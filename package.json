@@ -1,0 +1,63 @@
+{
+  "name": "liquidx",
+  "version": "1.0.0",
+  "description": "TSX to Shopify Liquid compiler with Babel & esbuild",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "bin": {
+    "liquidx": "dist/presentation/cli/index.js",
+    "liquidx:watch": "dist/presentation/cli/watch.js"
+  },
+  "scripts": {
+    "format": "biome format lib  --write",
+    "lint": "biome check lib  --apply",
+    "prepublishOnly": "npm run build",
+    "build": "tsc -p tsconfig.lib.json",
+    "dev": "tsc --watch",
+    "start": "node dist/presentation/cli/index.js",
+    "liquidx": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
+    "liquidx:watch": "tsx lib/presentation/cli/index.ts --watch"
+  },
+  "keywords": [
+    "shopify",
+    "liquid",
+    "tsx",
+    "babel",
+    "esbuild",
+    "compiler"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/generator": "^7.23.6",
+    "@babel/parser": "^7.23.6",
+    "@babel/traverse": "^7.23.6",
+    "@babel/types": "^7.23.6",
+    "chalk": "^5.6.2",
+    "chokidar": "^3.5.3",
+    "classnames": "^2.5.1",
+    "funcio": "^0.0.29",
+    "glob": "^10.3.10",
+    "kleur": "^4.1.5",
+    "ora": "^9.3.0",
+    "preact": "^10.28.4",
+    "react-icons": "^5.6.0",
+    "swiper": "^12.1.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.23.6",
+    "@babel/preset-react": "^7.28.5",
+    "@babel/preset-typescript": "^7.28.5",
+    "@biomejs/biome": "^2.4.4",
+    "@types/babel__core": "^7.20.5",
+    "@types/babel__generator": "^7.6.8",
+    "@types/babel__traverse": "^7.20.5",
+    "@types/node": "^20.10.5",
+    "esbuild": "0.27.3",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  }
+}

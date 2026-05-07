@@ -1,0 +1,8 @@
+node_modules
+lib
+src
+tsconfig.json
+.liquidxrc
+.gitignore
+lib/docs
+lib/README.md

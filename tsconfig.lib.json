@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "./lib",
+    "outDir": "./dist",
+    "declaration": true,
+    "sourceMap": true,
+    "jsx": "preserve"
+  },
+  "include": ["lib/**/*"],
+  "exclude": ["lib/docs", "lib/README.md"]
+}
