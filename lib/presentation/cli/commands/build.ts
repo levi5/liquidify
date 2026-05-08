@@ -49,7 +49,7 @@ export class LiquidXBuilder extends EventEmitter {
 
 	private async scanReactComponents(): Promise<Map<string, ReactComponentConfig>> {
 		const registry = new Map<string, ReactComponentConfig>()
-		const files = await glob(`${this.options.componentsDir}*.{tsx,jsx,ts,js}`)
+		const files = await glob(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}'))
 
 		for (const file of files) {
 			const filePath = path.resolve(file)
@@ -140,7 +140,7 @@ export class LiquidXBuilder extends EventEmitter {
 	}
 
 	private async buildComponents() {
-		const files = await glob(`${this.options.componentsDir}*.{tsx,jsx,ts,js}`)
+		const files = await glob(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}'))
 		for (const file of files) {
 			const filePath = path.resolve(file)
 			const src = this.fileSystem.readFileSync(filePath)

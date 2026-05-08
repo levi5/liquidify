@@ -77,6 +77,8 @@ export class BabelLiquidParser implements IParser {
 			mode: metadata.mode,
 			css: '',
 			globalCss: '',
+			hasUncoveredJs: false,
+			hasJsLogic: true,
 		}
 	}
 
@@ -104,6 +106,8 @@ export class BabelLiquidParser implements IParser {
 			mode: metadata.mode,
 			css: componentCss,
 			globalCss,
+			hasUncoveredJs: metadata.hasUncoveredJs,
+			hasJsLogic: metadata.scriptStatements.length > 0,
 		}
 	}
 

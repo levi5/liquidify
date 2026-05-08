@@ -14,10 +14,12 @@ import {
 	isUnaryExpression,
 	isBinaryExpression,
 	isBooleanLiteral,
+	isConditionalExpression,
 	type ArrowFunctionExpression,
 	type JSXAttribute,
 	type JSXExpressionContainer,
 	type JSXSpreadAttribute,
+	type ConditionalExpression,
 } from '@babel/types'
 
 import { HTMLAttributeConverter } from '../html/attribute-parser'
@@ -78,6 +80,8 @@ export class LiquidAttributeConverter {
 			return ` {% if ${condition} %}${attributeName}{% endif %}`
 		}
 
+		if (isConditionalExpression(expression)) return this.handleConditionalAttribute(attributeName, expression, renames, context)
+
 		return this.handleDefaultExpression(attributeName, expression, renames, context)
 	}
 
@@ -101,6 +105,17 @@ export class LiquidAttributeConverter {
 			.filter(Boolean)
 
 		return styles.length > 0 ? ` style="${styles.join(' ')} "` : ''
+	}
+
+	private handleConditionalAttribute(attributeName: string, expression: ConditionalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
+		const condition = this.expressionParser.generateLiquidCode(expression.test, true, renames, context)
+		const consequent = this.expressionParser.parseExpression(expression.consequent, renames, context)
+		const alternate = this.expressionParser.parseExpression(expression.alternate, renames, context)
+
+		const cleanConsequent = consequent.replace(/^{{\s*|\s*}}$/g, '')
+		const cleanAlternate = alternate.replace(/^{{\s*|\s*}}$/g, '')
+
+		return ` ${attributeName}="{% if ${condition} %}${cleanConsequent}{% else %}${cleanAlternate}{% endif %}"`
 	}
 
 	private handleDefaultExpression(attributeName: string, expression: any, renames?: Record<string, string>, context?: ParsingContext): string {

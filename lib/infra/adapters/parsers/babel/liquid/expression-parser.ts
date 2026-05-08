@@ -20,6 +20,10 @@ export class ExpressionParser {
 	}
 
 	public generateLiquidCode(node: Node, inCondition = false, renames?: Record<string, string>, context?: ParsingContext): string {
+		if (isTemplateLiteral(node)) {
+			return this.transformTemplateLiteralToLiquid(node, context)
+		}
+
 		const cloned = cloneNode(node, true)
 		traverseFast(cloned, (n) => {
 			if (isIdentifier(n) && renames?.[n.name]) {
@@ -112,9 +116,6 @@ export class ExpressionParser {
 	}
 
 	public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
-		if (isTemplateLiteral(expr)) {
-			return this.transformTemplateLiteralToLiquid(expr, context)
-		}
 
 		if (isStringLiteral(expr)) {
 			if (expr.value.includes('|')) {
@@ -144,10 +145,11 @@ export class ExpressionParser {
 	private transformTemplateLiteralToLiquid(expr: TemplateLiteral, context?: ParsingContext): string {
 		if (expr.expressions.length === 0) {
 			const raw = expr.quasis.map((q) => q.value.raw).join('')
-			return raw
+			if (raw.includes('|')) return raw
+			return `"${raw}"`
 		}
 
-		let result = expr.quasis[0].value.raw
+		let result = expr.quasis[0].value.raw ? `"${expr.quasis[0].value.raw}"` : ''
 		const arg = `(?:[a-zA-Z0-9_]+\\s*:\\s*)?(?:'[^']*'|"[^"]*"|[^,'\\"\\s|]+)`
 		const regex = new RegExp(`^\\s*\\|\\s*([a-zA-Z0-9_]+(?:\\s*:\\s*${arg}(?:\\s*,\\s*${arg})*)?)`)
 
@@ -175,7 +177,16 @@ export class ExpressionParser {
 			}
 
 			const filterSuffix = filters.length > 0 ? ` | ${filters.join(' | ')}` : ''
-			result += `{{ ${base}${filterSuffix} }}${remaining}`
+
+			if (!result) {
+				result = `${base}${filterSuffix}`
+			} else {
+				result += ` | append: ${base}${filterSuffix}`
+			}
+
+			if (remaining) {
+				result += ` | append: "${remaining}"`
+			}
 		}
 
 		return result

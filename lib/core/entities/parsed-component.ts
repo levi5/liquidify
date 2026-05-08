@@ -13,4 +13,6 @@ export interface ParsedComponent {
 	mode?: ComponentMode
 	css?: string
 	globalCss?: string
+	hasUncoveredJs?: boolean
+	hasJsLogic?: boolean
 }

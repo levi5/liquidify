@@ -14,7 +14,7 @@ export class TranspileFileUseCase {
 		const component = await this.parser.parse(source, filePath)
 		if (!component.name) return
 
-		this.validator.validate(component as any, filePath)
+		this.validator.validate(component, filePath)
 
 		await this.generator.generate(component)
 	}
