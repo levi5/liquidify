@@ -36,8 +36,33 @@ export class ExpressionParser {
 			}
 
 			if (isCallExpression(n)) {
+				if (isIdentifier(n.callee, { name: 'String' })) {
+					const arg = n.arguments[0];
+					if (arg && 'type' in arg) {
+						const argCode = this.generateLiquidCode(arg, inCondition, renames, context);
+						Object.assign(n, identifier(`${argCode} | append: ""`));
+						return;
+					}
+				}
+
+				if (isIdentifier(n.callee, { name: 'Number' })) {
+					const arg = n.arguments[0];
+					if (arg && 'type' in arg) {
+						const argCode = this.generateLiquidCode(arg, inCondition, renames, context);
+						Object.assign(n, identifier(`${argCode} | plus: 0`));
+						return;
+					}
+				}
+
 				if (isMemberExpression(n.callee) && isIdentifier(n.callee.property)) {
 					const methodName = n.callee.property.name
+
+					if (methodName === 'toString') {
+						const objectCode = this.generateLiquidCode(n.callee.object, inCondition, renames, context);
+						Object.assign(n, identifier(`${objectCode} | append: ""`));
+						return;
+					}
+
 					if (inCondition && ['toLowerCase', 'toUpperCase', 'trim'].includes(methodName)) {
 						const objectCode = generate(n.callee.object).code
 						const filter = methodName === 'toLowerCase' ? 'downcase' : methodName === 'toUpperCase' ? 'upcase' : 'strip'
