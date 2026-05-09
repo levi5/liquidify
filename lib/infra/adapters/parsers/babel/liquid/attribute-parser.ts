@@ -51,9 +51,31 @@ export class LiquidAttributeConverter {
 		if (!attributeName && !this.isDomMode(context)) return ''
 
 		if (!attribute.value) return ` ${attributeName}`
-		if (isStringLiteral(attribute.value)) return ` ${attributeName}="${attribute.value.value}"`
+		if (isStringLiteral(attribute.value)) return ` ${attributeName}="${this.escapeQuotes(attribute.value.value)}"`
 		if (isJSXExpressionContainer(attribute.value)) return this.handleExpressionAttribute(attribute, attributeName, renames, context)
 		return ''
+	}
+
+	private escapeQuotes(value: string): string {
+		return value.replace(/"/g, '&quot;')
+	}
+
+	private interpolateLiquidVariables(code: string): string {
+		const jsReserved = new Set([
+			'new', 'var', 'const', 'let', 'function', 'return', 'if', 'else', 'for', 'while', 
+			'break', 'continue', 'true', 'false', 'null', 'undefined', 'typeof', 'instanceof',
+			'window', 'document', 'console', 'event', 'e', 'Math', 'JSON', 'Object', 'Array',
+			'Error', 'CustomEvent', 'this', 'setTimeout', 'setInterval', 'location', 'history',
+			'URLSearchParams', 'preventDefault', 'stopPropagation', 
+			'target', 'currentTarget', 'dispatchEvent'
+		]);
+
+		return code.replace(/(^|[^.a-zA-Z0-9_'"/:;])\b([a-zA-Z_][a-zA-Z0-9_.]*)\b(?!\s*:)/g, (match, prefix, id) => {
+			const baseId = id.split('.')[0];
+			if (jsReserved.has(baseId)) return match;
+
+			return `${prefix}{{ ${id} | json | escape }}`;
+		});
 	}
 
 	private handleExpressionAttribute(attribute: JSXAttribute, attributeName: string, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -112,8 +134,8 @@ export class LiquidAttributeConverter {
 		const consequent = this.expressionParser.parseExpression(expression.consequent, renames, context)
 		const alternate = this.expressionParser.parseExpression(expression.alternate, renames, context)
 
-		const cleanConsequent = consequent.replace(/^{{\s*|\s*}}$/g, '')
-		const cleanAlternate = alternate.replace(/^{{\s*|\s*}}$/g, '')
+		const cleanConsequent = this.escapeQuotes(consequent.replace(/^{{\s*|\s*}}$/g, ''))
+		const cleanAlternate = this.escapeQuotes(alternate.replace(/^{{\s*|\s*}}$/g, ''))
 
 		return ` ${attributeName}="{% if ${condition} %}${cleanConsequent}{% else %}${cleanAlternate}{% endif %}"`
 	}
@@ -128,11 +150,11 @@ export class LiquidAttributeConverter {
 		const parsed = this.expressionParser.parseExpression(expression, renames, context)
 		const trimmed = parsed.trim()
 
-		if (this.isLiquidSyntax(trimmed)) return ` ${attributeName}="${parsed}"`
+		if (this.isLiquidSyntax(trimmed)) return ` ${attributeName}="${this.escapeQuotes(parsed)}"`
 
 		const generated = this.expressionParser.generateLiquidCode(expression, false, renames, context)
 		if (trimmed === generated && !this.isLiquidSyntax(generated)) {
-			return ` ${attributeName}="${generated}"`
+			return ` ${attributeName}="${this.escapeQuotes(generated)}"`
 		}
 
 		return ` ${attributeName}="{{ ${generated} }}"`
@@ -172,7 +194,12 @@ export class LiquidAttributeConverter {
 					code = `liquidx['${kebabName}'].${code}`
 				}
 			}
-			return ` ${attributeName}="${code}"`
+
+			if (!this.isDomMode(context)) {
+				code = this.interpolateLiquidVariables(code)
+			}
+
+			return ` ${attributeName}="${this.escapeQuotes(code)}"`
 		}
 
 		let callee = this.expressionParser.generateLiquidCode(arrowFunction.body.callee, false, renames, context)
@@ -191,7 +218,12 @@ export class LiquidAttributeConverter {
 			})
 			.join(', ')
 
-		return ` ${attributeName}="${callee}(${args})"`
+		let code = `${callee}(${args})`
+		if (!this.isDomMode(context)) {
+			code = this.interpolateLiquidVariables(code)
+		}
+
+		return ` ${attributeName}="${this.escapeQuotes(code)}"`
 	}
 
 	private isClassTemplate(name: string, expression: any): boolean {

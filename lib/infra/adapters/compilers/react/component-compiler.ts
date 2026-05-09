@@ -97,6 +97,7 @@ export class ReactComponentCompiler {
       minifySyntax: true,
       minifyWhitespace: true,
       minifyIdentifiers: false,
+      banner: { js: this.getContextBridgeScript() },
       plugins: this.getEsbuildPlugins(filePath),
     })
 
@@ -107,24 +108,31 @@ export class ReactComponentCompiler {
     return { html, assetName, script: finalScript, css: '' }
   }
 
+  private getContextBridgeScript(): string {
+    return `
+      window.__LIQUIDX_CONTEXTS__ = window.__LIQUIDX_CONTEXTS__ || {};
+      (function() {
+        var R = window.React;
+        if (R && !R.__createContext_patched__) {
+          var originalCreate = R.createContext;
+          R.createContext = function(defaultValue, id) {
+            if (id && typeof id === 'string') {
+              if (!window.__LIQUIDX_CONTEXTS__[id]) window.__LIQUIDX_CONTEXTS__[id] = originalCreate(defaultValue);
+              return window.__LIQUIDX_CONTEXTS__[id];
+            }
+            return originalCreate(defaultValue);
+          };
+          R.__createContext_patched__ = true;
+        }
+      })();
+    `
+  }
+
   private getClientRuntimeScript(componentName: string, source: string, injector: string): string {
     return `
           const React = window.React;
           const { createRoot } = ReactDOM || window.ReactDOM || {};
           window.LiquidxComponents = window.LiquidxComponents || {};
-          window.__LIQUIDX_CONTEXTS__ = window.__LIQUIDX_CONTEXTS__ || {};
-
-          if (React && !React.__createContext_patched__) {
-            const originalCreate = React.createContext;
-            React.createContext = function(defaultValue, id) {
-              if (id && typeof id === 'string') {
-                if (!window.__LIQUIDX_CONTEXTS__[id]) window.__LIQUIDX_CONTEXTS__[id] = originalCreate(defaultValue);
-                return window.__LIQUIDX_CONTEXTS__[id];
-              }
-              return originalCreate(defaultValue);
-            };
-            React.__createContext_patched__ = true;
-          }
           ${injector}
           ${source}
           try { window.LiquidxComponents['${componentName}'] = typeof ${componentName} !== 'undefined' ? ${componentName} : null; } catch(e) {}
@@ -138,8 +146,24 @@ export class ReactComponentCompiler {
                if (val === 'true') finalVal = true;
                else if (val === 'false') finalVal = false;
                else if (!isNaN(val) && val.trim() !== '') finalVal = Number(val);
-               const key = attr.name === 'class' ? 'className' : attr.name;
-               props[key] = finalVal;
+
+               let key = attr.name;
+               if (key === 'class') key = 'className';
+               else if (key === 'for') key = 'htmlFor';
+
+               if (key.startsWith('on') && typeof finalVal === 'string') {
+                 const code = finalVal;
+                 props[key] = (event) => {
+                   try {
+                     const fn = new Function('event', 'e', code);
+                     fn.call(event.currentTarget || node, event, event);
+                   } catch (e) {
+                     console.error('Error in inline event handler:', e);
+                   }
+                 };
+               } else {
+                 props[key] = finalVal;
+               }
             });
             const propsScript = Array.from(node.children).find(c => (c as any).tagName === 'SCRIPT' && (c as any).hasAttribute('data-react-props'));
             if (propsScript) {
