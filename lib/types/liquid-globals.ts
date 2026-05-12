@@ -182,6 +182,19 @@ export interface Menu {
   links: Link[];
 }
 
+export type FormErrors<TFields extends string = string> = {
+  messages?: Partial<Record<TFields, string[]>>
+  translated_fields?: Partial<Record<TFields, string>>
+}
+
+export type ShopifyForm<TFields extends string = string> = {
+  posted_successfully?: boolean
+  novalidate: 'novalidate'
+  errors?: FormErrors<TFields>
+
+  [key: string]: unknown
+}
+
 declare global {
   const collection: Collection;
   const collections: Collection[];
@@ -195,6 +208,7 @@ declare global {
   const cart: Cart;
   const shop: Shop;
   const settings: Record<string, any>;
+  const form: ShopifyForm;
   const closest: {
     product: {
       options_with_values: ProductOptionValue[];

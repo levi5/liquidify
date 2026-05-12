@@ -6,6 +6,7 @@ import { LiquidSnippetParser } from './liquid/snippet-parser'
 import { LiquidPaginateParser } from './liquid/paginate-parser'
 import { LiquidSvgParser } from './liquid/svg-parser'
 import { LiquidBlockParser } from './liquid/block-parser'
+import { LiquidFormParser } from './liquid/form-parser'
 import { ImportResolver } from './liquid/import-resolver'
 import { ReactComponentParser } from './liquid/react-component-parser'
 import { ExpressionParser } from './liquid/expression-parser'
@@ -59,6 +60,7 @@ export class LiquidParser implements ILiquidExpressionParser {
 	private snippetParser: LiquidSnippetParser
 	private paginateParser: LiquidPaginateParser
 	private svgParser: LiquidSvgParser
+	private formParser: LiquidFormParser
 
 	constructor(
 		private readonly compiler: Compiler,
@@ -115,6 +117,11 @@ export class LiquidParser implements ILiquidExpressionParser {
 		)
 
 		this.svgParser = new LiquidSvgParser()
+
+		this.formParser = new LiquidFormParser(
+			(children, renames, context) => this.renderChildren(children, renames, context),
+			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context)
+		)
 
 		this.htmlParser = new LiquidHtmlParser(
 			this.liquidAttributeConverter,
@@ -209,7 +216,8 @@ export class LiquidParser implements ILiquidExpressionParser {
 			[this.dynamicBlockTag]: () => `{% content_for 'blocks' %}`,
 			[this.renderSnippetTag]: () => this.snippetParser.transformRenderSnippet(node, context),
 			[this.renderSvgTag]: () => this.svgParser.transformRenderSvg(node),
-			'PaginateByLiquid': () => this.paginateParser.transformPaginate(node, context)
+			'PaginateByLiquid': () => this.paginateParser.transformPaginate(node, context),
+			'FormBlock': () => this.formParser.transformForm(node, context)
 		}
 
 		const handler = specialTagHandlers[tagName]
