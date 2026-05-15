@@ -30,7 +30,7 @@ export class LiquidLoopParser {
 	constructor(
 		private _jsxToHtml: (node: any, renames?: Record<string, string>, context?: ParsingContext) => string,
 		private liquidVariableParser: LiquidVariableParser,
-	) { }
+	) {}
 
 	public isMapCallExpression(expr: Expression): boolean {
 		const isMapCall = isCallExpression(expr) || isOptionalCallExpression(expr)
@@ -92,7 +92,10 @@ export class LiquidLoopParser {
 								assignments += this.liquidVariableParser.parseVariableDeclaration(decl, undefined, context).join('\n') + '\n'
 							}
 						} else if (isIfStatement(stmt)) {
-							assignments += this.liquidVariableParser.parseIfStatement(stmt, (n, ctx) => this.jsxToHtml(n, undefined, ctx), undefined, context).join('\n') + '\n'
+							assignments +=
+								this.liquidVariableParser
+									.parseIfStatement(stmt, (n, ctx) => this.jsxToHtml(n, undefined, ctx), undefined, context)
+									.join('\n') + '\n'
 						} else if (isReturnStatement(stmt)) {
 							assignments += this.jsxToHtml(stmt.argument as any, undefined, context) + '\n'
 						}

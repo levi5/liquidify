@@ -5,12 +5,16 @@ import { pascalToKebab } from '../../../../../shared/string'
 import { Compiler } from '../../../../../core/protocols/compiler'
 
 export class ScriptGenerator {
-	constructor(private readonly compiler: Compiler) { }
+	constructor(private readonly compiler: Compiler) {}
 
 	public generate(statements: Statement[], componentName?: string): string {
 		const filteredStatements = statements.filter(
 			(statement) =>
-				!(isExpressionStatement(statement) && isStringLiteral(statement.expression) && statement.expression.value.match(/^use (dom(:global)?|script)$/)),
+				!(
+					isExpressionStatement(statement) &&
+					isStringLiteral(statement.expression) &&
+					statement.expression.value.match(/^use (dom(:global)?|script)$/)
+				),
 		)
 
 		const code = filteredStatements.map((stmt) => generate(stmt).code).join('\n')

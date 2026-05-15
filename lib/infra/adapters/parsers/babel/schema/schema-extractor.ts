@@ -35,7 +35,7 @@ export class SchemaExtractor {
 	private currentFilePath?: string
 	private visitedIdentifiers = new Set<string>()
 
-	constructor(private readonly fs: IFileSystem = new NodeFileSystem()) { }
+	constructor(private readonly fs: IFileSystem = new NodeFileSystem()) {}
 
 	public extract(ast: File, currentFilePath?: string): Schema {
 		this.currentFilePath = currentFilePath
@@ -261,7 +261,7 @@ export class SchemaExtractor {
 
 		if (this.fs.existsSync(basePath)) return basePath
 
-		const foundExt = this.allowedExtensions.find(ext => this.fs.existsSync(basePath + ext))
+		const foundExt = this.allowedExtensions.find((ext) => this.fs.existsSync(basePath + ext))
 		return foundExt ? basePath + foundExt : null
 	}
 

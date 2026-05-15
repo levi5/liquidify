@@ -35,12 +35,9 @@ import {
 	type Node,
 	type ConditionalExpression,
 	type LogicalExpression,
-	type JSXOpeningElement
+	type JSXOpeningElement,
 } from '@babel/types'
 import { LiquidAttributeConverter } from './liquid/attribute-parser'
-
-
-
 
 export class LiquidParser implements ILiquidExpressionParser {
 	private readonly dynamicBlockTag: string
@@ -75,58 +72,52 @@ export class LiquidParser implements ILiquidExpressionParser {
 		this.importResolver = new ImportResolver(this.fs)
 		this.liquidAttributeConverter = new LiquidAttributeConverter(this)
 
-		this.liquidVariableParser = new LiquidVariableParser((node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context))
+		this.liquidVariableParser = new LiquidVariableParser((node, inCondition, renames, context) =>
+			this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
+		)
 
 		this.conditionalParser = new LiquidConditionalParser(
 			(node, renames, context) => this.jsxToHtml(node, renames, context),
 			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
-			(context) => this.expressionParser.getPendingAssigns(context)
+			(context) => this.expressionParser.getPendingAssigns(context),
 		)
 
 		this.loopParser = new LiquidLoopParser((node, renames, context) => this.jsxToHtml(node, renames, context), this.liquidVariableParser)
 
-		this.expressionParser = new ExpressionParser(
-			this.compiler,
-			this.importResolver,
-			this.loopParser
-		)
+		this.expressionParser = new ExpressionParser(this.compiler, this.importResolver, this.loopParser)
 
-		this.blockParser = new LiquidBlockParser(
-			this.dynamicBlockTag,
-			this.renderSnippetTag,
-			(element) => this.getTagName(element)
-		)
+		this.liquidVariableParser.parseExpression = (expr, renames, context) => this.expressionParser.parseExpression(expr, renames, context)
+
+		this.blockParser = new LiquidBlockParser(this.dynamicBlockTag, this.renderSnippetTag, (element) => this.getTagName(element))
 
 		this.reactComponentParser = new ReactComponentParser(
 			() => this.reactRegistry,
 			(componentName, context) => this.addScriptAsset(componentName, context),
 			this.importResolver,
 			() => undefined,
-			(children, renames, context) => this.renderChildren(children, renames, context)
+			(children, renames, context) => this.renderChildren(children, renames, context),
 		)
 
 		this.snippetParser = new LiquidSnippetParser(
 			() => this.reactRegistry,
 			(componentName, context) => this.addScriptAsset(componentName, context),
-			(node, context) => this.expressionParser.generateLiquidCode(node, false, undefined, context)
+			(node, context) => this.expressionParser.generateLiquidCode(node, false, undefined, context),
 		)
 
 		this.paginateParser = new LiquidPaginateParser(
 			(children, renames, context) => this.renderChildren(children, renames, context),
-			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context)
+			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
 		)
 
 		this.svgParser = new LiquidSvgParser()
 
 		this.formParser = new LiquidFormParser(
 			(children, renames, context) => this.renderChildren(children, renames, context),
-			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context)
+			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
 		)
 
-		this.htmlParser = new LiquidHtmlParser(
-			this.liquidAttributeConverter,
-			this.expressionParser,
-			(children, renames, context) => this.renderChildren(children, renames, context)
+		this.htmlParser = new LiquidHtmlParser(this.liquidAttributeConverter, this.expressionParser, (children, renames, context) =>
+			this.renderChildren(children, renames, context),
 		)
 	}
 
@@ -153,7 +144,7 @@ export class LiquidParser implements ILiquidExpressionParser {
 		const context = new ParsingContext({
 			currentFilePath,
 			componentName,
-			mode
+			mode,
 		})
 
 		this.liquidAttributeConverter = new LiquidAttributeConverter(this, componentName, mode)
@@ -176,8 +167,11 @@ export class LiquidParser implements ILiquidExpressionParser {
 		}
 	}
 
-
-	private jsxToHtml(node: JSXElement | JSXFragment | JSXText | JSXExpressionContainer | Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+	private jsxToHtml(
+		node: JSXElement | JSXFragment | JSXText | JSXExpressionContainer | Expression,
+		renames?: Record<string, string>,
+		context?: ParsingContext,
+	): string {
 		if (isJSXFragment(node)) return this.renderChildren(node.children, renames, context)
 		if (isJSXElement(node)) return this.renderJSXElement(node, renames, context)
 		if (isJSXText(node)) return node.value.trim() || ''
@@ -216,8 +210,8 @@ export class LiquidParser implements ILiquidExpressionParser {
 			[this.dynamicBlockTag]: () => `{% content_for 'blocks' %}`,
 			[this.renderSnippetTag]: () => this.snippetParser.transformRenderSnippet(node, context),
 			[this.renderSvgTag]: () => this.svgParser.transformRenderSvg(node),
-			'PaginateByLiquid': () => this.paginateParser.transformPaginate(node, context),
-			'FormBlock': () => this.formParser.transformForm(node, context)
+			PaginateByLiquid: () => this.paginateParser.transformPaginate(node, context),
+			FormBlock: () => this.formParser.transformForm(node, context),
 		}
 
 		const handler = specialTagHandlers[tagName]
@@ -258,4 +252,3 @@ export class LiquidParser implements ILiquidExpressionParser {
 	}
 }
 export { ReactComponentConfig }
-

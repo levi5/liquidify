@@ -1,6 +1,4 @@
-/// <reference path="./types/liquidex.d.ts" />
-import './types/liquid-globals'
-
+export * from './types/liquidex'
 export * from './main/factories/make-liquid-x-builder'
 export * from './presentation/cli/commands/build'
 export * from './infra/adapters/config/config-loader'

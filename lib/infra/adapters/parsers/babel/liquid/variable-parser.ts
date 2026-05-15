@@ -23,7 +23,11 @@ import { _Maybe, _Object } from 'funcio'
 import { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidVariableParser {
-	constructor(public generateLiquidCode: (node: any, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string) { }
+	public parseExpression?: (node: any, renames?: Record<string, string>, context?: ParsingContext) => string
+
+	constructor(
+		public generateLiquidCode: (node: any, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string,
+	) {}
 
 	public parseVariableDeclaration(declaration: VariableDeclarator, renames?: Record<string, string>, context?: ParsingContext): string[] {
 		const id = _Maybe
@@ -103,10 +107,7 @@ export class LiquidVariableParser {
 						`{% endfor %}`,
 					].filter(Boolean)
 
-					return [
-						`{% assign ${id.name} = "" %}`,
-						...loopBody
-					]
+					return [`{% assign ${id.name} = "" %}`, ...loopBody]
 				}
 			}
 			return [`{% assign ${id.name} = ${valueCode} %}`]
@@ -123,7 +124,12 @@ export class LiquidVariableParser {
 		return []
 	}
 
-	private parseConditionalExpressionRecursive(idName: string, expr: any, renames?: Record<string, string>, context?: ParsingContext): string[] {
+	private parseConditionalExpressionRecursive(
+		idName: string,
+		expr: any,
+		renames?: Record<string, string>,
+		context?: ParsingContext,
+	): string[] {
 		const lines: string[] = []
 		lines.push(`{% if ${this.generateLiquidCode(expr.test, true, renames, context)} %}`)
 		lines.push(`  {% assign ${idName} = ${this.generateLiquidCode(expr.consequent, false, renames, context)} %}`)
@@ -144,21 +150,26 @@ export class LiquidVariableParser {
 		return lines
 	}
 
-	public parseIfStatement(statement: IfStatement, onReturn?: (node: any, context?: ParsingContext) => string, renames?: Record<string, string>, context?: ParsingContext): string[] {
+	public parseIfStatement(
+		statement: IfStatement,
+		onReturn?: (node: any, context?: ParsingContext) => string,
+		renames?: Record<string, string>,
+		context?: ParsingContext,
+	): string[] {
 		const lines: string[] = []
 
 		const parseBranch = (stmt: IfStatement, isElsif = false) => {
 			const keyword = isElsif ? 'elsif' : 'if'
 			lines.push(`{% ${keyword} ${this.generateLiquidCode(stmt.test, true, renames, context)} %}`)
 
-			lines.push(...this.extractAssignments(stmt.consequent, onReturn, renames, context).map(s => `  ${s}`))
+			lines.push(...this.extractAssignments(stmt.consequent, onReturn, renames, context).map((s) => `  ${s}`))
 
 			if (stmt.alternate) {
 				if (isIfStatement(stmt.alternate)) {
 					parseBranch(stmt.alternate, true)
 				} else {
 					lines.push(`{% else %}`)
-					lines.push(...this.extractAssignments(stmt.alternate, onReturn, renames, context).map(s => `  ${s}`))
+					lines.push(...this.extractAssignments(stmt.alternate, onReturn, renames, context).map((s) => `  ${s}`))
 				}
 			}
 		}
@@ -169,13 +180,26 @@ export class LiquidVariableParser {
 		return lines
 	}
 
-	private extractAssignments(node: any, onReturn?: (node: any, context?: ParsingContext) => string, renames?: Record<string, string>, context?: ParsingContext): string[] {
+	private extractAssignments(
+		node: any,
+		onReturn?: (node: any, context?: ParsingContext) => string,
+		renames?: Record<string, string>,
+		context?: ParsingContext,
+	): string[] {
 		const assignments: string[] = []
 		if (isBlockStatement(node)) {
 			for (const stmt of node.body) {
-				if (isExpressionStatement(stmt) && isAssignmentExpression(stmt.expression)) {
-					if (isIdentifier(stmt.expression.left)) {
-						assignments.push(`{% assign ${stmt.expression.left.name} = ${this.generateLiquidCode(stmt.expression.right, false, renames, context)} %}`)
+				if (isExpressionStatement(stmt)) {
+					if (isAssignmentExpression(stmt.expression)) {
+						if (isIdentifier(stmt.expression.left)) {
+							assignments.push(
+								`{% assign ${stmt.expression.left.name} = ${this.generateLiquidCode(stmt.expression.right, false, renames, context)} %}`,
+							)
+						}
+					} else if (isCallExpression(stmt.expression) && isMemberExpression(stmt.expression.callee) && isIdentifier(stmt.expression.callee.property) && stmt.expression.callee.property.name === 'map') {
+						if (this.parseExpression) {
+							assignments.push(this.parseExpression(stmt.expression, renames, context))
+						}
 					}
 				} else if (isReturnStatement(stmt) && onReturn) {
 					assignments.push(onReturn((stmt as any).argument, context))
@@ -183,9 +207,17 @@ export class LiquidVariableParser {
 					assignments.push(...this.parseIfStatement(stmt, onReturn, renames, context))
 				}
 			}
-		} else if (isExpressionStatement(node) && isAssignmentExpression(node.expression)) {
-			if (isIdentifier(node.expression.left)) {
-				assignments.push(`{% assign ${node.expression.left.name} = ${this.generateLiquidCode(node.expression.right, false, renames, context)} %}`)
+		} else if (isExpressionStatement(node)) {
+			if (isAssignmentExpression(node.expression)) {
+				if (isIdentifier(node.expression.left)) {
+					assignments.push(
+						`{% assign ${node.expression.left.name} = ${this.generateLiquidCode(node.expression.right, false, renames, context)} %}`,
+					)
+				}
+			} else if (isCallExpression(node.expression) && isMemberExpression(node.expression.callee) && isIdentifier(node.expression.callee.property) && node.expression.callee.property.name === 'map') {
+				if (this.parseExpression) {
+					assignments.push(this.parseExpression(node.expression, renames, context))
+				}
 			}
 		} else if (isReturnStatement(node) && onReturn) {
 			assignments.push(onReturn(node.argument, context))

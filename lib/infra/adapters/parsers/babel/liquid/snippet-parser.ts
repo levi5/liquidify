@@ -1,6 +1,18 @@
 import { pascalToKebab } from '../../../../../shared/string'
 import type { ReactComponentConfig } from '../../../../../types/liquid'
-import { isStringLiteral, JSXElement, isJSXAttribute, isJSXIdentifier, isJSXExpressionContainer, isExpression, isIdentifier, isJSXSpreadAttribute, Node, JSXAttribute, JSXOpeningElement } from '@babel/types'
+import {
+	isStringLiteral,
+	JSXElement,
+	isJSXAttribute,
+	isJSXIdentifier,
+	isJSXExpressionContainer,
+	isExpression,
+	isIdentifier,
+	isJSXSpreadAttribute,
+	Node,
+	JSXAttribute,
+	JSXOpeningElement,
+} from '@babel/types'
 
 import { ParsingContext } from '../../../../../core/entities/parsing-context'
 
@@ -8,8 +20,8 @@ export class LiquidSnippetParser {
 	constructor(
 		private readonly getReactRegistry: () => Map<string, ReactComponentConfig>,
 		private readonly addScriptAsset: (componentName: string, context?: ParsingContext) => void,
-		private readonly generateLiquidCode: (node: Node, context?: ParsingContext) => string
-	) { }
+		private readonly generateLiquidCode: (node: Node, context?: ParsingContext) => string,
+	) {}
 
 	public transformRenderSnippet(node: JSXElement, context?: ParsingContext): string {
 		const openingElement = node.openingElement

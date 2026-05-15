@@ -1,13 +1,31 @@
-
-import { isStringLiteral, JSXElement, isJSXAttribute, isJSXIdentifier, isJSXExpressionContainer, isExpression, isNumericLiteral, Node, JSXAttribute } from '@babel/types'
+import {
+	isStringLiteral,
+	JSXElement,
+	isJSXAttribute,
+	isJSXIdentifier,
+	isJSXExpressionContainer,
+	isExpression,
+	isNumericLiteral,
+	Node,
+	JSXAttribute,
+} from '@babel/types'
 
 import { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidPaginateParser {
 	constructor(
-		private readonly renderChildren: (children: JSXElement['children'], renames?: Record<string, string>, context?: ParsingContext) => string,
-		private readonly generateLiquidCode: (node: Node, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string
-	) { }
+		private readonly renderChildren: (
+			children: JSXElement['children'],
+			renames?: Record<string, string>,
+			context?: ParsingContext,
+		) => string,
+		private readonly generateLiquidCode: (
+			node: Node,
+			inCondition?: boolean,
+			renames?: Record<string, string>,
+			context?: ParsingContext,
+		) => string,
+	) {}
 
 	public transformPaginate(node: JSXElement, context?: ParsingContext): string {
 		const openingElement = node.openingElement

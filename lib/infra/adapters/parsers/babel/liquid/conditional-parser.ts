@@ -6,7 +6,7 @@ export class LiquidConditionalParser {
 		private jsxToHtml: (node: any, renames?: Record<string, string>, context?: ParsingContext) => string,
 		private generateLiquidCode: (node: Node, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string,
 		private getAssigns: (context?: ParsingContext) => string,
-	) { }
+	) {}
 
 	public parseLogicalExpression(node: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): string | null {
 		if (node.operator === '&&') {

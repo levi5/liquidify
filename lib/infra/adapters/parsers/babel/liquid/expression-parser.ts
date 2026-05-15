@@ -1,19 +1,38 @@
-
 import generate from '@babel/generator'
 import type { Compiler } from '../../../../../core/protocols/compiler'
 import type { ImportResolver } from './import-resolver'
 import type { LiquidLoopParser } from './loop-parser'
-import { cloneNode, traverseFast, type Node, isBinaryExpression, isMemberExpression, isIdentifier, stringLiteral, isTemplateLiteral, isStringLiteral, isCallExpression, type CallExpression, type TemplateLiteral, type Expression, isParenthesizedExpression, isLogicalExpression, identifier, isArrowFunctionExpression, isObjectPattern, isUnaryExpression, type UnaryExpression } from '@babel/types'
+import {
+	cloneNode,
+	traverseFast,
+	type Node,
+	isBinaryExpression,
+	isMemberExpression,
+	isIdentifier,
+	stringLiteral,
+	isTemplateLiteral,
+	isStringLiteral,
+	isCallExpression,
+	type CallExpression,
+	type TemplateLiteral,
+	type Expression,
+	isParenthesizedExpression,
+	isLogicalExpression,
+	identifier,
+	isArrowFunctionExpression,
+	isObjectPattern,
+	isUnaryExpression,
+	type UnaryExpression,
+} from '@babel/types'
 
 import { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class ExpressionParser {
-
 	constructor(
 		private readonly compiler: Compiler,
 		private readonly importResolver: ImportResolver,
-		private readonly loopParser: LiquidLoopParser
-	) { }
+		private readonly loopParser: LiquidLoopParser,
+	) {}
 
 	public getPendingAssigns(context?: ParsingContext): string {
 		return context?.getPendingAssigns() || ''
@@ -37,20 +56,20 @@ export class ExpressionParser {
 
 			if (isCallExpression(n)) {
 				if (isIdentifier(n.callee, { name: 'String' })) {
-					const arg = n.arguments[0];
+					const arg = n.arguments[0]
 					if (arg && 'type' in arg) {
-						const argCode = this.generateLiquidCode(arg, inCondition, renames, context);
-						Object.assign(n, identifier(`${argCode} | append: ""`));
-						return;
+						const argCode = this.generateLiquidCode(arg, inCondition, renames, context)
+						Object.assign(n, identifier(`${argCode} | append: ""`))
+						return
 					}
 				}
 
 				if (isIdentifier(n.callee, { name: 'Number' })) {
-					const arg = n.arguments[0];
+					const arg = n.arguments[0]
 					if (arg && 'type' in arg) {
-						const argCode = this.generateLiquidCode(arg, inCondition, renames, context);
-						Object.assign(n, identifier(`${argCode} | plus: 0`));
-						return;
+						const argCode = this.generateLiquidCode(arg, inCondition, renames, context)
+						Object.assign(n, identifier(`${argCode} | plus: 0`))
+						return
 					}
 				}
 
@@ -58,9 +77,17 @@ export class ExpressionParser {
 					const methodName = n.callee.property.name
 
 					if (methodName === 'toString') {
-						const objectCode = this.generateLiquidCode(n.callee.object, inCondition, renames, context);
-						Object.assign(n, identifier(`${objectCode} | append: ""`));
-						return;
+						const objectCode = this.generateLiquidCode(n.callee.object, inCondition, renames, context)
+						Object.assign(n, identifier(`${objectCode} | append: ""`))
+						return
+					}
+
+					if (methodName === 'join') {
+						const objectCode = this.generateLiquidCode(n.callee.object, inCondition, renames, context)
+						const argCode =
+							n.arguments.length > 0 ? this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context) : '""'
+						Object.assign(n, identifier(`${objectCode} | join: ${argCode}`))
+						return
 					}
 
 					if (inCondition && ['toLowerCase', 'toUpperCase', 'trim'].includes(methodName)) {
@@ -84,12 +111,12 @@ export class ExpressionParser {
 
 							context?.addPendingAssign(
 								`{% assign ${varName} = nil %}\n` +
-								`{% for ${itemName} in ${objectCode} %}\n` +
-								`  {% if ${condition} %}\n` +
-								`    {% assign ${varName} = ${itemName} %}\n` +
-								`    {% break %}\n` +
-								`  {% endif %}\n` +
-								`{% endfor %}`
+									`{% for ${itemName} in ${objectCode} %}\n` +
+									`  {% if ${condition} %}\n` +
+									`    {% assign ${varName} = ${itemName} %}\n` +
+									`    {% break %}\n` +
+									`  {% endif %}\n` +
+									`{% endfor %}`,
 							)
 							Object.assign(n, identifier(varName))
 							return
@@ -122,9 +149,7 @@ export class ExpressionParser {
 		try {
 			const result = this.compiler.transpileSync(code, { loader: 'ts', format: 'esm', minify: false })
 			code = result.code.replace(/;\n$/, '').trim()
-		} catch (e) {
-
-		}
+		} catch (e) {}
 
 		code = code
 			.replace(/\s*===\s*/g, ' == ')
@@ -141,7 +166,6 @@ export class ExpressionParser {
 	}
 
 	public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
-
 		if (isStringLiteral(expr)) {
 			if (expr.value.includes('|')) {
 				return `{{ ${expr.value} }}`

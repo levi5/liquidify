@@ -73,7 +73,7 @@ export class LiquidXBuilder extends EventEmitter {
 			const parsed = await this.parser.parse(src, filePath)
 			const componentName = parsed.name || path.basename(filePath, path.extname(filePath))
 			const scriptName = pascalToKebab(componentName)
-			const script = (directives.isReact || directives.isDom) ? `${scriptName}.js` : ''
+			const script = directives.isReact || directives.isDom ? `${scriptName}.js` : ''
 
 			return {
 				name: componentName,
@@ -81,8 +81,8 @@ export class LiquidXBuilder extends EventEmitter {
 					rootId: directives.rootId,
 					script,
 					scriptAssets: parsed.scriptAssets,
-					mode: parsed.mode
-				}
+					mode: parsed.mode,
+				},
 			}
 		})
 
@@ -104,7 +104,7 @@ export class LiquidXBuilder extends EventEmitter {
 			isReact: !!isReact,
 			isDom: !!src.match(/['"]use\s+(dom(:global)?|script)['"]/),
 			isSnippet: !!src.match(/['"]use snippets['"]/),
-			rootId: isReact && isReact[1] ? isReact[1].replace(/^#/, '') : ''
+			rootId: isReact && isReact[1] ? isReact[1].replace(/^#/, '') : '',
 		}
 	}
 

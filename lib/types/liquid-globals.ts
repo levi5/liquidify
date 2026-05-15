@@ -51,6 +51,7 @@ export interface Product {
   images: ShopifyImage[];
   featured_image: ShopifyImage | null;
   url: string;
+  collections: Collection[];
 }
 
 export interface FilterValue {
@@ -85,6 +86,7 @@ export interface Collection {
   image: ShopifyImage | null;
   products: Product[];
   filters: Filter[];
+  [key: string]: unknown
 }
 
 export interface Paginate {
@@ -125,6 +127,12 @@ export interface Blog {
   handle: string;
   url: string;
   articles: Article[];
+}
+
+export interface Template {
+  name: string;
+  suffix: string | null;
+  directory: string | null;
 }
 
 export interface CartItem {
@@ -203,8 +211,12 @@ declare global {
   const paginate: Paginate;
   const product: Product;
   const all_products: Product[];
+  const page: Page;
   const pages: Page[];
+  const blog: Blog;
   const blogs: Blog[];
+  const template: Template;
+  const current_tags: string[];
   const cart: Cart;
   const shop: Shop;
   const settings: Record<string, any>;

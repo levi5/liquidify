@@ -21,14 +21,9 @@ export class ValidationService {
 			)
 		}
 
-		const isJsFile =
-			filePath.endsWith('.tsx') ||
-			filePath.endsWith('.jsx') ||
-			filePath.endsWith('.js') ||
-			filePath.endsWith('.ts')
+		const isJsFile = filePath.endsWith('.tsx') || filePath.endsWith('.jsx') || filePath.endsWith('.js') || filePath.endsWith('.ts')
 
-		const hasJsLogic =
-			component.hasUncoveredJs || component.hasJsLogic
+		const hasJsLogic = component.hasUncoveredJs || component.hasJsLogic
 
 		if (isJsFile && component.mode === 'liquid' && hasJsLogic) {
 			throw new ValidationError(

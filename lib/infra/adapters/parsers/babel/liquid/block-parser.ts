@@ -1,20 +1,29 @@
-import { type JSXOpeningElement, type JSXElement, isJSXAttribute, isJSXIdentifier, isJSXExpressionContainer, isJSXElement, isArrayExpression, type Identifier, isIdentifier } from '@babel/types'
+import {
+	type JSXOpeningElement,
+	type JSXElement,
+	isJSXAttribute,
+	isJSXIdentifier,
+	isJSXExpressionContainer,
+	isJSXElement,
+	isArrayExpression,
+	type Identifier,
+	isIdentifier,
+} from '@babel/types'
 import { pascalToKebab } from '../../../../../shared/string'
 import { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidBlockParser {
-
 	constructor(
 		private readonly dynamicBlockTag: string,
 		private readonly renderSnippetTag: string,
-		private readonly getTagName: (element: JSXOpeningElement) => string
-	) { }
+		private readonly getTagName: (element: JSXOpeningElement) => string,
+	) {}
 
 	public processDynamicBlocks(node: JSXElement, context?: ParsingContext): { type: string }[] {
 		const blocksSchema: { type: string }[] = []
 		this.traverse(node, blocksSchema)
 		if (context) {
-			blocksSchema.forEach(b => context.addBlockSchema(b))
+			blocksSchema.forEach((b) => context.addBlockSchema(b))
 		}
 		return blocksSchema
 	}

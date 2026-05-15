@@ -1,4 +1,3 @@
-
 import generate from '@babel/generator'
 import type { ReactComponentConfig } from '../../../../../types/liquid'
 import type { ImportResolver } from './import-resolver'
@@ -12,8 +11,12 @@ export class ReactComponentParser {
 		private readonly addScriptAsset: (componentName: string, context?: ParsingContext) => void,
 		private readonly importResolver: ImportResolver,
 		private readonly getCurrentFilePath: () => string | undefined,
-		private readonly renderChildren: (children: JSXElement['children'], renames?: Record<string, string>, context?: ParsingContext) => string,
-	) { }
+		private readonly renderChildren: (
+			children: JSXElement['children'],
+			renames?: Record<string, string>,
+			context?: ParsingContext,
+		) => string,
+	) {}
 
 	public transformReactComponent(node: JSXElement, tagName: string, context?: ParsingContext): string {
 		const registry = this.getReactRegistry()
@@ -68,11 +71,7 @@ export class ReactComponentParser {
 	}
 
 	private parseExpressionContainer(expression: Expression | JSXEmptyExpression, fallbackValue: string, context?: ParsingContext): string {
-		if (
-			expression.type === 'StringLiteral' ||
-			expression.type === 'NumericLiteral' ||
-			expression.type === 'BooleanLiteral'
-		) {
+		if (expression.type === 'StringLiteral' || expression.type === 'NumericLiteral' || expression.type === 'BooleanLiteral') {
 			return JSON.stringify(expression.value)
 		}
 

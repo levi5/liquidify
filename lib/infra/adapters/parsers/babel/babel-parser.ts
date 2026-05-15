@@ -89,9 +89,7 @@ export class BabelLiquidParser implements IParser {
 			? this.jsxConverter.convert(metadata.jsxElement, ast, filePath, metadata.name, metadata.mode)
 			: { html: '', blocksSchema: [], scriptAssets: [] }
 
-		const script = metadata.hasUseScript
-			? this.scriptGenerator.generate(metadata.scriptStatements, metadata.name)
-			: ''
+		const script = metadata.hasUseScript ? this.scriptGenerator.generate(metadata.scriptStatements, metadata.name) : ''
 
 		return {
 			name: this.resolveComponentName(metadata, filePath),

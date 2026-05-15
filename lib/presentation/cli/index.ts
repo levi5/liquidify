@@ -45,7 +45,7 @@ export async function cli() {
 	builder.on('file:change', (file) => {
 		console.log(kleur.dim(`\n📄 File changed: ${file}`))
 	})
-	
+
 	builder.on('error', (error: LiquidxError) => {
 		const prefix = error.name === 'ValidationError' ? 'Validation' : 'Build'
 		console.log(`\n${kleur.bgRed().white(` ${prefix} Error `)} ${kleur.red(error.message)}`)
