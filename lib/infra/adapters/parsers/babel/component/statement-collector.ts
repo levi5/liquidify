@@ -10,6 +10,8 @@ import {
 	isExpressionStatement,
 	isStringLiteral,
 	isIfStatement,
+	isArrowFunctionExpression,
+	isFunctionExpression,
 } from '@babel/types'
 import generate from '@babel/generator'
 import { ComponentMetadataType } from '../../../../../types/component'
@@ -72,12 +74,39 @@ export class StatementCollector {
 		return true
 	}
 
+	private isJsxReturningFunction(node: any): any {
+		if (isArrowFunctionExpression(node) || isFunctionExpression(node)) {
+			if (isJSXElement(node.body) || isJSXFragment(node.body) || isLogicalExpression(node.body) || isConditionalExpression(node.body)) {
+				return node.body
+			}
+			if (node.body.type === 'BlockStatement') {
+				const returnStmt = node.body.body.find((stmt: any) => isReturnStatement(stmt))
+				if (returnStmt) {
+					const arg = (returnStmt as any).argument
+					if (isJSXElement(arg) || isJSXFragment(arg) || isLogicalExpression(arg) || isConditionalExpression(arg)) {
+						return arg
+					}
+				}
+			}
+		}
+		return null
+	}
+
 	private handleLiquidAssignments(statement: Statement, metadata: ComponentMetadataType): boolean {
 		if (metadata.mode === 'react' || metadata.mode === 'dom' || metadata.mode === 'dom:global') return false
 
 		if (isVariableDeclaration(statement)) {
+			let handledAll = true
 			for (const decl of statement.declarations) {
+				if (decl.id.type === 'Identifier') {
+					const jsxBody = this.isJsxReturningFunction(decl.init)
+					if (jsxBody) {
+						metadata.inlineComponents?.set(decl.id.name, jsxBody)
+						continue
+					}
+				}
 				metadata.liquidAssignments.push(...this.liquidVariableParser.parseVariableDeclaration(decl))
+				handledAll = false
 			}
 			return true
 		}

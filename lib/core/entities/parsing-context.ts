@@ -6,6 +6,7 @@ export class ParsingContext {
 	public currentFilePath?: string
 	public componentName?: string
 	public mode?: string
+	public inlineComponents?: Map<string, any>
 
 	constructor(data: Partial<ParsingContext> = {}) {
 		Object.assign(this, data)

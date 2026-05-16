@@ -41,6 +41,7 @@ export class ComponentExtractor {
 			hasUseScript: false,
 			mode: 'liquid',
 			reactRootId: '',
+			inlineComponents: new Map(),
 		}
 
 		const directives = ast.program.directives || []

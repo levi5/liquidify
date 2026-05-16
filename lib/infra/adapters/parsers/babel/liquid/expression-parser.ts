@@ -127,7 +127,7 @@ export class ExpressionParser {
 
 			if (isUnaryExpression(n) && n.operator === '!') {
 				const innerCode = this.generateLiquidCode(n.argument, true, renames, context).trim()
-				const newCode = `${innerCode} == false`
+				const newCode = `${innerCode} == blank`
 				Object.assign(n, identifier(newCode))
 				return
 			}

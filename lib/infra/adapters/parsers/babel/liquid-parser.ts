@@ -140,11 +140,13 @@ export class LiquidParser implements ILiquidExpressionParser {
 		currentFilePath?: string,
 		componentName?: string,
 		mode?: string,
+		inlineComponents?: Map<string, any>,
 	): JSXResult {
 		const context = new ParsingContext({
 			currentFilePath,
 			componentName,
 			mode,
+			inlineComponents,
 		})
 
 		this.liquidAttributeConverter = new LiquidAttributeConverter(this, componentName, mode)
@@ -204,6 +206,11 @@ export class LiquidParser implements ILiquidExpressionParser {
 
 		if (this.reactRegistry.has(tagName)) {
 			return this.reactComponentParser.transformReactComponent(node, tagName, context)
+		}
+
+		if (context?.inlineComponents?.has(tagName)) {
+			const inlineBody = context.inlineComponents.get(tagName)
+			return this.jsxToHtml(inlineBody, renames, context)
 		}
 
 		const specialTagHandlers: Record<string, () => string> = {
