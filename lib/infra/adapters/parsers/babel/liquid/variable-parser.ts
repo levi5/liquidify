@@ -17,6 +17,7 @@ import {
 	isMemberExpression,
 	isArrowFunctionExpression,
 	isReturnStatement,
+	ObjectPattern,
 } from '@babel/types'
 import { _Maybe, _Object } from 'funcio'
 
@@ -27,7 +28,7 @@ export class LiquidVariableParser {
 
 	constructor(
 		public generateLiquidCode: (node: any, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string,
-	) {}
+	) { }
 
 	public parseVariableDeclaration(declaration: VariableDeclarator, renames?: Record<string, string>, context?: ParsingContext): string[] {
 		const id = _Maybe
@@ -114,14 +115,24 @@ export class LiquidVariableParser {
 		}
 
 		if (isObjectPattern(declaration.id)) {
-			return declaration.id.properties
-				.filter(
-					(prop): prop is typeof prop & { key: { name: string }; value: { name: string } } =>
-						isObjectProperty(prop) && isIdentifier(prop.key) && isIdentifier(prop.value),
-				)
-				.map((prop) => `{% assign ${prop.value.name} = ${valueCode}.${prop.key.name} %}`)
+			return this.flattenObjectPattern(declaration.id, valueCode)
 		}
 		return []
+	}
+
+	private flattenObjectPattern(pattern: ObjectPattern, basePath: string): string[] {
+		const assigns: string[] = []
+		for (const prop of pattern.properties) {
+			if (!isObjectProperty(prop) || !isIdentifier(prop.key)) continue
+			const keyName = prop.key.name
+			const fullPath = `${basePath}.${keyName}`
+			if (isIdentifier(prop.value)) {
+				assigns.push(`{% assign ${prop.value.name} = ${fullPath} %}`)
+			} else if (isObjectPattern(prop.value)) {
+				assigns.push(...this.flattenObjectPattern(prop.value, fullPath))
+			}
+		}
+		return assigns
 	}
 
 	private parseConditionalExpressionRecursive(
@@ -196,7 +207,12 @@ export class LiquidVariableParser {
 								`{% assign ${stmt.expression.left.name} = ${this.generateLiquidCode(stmt.expression.right, false, renames, context)} %}`,
 							)
 						}
-					} else if (isCallExpression(stmt.expression) && isMemberExpression(stmt.expression.callee) && isIdentifier(stmt.expression.callee.property) && stmt.expression.callee.property.name === 'map') {
+					} else if (
+						isCallExpression(stmt.expression) &&
+						isMemberExpression(stmt.expression.callee) &&
+						isIdentifier(stmt.expression.callee.property) &&
+						stmt.expression.callee.property.name === 'map'
+					) {
 						if (this.parseExpression) {
 							assignments.push(this.parseExpression(stmt.expression, renames, context))
 						}
@@ -214,7 +230,12 @@ export class LiquidVariableParser {
 						`{% assign ${node.expression.left.name} = ${this.generateLiquidCode(node.expression.right, false, renames, context)} %}`,
 					)
 				}
-			} else if (isCallExpression(node.expression) && isMemberExpression(node.expression.callee) && isIdentifier(node.expression.callee.property) && node.expression.callee.property.name === 'map') {
+			} else if (
+				isCallExpression(node.expression) &&
+				isMemberExpression(node.expression.callee) &&
+				isIdentifier(node.expression.callee.property) &&
+				node.expression.callee.property.name === 'map'
+			) {
 				if (this.parseExpression) {
 					assignments.push(this.parseExpression(node.expression, renames, context))
 				}
