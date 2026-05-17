@@ -1,16 +1,17 @@
 import path from 'path'
+import traverse from '@babel/traverse'
+import { isIdentifier } from '@babel/types'
 import { ASTParser } from './ASTParser'
 import { Compiler } from '../../../../core/protocols/compiler'
 import { ComponentExtractor } from './component'
 import { CSSImportExtractor } from './css/Import-extractor'
-import { CssInjector } from '../../compilers/react/runtime/css-injector'
-import { EsbuildCompiler } from '../../compilers/esbuild/esbuild-compiler'
 import { IParser } from '../../../../core/protocols/parser'
 import { LiquidParser, ReactComponentConfig } from './liquid-parser'
 import { ParsedComponent } from '../../../../core/entities/parsed-component'
 import { ReactComponentCompiler } from '../../compilers/react/component-compiler'
 import { SchemaExtractor } from './schema/schema-extractor'
 import { ScriptGenerator } from './script/script-generator'
+import { ValidationError } from '../../../../core/errors/validation-error'
 
 export interface BabelLiquidParserOptions {
 	astParser?: ASTParser
@@ -52,10 +53,36 @@ export class BabelLiquidParser implements IParser {
 		const schema = this.schemaExtractor.extract(ast, filePath)
 
 		if (componentMetadata.mode === 'react') {
+			this.validateNoLiquidFiltersInReact(ast, filePath)
 			return this.handleReactMode(ast, source, componentMetadata, schema, filePath)
 		}
 
 		return this.handleDefaultMode(ast, componentMetadata, schema, filePath)
+	}
+
+	private validateNoLiquidFiltersInReact(ast: any, filePath?: string): void {
+		const forbiddenFilters = new Set([
+			'markdownify',
+			'handleize',
+			'downcase',
+			'upcase',
+			'strip',
+			'strip_html',
+			'money',
+			'money_without_currency',
+		])
+
+		traverse(ast as any, {
+			CallExpression(path) {
+				const callee = path.node.callee
+				if (isIdentifier(callee) && forbiddenFilters.has(callee.name)) {
+					throw new ValidationError(
+						`Liquid filter method '${callee.name}' cannot be used inside a React component. It is a Liquid-only filter.`,
+						filePath,
+					)
+				}
+			},
+		})
 	}
 
 	private async handleReactMode(ast: any, source: string, metadata: any, schema: any, filePath?: string): Promise<ParsedComponent> {

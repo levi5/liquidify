@@ -3,6 +3,7 @@
 	"formatter": {
 		"enabled": true,
 		"lineWidth": 140,
+		"indentStyle": "space",
 		"indentWidth": 2,
 		"lineEnding": "lf"
 	},

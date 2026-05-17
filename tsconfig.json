@@ -22,7 +22,7 @@
     "noImplicitAny": false,
     "paths": {
       "liquidex": [
-        "src/types/liquidex.d.ts"
+        "lib/types/liquidex.ts"
       ],
       "@src/*": [
         "src/*"

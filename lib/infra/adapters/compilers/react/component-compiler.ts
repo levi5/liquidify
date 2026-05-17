@@ -335,7 +335,7 @@ export class ReactComponentCompiler {
 						{
 							filter: /^liquidx\/runtime$/,
 							namespace: 'liquidx-runtime-global',
-							content: 'module.exports = { registerLiquidIsland: window.registerLiquidIsland }',
+							content: 'module.exports = { registerLiquidIsland: window.registerLiquidIsland, LiquidxEvents: window.LiquidxEvents, useLiquidxEvent: window.LiquidxUseEvent, emitLiquidxEvent: window.LiquidxEmitEvent }',
 						},
 					]
 

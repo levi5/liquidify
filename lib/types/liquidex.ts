@@ -36,7 +36,12 @@ export const FormBlock: FC<FormBlockProps> = (() => null) as any
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      'liquid-data': any
+      'liquid-data': {
+        'data-liquid-store'?: string
+        store?: any
+        children?: any
+        [key: string]: any
+      }
       'product-provider': any
       'react-island': any
     }
@@ -45,7 +50,12 @@ declare global {
   // Augment React namespace if it exists globally
   namespace React.JSX {
     interface IntrinsicElements {
-      'liquid-data': any
+      'liquid-data': {
+        'data-liquid-store'?: string
+        store?: any
+        children?: any
+        [key: string]: any
+      }
       'product-provider': any
       'react-island': any
     }
