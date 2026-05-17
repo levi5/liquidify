@@ -73,6 +73,27 @@ export class ExpressionParser {
 					}
 				}
 
+				const globalFilters: Record<string, string> = {
+					markdownify: 'markdownify',
+					handleize: 'handleize',
+					downcase: 'downcase',
+					upcase: 'upcase',
+					strip: 'strip',
+					strip_html: 'strip_html',
+					money: 'money',
+					money_without_currency: 'money_without_currency',
+				}
+
+				if (isIdentifier(n.callee) && n.callee.name in globalFilters) {
+					const arg = n.arguments[0]
+					if (arg && 'type' in arg) {
+						const argCode = this.generateLiquidCode(arg, inCondition, renames, context)
+						const filterName = globalFilters[n.callee.name]
+						Object.assign(n, identifier(`${argCode} | ${filterName}`))
+						return
+					}
+				}
+
 				if (isMemberExpression(n.callee) && isIdentifier(n.callee.property)) {
 					const methodName = n.callee.property.name
 
@@ -159,6 +180,13 @@ export class ExpressionParser {
 			.replace(/\.toLowerCase\s*\(\)/g, ' | downcase')
 			.replace(/\.toUpperCase\s*\(\)/g, ' | upcase')
 			.replace(/\.trim\s*\(\)/g, ' | strip')
+			.replace(/\.markdownify\s*\(\)/g, ' | markdownify')
+			.replace(/\.handleize\s*\(\)/g, ' | handleize')
+			.replace(/\.stripHtml\s*\(\)/g, ' | strip_html')
+			.replace(/\.strip_html\s*\(\)/g, ' | strip_html')
+			.replace(/\.money\s*\(\)/g, ' | money')
+			.replace(/\.moneyWithoutCurrency\s*\(\)/g, ' | money_without_currency')
+			.replace(/\.money_without_currency\s*\(\)/g, ' | money_without_currency')
 			.replace(/\.includes\s*\(([^)]+)\)/g, ' contains $1')
 			.trim()
 

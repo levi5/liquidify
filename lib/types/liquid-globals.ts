@@ -268,4 +268,10 @@ declare global {
   const strip_html: any;
   const money: any;
   const money_without_currency: any;
+  const markdownify: (value: string | undefined | null) => string;
+
+  interface String {
+    markdownify(): string;
+  }
 }
+

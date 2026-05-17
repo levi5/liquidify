@@ -28,7 +28,7 @@ export class LiquidVariableParser {
 
 	constructor(
 		public generateLiquidCode: (node: any, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string,
-	) { }
+	) {}
 
 	public parseVariableDeclaration(declaration: VariableDeclarator, renames?: Record<string, string>, context?: ParsingContext): string[] {
 		const id = _Maybe
