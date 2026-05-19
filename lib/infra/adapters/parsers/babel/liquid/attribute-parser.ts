@@ -116,7 +116,11 @@ export class LiquidAttributeConverter {
 			'dispatchEvent',
 		])
 
-		return code.replace(/(^|[^.a-zA-Z0-9_'"/:;])\b([a-zA-Z_][a-zA-Z0-9_.]*)\b(?!\s*:)/g, (match, prefix, id) => {
+		const regex = /('[^']*'|"[^"]*"|`[^`]*`)|(^|[^.a-zA-Z0-9_'"/:;])\b([a-zA-Z_][a-zA-Z0-9_.]*)\b(?!\s*:)/g;
+
+		return code.replace(regex, (match, str, prefix, id) => {
+			if (str) return match;
+
 			const baseId = id.split('.')[0]
 			if (jsReserved.has(baseId)) return match
 

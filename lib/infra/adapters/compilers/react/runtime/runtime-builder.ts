@@ -25,11 +25,11 @@ export class ReactRuntimeBuilder {
 					window.LiquidxEvents = {
 						on(event, callback) {
 							const handler = (e) => callback(e.detail);
-							window.addEventListener('liquidx:' + event, handler);
+							window.addEventListener(event, handler);
 							if (!callback.__liquidx_handlers__) callback.__liquidx_handlers__ = new Map();
 							callback.__liquidx_handlers__.set(event, handler);
 							return () => {
-								window.removeEventListener('liquidx:' + event, handler);
+								window.removeEventListener(event, handler);
 								callback.__liquidx_handlers__.delete(event);
 							};
 						},
@@ -37,13 +37,13 @@ export class ReactRuntimeBuilder {
 							if (callback.__liquidx_handlers__) {
 								const handler = callback.__liquidx_handlers__.get(event);
 								if (handler) {
-									window.removeEventListener('liquidx:' + event, handler);
+									window.removeEventListener(event, handler);
 									callback.__liquidx_handlers__.delete(event);
 								}
 							}
 						},
 						emit(event, data) {
-							const ev = new CustomEvent('liquidx:' + event, {
+							const ev = new CustomEvent(event, {
 								detail: data,
 								bubbles: true,
 								cancelable: true
