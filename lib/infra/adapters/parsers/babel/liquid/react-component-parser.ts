@@ -16,7 +16,7 @@ export class ReactComponentParser {
 			renames?: Record<string, string>,
 			context?: ParsingContext,
 		) => string,
-	) {}
+	) { }
 
 	public transformReactComponent(node: JSXElement, tagName: string, context?: ParsingContext): string {
 		const registry = this.getReactRegistry()
@@ -67,7 +67,7 @@ export class ReactComponentParser {
 		}
 
 		const eagerAttr = eagerHydration ? ' data-hydrate="eager"' : ''
-		return `<react-island${elementId}${eagerAttr} component="${tagName}">${childrenHTML}</react-island>`
+		return `<react-island${elementId}${eagerAttr} style="display: flex;" component="${tagName}">${childrenHTML}</react-island>`
 	}
 
 	private parseExpressionContainer(expression: Expression | JSXEmptyExpression, fallbackValue: string, context?: ParsingContext): string {

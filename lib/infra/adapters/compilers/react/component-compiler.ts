@@ -278,14 +278,22 @@ export class ReactComponentCompiler {
 
           if (!window.LiquidxHydrate) window.LiquidxHydrate = {};
           window.LiquidxHydrate['${componentName}'] = (container) => {
-            if (container.hasAttribute('data-react-hydrated')) return;
+            if (container.hasAttribute('data-react-hydrated') && container._reactRoot) return;
+            if (container.hasAttribute('data-react-hydrated')) {
+              container.removeAttribute('data-react-hydrated');
+            }
             if (container.parentElement && container.parentElement.closest('react-island')) return;
 
             const hydrate = () => {
-              if (container.hasAttribute('data-react-hydrated')) return;
+              if (container.hasAttribute('data-react-hydrated') && container._reactRoot) return;
+              if (container.hasAttribute('data-react-hydrated')) {
+                container.removeAttribute('data-react-hydrated');
+              }
               container.setAttribute('data-react-hydrated', 'true');
               const props = window.LiquidxGetProps(container, 'store');
-              createRoot(container).render(React.createElement(${componentName}, props));
+              const root = createRoot(container);
+              container._reactRoot = root;
+              root.render(React.createElement(${componentName}, props));
             };
             if (container.getAttribute('data-hydrate') === 'eager') hydrate();
             else if ('IntersectionObserver' in window) {
@@ -299,6 +307,10 @@ export class ReactComponentCompiler {
           if (!customElements.get('react-island')) {
             class ReactIsland extends HTMLElement {
               connectedCallback() {
+                if (this._unmountTimeout) {
+                  clearTimeout(this._unmountTimeout);
+                  this._unmountTimeout = null;
+                }
                 const name = this.getAttribute('component');
                 if (window.LiquidxHydrate && window.LiquidxHydrate[name]) {
                   window.LiquidxHydrate[name](this);
@@ -311,6 +323,20 @@ export class ReactComponentCompiler {
                   };
                   document.addEventListener('liquidx:ready:' + name, onReady);
                 }
+              }
+
+              disconnectedCallback() {
+                this._unmountTimeout = setTimeout(() => {
+                  if (this._reactRoot) {
+                    try {
+                      this._reactRoot.unmount();
+                    } catch (e) {
+                      console.error('Error during island unmount:', e);
+                    }
+                    delete this._reactRoot;
+                    this.removeAttribute('data-react-hydrated');
+                  }
+                }, 100);
               }
             }
             customElements.define('react-island', ReactIsland);

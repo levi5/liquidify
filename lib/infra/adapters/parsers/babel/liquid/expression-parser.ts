@@ -148,7 +148,7 @@ export class ExpressionParser {
 
 			if (isUnaryExpression(n) && n.operator === '!') {
 				const innerCode = this.generateLiquidCode(n.argument, true, renames, context).trim()
-				const newCode = `${innerCode} == blank`
+				const newCode = `${innerCode} == blank or ${innerCode} == false`
 				Object.assign(n, identifier(newCode))
 				return
 			}
@@ -211,7 +211,7 @@ export class ExpressionParser {
 
 		if (isUnaryExpression(expr) && expr.operator === '!') {
 			const argCode = this.generateLiquidCode(expr.argument, false, renames, context)
-			return `{% if ${argCode} %}false{% else %}true{% endif %}`
+			return `{% if ${argCode} == blank or ${argCode} == false %}true{% else %}false{% endif %}`
 		}
 
 		const code = this.generateLiquidCode(expr, false, renames, context)

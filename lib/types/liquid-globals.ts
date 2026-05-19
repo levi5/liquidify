@@ -31,11 +31,11 @@ export interface ProductVariant {
 }
 
 export interface Product {
-  id: number;
+  id: any;
   title: string;
   handle: string;
   description: string;
-  price: number;
+  price: any;
   price_min: number;
   price_max: number;
   compare_at_price: number | null;
@@ -49,9 +49,10 @@ export interface Product {
   options_with_values: ProductOptionValue[];
   variants: ProductVariant[];
   images: ShopifyImage[];
-  featured_image: ShopifyImage | null;
+  featured_image: any;
   url: string;
   collections: Collection[];
+  metafields: any;
 }
 
 export interface FilterValue {
@@ -205,16 +206,16 @@ export type ShopifyForm<TFields extends string = string> = {
 
 declare global {
   const collection: Collection;
-  const collections: Collection[];
+  const collections: Record<string, Collection> & Collection[];
   const search: { filters: Filter[]; results: any[]; results_count: number; terms: string };
   const filters: Filter[];
   const paginate: Paginate;
   const product: Product;
-  const all_products: Product[];
+  const all_products: Record<string, Product> & Product[];
   const page: Page;
-  const pages: Page[];
+  const pages: Record<string, Page> & Page[];
   const blog: Blog;
-  const blogs: Blog[];
+  const blogs: Record<string, Blog> & Blog[];
   const template: Template;
   const current_tags: string[];
   const cart: Cart;

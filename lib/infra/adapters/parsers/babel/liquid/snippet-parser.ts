@@ -21,6 +21,7 @@ export class LiquidSnippetParser {
 		private readonly getReactRegistry: () => Map<string, ReactComponentConfig>,
 		private readonly addScriptAsset: (componentName: string, context?: ParsingContext) => void,
 		private readonly generateLiquidCode: (node: Node, context?: ParsingContext) => string,
+		private readonly renderChildren?: (children: JSXElement['children'], renames?: Record<string, string>, context?: ParsingContext) => string,
 	) {}
 
 	public transformRenderSnippet(node: JSXElement, context?: ParsingContext): string {
@@ -51,9 +52,19 @@ export class LiquidSnippetParser {
 		}
 
 		const props = this.extractSnippetProps(openingElement.attributes, context)
+		
+		let childrenCapture = ''
+		if (this.renderChildren && node.children && node.children.length > 0) {
+			const childrenContent = this.renderChildren(node.children, undefined, context)
+			if (childrenContent.trim()) {
+				childrenCapture = `{% capture snippet_content %}\n${childrenContent}\n{% endcapture %}\n`
+				props.push(`children: snippet_content`)
+			}
+		}
+
 		const propsString = props.length > 0 ? `, ${props.join(', ')}` : ''
 
-		return `{% render '${snippetName}'${propsString} %}`
+		return `${childrenCapture}{% render '${snippetName}'${propsString} %}`
 	}
 
 	private extractSnippetProps(attributes: JSXOpeningElement['attributes'], context?: ParsingContext): string[] {

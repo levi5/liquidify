@@ -12,7 +12,7 @@ import { ComponentMetadataType } from '../../../../../types/component'
 import { StatementCollector } from './statement-collector'
 
 export class VariableParser {
-	constructor(private statementCollector: StatementCollector) {}
+	constructor(private statementCollector: StatementCollector) { }
 
 	public parse(node: VariableDeclaration, metadata: ComponentMetadataType): void {
 		const declarator = node.declarations[0]
@@ -25,6 +25,21 @@ export class VariableParser {
 
 			if (hasJSX || !metadata.name) {
 				metadata.name = name
+			}
+
+			if (declarator.init.params.length > 0) {
+				const param = declarator.init.params[0]
+				if (param.type === 'ObjectPattern') {
+					for (const prop of param.properties) {
+						if (prop.type === 'ObjectProperty' && prop.value.type === 'AssignmentPattern' && prop.value.left.type === 'Identifier') {
+							const propName = prop.value.left.name
+							const generate = require('@babel/generator').default
+							const defaultValue = generate(prop.value.right).code
+							metadata.liquidAssignments = metadata.liquidAssignments || []
+							metadata.liquidAssignments.push(`{% if ${propName} == nil %}\n  {% assign ${propName} = ${defaultValue} %}\n{% endif %}`)
+						}
+					}
+				}
 			}
 
 			if (isBlockStatement(declarator.init.body)) {

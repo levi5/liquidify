@@ -102,6 +102,7 @@ export class LiquidParser implements ILiquidExpressionParser {
 			() => this.reactRegistry,
 			(componentName, context) => this.addScriptAsset(componentName, context),
 			(node, context) => this.expressionParser.generateLiquidCode(node, false, undefined, context),
+			(children, renames, context) => this.renderChildren(children, renames, context),
 		)
 
 		this.paginateParser = new LiquidPaginateParser(
