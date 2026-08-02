@@ -60,6 +60,33 @@ Agora você pode usar o comando `liquidx` diretamente no terminal do seu projeto
 
 ---
 
+## 🎨 Executando o Exemplo (Theme Shopify)
+
+O projeto contém uma pasta `example` com um tema de exemplo. Como a biblioteca (lib) do LiquidX ainda não está publicada no npm, o exemplo utiliza diretamente a versão compilada local (da pasta `dist/`).
+
+### Passos para testar:
+
+1. **Gere o build do compilador na raiz do projeto:**
+   ```bash
+   npm run build
+   ```
+
+2. **Acesse a pasta de exemplo:**
+   ```bash
+   cd example
+   ```
+
+3. **Execute o compilador:**
+   ```bash
+   # Para compilar os componentes (aponta para ../dist/presentation/cli/index.js)
+   npm run build
+
+   # Para rodar em modo desenvolvimento (watch)
+   npm run dev
+   ```
+
+---
+
 ## 📚 Documentação Adicional
 
 Para entender a arquitetura e o funcionamento interno, consulte a [Documentação Técnica](lib/docs/README.md).
