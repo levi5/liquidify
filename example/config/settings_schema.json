@@ -1,0 +1,13 @@
+[
+  {
+    "name": "Test theme",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "enable_demo",
+        "label": "Demo",
+        "default": true
+      }
+    ]
+  }
+]

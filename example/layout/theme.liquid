@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <title>
+      {{ page_title }}
+      {% if current_tags %} – tagged "{{ current_tags | join: ', ' }}"{% endif %}
+      {% if current_page != 1 %} – Page {{ current_page }}{% endif %}
+      {% unless page_title contains shop.name %} – {{ shop.name }}{% endunless %}
+    </title>
+    <meta name="description" content="{{ page_description | escape }}">
+    {% render 'css-variables' %}
+    {{ content_for_header }}
+    {{ 'global.css' | asset_url | stylesheet_tag: preload: true }}
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+      rel="stylesheet"
+    >
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loja Modelo</title>
+    <script
+      src="{{ 'react-runtime.js' | asset_url }}"
+      defer
+    ></script>
+  </head>
+  <body>
+    {% sections 'header-group' %}
+    <main>
+      {{ content_for_layout }}
+    </main>
+    {% sections 'footer-group' %}
+    {% render 'script-global' %}
+  </body>
+</html>

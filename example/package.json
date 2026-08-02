@@ -1,0 +1,12 @@
+{
+  "name": "example",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "node ../dist/presentation/cli/index.js",
+    "dev": "npx tsx --tsconfig ../tsconfig.runtime.json ../lib/presentation/cli/index.ts --watch"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18"
+  }
+}
