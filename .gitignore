@@ -10,7 +10,6 @@ src
 node_modules
 templates
 pnpm-lock.yaml
-.cursorrules
 .shopifyignore
 dist
 .gitkeep
