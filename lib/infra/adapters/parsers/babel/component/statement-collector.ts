@@ -21,12 +21,12 @@ import { LiquidVariableParser } from '../liquid/variable-parser'
 export class StatementCollector {
   private generateLiquidCodeFromNode(node: any): string {
     if (!node) return ''
-    
+
     if (node.type === 'UnaryExpression' && node.operator === '!') {
       const argCode = this.generateLiquidCodeFromNode(node.argument)
       return `${argCode} == blank or ${argCode} == false`
     }
-    
+
     if (node.type === 'MemberExpression' && node.object.type === 'Identifier' && node.object.name === 'styles') {
       return `"${node.property.name || node.property.value}"`
     }

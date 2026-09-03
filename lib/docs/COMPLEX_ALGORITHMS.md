@@ -1,6 +1,6 @@
 # Algoritmos Complexos e Manipulação de AST
 
-Este documento detalha os algoritmos mais sofisticados do LiquidX.
+Este documento detalha os algoritmos mais sofisticados do Liquidify.
 
 ---
 
@@ -23,7 +23,7 @@ Durante a geração de código Liquid, o `ExpressionParser` realiza mutações e
 ## 3. Isolamento de Escopo e Hidratação (`ScriptGenerator`)
 
 Para permitir que o JavaScript do cliente funcione sem conflitos:
-- **Mapeamento de Escopo**: O gerador identifica todas as variáveis e funções de nível superior e as anexa a um objeto de escopo global (`window.liquidx['component-name']`).
+- **Mapeamento de Escopo**: O gerador identifica todas as variáveis e funções de nível superior e as anexa a um objeto de escopo global (`window.liquidify['component-name']`).
 - **Encapsulamento**: Todo o código é envolvido em uma IIFE, garantindo isolamento total e impedindo que variáveis locais vazem para o escopo global do tema Shopify.
 
 ---

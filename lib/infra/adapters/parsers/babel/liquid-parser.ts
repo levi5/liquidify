@@ -17,246 +17,246 @@ import type { IFileSystem } from '../../../../core/protocols/file-system'
 import { NodeFileSystem } from '../../fs/node-file-system'
 import { ParsingContext } from '../../../../core/entities/parsing-context'
 import {
-	type Expression,
-	isConditionalExpression,
-	isExpression,
-	isJSXElement,
-	isJSXExpressionContainer,
-	isJSXFragment,
-	isJSXIdentifier,
-	isJSXMemberExpression,
-	isJSXText,
-	isLogicalExpression,
-	type File,
-	type JSXElement,
-	type JSXExpressionContainer,
-	type JSXFragment,
-	type JSXText,
-	type Node,
-	type ConditionalExpression,
-	type LogicalExpression,
-	type JSXOpeningElement,
+  type Expression,
+  isConditionalExpression,
+  isExpression,
+  isJSXElement,
+  isJSXExpressionContainer,
+  isJSXFragment,
+  isJSXIdentifier,
+  isJSXMemberExpression,
+  isJSXText,
+  isLogicalExpression,
+  type File,
+  type JSXElement,
+  type JSXExpressionContainer,
+  type JSXFragment,
+  type JSXText,
+  type Node,
+  type ConditionalExpression,
+  type LogicalExpression,
+  type JSXOpeningElement,
 } from '@babel/types'
 import { LiquidAttributeConverter } from './liquid/attribute-parser'
 
 export class LiquidParser implements ILiquidExpressionParser {
-	private readonly dynamicBlockTag: string
-	private readonly renderSnippetTag: string
-	private readonly renderSvgTag: string
-	private reactRegistry: Map<string, ReactComponentConfig> = new Map()
-	private readonly fs: IFileSystem
-	private liquidAttributeConverter: LiquidAttributeConverter
-	private blockParser: LiquidBlockParser
-	private importResolver: ImportResolver
-	private reactComponentParser: ReactComponentParser
-	private expressionParser: ExpressionParser
-	private htmlParser: LiquidHtmlParser
-	private liquidVariableParser: LiquidVariableParser
-	private conditionalParser: LiquidConditionalParser
-	private loopParser: LiquidLoopParser
-	private snippetParser: LiquidSnippetParser
-	private paginateParser: LiquidPaginateParser
-	private svgParser: LiquidSvgParser
-	private formParser: LiquidFormParser
+  private readonly dynamicBlockTag: string
+  private readonly renderSnippetTag: string
+  private readonly renderSvgTag: string
+  private reactRegistry: Map<string, ReactComponentConfig> = new Map()
+  private readonly fs: IFileSystem
+  private liquidAttributeConverter: LiquidAttributeConverter
+  private blockParser: LiquidBlockParser
+  private importResolver: ImportResolver
+  private reactComponentParser: ReactComponentParser
+  private expressionParser: ExpressionParser
+  private htmlParser: LiquidHtmlParser
+  private liquidVariableParser: LiquidVariableParser
+  private conditionalParser: LiquidConditionalParser
+  private loopParser: LiquidLoopParser
+  private snippetParser: LiquidSnippetParser
+  private paginateParser: LiquidPaginateParser
+  private svgParser: LiquidSvgParser
+  private formParser: LiquidFormParser
 
-	constructor(
-		private readonly compiler: Compiler,
-		config: JSXToLiquidConfig = {},
-		fsConfig: IFileSystem = new NodeFileSystem(),
-	) {
-		this.fs = fsConfig
-		this.dynamicBlockTag = config.dynamicBlockTag || 'DynamicBlock'
-		this.renderSnippetTag = config.renderSnippetTag || 'RenderSnippet'
-		this.renderSvgTag = config.renderSvgTag || 'RenderSvg'
+  constructor(
+    private readonly compiler: Compiler,
+    config: JSXToLiquidConfig = {},
+    fsConfig: IFileSystem = new NodeFileSystem(),
+  ) {
+    this.fs = fsConfig
+    this.dynamicBlockTag = config.dynamicBlockTag || 'DynamicBlock'
+    this.renderSnippetTag = config.renderSnippetTag || 'RenderSnippet'
+    this.renderSvgTag = config.renderSvgTag || 'RenderSvg'
 
-		this.importResolver = new ImportResolver(this.fs)
-		this.liquidAttributeConverter = new LiquidAttributeConverter(this)
+    this.importResolver = new ImportResolver(this.fs)
+    this.liquidAttributeConverter = new LiquidAttributeConverter(this)
 
-		this.liquidVariableParser = new LiquidVariableParser((node, inCondition, renames, context) =>
-			this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
-		)
+    this.liquidVariableParser = new LiquidVariableParser((node, inCondition, renames, context) =>
+      this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
+    )
 
-		this.conditionalParser = new LiquidConditionalParser(
-			(node, renames, context) => this.jsxToHtml(node, renames, context),
-			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
-			(context) => this.expressionParser.getPendingAssigns(context),
-		)
+    this.conditionalParser = new LiquidConditionalParser(
+      (node, renames, context) => this.jsxToHtml(node, renames, context),
+      (node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
+      (context) => this.expressionParser.getPendingAssigns(context),
+    )
 
-		this.loopParser = new LiquidLoopParser((node, renames, context) => this.jsxToHtml(node, renames, context), this.liquidVariableParser)
+    this.loopParser = new LiquidLoopParser((node, renames, context) => this.jsxToHtml(node, renames, context), this.liquidVariableParser)
 
-		this.expressionParser = new ExpressionParser(this.compiler, this.importResolver, this.loopParser)
+    this.expressionParser = new ExpressionParser(this.compiler, this.importResolver, this.loopParser)
 
-		this.liquidVariableParser.parseExpression = (expr, renames, context) => this.expressionParser.parseExpression(expr, renames, context)
+    this.liquidVariableParser.parseExpression = (expr, renames, context) => this.expressionParser.parseExpression(expr, renames, context)
 
-		this.blockParser = new LiquidBlockParser(this.dynamicBlockTag, this.renderSnippetTag, (element) => this.getTagName(element))
+    this.blockParser = new LiquidBlockParser(this.dynamicBlockTag, this.renderSnippetTag, (element) => this.getTagName(element))
 
-		this.reactComponentParser = new ReactComponentParser(
-			() => this.reactRegistry,
-			(componentName, context) => this.addScriptAsset(componentName, context),
-			this.importResolver,
-			() => undefined,
-			(children, renames, context) => this.renderChildren(children, renames, context),
-		)
+    this.reactComponentParser = new ReactComponentParser(
+      () => this.reactRegistry,
+      (componentName, context) => this.addScriptAsset(componentName, context),
+      this.importResolver,
+      () => undefined,
+      (children, renames, context) => this.renderChildren(children, renames, context),
+    )
 
-		this.snippetParser = new LiquidSnippetParser(
-			() => this.reactRegistry,
-			(componentName, context) => this.addScriptAsset(componentName, context),
-			(node, context) => this.expressionParser.generateLiquidCode(node, false, undefined, context),
-			(children, renames, context) => this.renderChildren(children, renames, context),
-		)
+    this.snippetParser = new LiquidSnippetParser(
+      () => this.reactRegistry,
+      (componentName, context) => this.addScriptAsset(componentName, context),
+      (node, context) => this.expressionParser.generateLiquidCode(node, false, undefined, context),
+      (children, renames, context) => this.renderChildren(children, renames, context),
+    )
 
-		this.paginateParser = new LiquidPaginateParser(
-			(children, renames, context) => this.renderChildren(children, renames, context),
-			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
-		)
+    this.paginateParser = new LiquidPaginateParser(
+      (children, renames, context) => this.renderChildren(children, renames, context),
+      (node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
+    )
 
-		this.svgParser = new LiquidSvgParser()
+    this.svgParser = new LiquidSvgParser()
 
-		this.formParser = new LiquidFormParser(
-			(children, renames, context) => this.renderChildren(children, renames, context),
-			(node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
-		)
+    this.formParser = new LiquidFormParser(
+      (children, renames, context) => this.renderChildren(children, renames, context),
+      (node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
+    )
 
-		this.htmlParser = new LiquidHtmlParser(this.liquidAttributeConverter, this.expressionParser, (children, renames, context) =>
-			this.renderChildren(children, renames, context),
-		)
-	}
+    this.htmlParser = new LiquidHtmlParser(this.liquidAttributeConverter, this.expressionParser, (children, renames, context) =>
+      this.renderChildren(children, renames, context),
+    )
+  }
 
-	/**
-	 * Sets the registry for React components to be hydrated on the client.
-	 * @param registry - Map containing React component configurations.
-	 */
-	public setReactRegistry(registry: Map<string, ReactComponentConfig>): void {
-		this.reactRegistry = registry
-	}
+  /**
+   * Sets the registry for React components to be hydrated on the client.
+   * @param registry - Map containing React component configurations.
+   */
+  public setReactRegistry(registry: Map<string, ReactComponentConfig>): void {
+    this.reactRegistry = registry
+  }
 
-	/**
-	 * Converts a JSXElement to a JSXResult containing HTML, schema blocks, and external scripts.
-	 * @param node - The root JSXElement to convert.
-	 * @returns The conversion result.
-	 */
-	public convert(
-		node: JSXElement | JSXFragment | LogicalExpression | ConditionalExpression,
-		ast?: File,
-		currentFilePath?: string,
-		componentName?: string,
-		mode?: string,
-		inlineComponents?: Map<string, any>,
-	): JSXResult {
-		const context = new ParsingContext({
-			currentFilePath,
-			componentName,
-			mode,
-			inlineComponents,
-		})
+  /**
+   * Converts a JSXElement to a JSXResult containing HTML, schema blocks, and external scripts.
+   * @param node - The root JSXElement to convert.
+   * @returns The conversion result.
+   */
+  public convert(
+    node: JSXElement | JSXFragment | LogicalExpression | ConditionalExpression,
+    ast?: File,
+    currentFilePath?: string,
+    componentName?: string,
+    mode?: string,
+    inlineComponents?: Map<string, any>,
+  ): JSXResult {
+    const context = new ParsingContext({
+      currentFilePath,
+      componentName,
+      mode,
+      inlineComponents,
+    })
 
-		this.liquidAttributeConverter = new LiquidAttributeConverter(this, componentName, mode)
+    this.liquidAttributeConverter = new LiquidAttributeConverter(this, componentName, mode)
 
-		if (ast) {
-			this.importResolver.resolveImports(ast)
-		} else {
-			this.importResolver.clear()
-		}
+    if (ast) {
+      this.importResolver.resolveImports(ast)
+    } else {
+      this.importResolver.clear()
+    }
 
-		if (isJSXElement(node)) {
-			this.blockParser.processDynamicBlocks(node, context)
-		}
-		const html = this.jsxToHtml(node, undefined, context)
+    if (isJSXElement(node)) {
+      this.blockParser.processDynamicBlocks(node, context)
+    }
+    const html = this.jsxToHtml(node, undefined, context)
 
-		return {
-			html,
-			blocksSchema: context.blocksSchema,
-			scriptAssets: Array.from(context.scriptAssets),
-		}
-	}
+    return {
+      html,
+      blocksSchema: context.blocksSchema,
+      scriptAssets: Array.from(context.scriptAssets),
+    }
+  }
 
-	private jsxToHtml(
-		node: JSXElement | JSXFragment | JSXText | JSXExpressionContainer | Expression,
-		renames?: Record<string, string>,
-		context?: ParsingContext,
-	): string {
-		if (isJSXFragment(node)) return this.renderChildren(node.children, renames, context)
-		if (isJSXElement(node)) return this.renderJSXElement(node, renames, context)
-		if (isJSXText(node)) return node.value.trim() || ''
+  private jsxToHtml(
+    node: JSXElement | JSXFragment | JSXText | JSXExpressionContainer | Expression,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    if (isJSXFragment(node)) return this.renderChildren(node.children, renames, context)
+    if (isJSXElement(node)) return this.renderJSXElement(node, renames, context)
+    if (isJSXText(node)) return node.value.trim() || ''
 
-		if (isJSXExpressionContainer(node)) {
-			return isExpression(node.expression) ? this.handleExpression(node.expression, renames, context) : ''
-		}
+    if (isJSXExpressionContainer(node)) {
+      return isExpression(node.expression) ? this.handleExpression(node.expression, renames, context) : ''
+    }
 
-		if (isExpression(node)) {
-			return this.handleExpression(node, renames, context)
-		}
+    if (isExpression(node)) {
+      return this.handleExpression(node, renames, context)
+    }
 
-		return ''
-	}
+    return ''
+  }
 
-	private handleExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
-		if (isLogicalExpression(expr)) {
-			return this.conditionalParser.parseLogicalExpression(expr, renames, context) || ''
-		}
+  private handleExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+    if (isLogicalExpression(expr)) {
+      return this.conditionalParser.parseLogicalExpression(expr, renames, context) || ''
+    }
 
-		if (isConditionalExpression(expr)) {
-			return this.conditionalParser.parseConditionalExpression(expr, renames, context)
-		}
+    if (isConditionalExpression(expr)) {
+      return this.conditionalParser.parseConditionalExpression(expr, renames, context)
+    }
 
-		return this.expressionParser.parseExpression(expr, renames, context)
-	}
+    return this.expressionParser.parseExpression(expr, renames, context)
+  }
 
-	private renderJSXElement(node: JSXElement, renames?: Record<string, string>, context?: ParsingContext): string {
-		const tagName = this.getTagName(node.openingElement)
+  private renderJSXElement(node: JSXElement, renames?: Record<string, string>, context?: ParsingContext): string {
+    const tagName = this.getTagName(node.openingElement)
 
-		if (this.reactRegistry.has(tagName)) {
-			return this.reactComponentParser.transformReactComponent(node, tagName, context)
-		}
+    if (this.reactRegistry.has(tagName)) {
+      return this.reactComponentParser.transformReactComponent(node, tagName, context)
+    }
 
-		if (context?.inlineComponents?.has(tagName)) {
-			const inlineBody = context.inlineComponents.get(tagName)
-			return this.jsxToHtml(inlineBody, renames, context)
-		}
+    if (context?.inlineComponents?.has(tagName)) {
+      const inlineBody = context.inlineComponents.get(tagName)
+      return this.jsxToHtml(inlineBody, renames, context)
+    }
 
-		const specialTagHandlers: Record<string, () => string> = {
-			[this.dynamicBlockTag]: () => `{% content_for 'blocks' %}`,
-			[this.renderSnippetTag]: () => this.snippetParser.transformRenderSnippet(node, context),
-			[this.renderSvgTag]: () => this.svgParser.transformRenderSvg(node),
-			PaginateByLiquid: () => this.paginateParser.transformPaginate(node, context),
-			FormBlock: () => this.formParser.transformForm(node, context),
-		}
+    const specialTagHandlers: Record<string, () => string> = {
+      [this.dynamicBlockTag]: () => `{% content_for 'blocks' %}`,
+      [this.renderSnippetTag]: () => this.snippetParser.transformRenderSnippet(node, context),
+      [this.renderSvgTag]: () => this.svgParser.transformRenderSvg(node),
+      PaginateByLiquid: () => this.paginateParser.transformPaginate(node, context),
+      FormBlock: () => this.formParser.transformForm(node, context),
+    }
 
-		const handler = specialTagHandlers[tagName]
-		if (handler) return handler()
+    const handler = specialTagHandlers[tagName]
+    if (handler) return handler()
 
-		return this.htmlParser.renderHTMLElement(node, tagName, renames, context)
-	}
+    return this.htmlParser.renderHTMLElement(node, tagName, renames, context)
+  }
 
-	private renderChildren(children: JSXElement['children'], renames?: Record<string, string>, context?: ParsingContext): string {
-		return children.map((child) => this.jsxToHtml(child as any, renames, context)).join('')
-	}
+  private renderChildren(children: JSXElement['children'], renames?: Record<string, string>, context?: ParsingContext): string {
+    return children.map((child) => this.jsxToHtml(child as any, renames, context)).join('')
+  }
 
-	public generateLiquidCode(node: Node, inCondition = false, renames?: Record<string, string>, context?: ParsingContext): string {
-		return this.expressionParser.generateLiquidCode(node, inCondition, renames, context)
-	}
+  public generateLiquidCode(node: Node, inCondition = false, renames?: Record<string, string>, context?: ParsingContext): string {
+    return this.expressionParser.generateLiquidCode(node, inCondition, renames, context)
+  }
 
-	public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
-		return this.expressionParser.parseExpression(expr, renames, context)
-	}
+  public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+    return this.expressionParser.parseExpression(expr, renames, context)
+  }
 
-	private getTagName(element: JSXOpeningElement): string {
-		if (isJSXIdentifier(element.name)) return element.name.name
-		if (isJSXMemberExpression(element.name)) return generate(element.name).code
-		return 'div'
-	}
+  private getTagName(element: JSXOpeningElement): string {
+    if (isJSXIdentifier(element.name)) return element.name.name
+    if (isJSXMemberExpression(element.name)) return generate(element.name).code
+    return 'div'
+  }
 
-	private addScriptAsset(componentName: string, context?: ParsingContext): void {
-		const config = this.reactRegistry.get(componentName)
-		if (!config || config.mode === 'dom:global' || !context) return
+  private addScriptAsset(componentName: string, context?: ParsingContext): void {
+    const config = this.reactRegistry.get(componentName)
+    if (!config || config.mode === 'dom:global' || !context) return
 
-		if (config.script) {
-			context.addScriptAsset(config.script)
-		}
+    if (config.script) {
+      context.addScriptAsset(config.script)
+    }
 
-		for (const asset of config.scriptAssets || []) {
-			context.addScriptAsset(asset)
-		}
-	}
+    for (const asset of config.scriptAssets || []) {
+      context.addScriptAsset(asset)
+    }
+  }
 }
 export { ReactComponentConfig }

@@ -1,6 +1,6 @@
 # Babel Component Extraction (`ComponentExtractor`)
 
-Antes de traduzir o JSX para Liquid ou fazer o bundle do React, o LiquidX precisa compreender a estrutura do arquivo. O `ComponentExtractor` (localizado em `lib/infra/adapters/parsers/babel/component/index.ts`) usa a AST gerada pelo `@babel/parser` para extrair essas informações e organizá-las na entidade `ComponentMetadataType`.
+Antes de traduzir o JSX para Liquid ou fazer o bundle do React, o Liquidify precisa compreender a estrutura do arquivo. O `ComponentExtractor` (localizado em `lib/infra/adapters/parsers/babel/component/index.ts`) usa a AST gerada pelo `@babel/parser` para extrair essas informações e organizá-las na entidade `ComponentMetadataType`.
 
 ## O Pipeline de Extração
 
@@ -50,7 +50,7 @@ Se o modo for `liquid` e o `StatementCollector` encontrar declarações JS compl
 ---
 
 ## 4. Schemas Shopify (`SchemaExtractor`)
-Em arquivos Liquid de seções e blocos, o Shopify requer um bloco `{% schema %}`. O LiquidX extrai esse objeto JSON diretamente do código JS/TS.
+Em arquivos Liquid de seções e blocos, o Shopify requer um bloco `{% schema %}`. O Liquidify extrai esse objeto JSON diretamente do código JS/TS.
 
 Ele procura por:
 - `export default { name: "...", settings: [...] }`

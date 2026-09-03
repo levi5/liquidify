@@ -22,7 +22,7 @@ Garante a integridade do código Liquid gerado.
 
 ### Fábricas (`lib/main/factories`)
 
-O LiquidX utiliza o padrão Factory para instanciar o sistema. O `makeLiquidXBuilder` (ou similar) é responsável por:
+O Liquidify utiliza o padrão Factory para instanciar o sistema. O `makeLiquidifyBuilder` (ou similar) é responsável por:
 1.  Instanciar os adaptadores de infraestrutura (Esbuild, Babel, NodeFS).
 2.  Injetá-los nos serviços de aplicação.
 3.  Retornar uma fachada simples para a CLI utilizar.

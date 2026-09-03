@@ -1,8 +1,8 @@
-import { LiquidxError } from './liquidx-error'
+import { LiquidifyError } from './liquidify-error'
 
-export class ValidationError extends LiquidxError {
-	constructor(message: string, filePath?: string) {
-		super(message, filePath)
-		this.name = 'ValidationError'
-	}
+export class ValidationError extends LiquidifyError {
+  constructor(message: string, filePath?: string) {
+    super(message, filePath)
+    this.name = 'ValidationError'
+  }
 }

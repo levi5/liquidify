@@ -1,23 +1,24 @@
-export interface LiquidxEventBus {
+export interface LiquidifyEventBus {
 	on(event: string, callback: (data: any) => void): () => void
 	off(event: string, callback: (data: any) => void): void
 	emit(event: string, data?: any): void
 }
 
-export const LiquidxEvents: LiquidxEventBus = {
+export const LiquidifyEvents: LiquidifyEventBus = {
 	on: () => (() => {}),
 	off: () => {},
 	emit: () => {},
 }
 
-export function useLiquidxEvent<T = any>(event: string, callback: (data: T) => void): void {}
-export function emitLiquidxEvent<T = any>(event: string, data?: T): void {}
+export function useLiquidifyEvent<T = any>(event: string, callback: (data: T) => void): void {}
+export function emitLiquidifyEvent<T = any>(event: string, data?: T): void {}
 export function registerLiquidIsland(name: string, component: any): void {}
 
 declare global {
 	interface Window {
-		LiquidxEvents: LiquidxEventBus
-		LiquidxUseEvent: <T = any>(event: string, callback: (data: T) => void) => void
-		LiquidxEmitEvent: <T = any>(event: string, data?: T) => void
+		LiquidifyEvents: LiquidifyEventBus
+		LiquidifyUseEvent: <T = any>(event: string, callback: (data: T) => void) => void
+		LiquidifyEmitEvent: <T = any>(event: string, data?: T) => void
 	}
 }
+

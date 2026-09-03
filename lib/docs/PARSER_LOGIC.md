@@ -1,6 +1,6 @@
 # Lógica de Parser e Transformação (Babel)
 
-Esta seção detalha como o LiquidX utiliza o Babel para transformar JSX/TypeScript em Liquid e JavaScript.
+Esta seção detalha como o Liquidify utiliza o Babel para transformar JSX/TypeScript em Liquid e JavaScript.
 
 ## Fluxo de Análise (`BabelLiquidParser`)
 
@@ -19,7 +19,7 @@ O `LiquidParser` orquestra vários sub-parsers especializados:
 
 ### `LiquidAttributeConverter`
 Transforma atributos JSX em atributos HTML/Liquid.
-- **Event Handlers**: Converte `onClick={handler}` em chamadas globais do LiquidX (ex: `onclick="liquidx['comp'].handler(event)"`) se estiver no modo DOM.
+- **Event Handlers**: Converte `onClick={handler}` em chamadas globais do Liquidify (ex: `onclick="liquidify['comp'].handler(event)"`) se estiver no modo DOM.
 - **Classes Dinâmicas**: Trata `className` e literais de template.
 - **Booleanos**: Converte condicionais simples em tags `{% if %}` inline.
 
@@ -58,7 +58,7 @@ Responsável pela renderização final de tags HTML padrão.
 
 ## Extração de Schema (`SchemaExtractor`)
 
-O LiquidX procura por uma variável chamada `schema` ou um comentário específico para gerar o arquivo `.json` que o Shopify usa para configurar seções e blocos. Ele analisa o objeto JavaScript e o converte fielmente para o formato JSON exigido pelo Shopify.
+O Liquidify procura por uma variável chamada `schema` ou um comentário específico para gerar o arquivo `.json` que o Shopify usa para configurar seções e blocos. Ele analisa o objeto JavaScript e o converte fielmente para o formato JSON exigido pelo Shopify.
 
 ## Geração de Scripts (`ScriptGenerator`)
 

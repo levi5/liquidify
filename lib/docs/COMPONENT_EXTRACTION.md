@@ -1,6 +1,6 @@
 # Extração de Componentes e Hidratação
 
-Este documento detalha como o LiquidX analisa um arquivo `.tsx` para separar o que deve ser processado no servidor (Shopify/Liquid) e o que deve ser enviado para o navegador (Client-side JS).
+Este documento detalha como o Liquidify analisa um arquivo `.tsx` para separar o que deve ser processado no servidor (Shopify/Liquid) e o que deve ser enviado para o navegador (Client-side JS).
 
 ## O extrator principal (`ComponentExtractor`)
 
@@ -31,13 +31,13 @@ Se o modo for `dom` ou `dom:global`, as funções e variáveis são coletadas pa
 
 Para evitar conflitos entre múltiplos componentes na mesma página, o `ScriptGenerator` encapsula o código em um **IIFE (Immediately Invoked Function Expression)** e cria um escopo global:
 
-### O Objeto `window.liquidx`
+### O Objeto `window.liquidify`
 O código gerado segue este padrão:
 ```javascript
 (function() {
-  window.liquidx = window.liquidx || {};
-  window.liquidx['nome-do-componente'] = {};
-  const scope = window.liquidx['nome-do-componente'];
+  window.liquidify = window.liquidify || {};
+  window.liquidify['nome-do-componente'] = {};
+  const scope = window.liquidify['nome-do-componente'];
   
   // O código do usuário entra aqui
   function handleClick() { ... }

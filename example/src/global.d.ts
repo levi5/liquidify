@@ -1,1 +1,1 @@
-/// <reference types="liquidx" />
+/// <reference types="liquidify" />

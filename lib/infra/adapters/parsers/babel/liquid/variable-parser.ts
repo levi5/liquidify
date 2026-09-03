@@ -28,7 +28,7 @@ export class LiquidVariableParser {
 
   constructor(
     public generateLiquidCode: (node: any, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string,
-  ) { }
+  ) {}
 
   public parseVariableDeclaration(declaration: VariableDeclarator, renames?: Record<string, string>, context?: ParsingContext): string[] {
     const id = _Maybe
@@ -205,13 +205,9 @@ export class LiquidVariableParser {
             if (isIdentifier(stmt.expression.left)) {
               const rightCode = this.generateLiquidCode(stmt.expression.right, false, renames, context)
               if (stmt.expression.operator === '+=') {
-                assignments.push(
-                  `{% assign ${stmt.expression.left.name} = ${stmt.expression.left.name} | append: ${rightCode} %}`,
-                )
+                assignments.push(`{% assign ${stmt.expression.left.name} = ${stmt.expression.left.name} | append: ${rightCode} %}`)
               } else {
-                assignments.push(
-                  `{% assign ${stmt.expression.left.name} = ${rightCode} %}`,
-                )
+                assignments.push(`{% assign ${stmt.expression.left.name} = ${rightCode} %}`)
               }
             }
           } else if (
@@ -235,13 +231,9 @@ export class LiquidVariableParser {
         if (isIdentifier(node.expression.left)) {
           const rightCode = this.generateLiquidCode(node.expression.right, false, renames, context)
           if (node.expression.operator === '+=') {
-            assignments.push(
-              `{% assign ${node.expression.left.name} = ${node.expression.left.name} | append: ${rightCode} %}`,
-            )
+            assignments.push(`{% assign ${node.expression.left.name} = ${node.expression.left.name} | append: ${rightCode} %}`)
           } else {
-            assignments.push(
-              `{% assign ${node.expression.left.name} = ${rightCode} %}`,
-            )
+            assignments.push(`{% assign ${node.expression.left.name} = ${rightCode} %}`)
           }
         }
       } else if (

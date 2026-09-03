@@ -1,6 +1,6 @@
-# LiquidX Library Documentation
+# Liquidify Library Documentation
 
-Esta pasta contém o núcleo do LiquidX, um compilador que transforma componentes JSX/TSX em código Liquid para Shopify.
+Esta pasta contém o núcleo do Liquidify, um compilador que transforma componentes JSX/TSX em código Liquid para Shopify.
 
 ## Documentação Detalhada
 

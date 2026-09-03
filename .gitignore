@@ -1,20 +1,22 @@
-.shopify
-assets
-blocks
-snippets
-sections
-config
-layout
-locales
-src
+/.shopify
+/assets
+/blocks
+/snippets
+/sections
+/config
+/layout
+/locales
+/src
 node_modules
-templates
+/templates
 pnpm-lock.yaml
 .shopifyignore
 dist
 .gitkeep
 
+.liquidifyrc
 .liquidxrc
 
 error.txt
+liquidify_docs*
 liquidx_docs*

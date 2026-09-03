@@ -1,6 +1,6 @@
 export class CssInjector {
-	build(): string {
-		return `
+  build(): string {
+    return `
       if (typeof window.__react_css_inject__ === 'undefined') {
         window.__react_css_inject__ = function(cssText, id) {
           if (document.getElementById(id)) return;
@@ -12,9 +12,9 @@ export class CssInjector {
         }
       }
     `
-	}
+  }
 
-	escape(css: string): string {
-		return css.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
-	}
+  escape(css: string): string {
+    return css.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
+  }
 }

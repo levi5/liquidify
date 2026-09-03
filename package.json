@@ -1,5 +1,5 @@
 {
-  "name": "liquidx",
+  "name": "liquidify",
   "version": "1.0.0",
   "description": "TSX to Shopify Liquid compiler with Babel & esbuild",
   "main": "dist/index.js",
@@ -18,6 +18,8 @@
     "dist"
   ],
   "bin": {
+    "liquidify": "dist/presentation/cli/index.js",
+    "liquidify:watch": "dist/presentation/cli/watch.js",
     "liquidx": "dist/presentation/cli/index.js",
     "liquidx:watch": "dist/presentation/cli/watch.js"
   },
@@ -28,6 +30,8 @@
     "build": "tsc -p tsconfig.lib.json",
     "dev": "tsc --watch",
     "start": "node dist/presentation/cli/index.js",
+    "liquidify": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
+    "liquidify:watch": "tsx lib/presentation/cli/index.ts --watch",
     "liquidx": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
     "liquidx:watch": "tsx lib/presentation/cli/index.ts --watch"
   },

@@ -1,12 +1,12 @@
 import { Compiler } from '../../../../../core/protocols/compiler'
 
 export class ReactRuntimeBuilder {
-	constructor(private readonly compiler: Compiler) {}
+  constructor(private readonly compiler: Compiler) {}
 
-	public async build(): Promise<string> {
-		const result = await this.compiler.build({
-			stdin: {
-				contents: `
+  public async build(): Promise<string> {
+    const result = await this.compiler.build({
+      stdin: {
+        contents: `
 					import React from 'preact/compat'
 					import * as ReactDOM from 'preact/compat'
 
@@ -22,23 +22,23 @@ export class ReactRuntimeBuilder {
 					window.ReactDOM = { ...ReactDOM, createRoot }
 
 					// Global Event Bridge
-					window.LiquidxEvents = {
+					window.LiquidifyEvents = {
 						on(event, callback) {
 							const handler = (e) => callback(e.detail);
 							window.addEventListener(event, handler);
-							if (!callback.__liquidx_handlers__) callback.__liquidx_handlers__ = new Map();
-							callback.__liquidx_handlers__.set(event, handler);
+							if (!callback.__liquidify_handlers__) callback.__liquidify_handlers__ = new Map();
+							callback.__liquidify_handlers__.set(event, handler);
 							return () => {
 								window.removeEventListener(event, handler);
-								callback.__liquidx_handlers__.delete(event);
+								callback.__liquidify_handlers__.delete(event);
 							};
 						},
 						off(event, callback) {
-							if (callback.__liquidx_handlers__) {
-								const handler = callback.__liquidx_handlers__.get(event);
+							if (callback.__liquidify_handlers__) {
+								const handler = callback.__liquidify_handlers__.get(event);
 								if (handler) {
 									window.removeEventListener(event, handler);
-									callback.__liquidx_handlers__.delete(event);
+									callback.__liquidify_handlers__.delete(event);
 								}
 							}
 						},
@@ -51,9 +51,10 @@ export class ReactRuntimeBuilder {
 							window.dispatchEvent(ev);
 						}
 					};
+					window.LiquidxEvents = window.LiquidifyEvents;
 
 					// React Hook for Events
-					window.LiquidxUseEvent = (event, callback) => {
+					window.LiquidifyUseEvent = (event, callback) => {
 						const savedCallback = React.useRef(callback);
 						React.useEffect(() => {
 							savedCallback.current = callback;
@@ -63,26 +64,28 @@ export class ReactRuntimeBuilder {
 							const listener = (data) => {
 								if (savedCallback.current) savedCallback.current(data);
 							};
-							return window.LiquidxEvents.on(event, listener);
+							return window.LiquidifyEvents.on(event, listener);
 						}, [event]);
 					};
+					window.LiquidxUseEvent = window.LiquidifyUseEvent;
 
 					// React Emit Function
-					window.LiquidxEmitEvent = (event, data) => {
-						window.LiquidxEvents.emit(event, data);
+					window.LiquidifyEmitEvent = (event, data) => {
+						window.LiquidifyEvents.emit(event, data);
 					};
+					window.LiquidxEmitEvent = window.LiquidifyEmitEvent;
 				`,
-				resolveDir: process.cwd(),
-				loader: 'ts',
-			},
-			bundle: true,
-			write: false,
-			format: 'iife',
-			platform: 'browser',
-			minify: true,
-			target: ['es2020'],
-		})
+        resolveDir: process.cwd(),
+        loader: 'ts',
+      },
+      bundle: true,
+      write: false,
+      format: 'iife',
+      platform: 'browser',
+      minify: true,
+      target: ['es2020'],
+    })
 
-		return result.outputFiles[0].text
-	}
+    return result.outputFiles[0].text
+  }
 }

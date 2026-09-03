@@ -5,7 +5,7 @@ Esta camada contém as implementações que dependem de ferramentas externas.
 ## Compiladores (`lib/infra/adapters/compilers`)
 
 ### `EsbuildCompiler`
-Utiliza o **Esbuild** para transpilar TypeScript e minificar JavaScript/CSS. É escolhido pela sua performance extrema, permitindo que o `watch` do LiquidX seja quase instantâneo.
+Utiliza o **Esbuild** para transpilar TypeScript e minificar JavaScript/CSS. É escolhido pela sua performance extrema, permitindo que o `watch` do Liquidify seja quase instantâneo.
 
 ### `ReactComponentCompiler`
 Usado quando o modo é `'use react'`.

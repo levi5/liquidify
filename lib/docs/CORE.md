@@ -5,7 +5,7 @@ A camada `core` define as regras de negócio fundamentais e os contratos (interf
 ## Entidades (`lib/core/entities`)
 
 ### `Config`
-Representa a configuração global do LiquidX, carregada a partir do arquivo `.liquidxrc`. Define as pastas de entrada/saída e comportamentos do compilador.
+Representa a configuração global do Liquidify, carregada a partir do arquivo `.liquidifyrc`. Define as pastas de entrada/saída e comportamentos do compilador.
 
 ### `ParsedComponent`
 O resultado final da transpilação de um arquivo. Contém:

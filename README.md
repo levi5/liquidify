@@ -1,8 +1,8 @@
-# LiquidX 🚀
+# Liquidify 🚀
 
 > **Status:** Projeto em andamento (Alpha v0.0.1)
 
-LiquidX é um compilador avançado que transforma componentes **JSX/TSX** em código **Liquid** para Shopify, utilizando o Babel e esbuild.
+Liquidify é um compilador avançado que transforma componentes **JSX/TSX** em código **Liquid** para Shopify, utilizando o Babel e esbuild.
 
 ---
 
@@ -10,14 +10,14 @@ LiquidX é um compilador avançado que transforma componentes **JSX/TSX** em có
 
 ### Desenvolvimento Local
 
-Para rodar o LiquidX diretamente do código fonte (usando `tsx`):
+Para rodar o Liquidify diretamente do código fonte (usando `tsx`):
 
 ```bash
 # Executa o comando build do CLI
-npm run liquidx -- build
+npm run liquidify -- build
 
 # Executa o modo watch
-npm run liquidx -- watch
+npm run liquidify -- watch
 ```
 
 ### Gerando o Build
@@ -32,9 +32,9 @@ npm run build
 
 ## 🔗 Utilizando via `npm link`
 
-Se você deseja usar o LiquidX em outro projeto localmente para testar:
+Se você deseja usar o Liquidify em outro projeto localmente para testar:
 
-### 1. No repositório do LiquidX:
+### 1. No repositório do Liquidify:
 
 Primeiro, gere o build e crie o link global:
 
@@ -46,23 +46,23 @@ npm link
 
 ### 2. No projeto de destino:
 
-Vá até a pasta do seu tema ou projeto onde deseja usar o LiquidX e execute (recomenda-se apagar a pasta `node_modules` antes de rodar o comando):
+Vá até a pasta do seu tema ou projeto onde deseja usar o Liquidify e execute (recomenda-se apagar a pasta `node_modules` antes de rodar o comando):
 
 ```bash
 # Apague os módulos antigos (opcional, mas recomendado)
 rm -rf node_modules
 
-# Crie o link para o LiquidX
-npm link liquidx
+# Crie o link para o Liquidify
+npm link liquidify
 ```
 
-Agora você pode usar o comando `liquidx` diretamente no terminal do seu projeto de destino!
+Agora você pode usar o comando `liquidify` diretamente no terminal do seu projeto de destino!
 
 ---
 
 ## 🎨 Executando o Exemplo (Theme Shopify)
 
-O projeto contém uma pasta `example` com um tema de exemplo. Como a biblioteca (lib) do LiquidX ainda não está publicada no npm, o exemplo utiliza diretamente a versão compilada local (da pasta `dist/`).
+O projeto contém uma pasta `example` com um tema de exemplo. Como a biblioteca (lib) do Liquidify ainda não está publicada no npm, o exemplo utiliza diretamente a versão compilada local (da pasta `dist/`).
 
 ### Passos para testar:
 
@@ -90,3 +90,4 @@ O projeto contém uma pasta `example` com um tema de exemplo. Como a biblioteca 
 ## 📚 Documentação Adicional
 
 Para entender a arquitetura e o funcionamento interno, consulte a [Documentação Técnica](lib/docs/README.md).
+
