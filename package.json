@@ -1,6 +1,6 @@
 {
   "name": "liquidify",
-  "version": "1.0.0-alpha.0",
+  "version": "1.0.0-alpha.1",
   "description": "TSX to Shopify Liquid compiler with Babel & esbuild",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
