@@ -21,6 +21,9 @@
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": false,
     "paths": {
+      "liquidify": [
+        "lib/index.ts"
+      ],
       "liquidex": [
         "lib/types/liquidex.ts"
       ],
@@ -50,7 +53,7 @@
       ]
     }
   },
-  "include": ["lib/**/*", "src/**/*"],
+  "include": ["lib/**/*", "src/**/*", "resources/templates/shopify-starter/src/**/*"],
   "exclude": [
     "node_modules",
     "dist"
