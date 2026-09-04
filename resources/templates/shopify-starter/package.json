@@ -8,7 +8,7 @@
     "build": "liquidify"
   },
   "dependencies": {
-    "liquidify": "^1.0.0-alpha.3",
+    "liquidify": "^1.0.0-alpha.4",
     "preact": "^10.28.4"
   }
 }

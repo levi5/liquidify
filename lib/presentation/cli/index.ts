@@ -3,8 +3,6 @@ import ora from 'ora'
 import kleur from 'kleur'
 import { _match } from 'funcio'
 import { runInit } from './commands/init'
-import { makeLiquidifyBuilder } from '../../main/factories/make-liquidify-builder'
-import { ConfigLoader } from '../../infra/adapters/config/config-loader'
 import type { LiquidifyError } from '../../core/errors/liquidify-error'
 import '../../shared/string'
 
@@ -43,6 +41,8 @@ const showHelp = (): void => {
 
 const runBuild = async (watch: boolean): Promise<void> => {
   const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' }).start()
+  const { ConfigLoader } = await import('../../infra/adapters/config/config-loader')
+  const { makeLiquidifyBuilder } = await import('../../main/factories/make-liquidify-builder')
   const config = ConfigLoader.load()
   const builder = makeLiquidifyBuilder(config)
 
