@@ -1,6 +1,7 @@
 export * from './types/liquidex'
 export * from './main/factories/make-liquidify-builder'
 export * from './presentation/cli/commands/build'
+export * from './presentation/cli/commands/init'
 export * from './infra/adapters/config/config-loader'
 export * from './application/services/transpile-file'
 export * from './core/entities/config'

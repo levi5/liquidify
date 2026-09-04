@@ -32,7 +32,25 @@ yarn add liquidify@alpha
 
 ## 🚀 Quick Start
 
-### 1. Create a config file
+### 1. Initialize a new theme template (Recommended)
+
+Generate a complete Shopify theme structure and Liquidify configuration with ready-to-use example components:
+
+```bash
+npx liquidify init [project-name]
+# or initialize in the current folder:
+npx liquidify init
+```
+
+This creates:
+- Shopify theme folders (`layout/`, `templates/`, `sections/`, `snippets/`, `assets/`, `config/`, `locales/`)
+- Default Shopify files (`theme.liquid`, `index.json`, `settings_schema.json`, `css-variables.liquid`)
+- Liquidify example components (`Hero.tsx` section, `Counter.tsx` React Island, `Badge.tsx` snippet)
+- `liquidify.config.json` and `tsconfig.json`
+
+---
+
+### 2. Or configure an existing project manually
 
 Create a `liquidify.config.json` at the root of your Shopify theme project:
 
@@ -50,7 +68,7 @@ Create a `liquidify.config.json` at the root of your Shopify theme project:
 
 ---
 
-### 2. Run the compiler
+### 3. Run the compiler
 
 ```bash
 # Build once
@@ -195,10 +213,16 @@ your-shopify-theme/
 ## 🛠️ CLI Reference
 
 ```
-Usage: liquidify [options]
+Usage:
+  liquidify [options]
+  liquidify init [directory]
+
+Commands:
+  init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
 
 Options:
-  --watch    Watch for file changes and rebuild automatically
+  --watch, -w     Watch for file changes and rebuild automatically
+  --help, -h      Show help
 
 Aliases: liquidx, liquidx:watch
 ```

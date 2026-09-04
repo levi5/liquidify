@@ -1,14 +1,17 @@
 #!/usr/bin/env node
 import ora from 'ora'
 import kleur from 'kleur'
+import { _match } from 'funcio'
+import { runInit } from './commands/init'
 import { makeLiquidifyBuilder } from '../../main/factories/make-liquidify-builder'
 import { ConfigLoader } from '../../infra/adapters/config/config-loader'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
+import type { LiquidifyError } from '../../core/errors/liquidify-error'
 import '../../shared/string'
 
-console.clear()
-console.log(
-  kleur.cyan(`
+const printBanner = (): void => {
+  console.clear()
+  console.log(
+    kleur.cyan(`
   _      _             _     _ _  __       
  | |    (_)           (_)   | (_)/ _|      
  | |     _  __ _ _   _ _  __| |_| |_ _   _ 
@@ -18,14 +21,28 @@ console.log(
               | |                     __/ |
               |_|                    |___/ 
 `),
-)
-console.log(kleur.dim('  Shopify Liquid + React Compiler\n'))
+  )
+  console.log(kleur.dim('  Shopify Liquid + React Compiler\n'))
+}
 
-export async function cli() {
-  const watch = process.argv.includes('--watch')
-  const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' })
-  spinner.start()
+const showHelp = (): void => {
+  console.log(`
+  ${kleur.bold('Usage:')}
+    liquidify [options]
+    liquidify init [directory]
 
+  ${kleur.bold('Commands:')}
+    init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
+
+  ${kleur.bold('Options:')}
+    --watch, -w     Watch for file changes and rebuild automatically
+    --help, -h      Show help
+`)
+  process.exit(0)
+}
+
+const runBuild = async (watch: boolean): Promise<void> => {
+  const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' }).start()
   const config = ConfigLoader.load()
   const builder = makeLiquidifyBuilder(config)
 
@@ -37,9 +54,10 @@ export async function cli() {
 
   builder.on('build:end', () => {
     spinner.succeed(kleur.green('Build completed successfully!'))
-    if (watch) {
-      console.log(kleur.dim('\n👀 Watching for changes...'))
-    }
+    _match(watch)
+      .with(true, () => console.log(kleur.dim('\n👀 Watching for changes...')))
+      .with(false, () => {})
+      .exec()
   })
 
   builder.on('file:change', (file) => {
@@ -49,9 +67,10 @@ export async function cli() {
   builder.on('error', (error: LiquidifyError) => {
     const prefix = error.name === 'ValidationError' ? 'Validation' : 'Build'
     console.log(`\n${kleur.bgRed().white(` ${prefix} Error `)} ${kleur.red(error.message)}`)
-    if (error.filePath) {
-      console.log(kleur.dim(`   ${error.filePath}`))
-    }
+    _match(Boolean(error.filePath))
+      .with(true, () => console.log(kleur.dim(`   ${error.filePath}`)))
+      .with(false, () => {})
+      .exec()
   })
 
   const shutdown = () => {
@@ -67,18 +86,47 @@ export async function cli() {
 
   if (process.stdin.isTTY) {
     process.stdin.on('data', (data) => {
-      if (data.toString() === '\u0003') shutdown()
+      _match(data.toString() === '\u0003')
+        .with(true, shutdown)
+        .with(false, () => {})
+        .exec()
     })
   }
 
   await builder.build()
 
-  if (watch) {
-    builder.watch()
-    return
-  }
+  _match(watch)
+    .with(true, () => builder.watch())
+    .with(false, shutdown)
+    .exec()
+}
 
-  shutdown()
+const resolveCommand = (args: string[]): string => {
+  const isHelp = args.includes('--help') || args.includes('-h')
+  const isInit = args[0] === 'init'
+
+  return _match(isHelp)
+    .with(true, () => 'help')
+    .with(false, () => (isInit ? 'init' : 'build'))
+    .exec()
+}
+
+const resolveAction = (args: string[]) => {
+  const command = resolveCommand(args)
+  const watch = args.includes('--watch') || args.includes('-w')
+
+  return _match(command)
+    .with('help', () => showHelp)
+    .with('init', () => () => runInit(args[1] || '.'))
+    .with('build', () => () => runBuild(watch))
+    .exec()
+}
+
+export async function cli(): Promise<void> {
+  printBanner()
+  const args = process.argv.slice(2)
+  const action = resolveAction(args)
+  await action()
 }
 
 if (require.main === module) cli()

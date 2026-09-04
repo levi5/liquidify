@@ -10,6 +10,7 @@
 node_modules
 /templates
 pnpm-lock.yaml
+package-lock.json
 .shopifyignore
 dist
 .gitkeep

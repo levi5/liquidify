@@ -15,7 +15,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "resources"
   ],
   "bin": {
     "liquidify": "dist/presentation/cli/index.js",
