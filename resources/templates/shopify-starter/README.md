@@ -41,7 +41,9 @@ shopify theme dev
 ├── src/
 │   └── components/
 │       ├── sections/
-│       │   └── Hero.tsx        # "use sections" Liquid section with schema
+│       │   ├── Header.tsx      # "use sections" Header section
+│       │   ├── Hero.tsx        # "use sections" Liquid section with schema
+│       │   └── Footer.tsx      # "use sections" Footer section
 │       ├── islands/
 │       │   └── Counter.tsx     # "use react" interactive React Island
 │       └── snippets/

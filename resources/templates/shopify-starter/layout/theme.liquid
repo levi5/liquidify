@@ -21,9 +21,11 @@
     <script src="{{ 'react-runtime.js' | asset_url }}" defer></script>
   </head>
   <body>
+    {% sections 'header-group' %}
     <main role="main">
       {{ content_for_layout }}
     </main>
+    {% sections 'footer-group' %}
     {% render 'script-global' %}
   </body>
 </html>
