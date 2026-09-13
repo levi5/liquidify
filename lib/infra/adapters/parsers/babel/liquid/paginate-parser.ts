@@ -1,16 +1,16 @@
 import {
   isStringLiteral,
-  JSXElement,
+  type JSXElement,
   isJSXAttribute,
   isJSXIdentifier,
   isJSXExpressionContainer,
   isExpression,
   isNumericLiteral,
-  Node,
-  JSXAttribute,
+  type Node,
+  type JSXAttribute,
 } from '@babel/types'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidPaginateParser {
   constructor(

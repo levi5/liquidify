@@ -1,8 +1,8 @@
-import { NodePath } from '@babel/traverse'
-import { isFunctionDeclaration, isVariableDeclaration, ExportDefaultDeclaration, ExportNamedDeclaration } from '@babel/types'
-import { ComponentMetadataType } from '../../../../../types/component'
-import { VariableParser } from './variable-parser'
-import { FunctionBodyParser } from './function-body-parser'
+import type { NodePath } from '@babel/traverse'
+import { isFunctionDeclaration, isVariableDeclaration, type ExportDefaultDeclaration, type ExportNamedDeclaration } from '@babel/types'
+import type { ComponentMetadataType } from '../../../../../types/component'
+import type { VariableParser } from './variable-parser'
+import type { FunctionBodyParser } from './function-body-parser'
 
 export class ExportParser {
   constructor(

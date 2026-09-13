@@ -24,8 +24,8 @@ import {
 
 import { HTMLAttributeConverter } from '../html/attribute-parser'
 import { _Maybe } from 'funcio'
-import { ILiquidExpressionParser } from '../../../../../types/liquid'
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ILiquidExpressionParser } from '../../../../../types/liquid'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 import { pascalToKebab } from '../../../../../shared/string'
 
 export class LiquidAttributeConverter {

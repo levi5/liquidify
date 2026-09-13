@@ -1,6 +1,6 @@
-import pathModule from 'path'
-import { IPathResolver } from '../../../core/protocols/path-resolver'
-import { IFileSystem } from '../../../core/protocols/file-system'
+import pathModule from 'node:path'
+import type { IPathResolver } from '../../../core/protocols/path-resolver'
+import type { IFileSystem } from '../../../core/protocols/file-system'
 import { NodeFileSystem } from '../fs/node-file-system'
 
 export class TsconfigPathResolver implements IPathResolver {
@@ -28,7 +28,7 @@ export class TsconfigPathResolver implements IPathResolver {
           this.tsconfigPaths[alias] = target
         }
       }
-    } catch (e) {}
+    } catch (_e) {}
   }
 
   public resolve(importPath: string, basePath?: string): string {

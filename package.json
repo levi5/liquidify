@@ -25,8 +25,8 @@
     "liquidx:watch": "dist/presentation/cli/watch.js"
   },
   "scripts": {
-    "format": "biome format lib  --write",
-    "lint": "biome check lib  --apply",
+    "format": "biome format lib --write",
+    "lint": "biome check lib --write --unsafe",
     "prepublishOnly": "npm run build",
     "build": "tsc -p tsconfig.lib.json",
     "pretest": "tsc -p tsconfig.lib.json",

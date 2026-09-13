@@ -2,19 +2,19 @@ import { pascalToKebab } from '../../../../../shared/string'
 import type { ReactComponentConfig } from '../../../../../types/liquid'
 import {
   isStringLiteral,
-  JSXElement,
+  type JSXElement,
   isJSXAttribute,
   isJSXIdentifier,
   isJSXExpressionContainer,
   isExpression,
   isIdentifier,
   isJSXSpreadAttribute,
-  Node,
-  JSXAttribute,
-  JSXOpeningElement,
+  type Node,
+  type JSXAttribute,
+  type JSXOpeningElement,
 } from '@babel/types'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidSnippetParser {
   constructor(

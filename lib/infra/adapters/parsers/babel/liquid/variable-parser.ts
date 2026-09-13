@@ -1,4 +1,3 @@
-import generate from '@babel/generator'
 import {
   isIdentifier,
   isObjectPattern,
@@ -17,11 +16,11 @@ import {
   isMemberExpression,
   isArrowFunctionExpression,
   isReturnStatement,
-  ObjectPattern,
+  type ObjectPattern,
 } from '@babel/types'
 import { _Maybe, _Object } from 'funcio'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidVariableParser {
   public parseExpression?: (node: any, renames?: Record<string, string>, context?: ParsingContext) => string

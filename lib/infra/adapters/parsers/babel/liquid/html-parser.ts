@@ -7,13 +7,13 @@ import {
   isIdentifier,
   isStringLiteral,
   isExpression,
-  JSXElement,
-  ObjectProperty,
+  type JSXElement,
+  type ObjectProperty,
 } from '@babel/types'
-import { LiquidAttributeConverter } from './attribute-parser'
-import { ExpressionParser } from './expression-parser'
+import type { LiquidAttributeConverter } from './attribute-parser'
+import type { ExpressionParser } from './expression-parser'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidHtmlParser {
   constructor(
@@ -43,7 +43,7 @@ export class LiquidHtmlParser {
       return true
     })
 
-    let attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, context)
+    const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, context)
     let children = hasDangerouslySetInnerHTML ? dangerouslySetInnerHTMLContent : this.renderChildren(node.children, renames, context)
 
     if (tagName === 'liquid-data' && bridgeAttributes.length > 0) {

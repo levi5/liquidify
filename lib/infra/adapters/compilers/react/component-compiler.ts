@@ -1,6 +1,6 @@
-import { Compiler } from '../../../../core/protocols/compiler'
-import { ComponentMetadataType } from '../../../../types/component'
-import { CssInjector } from './runtime/css-injector'
+import type { Compiler } from '../../../../core/protocols/compiler'
+import type { ComponentMetadataType } from '../../../../types/component'
+import type { CssInjector } from './runtime/css-injector'
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
 import generate from '@babel/generator'
@@ -80,7 +80,7 @@ export class ReactComponentCompiler {
     if (filePath) source = this.processContextBridge(source, filePath)
 
     const entry = this.getClientRuntimeScript(componentName, source, injector)
-    const dir = filePath ? require('path').dirname(filePath) : process.cwd()
+    const dir = filePath ? require('node:path').dirname(filePath) : process.cwd()
 
     const result = await this.compiler.build({
       stdin: { contents: entry, resolveDir: dir, loader: 'tsx' },
@@ -358,7 +358,7 @@ export class ReactComponentCompiler {
         `
   }
 
-  private getEsbuildPlugins(filePath?: string): any[] {
+  private getEsbuildPlugins(_filePath?: string): any[] {
     return [
       {
         name: 'global-externals',
@@ -399,7 +399,7 @@ export class ReactComponentCompiler {
       {
         name: 'liquidify-context-bridge',
         setup: (build: any) => {
-          const fs = require('fs')
+          const fs = require('node:fs')
           build.onLoad({ filter: /\.[jt]sx?$/ }, async (args: any) => {
             let contents = await fs.promises.readFile(args.path, 'utf8')
             contents = this.processContextBridge(contents, args.path)
@@ -427,6 +427,6 @@ export class ReactComponentCompiler {
 
     const escapedCss = css.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
     const cssId = rootId ? `css-${rootId}` : `css-${componentName}`
-    return script + `\nif(window.__react_css_inject__) { window.__react_css_inject__(\`${escapedCss}\`, '${cssId}'); }`
+    return `${script}\nif(window.__react_css_inject__) { window.__react_css_inject__(\`${escapedCss}\`, '${cssId}'); }`
   }
 }

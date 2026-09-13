@@ -1,5 +1,5 @@
 import {
-  VariableDeclaration,
+  type VariableDeclaration,
   isIdentifier,
   isArrowFunctionExpression,
   isBlockStatement,
@@ -8,8 +8,8 @@ import {
   isJSXFragment,
   isParenthesizedExpression,
 } from '@babel/types'
-import { ComponentMetadataType } from '../../../../../types/component'
-import { StatementCollector } from './statement-collector'
+import type { ComponentMetadataType } from '../../../../../types/component'
+import type { StatementCollector } from './statement-collector'
 
 export class VariableParser {
   constructor(private statementCollector: StatementCollector) {}

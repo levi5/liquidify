@@ -1,5 +1,5 @@
 import { parse } from '@babel/parser'
-import { File } from '@babel/types'
+import type { File } from '@babel/types'
 import { _try } from 'funcio/lib/Monads/Either'
 import { LiquidifyError } from '../../../../core/errors/liquidify-error'
 

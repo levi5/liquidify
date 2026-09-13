@@ -10,7 +10,7 @@ import {
   isIdentifier,
 } from '@babel/types'
 import { pascalToKebab } from '../../../../../shared/string'
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidBlockParser {
   constructor(
@@ -23,7 +23,9 @@ export class LiquidBlockParser {
     const blocksSchema: { type: string }[] = []
     this.traverse(node, blocksSchema)
     if (context) {
-      blocksSchema.forEach((b) => context.addBlockSchema(b))
+      blocksSchema.forEach((b) => {
+        context.addBlockSchema(b)
+      })
     }
     return blocksSchema
   }

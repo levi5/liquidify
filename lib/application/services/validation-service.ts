@@ -1,4 +1,4 @@
-import { ParsedComponent } from '../../core/entities/parsed-component'
+import type { ParsedComponent } from '../../core/entities/parsed-component'
 import { ValidationError } from '../../core/errors/validation-error'
 
 export class ValidationService {

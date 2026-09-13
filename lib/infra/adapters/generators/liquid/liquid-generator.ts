@@ -109,7 +109,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
     let content = ''
 
     if (component.liquidAssignments && component.liquidAssignments.length > 0) {
-      content += component.liquidAssignments.join('\n') + '\n\n'
+      content += `${component.liquidAssignments.join('\n')}\n\n`
     }
 
     content += this.formatHtml(component.html)

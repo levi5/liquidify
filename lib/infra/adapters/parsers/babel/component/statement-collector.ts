@@ -5,7 +5,7 @@ import {
   isLogicalExpression,
   isConditionalExpression,
   isVariableDeclaration,
-  Statement,
+  type Statement,
   isDirective,
   isExpressionStatement,
   isStringLiteral,
@@ -14,7 +14,7 @@ import {
   isFunctionExpression,
 } from '@babel/types'
 import generate from '@babel/generator'
-import { ComponentMetadataType } from '../../../../../types/component'
+import type { ComponentMetadataType } from '../../../../../types/component'
 
 import { LiquidVariableParser } from '../liquid/variable-parser'
 
@@ -48,7 +48,7 @@ export class StatementCollector {
   }
 
   private liquidVariableParser = new LiquidVariableParser((node: any) => {
-    let code = this.generateLiquidCodeFromNode(node)
+    const code = this.generateLiquidCodeFromNode(node)
 
     return code
       .replace(/\s*===\s*/g, ' == ')
@@ -127,7 +127,7 @@ export class StatementCollector {
     if (metadata.mode === 'react' || metadata.mode === 'dom' || metadata.mode === 'dom:global') return false
 
     if (isVariableDeclaration(statement)) {
-      let handledAll = true
+      let _handledAll = true
       for (const decl of statement.declarations) {
         if (decl.id.type === 'Identifier') {
           const jsxBody = this.isJsxReturningFunction(decl.init)
@@ -137,7 +137,7 @@ export class StatementCollector {
           }
         }
         metadata.liquidAssignments.push(...this.liquidVariableParser.parseVariableDeclaration(decl))
-        handledAll = false
+        _handledAll = false
       }
       return true
     }

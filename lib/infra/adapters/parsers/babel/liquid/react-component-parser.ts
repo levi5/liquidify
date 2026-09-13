@@ -3,7 +3,7 @@ import type { ReactComponentConfig } from '../../../../../types/liquid'
 import type { ImportResolver } from './import-resolver'
 import type { Expression, JSXElement, JSXEmptyExpression } from '@babel/types'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class ReactComponentParser {
   constructor(

@@ -1,15 +1,15 @@
 import {
-  JSXElement,
+  type JSXElement,
   isJSXAttribute,
   isJSXIdentifier,
   isStringLiteral,
   isJSXExpressionContainer,
   isExpression,
-  JSXAttribute,
-  Node,
+  type JSXAttribute,
+  type Node,
 } from '@babel/types'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidFormParser {
   constructor(

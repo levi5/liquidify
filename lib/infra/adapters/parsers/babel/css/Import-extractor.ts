@@ -1,8 +1,8 @@
-import { File, isIdentifier, stringLiteral } from '@babel/types'
-import path from 'path'
+import { type File, isIdentifier, stringLiteral } from '@babel/types'
+import path from 'node:path'
 import traverse from '@babel/traverse'
 
-import { IFileSystem } from '../../../../../core/protocols/file-system'
+import type { IFileSystem } from '../../../../../core/protocols/file-system'
 import { NodeFileSystem } from '../../../fs/node-file-system'
 
 export interface CSSImportResult {
@@ -47,14 +47,14 @@ export class CSSImportExtractor {
         const specifiers = pathNode.node.specifiers
 
         if (specifiers.length > 0) {
-          componentCss += cssContent + '\n'
+          componentCss += `${cssContent}\n`
           specifiers.forEach((spec) => {
             if (isIdentifier(spec.local)) {
               importedStyleNames.add(spec.local.name)
             }
           })
         } else {
-          globalCss += cssContent + '\n'
+          globalCss += `${cssContent}\n`
         }
 
         pathNode.remove()

@@ -1,5 +1,5 @@
-import { type ConditionalExpression, type LogicalExpression, type Node } from '@babel/types'
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ConditionalExpression, LogicalExpression, Node } from '@babel/types'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidConditionalParser {
   constructor(

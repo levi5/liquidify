@@ -24,7 +24,7 @@ import {
   isLogicalExpression,
 } from '@babel/types'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidLoopParser {
   constructor(
@@ -50,7 +50,7 @@ export class LiquidLoopParser {
     if (!isMemberExpression(callee) && !isOptionalMemberExpression(callee)) return ''
 
     let arrayName = generate(callee.object).code.replace(/\?\.$/, '').replace(/\?/g, '')
-    let callback = expr.arguments[0]
+    const callback = expr.arguments[0]
     let filterCondition = ''
     let assignments = ''
     let itemName = 'item'
@@ -89,15 +89,14 @@ export class LiquidLoopParser {
           for (const stmt of body.body) {
             if (isVariableDeclaration(stmt)) {
               for (const decl of stmt.declarations) {
-                assignments += this.liquidVariableParser.parseVariableDeclaration(decl, undefined, context).join('\n') + '\n'
+                assignments += `${this.liquidVariableParser.parseVariableDeclaration(decl, undefined, context).join('\n')}\n`
               }
             } else if (isIfStatement(stmt)) {
-              assignments +=
-                this.liquidVariableParser
-                  .parseIfStatement(stmt, (n, ctx) => this.jsxToHtml(n, undefined, ctx), undefined, context)
-                  .join('\n') + '\n'
+              assignments += `${this.liquidVariableParser
+                .parseIfStatement(stmt, (n, ctx) => this.jsxToHtml(n, undefined, ctx), undefined, context)
+                .join('\n')}\n`
             } else if (isReturnStatement(stmt)) {
-              assignments += this.jsxToHtml(stmt.argument as any, undefined, context) + '\n'
+              assignments += `${this.jsxToHtml(stmt.argument as any, undefined, context)}\n`
             }
           }
 
@@ -166,10 +165,10 @@ export class LiquidLoopParser {
       for (const stmt of callback.body.body) {
         if (isVariableDeclaration(stmt)) {
           for (const decl of stmt.declarations) {
-            assignments += this.liquidVariableParser.parseVariableDeclaration(decl, undefined, context).join('\n') + '\n'
+            assignments += `${this.liquidVariableParser.parseVariableDeclaration(decl, undefined, context).join('\n')}\n`
           }
         } else if (isIfStatement(stmt)) {
-          assignments += this.liquidVariableParser.parseIfStatement(stmt, undefined, undefined, context).join('\n') + '\n'
+          assignments += `${this.liquidVariableParser.parseIfStatement(stmt, undefined, undefined, context).join('\n')}\n`
         }
       }
     }

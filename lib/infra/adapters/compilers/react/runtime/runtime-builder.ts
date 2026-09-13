@@ -1,4 +1,4 @@
-import { Compiler } from '../../../../../core/protocols/compiler'
+import type { Compiler } from '../../../../../core/protocols/compiler'
 import { LiquidifyError } from '../../../../../core/errors/liquidify-error'
 
 export class ReactRuntimeBuilder {

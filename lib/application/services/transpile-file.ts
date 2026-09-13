@@ -1,5 +1,5 @@
-import { IParser } from '../../core/protocols/parser'
-import { IGenerator } from '../../core/protocols/generator'
+import type { IParser } from '../../core/protocols/parser'
+import type { IGenerator } from '../../core/protocols/generator'
 import { ValidationService } from './validation-service'
 
 export type TranspileStatus = 'ok' | 'skipped-empty' | 'skipped-unnamed'

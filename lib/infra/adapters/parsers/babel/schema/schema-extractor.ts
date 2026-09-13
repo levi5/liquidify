@@ -16,7 +16,7 @@ import {
 } from '@babel/types'
 
 import { parse } from '@babel/parser'
-import * as path from 'path'
+import * as path from 'node:path'
 import type { IFileSystem } from '../../../../../core/protocols/file-system'
 import { NodeFileSystem } from '../../../fs/node-file-system'
 

@@ -17,15 +17,13 @@ import {
   type TemplateLiteral,
   type Expression,
   isParenthesizedExpression,
-  isLogicalExpression,
   identifier,
   isArrowFunctionExpression,
   isObjectPattern,
   isUnaryExpression,
-  type UnaryExpression,
 } from '@babel/types'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class ExpressionParser {
   constructor(
@@ -170,7 +168,7 @@ export class ExpressionParser {
     try {
       const result = this.compiler.transpileSync(code, { loader: 'ts', format: 'esm', minify: false })
       code = result.code.replace(/;\n$/, '').trim()
-    } catch (e) {}
+    } catch (_e) {}
 
     code = code
       .replace(/\s*===\s*/g, ' == ')
@@ -232,9 +230,9 @@ export class ExpressionParser {
 
     for (let i = 0; i < expr.expressions.length; i++) {
       const base = this.generateLiquidCode(expr.expressions[i], false, undefined, context)
-      let quasi = expr.quasis[i + 1].value.raw
+      const quasi = expr.quasis[i + 1].value.raw
 
-      let filters: string[] = []
+      const filters: string[] = []
       let remaining = quasi
 
       while (true) {

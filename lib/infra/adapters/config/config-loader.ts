@@ -1,10 +1,11 @@
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import { _try } from 'funcio/lib/Monads/Either'
-import { DEFAULT_CONFIG, LiquidifyConfig } from '../../../core/entities/config'
+import { DEFAULT_CONFIG, type LiquidifyConfig } from '../../../core/entities/config'
 
 const KNOWN_KEYS = ['componentsDir', 'output'] as const
 
+// biome-ignore lint/complexity/noStaticOnlyClass: stateless namespace intentional, used as ConfigLoader.load()
 export class ConfigLoader {
   static load(cwd: string = process.cwd()): LiquidifyConfig {
     const configFiles = [
