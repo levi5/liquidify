@@ -1,0 +1,128 @@
+<section class="fashion-hero container">
+  <div class="fashion-hero-copy">
+    <p class="eyebrow">
+      <span class="new-season-dot">
+      </span>
+      NEW SEASON / ESSENTIALS
+    </p>
+    <h1>
+      {{ section.settings.heading | escape }}
+      <br />
+      <span>
+        {{ section.settings.highlight | escape }}
+      </span>
+    </h1>
+    <p class="hero-description">
+      {{ section.settings.description | escape }}
+    </p>
+    <a class="button button-dark" href="{{ section.settings.link | default: routes.all_products_collection_url | escape }}">
+      {{ section.settings.button | escape }}
+      <span aria-hidden="true">
+        ↗
+      </span>
+    </a>
+    <div class="hero-bottom-note">
+      <span>
+        DROP 01
+      </span>
+      <span>
+        EXPRESSE QUEM VOCÊ É.
+      </span>
+    </div>
+  </div>
+  <a class="fashion-hero-photo hero-women" href="{{ section.settings.women_link | default: '/collections/all/feminino' | escape }}">
+    {% if section.settings.image %}
+    <img src="{{ section.settings.image | image_url: width: 1200 | escape }}" alt="{{ section.settings.image.alt | default: 'Coleção feminina Liquidify' | escape }}" width="900" height="1200" fetchpriority="high" />
+    {% else %}
+    <img src="{{ 'liquidify-women.jpg' | asset_url | escape }}" alt="Moda feminina Liquidify — estilo urbano e denim" width="900" height="1200" fetchpriority="high" />
+    {% endif %}
+    <span class="hero-photo-label">
+      <strong>
+        Feminino
+      </strong>
+      <span aria-hidden="true">
+        ↗
+      </span>
+    </span>
+    <span class="hero-photo-tag">
+      THE NEW EDIT
+    </span>
+  </a>
+  <a class="fashion-hero-photo hero-men" href="{{ section.settings.men_link | default: '/collections/all/masculino' | escape }}">
+    {% if section.settings.men_image %}
+    <img src="{{ section.settings.men_image | image_url: width: 1000 | escape }}" alt="{{ section.settings.men_image.alt | default: 'Coleção masculina Liquidify' | escape }}" width="900" height="1200" fetchpriority="high" />
+    {% else %}
+    <img src="{{ 'liquidify-men.jpg' | asset_url | escape }}" alt="Moda masculina Liquidify — jaquetas e essenciais" width="900" height="1200" fetchpriority="high" />
+    {% endif %}
+    <span class="hero-photo-label">
+      <strong>
+        Masculino
+      </strong>
+      <span aria-hidden="true">
+        ↗
+      </span>
+    </span>
+  </a>
+</section>
+
+{% schema %}
+{
+  "name": "Capa de moda",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Seu estilo."
+    },
+    {
+      "type": "text",
+      "id": "highlight",
+      "label": "Destaque",
+      "default": "Sem limites."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descrição",
+      "default": "Novas peças. Novas possibilidades. Encontre os essenciais que acompanham o seu ritmo."
+    },
+    {
+      "type": "text",
+      "id": "button",
+      "label": "Botão",
+      "default": "Explorar novidades"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link principal"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Foto feminina"
+    },
+    {
+      "type": "image_picker",
+      "id": "men_image",
+      "label": "Foto masculina"
+    },
+    {
+      "type": "url",
+      "id": "women_link",
+      "label": "Link Feminino"
+    },
+    {
+      "type": "url",
+      "id": "men_link",
+      "label": "Link Masculino"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Capa de moda"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,75 @@
+<section class="search-page container section-space">
+  <div class="page-heading">
+    <p class="eyebrow">
+      ENCONTRE O QUE COMBINA COM VOCÊ
+    </p>
+    <h1>
+      Boas descobertas.
+    </h1>
+    <form action="{{ routes.search_url }}" method="get" role="search" class="page-search">
+      <input type="hidden" name="type" value="product" />
+      <label class="visually-hidden" for="PageSearch">
+        Buscar produtos
+      </label>
+      <input type="search" id="PageSearch" name="q" value="{{ search.terms | escape }}" placeholder="O que você está procurando?" required />
+      <button class="button button-dark" type="submit">
+        Buscar ↗
+      </button>
+    </form>
+  </div>
+  <p class="catalog-meta">
+    {{ search.results_count }}resultados para “{{ search.terms | escape }}”
+  </p>
+  {% paginate search.results by section.settings.products_per_page %}
+{% if search.results.size > 0 %}
+  <div class="product-grid">
+    {% for item in search.results %}{% if item.object_type == "product" %}
+{% render 'product-card', item: item %}
+{% else %}
+    <article class="search-text-result">
+      <a href="{{ item.url }}">
+        <h2>
+          {{ item.title | escape }}
+        </h2>
+        <span>
+          Saiba mais ↗
+        </span>
+      </a>
+    </article>
+    {% endif %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <span class="empty-spark">
+      ✳
+    </span>
+    <h2>
+      Vamos tentar de outro jeito?
+    </h2>
+    <p>
+      Experimente outro termo ou descubra todas as peças da loja.
+    </p>
+    <a class="button button-dark" href="{{ routes.all_products_collection_url }}">
+      Explorar a loja ↗
+    </a>
+  </div>
+  {% endif %}{% render 'pagination', pager: paginate %}
+{% endpaginate %}
+</section>
+
+{% schema %}
+{
+  "name": "Resultados da busca",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Resultados por página",
+      "min": 6,
+      "max": 36,
+      "step": 6,
+      "default": 12
+    }
+  ]
+}
+{% endschema %}

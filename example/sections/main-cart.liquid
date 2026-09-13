@@ -1,0 +1,62 @@
+<section class="cart-page container section-space">
+  <div class="page-heading">
+    <p class="eyebrow">
+      SUAS PRÓXIMAS BOAS ESCOLHAS
+    </p>
+    <h1>
+      Minha sacola.
+    </h1>
+  </div>
+  <div class="island-bridge" data-liquid-store="{{ cart | json | escape }}">
+    <react-island data-hydrate="eager" style="display: flex;" component="CartPage">
+      {% if cart.item_count > 0 %}
+      <form method="post" action="{{ routes.cart_url }}" class="fallback-cart">
+        {% for item in cart.items %}
+        <div class="cart-line">
+          <a href="{{ item.url }}">
+            {{ item.title | escape }}
+          </a>
+          <label>
+            Quantidade
+            <input type="number" name="updates[]" value="{{ item.quantity }}" min="0" />
+          </label>
+          <span>
+            {{ item.final_line_price | money }}
+          </span>
+        </div>
+        {% endfor %}
+        <p class="detail-price">
+          Subtotal:{{ cart.total_price | money }}
+        </p>
+        <button class="button button-outline" name="update" type="submit">
+          Atualizar sacola
+        </button>
+        <button class="button button-dark" type="submit" name="checkout">
+          Finalizar compra ↗
+        </button>
+      </form>
+      {% else %}
+      <div class="empty-state">
+        <h2>
+          Sua sacola ainda está vazia.
+        </h2>
+        <a class="button button-dark" href="{{ routes.all_products_collection_url }}">
+          Explorar a loja ↗
+        </a>
+      </div>
+      {% endif %}
+      </react-island>
+    </div>
+  </section>
+
+{%- unless script_cart_page_loaded -%}
+  <script src="{{ 'cart-page.js' | asset_url }}" defer></script>
+  {%- assign script_cart_page_loaded = true -%}
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "Sacola",
+  "settings": []
+}
+{% endschema %}

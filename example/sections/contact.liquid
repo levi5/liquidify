@@ -1,0 +1,55 @@
+<section class="contact-page container section-space">
+  <div class="page-heading">
+    <p class="eyebrow">
+      UMA BOA CONVERSA COMEÇA AQUI
+    </p>
+    <h1>
+      {{ page.title | default: "Vamos conversar." | escape }}
+    </h1>
+    <div class="rich-text">
+      {{ page.content }}
+    </div>
+  </div>
+  {% form 'contact', id: 'ContactForm', class: 'contact-form' %}
+{% if form["posted_successfully?"] %}
+  <p class="form-success" role="status">
+    Recebemos sua mensagem. Nossa equipe vai responder pelo e-mail informado.
+  </p>
+  {% else %}
+  <div class="form-row">
+    <label>
+      Seu nome
+      <input type="text" name="contact[name]" autocomplete="name" required />
+    </label>
+    <label>
+      E-mail
+      <input type="email" name="contact[email]" autocomplete="email" required />
+    </label>
+  </div>
+  <label>
+    Telefone (opcional)
+    <input type="tel" name="contact[phone]" autocomplete="tel" />
+  </label>
+  <label>
+    Como podemos ajudar?
+    <textarea name="contact[body]" rows="{{ 6 }}" required>
+    </textarea>
+  </label>
+  {% if form.errors %}
+  <div class="form-error" role="alert">
+    {{ form.errors | default_errors }}
+  </div>
+  {% endif %}
+  <button class="button button-dark" type="submit">
+    Enviar mensagem ↗
+  </button>
+  {% endif %}
+{% endform %}
+</section>
+
+{% schema %}
+{
+  "name": "Formulário de contato",
+  "settings": []
+}
+{% endschema %}

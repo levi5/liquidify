@@ -1,7 +1,123 @@
-<footer>
-  Footer
+<footer class="site-footer">
+  <div class="newsletter container">
+    <div>
+      <p class="eyebrow">
+        VAMOS FICAR MAIS PERTO?
+      </p>
+      <h2>
+        Entre para a nossa lista.
+        <br />
+        Fique por dentro do próximo drop.
+      </h2>
+    </div>
+    <div class="newsletter-form">
+      {% form 'customer', id: 'FooterNewsletter' %}
+      <input type="hidden" name="contact[tags]" value="newsletter" />
+      <label for="NewsletterEmail">
+        Seu melhor e-mail
+      </label>
+      <div class="email-field">
+        <input id="NewsletterEmail" type="email" name="contact[email]" placeholder="voce@email.com" autocomplete="email" required />
+        <button type="submit" aria-label="Inscrever-se na newsletter">
+          ↗
+        </button>
+      </div>
+      {% if form["posted_successfully?"] %}
+      <p role="status">
+        Você está na lista. Até o próximo encontro!
+      </p>
+      {% endif %}{% if form.errors %}
+      <div role="alert">
+        {{ form.errors | default_errors }}
+      </div>
+      {% endif %}
+      <p class="newsletter-note">
+        Novidades, lançamentos e inspiração. Cancele quando quiser.
+      </p>
+      {% endform %}
+    </div>
+  </div>
+  <div class="footer-main container">
+    <div class="footer-brand">
+      <a class="wordmark" href="{{ routes.root_url }}">
+        {{ settings.brand_name | default: shop.name | escape }}
+      </a>
+      <p>
+        Seu estilo. Suas regras.
+        <br />
+        Isso é Liquidify.
+      </p>
+    </div>
+    <div>
+      <h3>
+        Explore
+      </h3>
+      <a href="{{ routes.all_products_collection_url }}">
+        Todos os produtos
+      </a>
+      <a href="{{ routes.collections_url }}">
+        Nossas coleções
+      </a>
+      <a href="{{ routes.root_url | escape }}#essencia">
+        Nossa essência
+      </a>
+    </div>
+    <div>
+      <h3>
+        Podemos ajudar?
+      </h3>
+      <a href="{{ routes.account_url }}">
+        Minha conta
+      </a>
+      <a href="{{ routes.cart_url }}">
+        Minha sacola
+      </a>
+      <a href="mailto:{{ shop.email | escape }}">
+        Fale com a gente
+      </a>
+    </div>
+    <div>
+      <h3>
+        Informações
+      </h3>
+      {% for link in section.settings.menu.links %}
+      <a href="{{ link.url }}">
+        {{ link.title | escape }}
+      </a>
+      {% endfor %}{% for policy in shop.policies %}
+      <a href="{{ policy.url | escape }}">
+        {{ policy.title | escape }}
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  <div class="footer-bottom container">
+    <span>
+      ©{{ "now" | date: "%Y" }}{{ settings.brand_name | default: shop.name | escape }}. Todos os
+          direitos reservados.
+    </span>
+    <span>
+      LIQUIDIFY / EVERYDAY CULTURE
+      <span aria-hidden="true">
+        ↗
+      </span>
+    </span>
+    <span>
+      Pagamento seguro · Shopify
+    </span>
+  </div>
 </footer>
 
 {% schema %}
-{}
+{
+  "name": "Rodapé e newsletter",
+  "settings": [
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menu de informações",
+      "default": "footer"
+    }
+  ]
+}
 {% endschema %}

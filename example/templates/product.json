@@ -1,0 +1,18 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "settings": {}
+    },
+    "featured": {
+      "type": "product-recommendations",
+      "settings": {
+        "heading": "Complete o look."
+      }
+    }
+  },
+  "order": [
+    "main",
+    "featured"
+  ]
+}

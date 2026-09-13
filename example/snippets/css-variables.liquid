@@ -1,8 +1,7 @@
-{% style %}
-
+<style>
   :root {
-    --primary-color: #6e1ac8;
-    --font-primary: Roboto, sans-serif;
-    --color-gray-200: #ccc;
+    --ink: {{ settings.primary_color | default: '#171717' }};
+    --accent: {{ settings.accent_color | default: '#414141' }};
+    --paper: {{ settings.background_color | default: '#ffffff' }};
   }
-{% endstyle %}
+</style>

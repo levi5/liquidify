@@ -1,0 +1,103 @@
+{% assign selected_sort = collection.sort_by | default: collection.default_sort_by %}
+
+<section class="catalog container section-space">
+  <nav class="breadcrumbs" aria-label="Navegação estrutural">
+    <a href="{{ routes.root_url }}">
+      Início
+    </a>
+    <span>
+      /
+    </span>
+    <span>
+      {{ collection.title | escape }}
+    </span>
+  </nav>
+  <div class="page-heading">
+    <p class="eyebrow">
+      ESCOLHAS QUE TRANSFORMAM
+    </p>
+    <h1>
+      {% if current_tags.size > 0 %}
+{{ current_tags | join: ' + ' | escape }}
+{% else %}
+{{ collection.title | escape }}
+{% endif %}
+    </h1>
+    {% if collection.description %}
+    <div class="rich-text">
+      {{ collection.description }}
+    </div>
+    {% endif %}
+  </div>
+  <div class="catalog-layout">
+    {% render 'collection-filters', collection_filters: collection.filters, section_id: section.id, heading: section.settings.filter_heading %}
+    <div class="catalog-results">
+      <div class="catalog-toolbar">
+        <span class="catalog-meta">
+          {{ collection.products_count | append: " produtos" }}
+        </span>
+        <div class="sort-control">
+          <label for="SortBy">
+            Ordenar
+          </label>
+          <select id="SortBy" name="sort_by" form="CollectionFilters-{{ section.id | escape }}" data-selected="{{ collection.sort_by | default: collection.default_sort_by | escape }}">
+            {% for option in collection.sort_options %}{% if option.value == selected_sort %}
+            <option value="{{ option.value | escape }}" selected>
+              {{ option.name | escape }}
+            </option>
+            {% else %}
+            <option value="{{ option.value | escape }}">
+              {{ option.name | escape }}
+            </option>
+            {% endif %}{% endfor %}
+          </select>
+        </div>
+      </div>
+      {% render 'active-filters', filters: collection.filters %}{% paginate collection.products by section.settings.products_per_page %}
+{% if collection.products.size > 0 %}
+      <div class="product-grid">
+        {% for item in collection.products %}{% render 'product-card', item: item %}{% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state">
+        <span class="empty-spark">
+          ✳
+        </span>
+        <h2>
+          Nenhuma peça por aqui.
+        </h2>
+        <p>
+          Tente ajustar os filtros ou explorar toda a coleção.
+        </p>
+        <a class="button button-dark" href="{{ routes.all_products_collection_url }}">
+          Ver todos os produtos ↗
+        </a>
+      </div>
+      {% endif %}{% render 'pagination', pager: paginate %}
+{% endpaginate %}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Catálogo",
+  "settings": [
+    {
+      "type": "text",
+      "id": "filter_heading",
+      "label": "Título dos filtros",
+      "default": "Filtros"
+    },
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Produtos por página",
+      "min": 6,
+      "max": 36,
+      "step": 6,
+      "default": 12
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,40 @@
+<section class="container section-space">
+  <div class="page-heading">
+    <p class="eyebrow">
+      INSPIRAÇÃO PARA O SEU ESTILO
+    </p>
+    <h1>
+      {{ blog.title | escape }}
+    </h1>
+  </div>
+  {% paginate blog.articles by 9 %}
+  <div class="journal-grid">
+    {% for post in blog.articles %}
+    <article>
+      <a href="{{ post.url }}">
+        {% if post.image %}
+        <img src="{{ post.image | image_url: width: 900 | escape }}" alt="{{ post.image.alt | default: post.title | escape }}" width="900" height="650" loading="lazy" />
+        {% endif %}
+        <p class="eyebrow">
+          {{ post.published_at | date: "%d.%m.%Y" }}
+        </p>
+        <h2>
+          {{ post.title | escape }}
+        </h2>
+        <span class="text-link">
+          Ler história ↗
+        </span>
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+  {% render 'pagination', pager: paginate %}
+{% endpaginate %}
+</section>
+
+{% schema %}
+{
+  "name": "Journal",
+  "settings": []
+}
+{% endschema %}

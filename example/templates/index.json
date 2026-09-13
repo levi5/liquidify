@@ -1,6 +1,65 @@
 {
   "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {}
+    },
+    "values": {
+      "type": "values",
+      "settings": {}
+    },
+    "featured": {
+      "type": "featured-collection",
+      "settings": {}
+    },
+    "categories": {
+      "type": "categories",
+      "settings": {},
+      "blocks": {
+        "women": {
+          "type": "category",
+          "settings": {
+            "title": "Feminino",
+            "subtitle": "SEU ESTILO EM TODOS OS MOMENTOS",
+            "fallback": "liquidify-women.jpg",
+            "link": "/collections/all/feminino"
+          }
+        },
+        "men": {
+          "type": "category",
+          "settings": {
+            "title": "Masculino",
+            "subtitle": "ESSENCIAIS PARA O SEU RITMO",
+            "fallback": "liquidify-men.jpg",
+            "link": "/collections/all/masculino"
+          }
+        },
+        "accessories": {
+          "type": "category",
+          "settings": {
+            "title": "Acessórios",
+            "subtitle": "OS DETALHES FAZEM O LOOK",
+            "fallback": "liquidify-accessories.jpg",
+            "link": "/search?type=product&q=bag%20OR%20shoes"
+          }
+        }
+      },
+      "block_order": [
+        "women",
+        "men",
+        "accessories"
+      ]
+    },
+    "story": {
+      "type": "brand-story",
+      "settings": {}
+    }
   },
   "order": [
+    "hero",
+    "values",
+    "featured",
+    "categories",
+    "story"
   ]
 }

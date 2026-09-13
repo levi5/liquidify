@@ -6,7 +6,12 @@
       "type": "header",
       "blocks": {},
       "block_order": [],
-      "settings": {}
+      "settings": {
+        "menu": "",
+        "women_link": "/collections/all/feminino",
+        "men_link": "/collections/all/masculino",
+        "accessories_link": "/search?type=product&q=bag%20OR%20shoes"
+      }
     }
   },
   "order": [

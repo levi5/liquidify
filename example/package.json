@@ -1,12 +1,17 @@
 {
-  "name": "example",
+  "name": "liquidify-fashion-theme",
   "version": "1.0.0",
   "private": true,
+  "description": "Loja Shopify em TSX com Liquidify",
   "scripts": {
-    "build": "node ../dist/presentation/cli/index.js",
-    "dev": "npx tsx --tsconfig ../tsconfig.runtime.json ../lib/presentation/cli/index.ts --watch"
-  },
-  "devDependencies": {
-    "@types/react": "^19.2.18"
+    "predev": "npm --prefix .. run build",
+    "dev": "node scripts/dev.mjs",
+    "prebuild": "npm --prefix .. run build",
+    "build": "node scripts/build.mjs",
+    "pretypecheck": "npm --prefix .. run build",
+    "typecheck": "tsc --noEmit",
+    "verify": "node scripts/verify-build.mjs",
+    "check": "shopify theme check",
+    "preview": "shopify theme dev --store mm-solution-2141.myshopify.com"
   }
 }
