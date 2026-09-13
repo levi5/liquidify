@@ -1,4 +1,5 @@
 import { Compiler } from '../../../../../core/protocols/compiler'
+import { LiquidifyError } from '../../../../../core/errors/liquidify-error'
 
 export class ReactRuntimeBuilder {
   constructor(private readonly compiler: Compiler) {}
@@ -86,6 +87,11 @@ export class ReactRuntimeBuilder {
       target: ['es2020'],
     })
 
-    return result.outputFiles[0].text
+    const output = result.outputFiles?.[0]?.text
+    if (!output) {
+      throw new LiquidifyError('Failed to bundle the React runtime: esbuild returned no output.')
+    }
+
+    return output
   }
 }

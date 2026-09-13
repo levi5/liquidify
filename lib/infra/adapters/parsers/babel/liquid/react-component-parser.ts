@@ -80,8 +80,7 @@ export class ReactComponentParser {
       try {
         const evaluated = new Function(`return ${code}`)()
         return JSON.stringify(evaluated)
-      } catch (error) {
-        console.info(error)
+      } catch {
         return `{{ ${code} | json }}`
       }
     }
