@@ -21,3 +21,6 @@ dist
 error.txt
 liquidify_docs*
 liquidx_docs*
+
+# Build artifact: default compiler output when run at repo root
+/liquidify/

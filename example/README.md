@@ -58,7 +58,7 @@ Loja configurada: `mm-solution-2141.myshopify.com`. A prévia requer a CLI da Sh
 | `src/styles/theme.css` | Estilos e responsividade |
 | `templates/` | Composição das páginas Shopify |
 | `config/` | Nome e cores da marca |
-| `scripts/` | Compilação com a biblioteca local, assets, watch e verificação dos arquivos gerados |
+| `scripts/` | Só para o monorepo: compilação com a biblioteca local, assets, watch e verificação (fora daqui use `npx liquidify`) |
 
 `sections/*.liquid`, os snippets correspondentes aos componentes TSX e os bundles JavaScript são resultados do build. Edite o TSX de origem para preservar as alterações nas próximas compilações. O layout, os templates JSON e `snippets/css-variables.liquid` são arquivos nativos do tema.
 
@@ -66,7 +66,7 @@ Os estilos dos submenus e filtros estão nos próprios arquivos TSX. `MainCollec
 
 `ProductRecommendations.tsx` está ligado ao template de produto. A paginação usa o snippet `Pagination.tsx` e o componente `PaginateByLiquid` exportado pela biblioteca local, que já aceita o nome Liquid da configuração de tamanho de página.
 
-A pasta `scripts/` é necessária: `build.mjs` usa a API do compilador local, `build-assets.mjs` compila o CSS e o JavaScript compartilhado, `dev.mjs` recompila o tema quando os arquivos mudam e `verify-build.mjs` valida os arquivos gerados. Erros emitidos pelo compilador fazem o build terminar com falha, mesmo quando a versão alpha consegue continuar compilando outros componentes.
+> **Nota de monorepo:** a pasta `scripts/` só existe por causa deste monorepo. `build.mjs` usa a API do compilador local (`../../dist`), `build-assets.mjs` compila o CSS e o JavaScript compartilhado, `dev.mjs` recompila o tema quando os arquivos mudam e `verify-build.mjs` valida os arquivos gerados. Em um projeto normal instalado via npm você não precisa dela — basta `npx liquidify` / `npx liquidify --watch`. Erros emitidos pelo compilador fazem o build terminar com falha, mesmo quando a versão alpha consegue continuar compilando outros componentes.
 
 A página `page.contact.json` deve ser atribuída à página de contato no administrador. Os filtros disponíveis dependem da configuração do Shopify Search & Discovery. Os links Feminino e Masculino usam as tags existentes no catálogo; os destinos podem ser substituídos por coleções no editor. Produtos que exigem assinatura precisam de um seletor de plano adicional; o tema bloqueia a compra sem o plano obrigatório.
 
