@@ -16,7 +16,8 @@
   },
   "files": [
     "dist",
-    "resources"
+    "resources",
+    "docs"
   ],
   "bin": {
     "liquidify": "dist/presentation/cli/index.js",
@@ -26,7 +27,7 @@
   },
   "scripts": {
     "format": "biome format lib  --write",
-    "lint": "biome check lib  --apply",
+    "lint": "biome check lib",
     "prepublishOnly": "npm run build",
     "build": "tsc -p tsconfig.lib.json",
     "build:example": "npm --prefix example run build",
@@ -37,7 +38,9 @@
     "liquidify": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
     "liquidify:watch": "tsx lib/presentation/cli/index.ts --watch",
     "liquidx": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
-    "liquidx:watch": "tsx lib/presentation/cli/index.ts --watch"
+    "liquidx:watch": "tsx lib/presentation/cli/index.ts --watch",
+    "test": "npm run build && node --test tests/*.test.cjs",
+    "test:example:browser": "npm run build && node tests/react-example-browser.cjs"
   },
   "keywords": [
     "shopify",

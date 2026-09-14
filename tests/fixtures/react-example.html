@@ -1,0 +1,30 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="script-src 'nonce-liquidify-test' __EVAL_POLICY__; object-src 'none'; base-uri 'none'">
+<script nonce="liquidify-test" src="setup.js"></script>
+<script nonce="liquidify-test" src="assets/react-runtime.js"></script>
+</head>
+<body>
+<pre id="result">RUNNING</pre>
+<react-island component="ProductPurchase" data-hydrate="eager">
+<script type="application/json" data-react-props>{"store":{"variants":[{"id":1,"title":"Default Title","available":true,"price":1000,"compare_at_price":null,"options":["Default Title"]}],"options":["Title"]}}</script>
+</react-island>
+<react-island component="FilterDrawer" data-hydrate="eager"><script type="application/json" data-react-props>{"sectionId":"test"}</script></react-island>
+<react-island component="CartPage" data-hydrate="eager"><script type="application/json" data-react-props>{"store":{"items":[],"item_count":0,"total_price":0,"total_discount":0,"currency":"BRL"}}</script></react-island>
+<react-island component="ImportProbe" data-hydrate="eager"></react-island>
+<div id="legacy:root" data-hydrate="eager">Olá <strong>mundo</strong>! <react-island component="ChildProbe">Dentro <b>da ilha</b>!</react-island><!--ignored--><script type="application/json" data-react-props>{}</script></div>
+<div id="actions"></div>
+<script nonce="liquidify-test" src="assets/product-purchase.js"></script>
+<script nonce="liquidify-test" src="assets/filter-drawer.js"></script>
+<script nonce="liquidify-test" src="assets/cart-page.js"></script>
+<script nonce="liquidify-test" src="assets/recommendation-loader.js"></script>
+<script nonce="liquidify-test" src="assets/storefront.js"></script>
+<script nonce="liquidify-test" src="assets/probe.js"></script>
+<script nonce="liquidify-test" src="assets/child-probe.js"></script>
+<script nonce="liquidify-test" src="assets/root-probe.js"></script>
+<script nonce="liquidify-test" src="assets/shopify-probe.js"></script>
+<script nonce="liquidify-test" src="assertions.js"></script>
+</body>
+</html>

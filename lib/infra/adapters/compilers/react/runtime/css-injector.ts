@@ -1,17 +1,18 @@
+import generate from '@babel/generator'
+import { callExpression, expressionStatement, identifier, memberExpression, stringLiteral } from '@babel/types'
+import { readReactTemplate } from './template-loader'
+
 export class CssInjector {
   build(): string {
-    return `
-      if (typeof window.__react_css_inject__ === 'undefined') {
-        window.__react_css_inject__ = function(cssText, id) {
-          if (document.getElementById(id)) return;
+    return readReactTemplate('css-injector.js')
+  }
 
-          const style = document.createElement('style');
-          style.id = id;
-          style.textContent = cssText;
-          document.head.appendChild(style);
-        }
-      }
-    `
+  buildCall(css: string, id: string): string {
+    return generate(
+      expressionStatement(
+        callExpression(memberExpression(identifier('window'), identifier('__react_css_inject__')), [stringLiteral(css), stringLiteral(id)]),
+      ),
+    ).code
   }
 
   escape(css: string): string {

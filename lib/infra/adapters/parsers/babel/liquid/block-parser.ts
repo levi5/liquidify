@@ -23,7 +23,9 @@ export class LiquidBlockParser {
     const blocksSchema: { type: string }[] = []
     this.traverse(node, blocksSchema)
     if (context) {
-      blocksSchema.forEach((b) => context.addBlockSchema(b))
+      blocksSchema.forEach((b) => {
+        context.addBlockSchema(b)
+      })
     }
     return blocksSchema
   }

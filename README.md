@@ -179,6 +179,10 @@ import {
 
 ---
 
+## React events and the Shopify theme editor
+
+Strict CSP mode is enabled by default. See [event examples and Shopify section lifecycle](docs/react-events.md) for JSX handlers, registered Liquid actions, native DOM listeners, and cleanup when sections reload in the theme editor.
+
 ## ⚙️ Programmatic API
 
 You can use Liquidify programmatically in your own scripts:
