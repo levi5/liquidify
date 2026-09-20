@@ -1,5 +1,5 @@
-import { appendFileSync, existsSync, mkdirSync, readFileSync, unlinkSync, utimesSync, writeFileSync } from 'fs'
-import { IFileSystem } from '../../../core/protocols/file-system'
+import { appendFileSync, existsSync, mkdirSync, readFileSync, unlinkSync, utimesSync, writeFileSync } from 'node:fs'
+import type { IFileSystem } from '../../../core/protocols/file-system'
 
 export class NodeFileSystem implements IFileSystem {
   public async appendFile(path: string, content: string): Promise<void> {

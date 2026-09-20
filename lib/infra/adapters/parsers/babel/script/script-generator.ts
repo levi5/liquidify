@@ -1,8 +1,8 @@
 import generate from '@babel/generator'
-import { isExpressionStatement, isStringLiteral, Statement } from '@babel/types'
+import { isExpressionStatement, isStringLiteral, type Statement } from '@babel/types'
 import { pascalToKebab } from '../../../../../shared/string'
 
-import { Compiler } from '../../../../../core/protocols/compiler'
+import type { Compiler } from '../../../../../core/protocols/compiler'
 
 export class ScriptGenerator {
   constructor(private readonly compiler: Compiler) {}
@@ -45,7 +45,7 @@ export class ScriptGenerator {
       }
 
       return `"use strict";\n(function() {\n${cleanCode}\n})();`
-    } catch (e) {
+    } catch (_e) {
       const cleanCode = code.replace(/['"]use (dom(:global)?|script)['"];?\n?/, '')
       return `"use strict";\n(function() {\n${cleanCode}\n})();`
     }

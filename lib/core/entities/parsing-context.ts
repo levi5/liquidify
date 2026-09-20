@@ -7,6 +7,12 @@ export class ParsingContext {
   public componentName?: string
   public mode?: string
   public inlineComponents?: Map<string, any>
+  public outputContext: 'text' | 'raw' | 'json' = 'text'
+  private sequence = 0
+
+  public allocateName(prefix: string): string {
+    return `__liquidify_${prefix}_${this.sequence++}`
+  }
 
   constructor(data: Partial<ParsingContext> = {}) {
     Object.assign(this, data)

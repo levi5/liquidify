@@ -1,16 +1,16 @@
-import path from 'path'
+import path from 'node:path'
 import traverse from '@babel/traverse'
 import { isIdentifier } from '@babel/types'
-import { ASTParser } from './ASTParser'
-import { Compiler } from '../../../../core/protocols/compiler'
-import { ComponentExtractor } from './component'
-import { CSSImportExtractor } from './css/Import-extractor'
-import { IParser } from '../../../../core/protocols/parser'
-import { LiquidParser, ReactComponentConfig } from './liquid-parser'
-import { ParsedComponent } from '../../../../core/entities/parsed-component'
-import { ReactComponentCompiler } from '../../compilers/react/component-compiler'
-import { SchemaExtractor } from './schema/schema-extractor'
-import { ScriptGenerator } from './script/script-generator'
+import type { ASTParser } from './ASTParser'
+import type { Compiler } from '../../../../core/protocols/compiler'
+import type { ComponentExtractor } from './component'
+import type { CSSImportExtractor } from './css/Import-extractor'
+import type { IParser } from '../../../../core/protocols/parser'
+import type { LiquidParser, ReactComponentConfig } from './liquid-parser'
+import type { ParsedComponent } from '../../../../core/entities/parsed-component'
+import type { ReactComponentCompiler } from '../../compilers/react/component-compiler'
+import type { SchemaExtractor } from './schema/schema-extractor'
+import type { ScriptGenerator } from './script/script-generator'
 import { ValidationError } from '../../../../core/errors/validation-error'
 
 export interface BabelLiquidParserOptions {
@@ -50,6 +50,9 @@ export class BabelLiquidParser implements IParser {
   public async parse(source: string, filePath?: string): Promise<ParsedComponent> {
     const ast = this.astParser.parse(source)
     const componentMetadata = this.componentExtractor.extract(ast, source)
+    if (!componentMetadata.name && componentMetadata.liquidBody && filePath) {
+      componentMetadata.name = path.basename(filePath, path.extname(filePath))
+    }
     const schema = this.schemaExtractor.extract(ast, filePath)
 
     if (componentMetadata.mode === 'react') {
@@ -89,7 +92,7 @@ export class BabelLiquidParser implements IParser {
     const reactBuild = await this.reactCompiler.compile(metadata, source, filePath)
     const { componentCss } = filePath ? this.cssExtractor.extract(ast, filePath) : { componentCss: '' }
 
-    const combinedCss = ((reactBuild.css || '') + '\n' + componentCss).trim()
+    const combinedCss = `${reactBuild.css || ''}\n${componentCss}`.trim()
     const html = combinedCss ? `<style>\n${combinedCss}\n</style>\n${reactBuild.html}` : reactBuild.html
 
     return {
@@ -112,9 +115,11 @@ export class BabelLiquidParser implements IParser {
   private handleDefaultMode(ast: any, metadata: any, schema: any, filePath?: string): ParsedComponent {
     const { componentCss, globalCss } = filePath ? this.cssExtractor.extract(ast, filePath) : { componentCss: '', globalCss: '' }
 
-    const jsxResult = metadata.jsxElement
-      ? this.jsxConverter.convert(metadata.jsxElement, ast, filePath, metadata.name, metadata.mode, metadata.inlineComponents)
-      : { html: '', blocksSchema: [], scriptAssets: [] }
+    const jsxResult = metadata.liquidBody
+      ? this.jsxConverter.convertBody(metadata.liquidBody, ast, filePath, metadata.name, metadata.inlineComponents)
+      : metadata.jsxElement
+        ? this.jsxConverter.convert(metadata.jsxElement, ast, filePath, metadata.name, metadata.mode, metadata.inlineComponents)
+        : { html: '', blocksSchema: [], scriptAssets: [] }
 
     const script = metadata.hasUseScript ? this.scriptGenerator.generate(metadata.scriptStatements, metadata.name) : ''
 

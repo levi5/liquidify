@@ -10,14 +10,14 @@ const printBanner = (): void => {
   console.clear()
   console.log(
     kleur.cyan(`
-  _      _             _     _ _  __       
- | |    (_)           (_)   | (_)/ _|      
- | |     _  __ _ _   _ _  __| |_| |_ _   _ 
+  _      _             _     _ _  __
+ | |    (_)           (_)   | (_)/ _|
+ | |     _  __ _ _   _ _  __| |_| |_ _   _
  | |    | |/ _\` | | | | |/ _\` | |  _| | | |
  | |____| | (_| | |_| | | (_| | | | | |_| |
  |______|_|\\__, |\\__,_|_|\\__,_|_|_|  \\__, |
               | |                     __/ |
-              |_|                    |___/ 
+              |_|                    |___/
 `),
   )
   console.log(kleur.dim('  Shopify Liquid + React Compiler\n'))
@@ -41,9 +41,9 @@ const showHelp = (): void => {
 
 const runBuild = async (watch: boolean): Promise<void> => {
   const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' }).start()
-  const { ConfigLoader } = await import('../../infra/adapters/config/config-loader')
+  const { loadConfig } = await import('../../infra/adapters/config/config-loader')
   const { makeLiquidifyBuilder } = await import('../../main/factories/make-liquidify-builder')
-  const config = ConfigLoader.load()
+  const config = loadConfig()
   const builder = makeLiquidifyBuilder(config)
 
   spinner.succeed(`Configuration loaded (src: ${config.componentsDir}, out: ${config.output})`)
@@ -57,6 +57,7 @@ const runBuild = async (watch: boolean): Promise<void> => {
     _match(watch)
       .with(true, () => console.log(kleur.dim('\n👀 Watching for changes...')))
       .with(false, () => {})
+      ._(() => {})
       .exec()
   })
 
@@ -93,7 +94,18 @@ const runBuild = async (watch: boolean): Promise<void> => {
     })
   }
 
-  await builder.build()
+  builder.on('build:failed', (error: Error) => spinner.fail(error.message))
+
+  try {
+    await builder.build()
+  } catch (error) {
+    spinner.fail(error instanceof Error ? error.message : String(error))
+    if (!watch) {
+      process.exitCode = 1
+      builder.disposeSync()
+      return
+    }
+  }
 
   _match(watch)
     .with(true, () => builder.watch())
@@ -129,4 +141,9 @@ export async function cli(): Promise<void> {
   await action()
 }
 
-if (require.main === module) cli()
+if (require.main === module) {
+  cli().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error))
+    process.exitCode = 1
+  })
+}

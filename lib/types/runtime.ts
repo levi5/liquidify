@@ -16,9 +16,15 @@ export function registerLiquidIsland(name: string, component: any): void {}
 
 declare global {
 	interface Window {
+        LiquidifyActions: Map<string, (this: EventTarget, event: Event) => void>
+        registerLiquidifyAction: typeof registerLiquidifyAction
 		LiquidifyEvents: LiquidifyEventBus
 		LiquidifyUseEvent: <T = any>(event: string, callback: (data: T) => void) => void
 		LiquidifyEmitEvent: <T = any>(event: string, data?: T) => void
 	}
 }
 
+
+export function registerLiquidifyAction(name: string, handler: (this: EventTarget, event: Event) => void): () => void {
+  return window.registerLiquidifyAction(name, handler)
+}

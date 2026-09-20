@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild'
-import { Compiler, BuildOptions, TranspileOptions } from '../../../../core/protocols/compiler'
+import type { Compiler, BuildOptions, TranspileOptions } from '../../../../core/protocols/compiler'
 
 export class EsbuildCompiler implements Compiler {
   transpileSync(code: string, options?: TranspileOptions): { code: string } {

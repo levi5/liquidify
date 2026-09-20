@@ -1,17 +1,15 @@
 import { _Maybe } from 'funcio'
-import { FunctionDeclaration, isBlockStatement } from '@babel/types'
-import { ComponentMetadataType } from '../../../../../types/component'
-import { StatementCollector } from './statement-collector'
+import { type FunctionDeclaration, isBlockStatement } from '@babel/types'
+import type { ComponentMetadataType } from '../../../../../types/component'
+import type { StatementCollector } from './statement-collector'
 
 export class FunctionBodyParser {
   constructor(private statementCollector: StatementCollector) {}
 
   public parse(node: FunctionDeclaration, metadata: ComponentMetadataType): void {
     metadata.name = _Maybe
-      .of(node)
-      .map((node) => node.id)
-      .map((id) => id.name)
-      .map((name) => name)
+      .of(node.id)
+      .map((id) => id?.name ?? '')
       .getOrElse('')
 
     if (node.body && isBlockStatement(node.body)) {

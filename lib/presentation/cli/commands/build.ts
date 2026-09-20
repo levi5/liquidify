@@ -1,23 +1,26 @@
 import { _try } from 'funcio/lib/Monads/Either'
-import { EventEmitter } from 'events'
-import { FSWatcher } from 'fs'
+import { _Maybe, _match } from 'funcio'
+import { EventEmitter } from 'node:events'
+import type { FSWatcher } from 'node:fs'
 import { glob } from 'glob'
 import chokidar from 'chokidar'
-import path from 'path'
+import path from 'node:path'
 
 import { pascalToKebab } from '../../../shared/string'
-import { BabelLiquidParser } from '../../../infra/adapters/parsers/babel/babel-parser'
+import type { BabelLiquidParser } from '../../../infra/adapters/parsers/babel/babel-parser'
 import { ReactRuntimeBuilder } from '../../../infra/adapters/compilers/react/runtime/runtime-builder'
 import { EsbuildCompiler } from '../../../infra/adapters/compilers/esbuild/esbuild-compiler'
-import { ReactComponentConfig } from '../../../infra/adapters/parsers/babel/liquid-parser'
-import { TranspileFileUseCase } from '../../../application/services/transpile-file'
-import { IFileSystem } from '../../../core/protocols/file-system'
+import type { ReactComponentConfig } from '../../../infra/adapters/parsers/babel/liquid-parser'
+import type { TranspileFileUseCase } from '../../../application/services/transpile-file'
+import type { IFileSystem } from '../../../core/protocols/file-system'
 import { NodeFileSystem } from '../../../infra/adapters/fs/node-file-system'
 import { LiquidifyError } from '../../../core/errors/liquidify-error'
 
 export class LiquidifyBuilder extends EventEmitter {
   private watcher: FSWatcher | null = null
   private timer: NodeJS.Timeout | null = null
+  private building = false
+  private queued = false
   constructor(
     private options: { componentsDir: string; output: string },
     private parser: BabelLiquidParser,
@@ -89,8 +92,8 @@ export class LiquidifyBuilder extends EventEmitter {
     if (result.isLeft()) {
       const error = result.value as Error
       if (error instanceof LiquidifyError) {
-        this.emit('error', error)
-        return null
+        if (this.listenerCount('error')) this.emit('error', error)
+        throw error
       }
       throw error
     }
@@ -152,8 +155,7 @@ export class LiquidifyBuilder extends EventEmitter {
       const result = await _try.async(() => this.useCase.execute(src, filePath))
       if (result.isLeft()) {
         if (result.value instanceof LiquidifyError) {
-          this.emit('error', result.value)
-          continue
+          if (this.listenerCount('error')) this.emit('error', result.value)
         }
         throw result.value
       }
@@ -162,17 +164,50 @@ export class LiquidifyBuilder extends EventEmitter {
 
   public watch() {
     this.watcher = chokidar.watch([this.options.componentsDir], { ignoreInitial: true })
-
-    this.watcher.on('change', (file) => {
-      this.emit('file:change', file)
-
-      if (this.timer) clearTimeout(this.timer)
-      this.timer = setTimeout(() => this.build(), 200)
+    ;['add', 'change', 'unlink', 'addDir', 'unlinkDir'].forEach((event) => {
+      this.watcher!.on(event, (file) => this.schedule(file))
     })
   }
 
+  private schedule(file: string): void {
+    this.emit('file:change', file)
+    _Maybe
+      .of(this.timer)
+      .map((timer) => (timer ? clearTimeout(timer) : null))
+      .getOrElse(null)
+    this.timer = setTimeout(() => void this.runSerialized(), 200)
+  }
+
+  private async runSerialized(): Promise<void> {
+    return _match(this.building)
+      .with(true, () => {
+        this.queued = true
+        return Promise.resolve()
+      })
+      .with(this.building, async () => {
+        this.building = true
+        const result = await _try.async(() => this.build())
+        result.match({
+          right: () => null,
+          left: (error: Error) => this.emit('build:failed', error),
+        })
+        this.building = false
+        return _match(this.queued)
+          .with(true, () => {
+            this.queued = false
+            return this.runSerialized()
+          })
+          .with(this.queued, () => Promise.resolve())
+          .exec()
+      })
+      .exec()
+  }
+
   public disposeSync() {
-    if (this.timer) clearTimeout(this.timer)
+    _Maybe
+      .of(this.timer)
+      .map((timer) => (timer ? clearTimeout(timer) : null))
+      .getOrElse(null)
     _try.sync(() => this.watcher?.close())
   }
 }

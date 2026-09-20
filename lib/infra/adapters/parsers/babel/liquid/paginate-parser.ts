@@ -1,16 +1,15 @@
 import {
   isStringLiteral,
-  JSXElement,
+  type JSXElement,
   isJSXAttribute,
   isJSXIdentifier,
   isJSXExpressionContainer,
   isExpression,
-  isNumericLiteral,
-  Node,
-  JSXAttribute,
+  type Node,
+  type JSXAttribute,
 } from '@babel/types'
-
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { _Maybe } from 'funcio'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidPaginateParser {
   constructor(
@@ -32,27 +31,48 @@ export class LiquidPaginateParser {
     const collectionAttr = openingElement.attributes.find(
       (attr) => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'collection',
     ) as JSXAttribute | undefined
-
     const byAttr = openingElement.attributes.find(
       (attr) => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'by',
     ) as JSXAttribute | undefined
-
-    let collection = ''
-    if (collectionAttr && isStringLiteral(collectionAttr.value)) {
-      collection = collectionAttr.value.value
-    } else if (collectionAttr && isJSXExpressionContainer(collectionAttr.value) && isExpression(collectionAttr.value.expression)) {
-      collection = this.generateLiquidCode(collectionAttr.value.expression, false, undefined, context)
-    }
-
-    let by = ''
-    if (byAttr && isJSXExpressionContainer(byAttr.value) && isNumericLiteral(byAttr.value.expression)) {
-      by = String(byAttr.value.expression.value)
-    } else if (byAttr && isStringLiteral(byAttr.value)) {
-      by = byAttr.value.value
-    }
-
+    const collection = this.readCollection(collectionAttr, context)
+    const by = this.readBy(byAttr, context)
     const children = this.renderChildren(node.children, undefined, context)
-
     return `{% paginate ${collection} by ${by} %}\n${children}\n{% endpaginate %}`
+  }
+
+  private readCollection(attr: JSXAttribute | undefined, context?: ParsingContext): string {
+    return _Maybe
+      .of(attr?.value)
+      .map((value) =>
+        _Maybe
+          .of(isStringLiteral(value) ? value : null)
+          .map((v) => v!.value)
+          .getOrElse(
+            _Maybe
+              .of(isJSXExpressionContainer(value) ? value : null)
+              .map((v) => v!.expression)
+              .map((expr) => (isExpression(expr) ? this.generateLiquidCode(expr, false, undefined, context) : ''))
+              .getOrElse(''),
+          ),
+      )
+      .getOrElse('')
+  }
+
+  private readBy(attr: JSXAttribute | undefined, context?: ParsingContext): string {
+    return _Maybe
+      .of(attr?.value)
+      .map((value) =>
+        _Maybe
+          .of(isStringLiteral(value) ? value : null)
+          .map((v) => v!.value)
+          .getOrElse(
+            _Maybe
+              .of(isJSXExpressionContainer(value) ? value : null)
+              .map((v) => v!.expression)
+              .map((expr) => (isExpression(expr) ? this.generateLiquidCode(expr, false, undefined, context) : ''))
+              .getOrElse(''),
+          ),
+      )
+      .getOrElse('')
   }
 }

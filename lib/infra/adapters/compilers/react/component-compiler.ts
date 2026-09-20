@@ -1,6 +1,7 @@
-import { Compiler } from '../../../../core/protocols/compiler'
-import { ComponentMetadataType } from '../../../../types/component'
-import { CssInjector } from './runtime/css-injector'
+import { readReactTemplate } from './runtime/template-loader'
+import type { Compiler } from '../../../../core/protocols/compiler'
+import type { ComponentMetadataType } from '../../../../types/component'
+import type { CssInjector } from './runtime/css-injector'
 import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
 import generate from '@babel/generator'
@@ -18,6 +19,7 @@ export class ReactComponentCompiler {
   constructor(
     private readonly compiler: Compiler,
     private readonly cssInjector: CssInjector,
+    private readonly options: { strictCsp?: boolean } = {},
   ) {}
 
   private processContextBridge(source: string, filePath: string): string {
@@ -64,7 +66,11 @@ export class ReactComponentCompiler {
     })
 
     if (box.isLeft()) {
-      console.error('Failed to parse source for context bridge:', filePath, box.value)
+      console.error(
+        '[Liquidify] Context bridge transform failed. Fix the TSX syntax in this file before sharing contexts:',
+        filePath,
+        box.value,
+      )
       return source
     }
 
@@ -73,14 +79,15 @@ export class ReactComponentCompiler {
 
   public async compile(metadata: ComponentMetadataType, source: string, filePath?: string): Promise<ReactBuildResult> {
     const componentName = metadata.name || 'Component'
+    if (!/^[A-Za-z_$][\w$]*$/.test(componentName)) throw new Error(`Invalid React component name: ${componentName}`)
     const assetName = `${componentName}.js`
     const rootId = metadata.reactRootId || ''
     const injector = this.cssInjector.build()
 
     if (filePath) source = this.processContextBridge(source, filePath)
 
-    const entry = this.getClientRuntimeScript(componentName, source, injector)
-    const dir = filePath ? require('path').dirname(filePath) : process.cwd()
+    const entry = this.getClientRuntimeScript(componentName, source, injector, rootId)
+    const dir = filePath ? require('node:path').dirname(filePath) : process.cwd()
 
     const result = await this.compiler.build({
       stdin: { contents: entry, resolveDir: dir, loader: 'tsx' },
@@ -90,6 +97,8 @@ export class ReactComponentCompiler {
       format: 'iife',
       platform: 'browser',
       loader: { '.css': 'local-css' },
+      jsxFactory: 'window.React.createElement',
+      jsxFragment: 'window.React.Fragment',
       target: ['es2020'],
       charset: 'utf8',
       legalComments: 'none',
@@ -97,268 +106,42 @@ export class ReactComponentCompiler {
       minifyWhitespace: true,
       minifyIdentifiers: false,
       banner: { js: this.getContextBridgeScript() },
-      plugins: this.getEsbuildPlugins(filePath),
+      plugins: this.getEsbuildPlugins(),
     })
 
     const { script, css } = this.processBuildResult(result)
     const finalScript = this.appendCssInjection(script, css, rootId, componentName)
-    const html = rootId ? `<div id="${rootId}"></div>` : `<react-island component="${componentName}"></react-island>`
+    const html = readReactTemplate(rootId ? 'root.html' : 'island.html')
+      .trim()
+      .replace('__VALUE__', () =>
+        (rootId || componentName).replace(
+          /[&<>"']/g,
+          (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]!,
+        ),
+      )
 
     return { html, assetName, script: finalScript, css: '' }
   }
 
   private getContextBridgeScript(): string {
-    return `
-      window.__LIQUIDIFY_CONTEXTS__ = window.__LIQUIDIFY_CONTEXTS__ || window.__LIQUIDX_CONTEXTS__ || {};
-      (function() {
-        var R = window.React;
-        if (R && !R.__createContext_patched__) {
-          var originalCreate = R.createContext;
-          R.createContext = function(defaultValue, id) {
-            if (id && typeof id === 'string') {
-              if (!window.__LIQUIDIFY_CONTEXTS__[id]) window.__LIQUIDIFY_CONTEXTS__[id] = originalCreate(defaultValue);
-              return window.__LIQUIDIFY_CONTEXTS__[id];
-            }
-            return originalCreate(defaultValue);
-          };
-          R.__createContext_patched__ = true;
-        }
-      })();
-    `
+    return [readReactTemplate('context-bridge.js').trimEnd(), ';'].join('')
   }
 
-  private getClientRuntimeScript(componentName: string, source: string, injector: string): string {
-    return `
-          const React = window.React;
-          const { createRoot } = ReactDOM || window.ReactDOM || {};
-          window.LiquidifyComponents = window.LiquidifyComponents || window.LiquidxComponents || {};
-
-          window.LiquidifyParseProps = (node) => {
-            const props = {};
-            Array.from(node.attributes || []).forEach(attr => {
-               const val = attr.value;
-               let finalVal = val;
-               if (val === 'true') finalVal = true;
-               else if (val === 'false') finalVal = false;
-               else if (!isNaN(val) && val.trim() !== '') finalVal = Number(val);
-
-               let key = attr.name;
-               if (key === 'class') key = 'className';
-               else if (key === 'for') key = 'htmlFor';
-
-               if (key.startsWith('on') && typeof finalVal === 'string') {
-                 const code = finalVal;
-                 props[key] = (event) => {
-                   try {
-                     const fn = new Function('event', 'e', code);
-                     fn.call(event.currentTarget || node, event, event);
-                   } catch (e) {
-                     console.error('Error in inline event handler:', e);
-                   }
-                 };
-               } else {
-                 props[key] = finalVal;
-               }
-            });
-            const propsScript = Array.from(node.children).find(c => (c as any).tagName === 'SCRIPT' && (c as any).hasAttribute('data-react-props'));
-            if (propsScript) {
-              try { Object.assign(props, JSON.parse(propsScript.textContent || '{}')); } catch (e) {}
-            }
-            return props;
-          };
-
-          const getComponent = (tagName, islandComp) => {
-             let C = islandComp ? window.LiquidifyComponents[islandComp] : null;
-             if (!C) {
-                const k = Object.keys(window.LiquidifyComponents).find(k => k.toLowerCase() === tagName.toLowerCase());
-                if (k) C = window.LiquidifyComponents[k];
-             }
-             return (C && C.default) ? C.default : C;
-          };
-
-          window.LiquidifyCreateReactElement = (node, index) => {
-            if (!node || node.nodeType !== 1) return null;
-            const nodeName = node.tagName;
-            const islandComp = node.getAttribute('component');
-            const Comp = getComponent(nodeName, islandComp);
-
-            if (islandComp || Comp) {
-              return React.createElement(LazyIsland, { ...window.LiquidifyParseProps(node), key: index, componentName: islandComp || nodeName, node: node });
-            }
-            
-            const props = window.LiquidifyParseProps(node);
-            const childNodes = Array.from(node.children || []);
-            return React.createElement(nodeName.toLowerCase(), {
-              key: index,
-              ...props,
-              dangerouslySetInnerHTML: childNodes.length === 0 ? { __html: node.innerHTML } : undefined
-            }, childNodes.length > 0 ? childNodes.map((c, i) => window.LiquidifyCreateReactElement(c, i)) : undefined);
-          }
-
-          function LazyIsland({ componentName, node, ...props }) {
-            const [Comp, setComp] = React.useState(() => getComponent(node.tagName, componentName));
-            React.useEffect(() => {
-              if (Comp) return;
-              const onReady = () => {
-                const found = getComponent(node.tagName, componentName);
-                if (found) setComp(() => found);
-              };
-              document.addEventListener('liquidify:ready:' + componentName, onReady);
-              document.addEventListener('liquidx:ready:' + componentName, onReady);
-              return () => {
-                document.removeEventListener('liquidify:ready:' + componentName, onReady);
-                document.removeEventListener('liquidx:ready:' + componentName, onReady);
-              };
-            }, [Comp, componentName]);
-
-            if (!Comp) {
-              return React.createElement(node.tagName.toLowerCase(), { dangerouslySetInnerHTML: { __html: node.innerHTML }, ...window.LiquidifyParseProps(node) });
-            }
-
-            node.setAttribute('data-react-hydrated', 'true');
-            const childNodes = Array.from(node.children || []).filter(c => c.tagName !== 'SCRIPT');
-            const children = childNodes.length > 0 ? childNodes.map((c, i) => window.LiquidifyCreateReactElement(c, i)) : (props.children || node.innerHTML);
-            return React.createElement(Comp, { ...props, children });
-          }
-
-          window.LiquidifyGetProps = (node, propName = 'store') => {
-            const props = { elementId: node.id || node.tagName.toLowerCase() };
-            let parent = node.parentElement;
-            while (parent) {
-              // 1. Collect from parent scripts (Bridge)
-              const script = Array.from(parent.children).find(c => (c as any).tagName === 'SCRIPT' && (c as any).type === 'application/json' && ((c as any).hasAttribute('data-liquid') || (c as any).hasAttribute('data-liquid-store')));
-              if (script) {
-                try {
-                  const val = JSON.parse(script.textContent || '{}');
-                  props[propName] = Object.assign(props[propName] || {}, val);
-                } catch(e) {}
-              }
-
-              // 2. Collect from parent attributes (Bridge)
-              for (const attr of Array.from(parent.attributes)) {
-                if (attr.name.startsWith('data-liquid')) {
-                  const key = attr.name === 'data-liquid' || attr.name === 'data-liquid-store' ? propName : attr.name.replace('data-liquid-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-                  try { 
-                    const val = JSON.parse(attr.value || '{}'); 
-                    if (typeof val === 'object' && val !== null) {
-                      props[key] = Object.assign(props[key] || {}, val);
-                    } else {
-                      props[key] = val;
-                    }
-                  } catch(e) { 
-                    props[key] = attr.value; 
-                  }
-                }
-              }
-              parent = parent.parentElement;
-            }
-            for (const attr of Array.from(node.attributes)) {
-              let val = attr.value;
-              if (attr.name.startsWith('data-liquid')) {
-                const key = attr.name === 'data-liquid' || attr.name === 'data-liquid-store' ? propName : attr.name.replace('data-liquid-', '').replace(/-([a-z])/g, g => g[1].toUpperCase());
-                try { val = JSON.parse(val || '{}'); } catch(e) {}
-                props[key] = Object.assign(props[key] || {}, val); continue;
-              }
-              if (val === 'true') val = true; else if (val === 'false') val = false; else if (!isNaN(val) && val.trim() !== '') val = Number(val);
-              props[attr.name.replace(/-([a-z])/g, g => g[1].toUpperCase())] = val;
-            }
-            const propsScript = Array.from(node.children).find(c => (c as any).tagName === 'SCRIPT' && (c as any).hasAttribute('data-react-props'));
-            if (propsScript) {
-              try { Object.assign(props, JSON.parse(propsScript.textContent || '{}')); } catch (e) {}
-            }
-            props.children = Array.from(node.children).filter(c => (c as any).tagName !== 'SCRIPT').map((c, i) => window.LiquidifyCreateReactElement(c, i));
-            return props;
-          };
-
-          if (!customElements.get('liquid-data')) {
-            class LiquidData extends HTMLElement { connectedCallback() { this.style.display = 'contents'; } }
-            customElements.define('liquid-data', LiquidData);
-          }
-
-          ${injector}
-          ${source}
-          try { 
-            window.LiquidifyComponents['${componentName}'] = typeof ${componentName} !== 'undefined' ? ${componentName} : null; 
-            window.LiquidxComponents = window.LiquidifyComponents;
-          } catch(e) {}
-          document.dispatchEvent(new CustomEvent('liquidify:ready:${componentName}'));
-          document.dispatchEvent(new CustomEvent('liquidx:ready:${componentName}'));
-
-          if (!window.LiquidifyHydrate) window.LiquidifyHydrate = window.LiquidxHydrate || {};
-          window.LiquidxHydrate = window.LiquidifyHydrate;
-          window.LiquidifyHydrate['${componentName}'] = (container) => {
-            if (container.hasAttribute('data-react-hydrated') && container._reactRoot) return;
-            if (container.hasAttribute('data-react-hydrated')) {
-              container.removeAttribute('data-react-hydrated');
-            }
-            if (container.parentElement && container.parentElement.closest('react-island')) return;
-
-            const hydrate = () => {
-              if (container.hasAttribute('data-react-hydrated') && container._reactRoot) return;
-              if (container.hasAttribute('data-react-hydrated')) {
-                container.removeAttribute('data-react-hydrated');
-              }
-              container.setAttribute('data-react-hydrated', 'true');
-              const props = window.LiquidifyGetProps(container, 'store');
-              const root = createRoot(container);
-              container._reactRoot = root;
-              root.render(React.createElement(${componentName}, props));
-            };
-            if (container.getAttribute('data-hydrate') === 'eager') hydrate();
-            else if ('IntersectionObserver' in window) {
-              const observer = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) { hydrate(); observer.unobserve(container); }
-              }, { rootMargin: '200px' });
-              observer.observe(container);
-            } else hydrate();
-          };
-
-          if (!customElements.get('react-island')) {
-            class ReactIsland extends HTMLElement {
-              connectedCallback() {
-                if (this._unmountTimeout) {
-                  clearTimeout(this._unmountTimeout);
-                  this._unmountTimeout = null;
-                }
-                const name = this.getAttribute('component');
-                if (window.LiquidifyHydrate && window.LiquidifyHydrate[name]) {
-                  window.LiquidifyHydrate[name](this);
-                } else {
-                  const onReady = () => {
-                    if (window.LiquidifyHydrate && window.LiquidifyHydrate[name]) {
-                      window.LiquidifyHydrate[name](this);
-                      document.removeEventListener('liquidify:ready:' + name, onReady);
-                      document.removeEventListener('liquidx:ready:' + name, onReady);
-                    }
-                  };
-                  document.addEventListener('liquidify:ready:' + name, onReady);
-                  document.addEventListener('liquidx:ready:' + name, onReady);
-                }
-              }
-
-              disconnectedCallback() {
-                this._unmountTimeout = setTimeout(() => {
-                  if (this._reactRoot) {
-                    try {
-                      this._reactRoot.unmount();
-                    } catch (e) {
-                      console.error('Error during island unmount:', e);
-                    }
-                    delete this._reactRoot;
-                    this.removeAttribute('data-react-hydrated');
-                  }
-                }, 100);
-              }
-            }
-            customElements.define('react-island', ReactIsland);
-          }
-          document.querySelectorAll('react-island[component="${componentName}"]:not([data-react-hydrated])').forEach(island => {
-             if (!island.parentElement || !island.parentElement.closest('react-island')) window.LiquidifyHydrate['${componentName}'](island);
-          });
-        `
+  private getClientRuntimeScript(componentName: string, source: string, injector: string, rootId: string): string {
+    return readReactTemplate('component.tsx').replace(/__LIQUIDIFY_(INJECTOR|SOURCE|COMPONENT|INLINE_HANDLER|ROOT_ID)__/g, (token) =>
+      token === '__LIQUIDIFY_INLINE_HANDLER__'
+        ? readReactTemplate(this.options.strictCsp !== false ? 'inline-handler-strict.js' : 'inline-handler-legacy.js')
+        : token === '__LIQUIDIFY_ROOT_ID__'
+          ? JSON.stringify(rootId)
+          : token === '__LIQUIDIFY_INJECTOR__'
+            ? injector
+            : token === '__LIQUIDIFY_SOURCE__'
+              ? source
+              : componentName,
+    )
   }
 
-  private getEsbuildPlugins(filePath?: string): any[] {
+  private getEsbuildPlugins(): any[] {
     return [
       {
         name: 'global-externals',
@@ -368,12 +151,27 @@ export class ReactComponentCompiler {
             { filter: /^preact\/hooks$/, namespace: 'preact-hooks-global', content: 'module.exports = window.React' },
             { filter: /^preact\/compat$/, namespace: 'preact-compat-global', content: 'module.exports = window.React' },
             { filter: /^react$/, namespace: 'react-global', content: 'module.exports = window.React' },
+            {
+              filter: /^(react-dom|preact\/compat)\/client$/,
+              namespace: 'react-client-global',
+              content: 'module.exports = window.ReactDOMClient',
+            },
+            {
+              filter: /^(react|preact)\/jsx-runtime$/,
+              namespace: 'jsx-runtime-global',
+              content: 'module.exports = window.LiquidifyJSXRuntime',
+            },
+            {
+              filter: /^(react|preact)\/jsx-dev-runtime$/,
+              namespace: 'jsx-dev-runtime-global',
+              content: 'module.exports = window.LiquidifyJSXDevRuntime',
+            },
             { filter: /^react-dom$/, namespace: 'react-dom-global', content: 'module.exports = window.ReactDOM' },
             {
               filter: /^(liquidify|liquidx)\/runtime$/,
               namespace: 'liquidify-runtime-global',
               content:
-                'module.exports = { registerLiquidIsland: window.registerLiquidIsland, LiquidifyEvents: window.LiquidifyEvents || window.LiquidxEvents, useLiquidifyEvent: window.LiquidifyUseEvent || window.LiquidxUseEvent, emitLiquidifyEvent: window.LiquidifyEmitEvent || window.LiquidxEmitEvent, LiquidxEvents: window.LiquidifyEvents || window.LiquidxEvents, useLiquidxEvent: window.LiquidifyUseEvent || window.LiquidxUseEvent, emitLiquidxEvent: window.LiquidifyEmitEvent || window.LiquidxEmitEvent }',
+                'module.exports = { registerLiquidifyAction: window.registerLiquidifyAction, registerLiquidIsland: window.registerLiquidIsland, LiquidifyEvents: window.LiquidifyEvents || window.LiquidxEvents, useLiquidifyEvent: window.LiquidifyUseEvent || window.LiquidxUseEvent, emitLiquidifyEvent: window.LiquidifyEmitEvent || window.LiquidxEmitEvent, LiquidxEvents: window.LiquidifyEvents || window.LiquidxEvents, useLiquidxEvent: window.LiquidifyUseEvent || window.LiquidxUseEvent, emitLiquidxEvent: window.LiquidifyEmitEvent || window.LiquidxEmitEvent }',
             },
           ]
 
@@ -399,7 +197,7 @@ export class ReactComponentCompiler {
       {
         name: 'liquidify-context-bridge',
         setup: (build: any) => {
-          const fs = require('fs')
+          const fs = require('node:fs')
           build.onLoad({ filter: /\.[jt]sx?$/ }, async (args: any) => {
             let contents = await fs.promises.readFile(args.path, 'utf8')
             contents = this.processContextBridge(contents, args.path)
@@ -425,8 +223,7 @@ export class ReactComponentCompiler {
   private appendCssInjection(script: string, css: string, rootId: string, componentName: string): string {
     if (!css || !css.trim()) return script
 
-    const escapedCss = css.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
     const cssId = rootId ? `css-${rootId}` : `css-${componentName}`
-    return script + `\nif(window.__react_css_inject__) { window.__react_css_inject__(\`${escapedCss}\`, '${cssId}'); }`
+    return [script, this.cssInjector.buildCall(css, cssId)].join('\n')
   }
 }

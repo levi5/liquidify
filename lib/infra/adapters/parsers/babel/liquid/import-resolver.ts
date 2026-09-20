@@ -115,8 +115,8 @@ export class ImportResolver {
   }
 
   private resolveFilePath(importPath: string, currentFilePath: string): string | null {
-    const path = require('path')
-    let basePath = path.resolve(path.dirname(currentFilePath), importPath)
+    const path = require('node:path')
+    const basePath = path.resolve(path.dirname(currentFilePath), importPath)
 
     if (this.fs.existsSync(basePath)) return basePath
 
