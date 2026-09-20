@@ -8,16 +8,18 @@ import {
   isObjectProperty,
   isStringLiteral,
   isVariableDeclaration,
-  isVariableDeclarator,
   isSpreadElement,
+  isMemberExpression,
   type Node,
   type File,
 } from '@babel/types'
 
 import { parse } from '@babel/parser'
-import * as path from 'path'
+import * as path from 'node:path'
 import type { IFileSystem } from '../../../../../core/protocols/file-system'
 import { NodeFileSystem } from '../../../fs/node-file-system'
+
+import { ValidationError } from '../../../../../core/errors/validation-error'
 
 type Schema = Record<string, unknown>
 
@@ -45,21 +47,35 @@ export class SchemaExtractor {
 
     let schema: Schema | null = null
 
+    const accept = (node: Node): void => {
+      const value = this.parseObject(node)
+      if (!value || typeof value !== 'object' || Array.isArray(value)) {
+        throw new ValidationError('Schema must resolve to a static object.', currentFilePath)
+      }
+      schema = value
+    }
     traverse(ast, {
-      ExportDefaultDeclaration: (path) => {
-        schema = this.extractFromNode(path.node.declaration) || schema
+      ExportDefaultDeclaration: (nodePath) => {
+        const node = nodePath.node.declaration
+        if (isObjectExpression(node)) accept(node)
+        else if (isIdentifier(node) && node.name.toLowerCase() === 'schema') accept(node)
       },
-
-      VariableDeclaration: (path) => {
-        schema = this.extractFromVariable(path.node) || schema
+      VariableDeclarator: (nodePath) => {
+        if (nodePath.getFunctionParent()) return
+        const { id, init } = nodePath.node
+        if (isIdentifier(id) && id.name.toLowerCase() === 'schema' && init) accept(init)
       },
-
-      AssignmentExpression: (path) => {
-        schema = this.extractFromAssignment(path.node.right) || schema
+      AssignmentExpression: (nodePath) => {
+        if (nodePath.getFunctionParent()) return
+        const { left, right } = nodePath.node
+        if (
+          (isIdentifier(left) && left.name.toLowerCase() === 'schema') ||
+          (isMemberExpression(left) && !left.computed && isIdentifier(left.property, { name: 'schema' }))
+        )
+          accept(right)
       },
     })
-
-    return (schema as any) ?? {}
+    return schema ?? {}
   }
 
   private collectImports(ast: File): Map<string, ImportMapValue> {
@@ -108,30 +124,6 @@ export class SchemaExtractor {
       return node.declaration
     }
     return null
-  }
-
-  private extractFromNode(node: Node): Schema | null {
-    if (isObjectExpression(node) || isArrayExpression(node) || isIdentifier(node)) {
-      return this.parseObject(node)
-    }
-    return null
-  }
-
-  private extractFromVariable(node: any): Schema | null {
-    if (!isVariableDeclaration(node)) return null
-
-    for (const decl of node.declarations) {
-      const isSchema = isVariableDeclarator(decl) && isIdentifier(decl.id) && decl.id.name.toLowerCase() === 'schema'
-      if (isSchema && decl.init) {
-        return this.parseObject(decl.init)
-      }
-    }
-
-    return null
-  }
-
-  private extractFromAssignment(rightNode: Node): Schema | null {
-    return this.parseObject(rightNode)
   }
 
   private parseObject(node: any): any {

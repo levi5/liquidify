@@ -47,7 +47,6 @@ declare global {
     }
   }
   
-  // Augment React namespace if it exists globally
   namespace React.JSX {
     interface IntrinsicElements {
       'liquid-data': {

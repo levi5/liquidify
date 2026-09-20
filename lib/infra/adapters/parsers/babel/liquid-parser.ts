@@ -11,7 +11,8 @@ import { ImportResolver } from './liquid/import-resolver'
 import { ReactComponentParser } from './liquid/react-component-parser'
 import { ExpressionParser } from './liquid/expression-parser'
 import { LiquidHtmlParser } from './liquid/html-parser'
-import { JSXResult, ReactComponentConfig, JSXToLiquidConfig, ILiquidExpressionParser } from '../../../../types/liquid'
+import { LiquidStatementParser } from './liquid/statement-parser'
+import { type JSXResult, ReactComponentConfig, type JSXToLiquidConfig, type ILiquidExpressionParser } from '../../../../types/liquid'
 import type { Compiler } from '../../../../core/protocols/compiler'
 import type { IFileSystem } from '../../../../core/protocols/file-system'
 import { NodeFileSystem } from '../../fs/node-file-system'
@@ -36,8 +37,10 @@ import {
   type ConditionalExpression,
   type LogicalExpression,
   type JSXOpeningElement,
+  type Statement,
 } from '@babel/types'
 import { LiquidAttributeConverter } from './liquid/attribute-parser'
+import { _Maybe, _match } from 'funcio'
 
 export class LiquidParser implements ILiquidExpressionParser {
   private readonly dynamicBlockTag: string
@@ -58,6 +61,7 @@ export class LiquidParser implements ILiquidExpressionParser {
   private paginateParser: LiquidPaginateParser
   private svgParser: LiquidSvgParser
   private formParser: LiquidFormParser
+  private statementParser: LiquidStatementParser
 
   constructor(
     private readonly compiler: Compiler,
@@ -85,6 +89,10 @@ export class LiquidParser implements ILiquidExpressionParser {
     this.loopParser = new LiquidLoopParser((node, renames, context) => this.jsxToHtml(node, renames, context), this.liquidVariableParser)
 
     this.expressionParser = new ExpressionParser(this.compiler, this.importResolver, this.loopParser)
+    this.statementParser = new LiquidStatementParser(this.liquidVariableParser, (node, renames, context) =>
+      this.jsxToHtml(node, renames, context),
+    )
+    this.loopParser.renderBody = (body, renames, context) => this.statementParser.renderBody(body, renames, context)
 
     this.liquidVariableParser.parseExpression = (expr, renames, context) => this.expressionParser.parseExpression(expr, renames, context)
 
@@ -122,19 +130,23 @@ export class LiquidParser implements ILiquidExpressionParser {
     )
   }
 
-  /**
-   * Sets the registry for React components to be hydrated on the client.
-   * @param registry - Map containing React component configurations.
-   */
   public setReactRegistry(registry: Map<string, ReactComponentConfig>): void {
     this.reactRegistry = registry
   }
 
-  /**
-   * Converts a JSXElement to a JSXResult containing HTML, schema blocks, and external scripts.
-   * @param node - The root JSXElement to convert.
-   * @returns The conversion result.
-   */
+  public convertBody(
+    body: Statement[],
+    ast: File,
+    currentFilePath?: string,
+    componentName?: string,
+    inlineComponents?: Map<string, any>,
+  ): JSXResult {
+    const context = new ParsingContext({ currentFilePath, componentName, mode: 'liquid', inlineComponents })
+    this.importResolver.resolveImports(ast)
+    const html = this.statementParser.renderBody(body, undefined, context)
+    return { html, blocksSchema: context.blocksSchema, scriptAssets: Array.from(context.scriptAssets) }
+  }
+
   public convert(
     node: JSXElement | JSXFragment | LogicalExpression | ConditionalExpression,
     ast?: File,
@@ -152,15 +164,15 @@ export class LiquidParser implements ILiquidExpressionParser {
 
     this.liquidAttributeConverter = new LiquidAttributeConverter(this, componentName, mode)
 
-    if (ast) {
-      this.importResolver.resolveImports(ast)
-    } else {
-      this.importResolver.clear()
-    }
+    _Maybe
+      .of(Boolean(ast))
+      .map((hasAst) => (hasAst ? this.importResolver.resolveImports(ast!) : this.importResolver.clear()))
+      .getOrElse(null)
 
-    if (isJSXElement(node)) {
-      this.blockParser.processDynamicBlocks(node, context)
-    }
+    _Maybe
+      .of(isJSXElement(node))
+      .map((isElement) => (isElement ? this.blockParser.processDynamicBlocks(node as JSXElement, context) : null))
+      .getOrElse(null)
     const html = this.jsxToHtml(node, undefined, context)
 
     return {
@@ -175,45 +187,61 @@ export class LiquidParser implements ILiquidExpressionParser {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string {
-    if (isJSXFragment(node)) return this.renderChildren(node.children, renames, context)
-    if (isJSXElement(node)) return this.renderJSXElement(node, renames, context)
-    if (isJSXText(node)) return node.value.trim() || ''
+    return _match(true)
+      .with(isJSXFragment(node), () => this.renderChildren((node as JSXFragment).children, renames, context))
+      .with(isJSXElement(node), () => this.renderJSXElement(node as JSXElement, renames, context))
+      .with(isJSXText(node), () => this.textOf(node as JSXText))
+      .with(isJSXExpressionContainer(node), () =>
+        _Maybe
+          .of(isExpression((node as JSXExpressionContainer).expression))
+          .map((valid) => (valid ? this.handleExpression((node as JSXExpressionContainer).expression as Expression, renames, context) : ''))
+          .getOrElse(''),
+      )
+      .with(isExpression(node as any), () => this.handleExpression(node as Expression, renames, context))
+      .with(true, () => '')
+      .exec() as string
+  }
 
-    if (isJSXExpressionContainer(node)) {
-      return isExpression(node.expression) ? this.handleExpression(node.expression, renames, context) : ''
-    }
-
-    if (isExpression(node)) {
-      return this.handleExpression(node, renames, context)
-    }
-
-    return ''
+  private textOf(node: JSXText): string {
+    return _match(node.value.includes('\n'))
+      .with(true, () => node.value.replace(/\s+/g, ' ').trim() || '')
+      .with(node.value.includes('\n'), () => node.value.replace(/[ \t]{2,}/g, ' '))
+      .exec() as string
   }
 
   private handleExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
-    if (isLogicalExpression(expr)) {
-      return this.conditionalParser.parseLogicalExpression(expr, renames, context) || ''
-    }
-
-    if (isConditionalExpression(expr)) {
-      return this.conditionalParser.parseConditionalExpression(expr, renames, context)
-    }
-
-    return this.expressionParser.parseExpression(expr, renames, context)
+    return _match(true)
+      .with(
+        isLogicalExpression(expr),
+        () => this.conditionalParser.parseLogicalExpression(expr as LogicalExpression, renames, context) || '',
+      )
+      .with(isConditionalExpression(expr), () =>
+        this.conditionalParser.parseConditionalExpression(expr as ConditionalExpression, renames, context),
+      )
+      .with(true, () => this.expressionParser.parseExpression(expr, renames, context))
+      .exec() as string
   }
 
   private renderJSXElement(node: JSXElement, renames?: Record<string, string>, context?: ParsingContext): string {
+    return (
+      _Maybe
+        .of(this.reactRegistry.has(this.getTagName(node.openingElement)))
+        .map((isReact) =>
+          isReact ? this.reactComponentParser.transformReactComponent(node, this.getTagName(node.openingElement), context) : null,
+        )
+        .getOrElse(null) ??
+      _Maybe
+        .of(context?.inlineComponents?.has(this.getTagName(node.openingElement)))
+        .map((isInline) =>
+          isInline ? this.jsxToHtml(context!.inlineComponents!.get(this.getTagName(node.openingElement)), renames, context) : null,
+        )
+        .getOrElse(null) ??
+      this.renderSpecial(node, renames, context)
+    )
+  }
+
+  private renderSpecial(node: JSXElement, renames?: Record<string, string>, context?: ParsingContext): string {
     const tagName = this.getTagName(node.openingElement)
-
-    if (this.reactRegistry.has(tagName)) {
-      return this.reactComponentParser.transformReactComponent(node, tagName, context)
-    }
-
-    if (context?.inlineComponents?.has(tagName)) {
-      const inlineBody = context.inlineComponents.get(tagName)
-      return this.jsxToHtml(inlineBody, renames, context)
-    }
-
     const specialTagHandlers: Record<string, () => string> = {
       [this.dynamicBlockTag]: () => `{% content_for 'blocks' %}`,
       [this.renderSnippetTag]: () => this.snippetParser.transformRenderSnippet(node, context),
@@ -221,11 +249,10 @@ export class LiquidParser implements ILiquidExpressionParser {
       PaginateByLiquid: () => this.paginateParser.transformPaginate(node, context),
       FormBlock: () => this.formParser.transformForm(node, context),
     }
-
-    const handler = specialTagHandlers[tagName]
-    if (handler) return handler()
-
-    return this.htmlParser.renderHTMLElement(node, tagName, renames, context)
+    return _Maybe
+      .of(specialTagHandlers[tagName])
+      .map((handler) => (handler ? handler() : this.htmlParser.renderHTMLElement(node, tagName, renames, context)))
+      .getOrElse(this.htmlParser.renderHTMLElement(node, tagName, renames, context))
   }
 
   private renderChildren(children: JSXElement['children'], renames?: Record<string, string>, context?: ParsingContext): string {
@@ -241,22 +268,32 @@ export class LiquidParser implements ILiquidExpressionParser {
   }
 
   private getTagName(element: JSXOpeningElement): string {
-    if (isJSXIdentifier(element.name)) return element.name.name
-    if (isJSXMemberExpression(element.name)) return generate(element.name).code
-    return 'div'
+    return _match(true)
+      .with(isJSXIdentifier(element.name), () => (element.name as any).name)
+      .with(isJSXMemberExpression(element.name), () => generate(element.name).code)
+      .with(true, () => 'div')
+      .exec() as string
   }
 
   private addScriptAsset(componentName: string, context?: ParsingContext): void {
-    const config = this.reactRegistry.get(componentName)
-    if (!config || config.mode === 'dom:global' || !context) return
+    _Maybe
+      .of(this.reactRegistry.get(componentName))
+      .map((config) => {
+        _Maybe
+          .of(!config || config.mode === 'dom:global' || !context)
+          .map((skip) => (skip ? null : this.collectAssets(config!, context!)))
+          .getOrElse(null)
+        return null
+      })
+      .getOrElse(null)
+  }
 
-    if (config.script) {
-      context.addScriptAsset(config.script)
-    }
-
-    for (const asset of config.scriptAssets || []) {
-      context.addScriptAsset(asset)
-    }
+  private collectAssets(config: ReactComponentConfig, context: ParsingContext): void {
+    _Maybe
+      .of(config.script)
+      .map((script) => (script ? context.addScriptAsset(script) : null))
+      .getOrElse(null)
+    for (const asset of config.scriptAssets || []) context.addScriptAsset(asset)
   }
 }
 export { ReactComponentConfig }

@@ -1,9 +1,10 @@
 import generate from '@babel/generator'
+import { escapeHtml, jsonForHtml, liquidJsonOutput } from '../../../../../shared/html'
 import type { ReactComponentConfig } from '../../../../../types/liquid'
 import type { ImportResolver } from './import-resolver'
 import type { Expression, JSXElement, JSXEmptyExpression } from '@babel/types'
 
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class ReactComponentParser {
   constructor(
@@ -28,7 +29,7 @@ export class ReactComponentParser {
     const config = registry.get(tagName)!
 
     if (config.rootId) {
-      return `<div id="${config.rootId}"></div>`
+      return `<div id="${escapeHtml(config.rootId)}"></div>`
     }
 
     const propsObj: string[] = []
@@ -43,14 +44,17 @@ export class ReactComponentParser {
 
           if (attr.value) {
             if (attr.value.type === 'StringLiteral') {
-              propValue = JSON.stringify(attr.value.value)
+              propValue = jsonForHtml(attr.value.value)
             } else if (attr.value.type === 'JSXExpressionContainer') {
               propValue = this.parseExpressionContainer(attr.value.expression, propValue, context)
             }
           }
 
           if (propName === 'elementId') {
-            elementId = ` id=${propValue}`
+            elementId =
+              attr.value?.type === 'StringLiteral'
+                ? ` id="${escapeHtml(attr.value.value)}"`
+                : ` id="{{ ${generate((attr.value as any).expression).code} | escape }}"`
           } else if (propName === 'eager') {
             eagerHydration = true
           } else {
@@ -72,17 +76,17 @@ export class ReactComponentParser {
 
   private parseExpressionContainer(expression: Expression | JSXEmptyExpression, fallbackValue: string, context?: ParsingContext): string {
     if (expression.type === 'StringLiteral' || expression.type === 'NumericLiteral' || expression.type === 'BooleanLiteral') {
-      return JSON.stringify(expression.value)
+      return jsonForHtml(expression.value)
     }
 
     if (expression.type === 'ObjectExpression' || expression.type === 'ArrayExpression') {
       const code = generate(expression).code
       try {
         const evaluated = new Function(`return ${code}`)()
-        return JSON.stringify(evaluated)
+        return jsonForHtml(evaluated)
       } catch (error) {
         console.info(error)
-        return `{{ ${code} | json }}`
+        return liquidJsonOutput(code)
       }
     }
 
@@ -95,15 +99,15 @@ export class ReactComponentParser {
         const imported = imports.get(name)!
         const resolvedValue = this.importResolver.resolveExternalVariable(imported.source, imported.specifierName, currentFilePath)
         if (resolvedValue !== null) {
-          return JSON.stringify(resolvedValue)
+          return jsonForHtml(resolvedValue)
         }
       }
-      return `{{ ${name} | json }}`
+      return liquidJsonOutput(name)
     }
 
     if (expression.type === 'MemberExpression') {
       const code = generate(expression).code
-      return `{{ ${code} | json }}`
+      return liquidJsonOutput(code)
     }
 
     return fallbackValue

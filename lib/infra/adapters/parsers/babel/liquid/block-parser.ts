@@ -10,7 +10,7 @@ import {
   isIdentifier,
 } from '@babel/types'
 import { pascalToKebab } from '../../../../../shared/string'
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidBlockParser {
   constructor(

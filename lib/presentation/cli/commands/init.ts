@@ -1,5 +1,5 @@
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import ora from 'ora'
 import kleur from 'kleur'
 import { _Maybe, _match } from 'funcio'
@@ -35,8 +35,35 @@ const syncPackageName = (targetDir: string, projectName: string): void => {
 
 export const copyTemplate = (sourceDir: string, targetDir: string, projectName: string) => {
   return _try.sync(() => {
+    const checkConflicts = (source: string, target: string): void => {
+      const existing = (() => {
+        try {
+          return fs.lstatSync(target)
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code === 'ENOENT') return null
+          throw error
+        }
+      })()
+      if (existing && (!existing.isDirectory() || existing.isSymbolicLink())) {
+        throw new Error(`Refusing to overwrite existing path: ${target}. Initialize in an empty directory.`)
+      }
+      for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
+        const destination = path.join(target, entry.name)
+        if (entry.isDirectory()) checkConflicts(path.join(source, entry.name), destination)
+        else {
+          try {
+            fs.lstatSync(destination)
+          } catch (error) {
+            if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue
+            throw error
+          }
+          throw new Error(`Refusing to overwrite existing file: ${destination}. Initialize in an empty directory.`)
+        }
+      }
+    }
+    checkConflicts(sourceDir, targetDir)
     fs.mkdirSync(targetDir, { recursive: true })
-    fs.cpSync(sourceDir, targetDir, { recursive: true })
+    fs.cpSync(sourceDir, targetDir, { recursive: true, force: false, errorOnExist: true })
     syncPackageName(targetDir, projectName)
   })
 }

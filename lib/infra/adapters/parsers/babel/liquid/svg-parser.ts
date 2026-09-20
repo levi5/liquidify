@@ -1,4 +1,11 @@
-import { JSXElement, isJSXAttribute, isJSXIdentifier, isJSXExpressionContainer, isStringLiteral, JSXAttribute } from '@babel/types'
+import {
+  type JSXElement,
+  isJSXAttribute,
+  isJSXIdentifier,
+  isJSXExpressionContainer,
+  isStringLiteral,
+  type JSXAttribute,
+} from '@babel/types'
 
 export class LiquidSvgParser {
   public transformRenderSvg(node: JSXElement): string {

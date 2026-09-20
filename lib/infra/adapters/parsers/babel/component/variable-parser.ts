@@ -1,5 +1,5 @@
 import {
-  VariableDeclaration,
+  type VariableDeclaration,
   isIdentifier,
   isArrowFunctionExpression,
   isBlockStatement,
@@ -7,9 +7,10 @@ import {
   isJSXElement,
   isJSXFragment,
   isParenthesizedExpression,
+  returnStatement,
 } from '@babel/types'
-import { ComponentMetadataType } from '../../../../../types/component'
-import { StatementCollector } from './statement-collector'
+import type { ComponentMetadataType } from '../../../../../types/component'
+import type { StatementCollector } from './statement-collector'
 
 export class VariableParser {
   constructor(private statementCollector: StatementCollector) {}
@@ -45,6 +46,8 @@ export class VariableParser {
       if (isBlockStatement(declarator.init.body)) {
         const statements = [...(declarator.init.body.directives || []), ...declarator.init.body.body]
         this.statementCollector.collect(statements as any[], metadata)
+      } else {
+        this.statementCollector.collect([returnStatement(declarator.init.body)], metadata)
       }
     } else if (!metadata.name) {
       metadata.name = name

@@ -1,6 +1,6 @@
 import traverse from '@babel/traverse'
 import {
-  File,
+  type File,
   isExportDeclaration,
   isImportDeclaration,
   isTSTypeAliasDeclaration,
@@ -9,7 +9,7 @@ import {
   isTSDeclareFunction,
   isEmptyStatement,
 } from '@babel/types'
-import { ComponentMetadataType } from '../../../../../types/component'
+import type { ComponentMetadataType } from '../../../../../types/component'
 
 import { ExportParser } from './export-parser'
 import { DirectiveParser } from './directive-parser'
@@ -32,7 +32,7 @@ export class ComponentExtractor {
     this.directiveParser = new DirectiveParser()
   }
 
-  public extract(ast: File, source: string): ComponentMetadataType {
+  public extract(ast: File, _source: string): ComponentMetadataType {
     const metadata: ComponentMetadataType = {
       name: '',
       jsxElement: null,
