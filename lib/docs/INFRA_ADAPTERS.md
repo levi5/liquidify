@@ -17,8 +17,3 @@ Usado quando o modo é `'use react'`.
 
 ### `NodeFileSystem`
 Implementação baseada no módulo `fs` do Node.js. Inclui lógica para criar pastas recursivamente, garantindo que a estrutura do tema Shopify seja mantida ao salvar os arquivos gerados.
-
-## Resolução de Caminhos (`lib/infra/adapters/ts`)
-
-### `TsconfigPathResolver`
-Analisa o arquivo `tsconfig.json` para suportar aliases de importação (ex: `@/components/Button`). Isso permite que o código fonte use caminhos amigáveis enquanto o compilador localiza os arquivos reais no disco.

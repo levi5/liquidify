@@ -1,3 +1,5 @@
+import { _try } from 'funcio'
+import { LiquidifyError } from '../../../../core/errors/liquidify-error'
 import { parse } from '@babel/parser'
 import type { File } from '@babel/types'
 

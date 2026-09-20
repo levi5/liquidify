@@ -1,7 +1,6 @@
+import { EventAttributeConverter } from './event-attribute-converter'
 import {
   isArrowFunctionExpression,
-  isBlockStatement,
-  isCallExpression,
   isExpression,
   isIdentifier,
   isJSXAttribute,
@@ -18,7 +17,6 @@ import {
   type JSXAttribute,
   type JSXExpressionContainer,
   type JSXSpreadAttribute,
-  type ConditionalExpression,
 } from '@babel/types'
 
 import { HTMLAttributeConverter } from '../html/attribute-parser'
@@ -58,12 +56,16 @@ const booleanAttributes = new Set([
 ])
 
 export class LiquidAttributeConverter {
+  private readonly eventConverter: EventAttributeConverter
+
   constructor(
     private readonly expressionParser: ILiquidExpressionParser,
-    private readonly componentName?: string,
-    private readonly mode?: string,
+    componentName?: string,
+    mode?: string,
     private readonly htmlAttributeConverter = new HTMLAttributeConverter(),
-  ) {}
+  ) {
+    this.eventConverter = new EventAttributeConverter(expressionParser, componentName, mode)
+  }
 
   public getAttributes(
     attributes: Array<JSXAttribute | JSXSpreadAttribute>,
@@ -85,7 +87,7 @@ export class LiquidAttributeConverter {
 
     const attributeName = this.normalizeAttributeName(attribute)
 
-    if (!attributeName && !this.isDomMode(context)) return ''
+    if (!attributeName && !this.eventConverter.isDomMode(context)) return ''
 
     if (!attribute.value) return ` ${attributeName}`
     if (isStringLiteral(attribute.value)) {
@@ -93,66 +95,6 @@ export class LiquidAttributeConverter {
     }
     if (isJSXExpressionContainer(attribute.value)) return this.handleExpressionAttribute(attribute, attributeName, renames, context)
     return ''
-  }
-
-  private escapeQuotes(value: string): string {
-    return value.replace(/"/g, '&quot;')
-  }
-
-  private interpolateLiquidVariables(code: string): string {
-    const jsReserved = new Set([
-      'new',
-      'var',
-      'const',
-      'let',
-      'function',
-      'return',
-      'if',
-      'else',
-      'for',
-      'while',
-      'break',
-      'continue',
-      'true',
-      'false',
-      'null',
-      'undefined',
-      'typeof',
-      'instanceof',
-      'window',
-      'document',
-      'console',
-      'event',
-      'e',
-      'Math',
-      'JSON',
-      'Object',
-      'Array',
-      'Error',
-      'CustomEvent',
-      'this',
-      'setTimeout',
-      'setInterval',
-      'location',
-      'history',
-      'URLSearchParams',
-      'preventDefault',
-      'stopPropagation',
-      'target',
-      'currentTarget',
-      'dispatchEvent',
-    ])
-
-    const regex = /('[^']*'|"[^"]*"|`[^`]*`)|(^|[^.a-zA-Z0-9_'"/:;])\b([a-zA-Z_][a-zA-Z0-9_.]*)\b(?!\s*:)/g
-
-    return code.replace(regex, (match, str, prefix, id) => {
-      if (str) return match
-
-      const baseId = id.split('.')[0]
-      if (jsReserved.has(baseId)) return match
-
-      return `${prefix}{{ ${id} | json | escape }}`
-    })
   }
 
   private handleExpressionAttribute(
@@ -168,7 +110,7 @@ export class LiquidAttributeConverter {
       .getOrElse(null)
 
     if (!expression || !isExpression(expression)) return ''
-    if (this.isEventArrowFunction(attributeName, attribute)) return this.handleEventHandler(attribute, attributeName, renames, context)
+    if (this.isEventArrowFunction(attributeName, attribute)) return this.eventConverter.convert(attribute, attributeName, renames, context)
 
     if (attributeName === 'style' && isObjectExpression(expression)) {
       return this.handleStyleObject(expression, renames, context)
@@ -177,8 +119,6 @@ export class LiquidAttributeConverter {
     if (booleanAttributes.has(attributeName)) {
       return this.renderBoolean(expression, ` ${attributeName}`, '', renames, context)
     }
-
-    if (isConditionalExpression(expression)) return this.handleConditionalAttribute(attributeName, expression, renames, context)
 
     return this.handleDefaultExpression(attributeName, expression, renames, context)
   }
@@ -242,27 +182,16 @@ export class LiquidAttributeConverter {
     return styles.length > 0 ? ` style="${styles.join(' ')} "` : ''
   }
 
-  private handleConditionalAttribute(
-    attributeName: string,
-    expression: ConditionalExpression,
-    renames?: Record<string, string>,
-    context?: ParsingContext,
-  ): string {
-    return ` ${attributeName}="${this.renderValue(expression, renames, context)}"`
-  }
-
   private handleDefaultExpression(
     attributeName: string,
     expression: any,
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string {
-    const componentName = context?.componentName || this.componentName
-    if (this.isDomMode(context) && componentName && attributeName.startsWith('on') && isIdentifier(expression)) {
-      const kebabName = pascalToKebab(componentName)
-      return ` ${attributeName}="liquidify['${kebabName}'].${expression.name}(event)"`
+    if (attributeName.startsWith('on') && isIdentifier(expression)) {
+      const handler = this.eventConverter.convertReference(expression.name, attributeName, context)
+      if (handler) return handler
     }
-
     return ` ${attributeName}="${this.renderValue(expression, renames, context)}"`
   }
 
@@ -277,67 +206,11 @@ export class LiquidAttributeConverter {
     return true
   }
 
-  private handleEventHandler(
-    attribute: JSXAttribute & { value: JSXExpressionContainer & { expression: ArrowFunctionExpression } },
-    attributeName: string,
-    renames?: Record<string, string>,
-    context?: ParsingContext,
-  ): string {
-    const arrowFunction = attribute.value.expression
-    const firstParam = arrowFunction.params[0]
-    const eventName = isIdentifier(firstParam) ? firstParam.name : 'event'
-    const componentName = context?.componentName || this.componentName
-
-    if (!isCallExpression(arrowFunction.body)) {
-      let code = this.expressionParser.generateLiquidCode(arrowFunction.body, false, renames, context)
-      if (this.isDomMode(context) && componentName) {
-        if (eventName !== 'event') {
-          code = code.replace(new RegExp(`\\b${eventName}\\b`, 'g'), 'event')
-        }
-
-        if (!isBlockStatement(arrowFunction.body)) {
-          const kebabName = pascalToKebab(componentName)
-          code = `liquidify['${kebabName}'].${code}`
-        }
-      }
-
-      if (!this.isDomMode(context)) {
-        code = this.interpolateLiquidVariables(code)
-      }
-
-      return ` ${attributeName}="${this.escapeQuotes(code)}"`
-    }
-
-    let callee = this.expressionParser.generateLiquidCode(arrowFunction.body.callee, false, renames, context)
-    if (this.isDomMode(context) && componentName && !callee.includes('.') && !callee.includes('[')) {
-      const kebabName = pascalToKebab(componentName)
-      callee = `liquidify['${kebabName}'].${callee}`
-    }
-
-    const args = arrowFunction.body.arguments
-      .map((arg) => {
-        const argCode = this.expressionParser.generateLiquidCode(arg, false, renames, context)
-        if (this.isDomMode(context) && argCode === eventName) {
-          return 'event'
-        }
-        return argCode
-      })
-      .join(', ')
-
-    let code = `${callee}(${args})`
-    if (!this.isDomMode(context)) {
-      code = this.interpolateLiquidVariables(code)
-    }
-
-    return ` ${attributeName}="${this.escapeQuotes(code)}"`
-  }
-
   private normalizeAttributeName(attribute: JSXAttribute): string {
     const name = _Maybe
       .of(attribute)
       .map((attribute) => attribute.name)
       .map((identifier) => identifier.name)
-      .map((name) => name)
       .getOrElse('')
 
     let attributeName = this.htmlAttributeConverter.toHtmlAttribute(name as string)
@@ -346,10 +219,5 @@ export class LiquidAttributeConverter {
       attributeName = attributeName.toLowerCase()
     }
     return attributeName
-  }
-
-  private isDomMode(context?: ParsingContext): boolean {
-    const mode = context?.mode || this.mode
-    return mode === 'dom' || mode === 'dom:global'
   }
 }

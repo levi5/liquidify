@@ -2,8 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import ora from 'ora'
 import kleur from 'kleur'
-import { _Maybe, _match } from 'funcio'
-import { _try } from 'funcio/lib/Monads/Either'
+import { _Maybe, _match, _try } from 'funcio'
 
 export const resolveTemplate = (templateName = 'shopify-starter'): string => {
   const candidates = [

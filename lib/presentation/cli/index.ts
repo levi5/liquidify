@@ -2,10 +2,8 @@
 import ora from 'ora'
 import kleur from 'kleur'
 import { _match } from 'funcio'
-import { _try } from 'funcio/lib/Monads/Either'
 import { runInit } from './commands/init'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
-import '../../shared/string'
+import type { LiquidifyError } from '../../core/errors/liquidify-error'
 
 const printBanner = (): void => {
   console.clear()
@@ -58,7 +56,6 @@ const runBuild = async (watch: boolean): Promise<void> => {
     _match(watch)
       .with(true, () => console.log(kleur.dim('\n👀 Watching for changes...')))
       .with(false, () => {})
-      ._(() => {})
       .exec()
   })
 

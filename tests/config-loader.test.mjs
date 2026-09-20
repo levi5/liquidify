@@ -3,9 +3,9 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ConfigLoader } from '../dist/infra/adapters/config/config-loader.js'
+import { ConfigLoader, loadConfig } from '../dist/infra/adapters/config/config-loader.js'
+import { ValidationError } from '../dist/core/errors/validation-error.js'
 import { DEFAULT_CONFIG } from '../dist/core/entities/config.js'
-import { captureConsole } from './helpers.mjs'
 
 let cwd
 
@@ -23,49 +23,58 @@ describe('ConfigLoader', () => {
   })
 
   it('loads liquidify.config.json with first-hit precedence', () => {
-    fs.writeFileSync(
-      path.join(cwd, 'liquidify.config.json'),
-      JSON.stringify({ componentsDir: 'src/components', output: '.' }),
+    fs.writeFileSync(path.join(cwd, '.liquidifyrc.json'), JSON.stringify({ output: 'ignored' }))
+    fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ componentsDir: 'src/components', output: '.' }))
+
+    assert.deepEqual(ConfigLoader.load(cwd), { ...DEFAULT_CONFIG, componentsDir: 'src/components', output: '.' })
+  })
+
+  it('rejects corrupt configuration with its file path', () => {
+    const file = path.join(cwd, 'liquidify.config.json')
+    fs.writeFileSync(file, '{ not json')
+    assert.throws(
+      () => ConfigLoader.load(cwd),
+      (error) => {
+        assert.ok(error instanceof ValidationError)
+        assert.equal(error.filePath, file)
+        assert.match(error.message, /Invalid JSON/)
+        return true
+      },
     )
-
-    assert.deepEqual(ConfigLoader.load(cwd), { componentsDir: 'src/components', output: '.' })
   })
 
-  it('falls back to defaults and logs when the config is corrupt', async () => {
-    fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), '{ not json')
-    const { result, errors } = await captureConsole(async () => ConfigLoader.load(cwd))
-
-    assert.deepEqual(result, DEFAULT_CONFIG)
-    assert.ok(errors.some((line) => line.includes('liquidify.config.json')))
-  })
-
-  it('warns on unknown keys instead of silently keeping them', async () => {
-    fs.writeFileSync(
-      path.join(cwd, 'liquidify.config.json'),
-      JSON.stringify({ componentsDir: 'src', output: '.', typoKey: true }),
-    )
-    const { result, warns } = await captureConsole(async () => ConfigLoader.load(cwd))
-
-    assert.equal(result.componentsDir, 'src')
-    assert.ok(warns.some((line) => line.includes('typoKey')))
-  })
-
-  it('warns and falls back to the default for wrongly typed values', async () => {
+  it('rejects wrongly typed paths', () => {
     fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ componentsDir: 123, output: '.' }))
-    const { result, warns } = await captureConsole(async () => ConfigLoader.load(cwd))
-
-    assert.equal(result.componentsDir, DEFAULT_CONFIG.componentsDir)
-    assert.equal(result.output, '.')
-    assert.ok(warns.some((line) => line.includes('componentsDir')))
+    assert.throws(() => loadConfig(cwd), ValidationError)
   })
 
-  it('warns when componentsDir does not exist', async () => {
-    fs.writeFileSync(
-      path.join(cwd, 'liquidify.config.json'),
-      JSON.stringify({ componentsDir: 'src/missing', output: '.' }),
-    )
-    const { warns } = await captureConsole(async () => ConfigLoader.load(cwd))
+  it('rejects configuration that is not an object', () => {
+    for (const value of [null, [], 'theme', 42]) {
+      fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify(value))
+      assert.throws(() => loadConfig(cwd), ValidationError)
+    }
+  })
 
-    assert.ok(warns.some((line) => line.includes('src/missing')))
+  it('keeps the class API compatible with the function API', () => {
+    fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ output: '.', react: { strictCsp: false } }))
+    assert.deepEqual(ConfigLoader.load(cwd), loadConfig(cwd))
+    assert.equal(ConfigLoader.load(cwd).react.strictCsp, false)
+  })
+})
+
+describe('React configuration validation', () => {
+  it('rejects malformed React options', () => {
+    for (const react of [null, [], false, { strictCsp: 'false' }]) {
+      fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ react }))
+      assert.throws(() => loadConfig(cwd), ValidationError)
+    }
+  })
+  it('fills missing React defaults', () => {
+    fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ react: {} }))
+    assert.deepEqual(loadConfig(cwd).react, { strictCsp: true })
+  })
+  it('does not share mutable defaults between loads', () => {
+    loadConfig(cwd).react.strictCsp = false
+    assert.equal(loadConfig(cwd).react.strictCsp, true)
   })
 })

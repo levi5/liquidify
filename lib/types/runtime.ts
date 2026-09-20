@@ -10,9 +10,9 @@ export const LiquidifyEvents: LiquidifyEventBus = {
 	emit: () => {},
 }
 
-export function useLiquidifyEvent<T = any>(event: string, callback: (data: T) => void): void {}
-export function emitLiquidifyEvent<T = any>(event: string, data?: T): void {}
-export function registerLiquidIsland(name: string, component: any): void {}
+export function useLiquidifyEvent<T = any>(_event: string, _callback: (data: T) => void): void {}
+export function emitLiquidifyEvent<T = any>(_event: string, _data?: T): void {}
+export function registerLiquidIsland(_name: string, _component: any): void {}
 
 declare global {
 	interface Window {

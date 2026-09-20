@@ -1,6 +1,5 @@
 import { join } from 'node:path'
-import { _Maybe, _match } from 'funcio'
-import { _try } from 'funcio/lib/Monads/Either'
+import { _Maybe, _match, _try } from 'funcio'
 
 import type { GeneratorOptions, ResolvedGeneratorOptions } from '../../../../core/entities/liquid'
 import type { IFileSystem } from '../../../../core/protocols/file-system'

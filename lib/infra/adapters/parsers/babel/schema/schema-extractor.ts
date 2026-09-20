@@ -1,5 +1,5 @@
+import { _try } from 'funcio'
 import traverse from '@babel/traverse'
-import { _try } from 'funcio/lib/Monads/Either'
 import {
   isArrayExpression,
   isBooleanLiteral,
@@ -53,7 +53,7 @@ export class SchemaExtractor {
     let schema: Schema | null = null
 
     const accept = (node: Node): void => {
-      const value = this.parseObject(node)
+      const value = this.parseObject(node, state)
       if (!value || typeof value !== 'object' || Array.isArray(value)) {
         throw new ValidationError('Schema must resolve to a static object.', currentFilePath)
       }
@@ -131,7 +131,7 @@ export class SchemaExtractor {
     return null
   }
 
-  private parseObject(node: any): any {
+  private parseObject(node: any, state: ExtractionState): any {
     if (node === null || node === undefined) return null
     if (typeof node !== 'object' || !('type' in node)) return node
 

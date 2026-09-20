@@ -1,3 +1,4 @@
+import { TemplateLiteralParser } from './template-literal-parser'
 import generate from '@babel/generator'
 import type { Compiler } from '../../../../../core/protocols/compiler'
 import type { ImportResolver } from './import-resolver'
@@ -19,17 +20,20 @@ import {
   isParenthesizedExpression,
   identifier,
   isArrowFunctionExpression,
-  isObjectPattern,
   isUnaryExpression,
   isNullLiteral,
+  isLogicalExpression,
   isBooleanLiteral,
 } from '@babel/types'
-import { _Maybe, _match } from 'funcio'
-import { _try } from 'funcio/lib/Monads/Either'
+import { _Maybe, _match, _try } from 'funcio'
 import { escapeHtml, escapedOutput, liquidJsonOutput } from '../../../../../shared/html'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class ExpressionParser {
+  private readonly templateParser = new TemplateLiteralParser((node, renames, context) =>
+    this.generateLiquidCode(node, false, renames, context),
+  )
+
   constructor(
     private readonly compiler: Compiler,
     private readonly importResolver: ImportResolver,
@@ -45,7 +49,7 @@ export class ExpressionParser {
       .of(isTemplateLiteral(node))
       .map((isTemplate) =>
         isTemplate
-          ? this.transformTemplateLiteralToLiquid(node as TemplateLiteral, context, renames)
+          ? this.templateParser.parse(node as TemplateLiteral, context, renames)
           : this.generateNodeCode(node, inCondition, renames, context),
       )
       .getOrElse('')
@@ -63,8 +67,8 @@ export class ExpressionParser {
       }) as string
     const code = this.postprocess(transpiled)
     return _match(inCondition && this.hasMixedOperators(node))
-      .with(true, () => this.stabilizedCondition(node, code, renames, context))
-      .with(inCondition && this.hasMixedOperators(node), () => code)
+      .with(true, () => this.stabilizedCondition(code, context))
+      .with(false, () => code)
       .exec() as string
   }
 
@@ -181,7 +185,7 @@ export class ExpressionParser {
       .map(() => {
         const objectCode = generate(n.callee.object).code
         const param = callback.params[0]
-        const itemName = isIdentifier(param) ? param.name : isObjectPattern(param) ? 'item' : 'item'
+        const itemName = isIdentifier(param) ? param.name : 'item'
         const varName = `${objectCode.replace(/[^a-zA-Z0-9_]/g, '_')}_found`
         const condition = this.generateLiquidCode(callback.body, true, renames, context)
         context?.addPendingAssign(
@@ -279,7 +283,7 @@ export class ExpressionParser {
     return code.includes('&&') && code.includes('||')
   }
 
-  private stabilizedCondition(_node: Node, code: string, _renames?: Record<string, string>, context?: ParsingContext): string {
+  private stabilizedCondition(code: string, context?: ParsingContext): string {
     return _Maybe
       .of(context)
       .map((ctx) => {
@@ -288,7 +292,7 @@ export class ExpressionParser {
         const last = parts.pop() as string
         const head = parts.join(' or ')
         ctx!.addPendingAssign(`{% assign ${temp} = ${head} %}`)
-        return `${temp} or ${last}`.replace(/^.* or /, (_m) => `${temp} or ${last} `).trim() && `${temp} or ${last}`
+        return `${temp} or ${last}`
       })
       .getOrElse(code)
   }
@@ -315,83 +319,28 @@ export class ExpressionParser {
 
   private parseStringLiteral(expr: any, context?: ParsingContext): string {
     return _match(true)
-      .with(expr.value.includes('{{') || expr.value.includes('{%'), () => expr.value)
-      .with(
-        true,
-        () =>
-          _match(context?.outputContext)
-            .with('raw', () => expr.value)
-            .with(context?.outputContext, () => escapeHtml(expr.value))
-            .exec() as string,
-      )
-      .exec() as string
+      .with(expr.value.includes('{{') || expr.value.includes('{%') || context?.outputContext === 'raw', () => expr.value)
+      .with(true, () => escapeHtml(expr.value))
+      .exec()
   }
 
   private parseNilCoalescing(expr: any, renames?: Record<string, string>, context?: ParsingContext): string {
     const left = this.generateLiquidCode(expr.left, false, renames, context)
+    const right = this.generateLiquidCode(expr.right, false, renames, context)
     const assigns = this.getPendingAssigns(context)
-    const yes = _match(context?.outputContext)
-      .with('raw', () => `{{ ${this.generateLiquidCode(expr.left, false, renames, context)} }}`)
-      .with('json', () => liquidJsonOutput(this.generateLiquidCode(expr.left, false, renames, context)))
-      .with(context?.outputContext, () => escapedOutput(this.generateLiquidCode(expr.left, false, renames, context)))
-      .exec() as string
-    const no = _match(context?.outputContext)
-      .with('raw', () => `{{ ${this.generateLiquidCode(expr.right, false, renames, context)} }}`)
-      .with('json', () => liquidJsonOutput(this.generateLiquidCode(expr.right, false, renames, context)))
-      .with(context?.outputContext, () => escapedOutput(this.generateLiquidCode(expr.right, false, renames, context)))
-      .exec() as string
-    return `${assigns}{% if ${left} != nil %}${yes}{% else %}${no}{% endif %}`
+    return `${assigns}{% if ${left} != nil %}${this.renderOutput(left, context)}{% else %}${this.renderOutput(right, context)}{% endif %}`
   }
 
   private parseDefault(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
     const code = this.generateLiquidCode(expr, false, renames, context)
-    const assigns = this.getPendingAssigns(context)
+    return `${this.getPendingAssigns(context)}${this.renderOutput(code, context)}`
+  }
+
+  private renderOutput(code: string, context?: ParsingContext): string {
     return _match(context?.outputContext)
-      .with('json', () => `${assigns}${liquidJsonOutput(code)}`)
-      .with('raw', () => `${assigns}{{ ${code} }}`)
-      .with(context?.outputContext, () => `${assigns}${escapedOutput(code)}`)
-      .exec() as string
-  }
-
-  private transformTemplateLiteralToLiquid(expr: TemplateLiteral, context?: ParsingContext, renames?: Record<string, string>): string {
-    return _Maybe
-      .of(expr.expressions.length === 0)
-      .map((constant) => (constant ? this.constantTemplate(expr) : this.dynamicTemplate(expr, context, renames)))
-      .getOrElse('')
-  }
-
-  private constantTemplate(expr: TemplateLiteral): string {
-    const raw = expr.quasis.map((q) => q.value.raw).join('')
-    return _match(raw.includes('|'))
-      .with(true, () => raw)
-      .with(raw.includes('|'), () => `"${raw}"`)
-      .exec() as string
-  }
-
-  private dynamicTemplate(expr: TemplateLiteral, context?: ParsingContext, renames?: Record<string, string>): string {
-    let result = expr.quasis[0].value.raw ? `"${expr.quasis[0].value.raw}"` : ''
-    const arg = `(?:[a-zA-Z0-9_]+\\s*:\\s*)?(?:'[^']*'|"[^"]*"|[^,'\\"\\s|]+)`
-    const regex = new RegExp(`^\\s*\\|\\s*([a-zA-Z0-9_]+(?:\\s*:\\s*${arg}(?:\\s*,\\s*${arg})*)?)`)
-    for (let i = 0; i < expr.expressions.length; i++) {
-      const base = this.generateLiquidCode(expr.expressions[i], false, renames, context)
-      const quasi = expr.quasis[i + 1].value.raw
-      const filters: string[] = []
-      let remaining = quasi
-      while (true) {
-        const matched = remaining.match(regex)
-        if (!matched) break
-        let filterStr = matched[1].trim()
-        filterStr = filterStr.replace(/crop\s*:\s*([^,'"\s]+)/g, (m, val) => {
-          if (val === 'center' || val === 'top' || val === 'bottom' || val === 'left' || val === 'right') return `crop: '${val}'`
-          return m
-        })
-        filters.push(filterStr)
-        remaining = remaining.substring(matched[0].length)
-      }
-      const filterSuffix = filters.length > 0 ? ` | ${filters.join(' | ')}` : ''
-      result = !result ? `${base}${filterSuffix}` : `${result} | append: ${base}${filterSuffix}`
-      if (remaining) result += ` | append: "${remaining}"`
-    }
-    return result
+      .with('json', () => liquidJsonOutput(code))
+      .with('raw', () => `{{ ${code} }}`)
+      .with(context?.outputContext, () => escapedOutput(code))
+      .exec()
   }
 }

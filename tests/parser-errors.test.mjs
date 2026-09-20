@@ -34,19 +34,21 @@ export default function Card() {
     )
   })
 
-  it('resolves circular schema references to an empty schema with a warning', async () => {
+  it('rejects circular schema references with a warning', async () => {
     const parser = makeParser()
-    const { result, warns } = await captureConsole(() =>
-      parser.parse(
-        `export default function H() { return <div>hi</div> }
+    const { warns } = await captureConsole(() =>
+      assert.rejects(
+        parser.parse(
+          `export default function H() { return <div>hi</div> }
 const a = b
 const b = a
 export const schema = a`,
-        '/theme/src/components/sections/H.tsx',
+          '/theme/src/components/sections/H.tsx',
+        ),
+        ValidationError,
       ),
     )
 
-    assert.deepEqual(result.schema, {})
     assert.ok(warns.some((line) => line.includes('Circular reference')))
   })
 })

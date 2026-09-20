@@ -1,3 +1,4 @@
+import { LiquidifyError } from '../../../../../core/errors/liquidify-error'
 import { readReactTemplate, reactTemplatesDirectory } from './template-loader'
 import type { Compiler } from '../../../../../core/protocols/compiler'
 

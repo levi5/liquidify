@@ -16,7 +16,7 @@ export default function SectionHeader({ heading }) {
     assert.equal(component.name, 'SectionHeader')
     assert.equal(component.mode, 'liquid')
     assert.equal(component.type, 'snippets')
-    assert.equal(component.html, '<h1 class="section-title">{{ heading }}</h1>')
+    assert.equal(component.html, '<h1 class="section-title">{{ heading | escape }}</h1>')
   })
 
   it('compiles a liquid section with assignments from const declarations', async () => {
@@ -30,8 +30,8 @@ export default function SectionHeader({ heading }) {
     )
 
     assert.equal(component.name, 'Hero')
-    assert.equal(component.html, '<div class="hero"><h2>{{ title }}</h2></div>')
-    assert.deepEqual(component.liquidAssignments, [`{% assign title = "{{ product.title }}" %}`])
+    assert.equal(component.html.trim(), '{% assign title = "{{ product.title }}" %}\n<div class="hero"><h2>{{ title | escape }}</h2></div>')
+    assert.deepEqual(component.liquidAssignments, [])
   })
 
   it('extracts an inline schema object', async () => {
@@ -72,7 +72,7 @@ export default function List({ items }) {
       '/theme/src/components/snippets/List.tsx',
     )
 
-    assert.equal(component.html, '<ul>{% for item in items %}<li>{{ item.title }}</li>{% endfor %}</ul>')
+    assert.equal(component.html, '<ul>{% for item in items %}<li>{{ item.title | escape }}</li>{% endfor %}</ul>')
   })
 
   it('detects dom mode and keeps plain html', async () => {

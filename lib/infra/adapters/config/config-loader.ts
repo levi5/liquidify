@@ -1,55 +1,53 @@
+import { _Maybe, _try } from 'funcio'
 import fs from 'node:fs'
 import path from 'node:path'
-import { _Maybe, _match } from 'funcio'
-import { _try } from 'funcio/lib/Monads/Either'
 import { DEFAULT_CONFIG, type LiquidifyConfig } from '../../../core/entities/config'
 import { ValidationError } from '../../../core/errors/validation-error'
 
 const configFiles = ['liquidify.config.json', '.liquidifyrc.json', '.liquidifyrc', 'liquidx.config.json', '.liquidxrc.json', '.liquidxrc']
 
 export function loadConfig(cwd: string = process.cwd()): LiquidifyConfig {
-  const found = configFiles.map((file) => ({ file, fullPath: path.resolve(cwd, file) })).find(({ fullPath }) => fs.existsSync(fullPath))
+  const fullPath = configFiles.map((file) => path.resolve(cwd, file)).find((file) => fs.existsSync(file))
   return _Maybe
-    .of(found)
-    .map((entry) => readConfig(entry!.file, entry!.fullPath))
-    .getOrElse({ ...DEFAULT_CONFIG })
+    .of(fullPath)
+    .map((file) => readConfig(file!))
+    .getOrElse({ ...DEFAULT_CONFIG, react: { ...DEFAULT_CONFIG.react } })
 }
 
-function readConfig(file: string, fullPath: string): LiquidifyConfig {
-  const result = _try.sync(() => fs.readFileSync(fullPath, 'utf-8'))
-  return result.match({
-    right: (content: string) => parseConfig(file, fullPath, content),
-    left: (error: Error) => {
-      throw new ValidationError(`Unable to read ${file}: ${error.message}`, fullPath)
-    },
-  }) as LiquidifyConfig
-}
+function readConfig(fullPath: string): LiquidifyConfig {
+  const read = <T>(operation: () => T, message: string): T =>
+    _try.sync(operation).match({
+      right: (value) => value,
+      left: (error) => {
+        throw new ValidationError(`${message} ${path.basename(fullPath)}: ${error.message}`, fullPath)
+      },
+    })
 
-function parseConfig(file: string, fullPath: string, content: string): LiquidifyConfig {
-  const parsed = _try.sync(() => JSON.parse(content))
-  return parsed.match({
-    right: (value: unknown) => validateConfig(fullPath, value),
-    left: (error: Error) => {
-      throw new ValidationError(`Invalid JSON in ${file}: ${error.message}`, fullPath)
-    },
-  }) as LiquidifyConfig
+  const content = read(() => fs.readFileSync(fullPath, 'utf-8'), 'Unable to read')
+  const value: unknown = read(() => JSON.parse(content), 'Invalid JSON in')
+  return validateConfig(fullPath, value)
 }
 
 function validateConfig(fullPath: string, value: unknown): LiquidifyConfig {
-  return _match(typeof value === 'object' && value !== null && !Array.isArray(value))
-    .with(false, () => {
-      throw new ValidationError('Configuration must be a JSON object.', fullPath)
-    })
-    ._(() => {
-      const raw = value as Record<string, unknown>
-      const merged = { ...DEFAULT_CONFIG, ...raw }
-      _match(typeof merged.componentsDir === 'string' && typeof merged.output === 'string')
-        .with(false, () => {
-          throw new ValidationError('Configuration requires string componentsDir and output.', fullPath)
-        })
-        ._(() => null)
-        .exec()
-      return merged as LiquidifyConfig
-    })
-    .exec() as LiquidifyConfig
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new ValidationError('Configuration must be a JSON object.', fullPath)
+  }
+  const raw = value as Record<string, unknown>
+  const merged = { ...DEFAULT_CONFIG, ...raw }
+  if (typeof merged.componentsDir !== 'string' || typeof merged.output !== 'string') {
+    throw new ValidationError('Configuration requires string componentsDir and output.', fullPath)
+  }
+  if (raw.react !== undefined) {
+    if (typeof raw.react !== 'object' || raw.react === null || Array.isArray(raw.react)) {
+      throw new ValidationError('Configuration react must be an object.', fullPath)
+    }
+    const react = raw.react as Record<string, unknown>
+    if (react.strictCsp !== undefined && typeof react.strictCsp !== 'boolean') {
+      throw new ValidationError('Configuration react.strictCsp must be a boolean.', fullPath)
+    }
+  }
+  return { ...merged, react: { ...DEFAULT_CONFIG.react, ...(raw.react as LiquidifyConfig['react']) } }
 }
+
+/** Compatibility facade for consumers of the original configuration API. */
+export const ConfigLoader = { load: loadConfig }

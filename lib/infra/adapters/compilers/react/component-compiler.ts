@@ -1,3 +1,4 @@
+import { _try } from 'funcio'
 import { readReactTemplate } from './runtime/template-loader'
 import type { Compiler } from '../../../../core/protocols/compiler'
 import type { ComponentMetadataType } from '../../../../types/component'
@@ -6,7 +7,6 @@ import { parse } from '@babel/parser'
 import traverse from '@babel/traverse'
 import generate from '@babel/generator'
 import { isIdentifier, isMemberExpression, isStringLiteral, isVariableDeclarator, stringLiteral } from '@babel/types'
-import { _try } from 'funcio/lib/Monads/Either'
 
 export interface ReactBuildResult {
   html: string
