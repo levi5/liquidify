@@ -1,4 +1,5 @@
 import traverse from '@babel/traverse'
+import { _try } from 'funcio/lib/Monads/Either'
 import {
   isArrayExpression,
   isBooleanLiteral,
@@ -29,21 +30,25 @@ interface ImportMapValue {
   isDefault: boolean
 }
 
+interface ExtractionState {
+  localDecls: Map<string, Node>
+  currentImports: Map<string, ImportMapValue>
+  currentFilePath?: string
+  visitedIdentifiers: Set<string>
+}
+
 export class SchemaExtractor {
   private readonly allowedExtensions = ['.ts', '.tsx', '.js', '.jsx']
-
-  private localDecls = new Map<string, Node>()
-  private currentImports = new Map<string, ImportMapValue>()
-  private currentFilePath?: string
-  private visitedIdentifiers = new Set<string>()
 
   constructor(private readonly fs: IFileSystem = new NodeFileSystem()) {}
 
   public extract(ast: File, currentFilePath?: string): Schema {
-    this.currentFilePath = currentFilePath
-    this.currentImports = this.collectImports(ast)
-    this.localDecls = this.collectLocalDecls(ast)
-    this.visitedIdentifiers.clear()
+    const state: ExtractionState = {
+      localDecls: this.collectLocalDecls(ast),
+      currentImports: this.collectImports(ast),
+      currentFilePath,
+      visitedIdentifiers: new Set<string>(),
+    }
 
     let schema: Schema | null = null
 
@@ -134,46 +139,46 @@ export class SchemaExtractor {
       return node.value
     }
 
-    if (isIdentifier(node)) return this.handleIdentifier(node)
-    if (isArrayExpression(node)) return this.handleArrayExpression(node)
-    if (isObjectExpression(node)) return this.handleObjectExpression(node)
+    if (isIdentifier(node)) return this.handleIdentifier(node, state)
+    if (isArrayExpression(node)) return this.handleArrayExpression(node, state)
+    if (isObjectExpression(node)) return this.handleObjectExpression(node, state)
 
     return null
   }
 
-  private handleIdentifier(node: any): any {
-    if (this.visitedIdentifiers.has(node.name)) {
+  private handleIdentifier(node: any, state: ExtractionState): any {
+    if (state.visitedIdentifiers.has(node.name)) {
       console.warn(`Circular reference detected for identifier: ${node.name}`)
       return null
     }
 
-    this.visitedIdentifiers.add(node.name)
-    const resolved = this.resolveIdentifier(node.name)
-    const result = this.parseObject(resolved)
-    this.visitedIdentifiers.delete(node.name)
+    state.visitedIdentifiers.add(node.name)
+    const resolved = this.resolveIdentifier(node.name, state)
+    const result = this.parseObject(resolved, state)
+    state.visitedIdentifiers.delete(node.name)
     return result
   }
 
-  private handleArrayExpression(node: any): any[] {
+  private handleArrayExpression(node: any, state: ExtractionState): any[] {
     const result: any[] = []
     for (const el of node.elements) {
       if (!el) continue
       if (isSpreadElement(el)) {
-        const spreadValue = this.parseObject(el.argument)
+        const spreadValue = this.parseObject(el.argument, state)
         if (Array.isArray(spreadValue)) result.push(...spreadValue)
       } else {
-        result.push(this.parseObject(el))
+        result.push(this.parseObject(el, state))
       }
     }
     return result
   }
 
-  private handleObjectExpression(node: any): Record<string, unknown> {
+  private handleObjectExpression(node: any, state: ExtractionState): Record<string, unknown> {
     const result: Record<string, unknown> = {}
 
     for (const prop of node.properties) {
       if (isSpreadElement(prop)) {
-        const spreadValue = this.parseObject(prop.argument)
+        const spreadValue = this.parseObject(prop.argument, state)
         if (typeof spreadValue === 'object' && spreadValue !== null) {
           Object.assign(result, spreadValue)
         }
@@ -184,7 +189,7 @@ export class SchemaExtractor {
 
       const key = this.getPropertyKey(prop)
       if (key) {
-        result[key] = this.parseObject(prop.value)
+        result[key] = this.parseObject(prop.value, state)
       }
     }
 
@@ -197,13 +202,13 @@ export class SchemaExtractor {
     return ''
   }
 
-  private resolveIdentifier(name: string): any | null {
-    const local = this.localDecls.get(name)
+  private resolveIdentifier(name: string, state: ExtractionState): any | null {
+    const local = state.localDecls.get(name)
     if (local) return local
 
-    const imported = this.currentImports.get(name)
-    if (imported && this.currentFilePath) {
-      return this.resolveExternalSchema(imported.source, imported.specifierName, this.currentFilePath)
+    const imported = state.currentImports.get(name)
+    if (imported && state.currentFilePath) {
+      return this.resolveExternalSchema(imported.source, imported.specifierName, state.currentFilePath)
     }
 
     return null
@@ -213,35 +218,42 @@ export class SchemaExtractor {
     const resolvedPath = this.resolveFilePath(importPath, currentFilePath)
     if (!resolvedPath) return null
 
-    try {
+    const result = _try.sync(() => {
       const content = this.fs.readFileSync(resolvedPath)
       const ast = this.parseFile(content)
 
       const externalExtractor = new SchemaExtractor(this.fs)
       return externalExtractor.extractExportedNode(ast, specifierName, resolvedPath)
-    } catch (error) {
-      console.warn(`Could not resolve external schema: ${importPath}`, error)
-      return null
-    }
+    })
+
+    return result.match({
+      left: (error) => {
+        console.warn(`Could not resolve external schema: ${importPath}`, error)
+        return null
+      },
+      right: (schema) => schema,
+    })
   }
 
   private extractExportedNode(ast: File, specifierName: string, currentFilePath?: string): any | null {
-    this.currentFilePath = currentFilePath
-    this.currentImports = this.collectImports(ast)
-    this.localDecls = this.collectLocalDecls(ast)
-    this.visitedIdentifiers.clear()
+    const state: ExtractionState = {
+      localDecls: this.collectLocalDecls(ast),
+      currentImports: this.collectImports(ast),
+      currentFilePath,
+      visitedIdentifiers: new Set<string>(),
+    }
 
     for (const node of ast.program.body) {
       if (node.type === 'ExportNamedDeclaration' && node.declaration && isVariableDeclaration(node.declaration)) {
         for (const decl of node.declaration.declarations) {
           if (isIdentifier(decl.id) && decl.id.name === specifierName && decl.init) {
-            return this.parseObject(decl.init)
+            return this.parseObject(decl.init, state)
           }
         }
       }
 
       if (node.type === 'ExportDefaultDeclaration' && specifierName === 'default') {
-        return this.parseObject(node.declaration)
+        return this.parseObject(node.declaration, state)
       }
     }
 

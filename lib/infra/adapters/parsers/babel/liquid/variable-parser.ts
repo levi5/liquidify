@@ -1,4 +1,3 @@
-import generate from '@babel/generator'
 import {
   isIdentifier,
   isObjectPattern,

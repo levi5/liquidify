@@ -2,8 +2,9 @@
 import ora from 'ora'
 import kleur from 'kleur'
 import { _match } from 'funcio'
+import { _try } from 'funcio/lib/Monads/Either'
 import { runInit } from './commands/init'
-import type { LiquidifyError } from '../../core/errors/liquidify-error'
+import { LiquidifyError } from '../../core/errors/liquidify-error'
 import '../../shared/string'
 
 const printBanner = (): void => {
@@ -74,21 +75,21 @@ const runBuild = async (watch: boolean): Promise<void> => {
       .exec()
   })
 
-  const shutdown = () => {
+  const shutdown = (code = 0) => {
     spinner.stop()
     builder.disposeSync()
     console.log(kleur.yellow('\n👋 MM!'))
-    process.exit(0)
+    process.exit(code)
   }
 
-  process.once('SIGINT', shutdown)
-  process.once('SIGTERM', shutdown)
-  process.once('SIGHUP', shutdown)
+  process.once('SIGINT', () => shutdown())
+  process.once('SIGTERM', () => shutdown())
+  process.once('SIGHUP', () => shutdown())
 
   if (process.stdin.isTTY) {
     process.stdin.on('data', (data) => {
       _match(data.toString() === '\u0003')
-        .with(true, shutdown)
+        .with(true, () => shutdown())
         .with(false, () => {})
         .exec()
     })
@@ -109,7 +110,7 @@ const runBuild = async (watch: boolean): Promise<void> => {
 
   _match(watch)
     .with(true, () => builder.watch())
-    .with(false, shutdown)
+    .with(false, () => shutdown())
     .exec()
 }
 

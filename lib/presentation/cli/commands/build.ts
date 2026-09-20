@@ -32,6 +32,13 @@ export class LiquidifyBuilder extends EventEmitter {
 
   async build() {
     this.emit('build:start')
+    const errors: LiquidifyError[] = []
+    const collectError = (error: unknown, filePath?: string) => {
+      const liquidifyError =
+        error instanceof LiquidifyError ? error : new LiquidifyError(error instanceof Error ? error.message : String(error), filePath)
+      errors.push(liquidifyError)
+      this.emit('error', liquidifyError)
+    }
 
     const compiler = new EsbuildCompiler()
     const runtimeBuilder = new ReactRuntimeBuilder(compiler)
@@ -42,21 +49,25 @@ export class LiquidifyBuilder extends EventEmitter {
 
     this.fileSystem.writeFileSync(path.join(assetsDir, 'react-runtime.js'), runtimeScript)
 
-    const registry = await this.scanReactComponents()
+    const registry = await this.scanReactComponents(collectError)
     this.parser.setReactRegistry(registry)
 
-    await this.buildComponents()
+    await this.buildComponents(collectError)
+
+    if (errors.length > 0) {
+      throw new AggregateError(errors, `Build failed with ${errors.length} error(s).`)
+    }
 
     this.emit('build:end')
   }
 
-  private async scanReactComponents(): Promise<Map<string, ReactComponentConfig>> {
+  private async scanReactComponents(onError: (error: unknown, filePath: string) => void): Promise<Map<string, ReactComponentConfig>> {
     const registry = new Map<string, ReactComponentConfig>()
     const files = await glob(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}'))
 
     for (const file of files) {
       const filePath = path.resolve(file)
-      const component = await this.handleFileScanning(filePath)
+      const component = await this.handleFileScanning(filePath, onError)
       if (component) registry.set(component.name, component.config)
     }
 
@@ -64,7 +75,10 @@ export class LiquidifyBuilder extends EventEmitter {
     return registry
   }
 
-  private async handleFileScanning(filePath: string): Promise<{ name: string; config: ReactComponentConfig } | null> {
+  private async handleFileScanning(
+    filePath: string,
+    onError: (error: unknown, filePath: string) => void,
+  ): Promise<{ name: string; config: ReactComponentConfig } | null> {
     const src = this.fileSystem.readFileSync(filePath)
     const directives = this.detectDirectives(src)
     const isTSorJS = filePath.endsWith('.ts') || filePath.endsWith('.js')
@@ -142,7 +156,7 @@ export class LiquidifyBuilder extends EventEmitter {
     }
   }
 
-  private async buildComponents() {
+  private async buildComponents(onError: (error: unknown, filePath: string) => void) {
     const files = await glob(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}'))
     for (const file of files) {
       const filePath = path.resolve(file)

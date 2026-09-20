@@ -3,7 +3,7 @@ export function pascalToKebab(str: string = '') {
 }
 
 export const placeholder = (value: string, values: any) => {
-  value.replace(/\$\{(\w+)\}/g, (match, key: string) => {
+  return value.replace(/\$\{(\w+)\}/g, (match, key: string) => {
     return typeof values[key] !== 'undefined' ? String(values[key]) : match
   })
 }

@@ -17,7 +17,6 @@ import {
   type TemplateLiteral,
   type Expression,
   isParenthesizedExpression,
-  isLogicalExpression,
   identifier,
   isArrowFunctionExpression,
   isObjectPattern,

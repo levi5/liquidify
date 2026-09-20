@@ -48,7 +48,7 @@ export class BabelLiquidParser implements IParser {
   }
 
   public async parse(source: string, filePath?: string): Promise<ParsedComponent> {
-    const ast = this.astParser.parse(source)
+    const ast = this.astParser.parse(source, filePath)
     const componentMetadata = this.componentExtractor.extract(ast, source)
     if (!componentMetadata.name && componentMetadata.liquidBody && filePath) {
       componentMetadata.name = path.basename(filePath, path.extname(filePath))
