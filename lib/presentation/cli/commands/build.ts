@@ -1,4 +1,5 @@
 import { _try } from 'funcio/lib/Monads/Either'
+import { _Maybe, _match } from 'funcio'
 import { EventEmitter } from 'node:events'
 import type { FSWatcher } from 'node:fs'
 import { glob } from 'glob'
@@ -18,6 +19,8 @@ import { LiquidifyError } from '../../../core/errors/liquidify-error'
 export class LiquidifyBuilder extends EventEmitter {
   private watcher: FSWatcher | null = null
   private timer: NodeJS.Timeout | null = null
+  private building = false
+  private queued = false
   constructor(
     private options: { componentsDir: string; output: string },
     private parser: BabelLiquidParser,
@@ -101,8 +104,12 @@ export class LiquidifyBuilder extends EventEmitter {
     })
 
     if (result.isLeft()) {
-      onError(result.value, filePath)
-      return null
+      const error = result.value as Error
+      if (error instanceof LiquidifyError) {
+        if (this.listenerCount('error')) this.emit('error', error)
+        throw error
+      }
+      throw error
     }
 
     return result.value as { name: string; config: ReactComponentConfig }
@@ -161,36 +168,60 @@ export class LiquidifyBuilder extends EventEmitter {
 
       const result = await _try.async(() => this.useCase.execute(src, filePath))
       if (result.isLeft()) {
-        onError(result.value, filePath)
+        if (result.value instanceof LiquidifyError) {
+          if (this.listenerCount('error')) this.emit('error', result.value)
+        }
+        throw result.value
       }
     }
   }
 
   public watch() {
     this.watcher = chokidar.watch([this.options.componentsDir], { ignoreInitial: true })
+    ;['add', 'change', 'unlink', 'addDir', 'unlinkDir'].forEach((event) => {
+      this.watcher!.on(event, (file) => this.schedule(file))
+    })
+  }
 
-    const scheduleRebuild = (file: string) => {
-      this.emit('file:change', file)
+  private schedule(file: string): void {
+    this.emit('file:change', file)
+    _Maybe
+      .of(this.timer)
+      .map((timer) => (timer ? clearTimeout(timer) : null))
+      .getOrElse(null)
+    this.timer = setTimeout(() => void this.runSerialized(), 200)
+  }
 
-      if (this.timer) clearTimeout(this.timer)
-      this.timer = setTimeout(() => {
-        void _try
-          .async(() => this.build())
-          .then((result) => {
-            if (result.isLeft() && !(result.value instanceof AggregateError)) {
-              this.emit('error', result.value)
-            }
+  private async runSerialized(): Promise<void> {
+    return _match(this.building)
+      .with(true, () => {
+        this.queued = true
+        return Promise.resolve()
+      })
+      .with(this.building, async () => {
+        this.building = true
+        const result = await _try.async(() => this.build())
+        result.match({
+          right: () => null,
+          left: (error: Error) => this.emit('build:failed', error),
+        })
+        this.building = false
+        return _match(this.queued)
+          .with(true, () => {
+            this.queued = false
+            return this.runSerialized()
           })
-      }, 200)
-    }
-
-    this.watcher.on('change', scheduleRebuild)
-    this.watcher.on('add', scheduleRebuild)
-    this.watcher.on('unlink', scheduleRebuild)
+          .with(this.queued, () => Promise.resolve())
+          .exec()
+      })
+      .exec()
   }
 
   public disposeSync() {
-    if (this.timer) clearTimeout(this.timer)
+    _Maybe
+      .of(this.timer)
+      .map((timer) => (timer ? clearTimeout(timer) : null))
+      .getOrElse(null)
     _try.sync(() => this.watcher?.close())
   }
 }

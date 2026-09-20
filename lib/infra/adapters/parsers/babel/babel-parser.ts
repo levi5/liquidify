@@ -50,6 +50,9 @@ export class BabelLiquidParser implements IParser {
   public async parse(source: string, filePath?: string): Promise<ParsedComponent> {
     const ast = this.astParser.parse(source, filePath)
     const componentMetadata = this.componentExtractor.extract(ast, source)
+    if (!componentMetadata.name && componentMetadata.liquidBody && filePath) {
+      componentMetadata.name = path.basename(filePath, path.extname(filePath))
+    }
     const schema = this.schemaExtractor.extract(ast, filePath)
 
     if (componentMetadata.mode === 'react') {
@@ -112,9 +115,11 @@ export class BabelLiquidParser implements IParser {
   private handleDefaultMode(ast: any, metadata: any, schema: any, filePath?: string): ParsedComponent {
     const { componentCss, globalCss } = filePath ? this.cssExtractor.extract(ast, filePath) : { componentCss: '', globalCss: '' }
 
-    const jsxResult = metadata.jsxElement
-      ? this.jsxConverter.convert(metadata.jsxElement, ast, filePath, metadata.name, metadata.mode, metadata.inlineComponents)
-      : { html: '', blocksSchema: [], scriptAssets: [] }
+    const jsxResult = metadata.liquidBody
+      ? this.jsxConverter.convertBody(metadata.liquidBody, ast, filePath, metadata.name, metadata.inlineComponents)
+      : metadata.jsxElement
+        ? this.jsxConverter.convert(metadata.jsxElement, ast, filePath, metadata.name, metadata.mode, metadata.inlineComponents)
+        : { html: '', blocksSchema: [], scriptAssets: [] }
 
     const script = metadata.hasUseScript ? this.scriptGenerator.generate(metadata.scriptStatements, metadata.name) : ''
 

@@ -1,8 +1,10 @@
 import type { ParsedComponent } from '../../core/entities/parsed-component'
 import { ValidationError } from '../../core/errors/validation-error'
+import { validateSchema } from './schema-validation'
 
 export class ValidationService {
   public validate(component: ParsedComponent, filePath?: string): void {
+    validateSchema(component.schema ?? {}, filePath)
     if (!filePath) return
 
     const normalizedPath = filePath.replace(/\\/g, '/')

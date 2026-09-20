@@ -1,4 +1,5 @@
 import { join } from 'node:path'
+import { _Maybe, _match } from 'funcio'
 import { _try } from 'funcio/lib/Monads/Either'
 
 import type { GeneratorOptions, ResolvedGeneratorOptions } from '../../../../core/entities/liquid'
@@ -64,7 +65,23 @@ export class LiquidFileSystemGenerator implements IGenerator {
 
   private async appendGlobalCss(css: string): Promise<void> {
     const globalCssPath = join(this.options.assetsDir, 'global.css')
-    await this.fileSystem.appendFile(globalCssPath, css)
+    const trimmed = css.trim()
+    return _match(!trimmed)
+      .with(true, () => Promise.resolve())
+      .with(!trimmed, async () => {
+        const exists = await this.fileSystem.exists(globalCssPath)
+        const current = await _Maybe
+          .of(exists)
+          .map((found) => (found ? this.fileSystem.readFile(globalCssPath) : Promise.resolve('')))
+          .getOrElse(Promise.resolve(''))
+        return _match(current.includes(trimmed))
+          .with(true, () => Promise.resolve())
+          .with(current.includes(trimmed), () =>
+            this.fileSystem.appendFile(globalCssPath, current && !current.endsWith('\n') ? `\n${css}` : css),
+          )
+          .exec()
+      })
+      .exec()
   }
 
   private async touchDirectory(dir: string): Promise<void> {
@@ -172,7 +189,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
     })
 
     if (result.isLeft()) {
-      console.error('❌ Error writing script file:', result.value)
+      throw result.value
     }
   }
 
@@ -241,7 +258,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
   }
 
   private async ensureDirectories(): Promise<void> {
-    const dirs = [this.options.sectionsDir, this.options.assetsDir]
+    const dirs = [this.options.sectionsDir, this.options.assetsDir, this.options.snippetsDir, this.options.blocksDir]
 
     for (const dir of dirs) {
       if (!(await this.fileSystem.exists(dir))) {

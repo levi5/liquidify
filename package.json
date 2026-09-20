@@ -16,7 +16,8 @@
   },
   "files": [
     "dist",
-    "resources"
+    "resources",
+    "docs"
   ],
   "bin": {
     "liquidify": "dist/presentation/cli/index.js",
@@ -25,8 +26,8 @@
     "liquidx:watch": "dist/presentation/cli/watch.js"
   },
   "scripts": {
-    "format": "biome format lib --write",
-    "lint": "biome check lib --write --unsafe",
+    "format": "biome format lib  --write",
+    "lint": "biome check lib",
     "prepublishOnly": "npm run build",
     "build": "tsc -p tsconfig.lib.json",
     "pretest": "tsc -p tsconfig.lib.json",
@@ -39,7 +40,10 @@
     "liquidify": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
     "liquidify:watch": "tsx lib/presentation/cli/index.ts --watch",
     "liquidx": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
-    "liquidx:watch": "tsx lib/presentation/cli/index.ts --watch"
+    "liquidx:watch": "tsx lib/presentation/cli/index.ts --watch",
+    "test": "npm run build && node --test \"tests/**/*.test.cjs\"",
+    "test:runtime": "npm run build && node --test \"tests/runtime/*.test.cjs\"",
+    "test:example:browser": "npm run build && node tests/react-example-browser.cjs"
   },
   "keywords": [
     "shopify",
@@ -60,7 +64,7 @@
     "chokidar": "^3.5.3",
     "classnames": "^2.5.1",
     "esbuild": "0.27.3",
-    "funcio": "^0.0.29",
+    "funcio": "^0.0.31",
     "glob": "^10.3.10",
     "kleur": "^4.1.5",
     "ora": "^5.4.1",

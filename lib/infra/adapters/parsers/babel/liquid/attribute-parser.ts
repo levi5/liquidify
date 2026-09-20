@@ -7,14 +7,13 @@ import {
   isJSXAttribute,
   isJSXExpressionContainer,
   isJSXIdentifier,
-  isMemberExpression,
   isObjectExpression,
   isStringLiteral,
-  isTemplateLiteral,
   isUnaryExpression,
   isBinaryExpression,
   isBooleanLiteral,
   isConditionalExpression,
+  isLogicalExpression,
   type ArrowFunctionExpression,
   type JSXAttribute,
   type JSXExpressionContainer,
@@ -27,6 +26,36 @@ import { _Maybe } from 'funcio'
 import type { ILiquidExpressionParser } from '../../../../../types/liquid'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 import { pascalToKebab } from '../../../../../shared/string'
+import { escapeAttributeTemplate, escapedOutput } from '../../../../../shared/html'
+import { renderCondition } from './condition'
+
+const booleanAttributes = new Set([
+  'allowfullscreen',
+  'async',
+  'autofocus',
+  'autoplay',
+  'checked',
+  'controls',
+  'default',
+  'defer',
+  'disabled',
+  'formnovalidate',
+  'hidden',
+  'inert',
+  'ismap',
+  'itemscope',
+  'loop',
+  'multiple',
+  'muted',
+  'nomodule',
+  'novalidate',
+  'open',
+  'playsinline',
+  'readonly',
+  'required',
+  'reversed',
+  'selected',
+])
 
 export class LiquidAttributeConverter {
   constructor(
@@ -60,9 +89,7 @@ export class LiquidAttributeConverter {
 
     if (!attribute.value) return ` ${attributeName}`
     if (isStringLiteral(attribute.value)) {
-      const val = attribute.value.value
-      const finalVal = val.includes('{{') && !val.includes('| escape') ? val.replace(' }}', ' | escape }}') : val
-      return ` ${attributeName}="${this.escapeQuotes(finalVal)}"`
+      return ` ${attributeName}="${escapeAttributeTemplate(attribute.value.value)}"`
     }
     if (isJSXExpressionContainer(attribute.value)) return this.handleExpressionAttribute(attribute, attributeName, renames, context)
     return ''
@@ -141,25 +168,54 @@ export class LiquidAttributeConverter {
       .getOrElse(null)
 
     if (!expression || !isExpression(expression)) return ''
-    if (this.isClassTemplate(attributeName, expression)) return this.getClassName(attribute, renames, context)
     if (this.isEventArrowFunction(attributeName, attribute)) return this.handleEventHandler(attribute, attributeName, renames, context)
 
     if (attributeName === 'style' && isObjectExpression(expression)) {
       return this.handleStyleObject(expression, renames, context)
     }
 
-    if (this.isBooleanExpression(expression) && !this.isDomMode(context)) {
-      if (isUnaryExpression(expression) && expression.operator === '!') {
-        const argCode = this.expressionParser.generateLiquidCode(expression.argument, false, renames, context)
-        return ` {% unless ${argCode} %}${attributeName}{% endunless %}`
-      }
-      const condition = this.expressionParser.generateLiquidCode(expression, false, renames, context)
-      return ` {% if ${condition} %}${attributeName}{% endif %}`
+    if (booleanAttributes.has(attributeName)) {
+      return this.renderBoolean(expression, ` ${attributeName}`, '', renames, context)
     }
 
     if (isConditionalExpression(expression)) return this.handleConditionalAttribute(attributeName, expression, renames, context)
 
     return this.handleDefaultExpression(attributeName, expression, renames, context)
+  }
+
+  private renderBoolean(expression: any, yes: string, no: string, renames?: Record<string, string>, context?: ParsingContext): string {
+    if (isBooleanLiteral(expression)) return expression.value ? yes : no
+    if (isConditionalExpression(expression)) {
+      const consequent = this.renderBoolean(expression.consequent, yes, no, renames, context)
+      const alternate = this.renderBoolean(expression.alternate, yes, no, renames, context)
+      const markup = renderCondition(expression.test, consequent, alternate, (node) =>
+        this.expressionParser.generateLiquidCode(node, true, renames, context),
+      )
+      return `${context?.getPendingAssigns() || ''}${markup}`
+    }
+    const markup = renderCondition(expression, yes, no, (node) => this.expressionParser.generateLiquidCode(node, true, renames, context))
+    return `${context?.getPendingAssigns() || ''}${markup}`
+  }
+
+  private renderValue(expression: any, renames?: Record<string, string>, context?: ParsingContext): string {
+    if (isStringLiteral(expression)) return escapeAttributeTemplate(expression.value)
+    if (isConditionalExpression(expression)) {
+      const yes = this.renderValue(expression.consequent, renames, context)
+      const no = this.renderValue(expression.alternate, renames, context)
+      const markup = renderCondition(expression.test, yes, no, (node) =>
+        this.expressionParser.generateLiquidCode(node, true, renames, context),
+      )
+      return `${context?.getPendingAssigns() || ''}${markup}`
+    }
+    if (isLogicalExpression(expression) && expression.operator === '??') {
+      const left = this.expressionParser.generateLiquidCode(expression.left, false, renames, context)
+      return `{% if ${left} != nil %}${this.renderValue(expression.left, renames, context)}{% else %}${this.renderValue(expression.right, renames, context)}{% endif %}`
+    }
+    if (this.isBooleanExpression(expression) || isLogicalExpression(expression)) {
+      return this.renderBoolean(expression, 'true', 'false', renames, context)
+    }
+    const code = this.expressionParser.generateLiquidCode(expression, false, renames, context)
+    return `${context?.getPendingAssigns() || ''}${escapedOutput(code)}`
   }
 
   private isBooleanExpression(node: any): boolean {
@@ -177,7 +233,7 @@ export class LiquidAttributeConverter {
         const key = isIdentifier(prop.key) ? pascalToKebab(prop.key.name) : isStringLiteral(prop.key) ? prop.key.value : ''
         if (!key) return ''
 
-        const value = this.expressionParser.parseExpression(prop.value, renames, context)
+        const value = this.renderValue(prop.value, renames, context)
 
         return `${key}: ${value};`
       })
@@ -192,14 +248,7 @@ export class LiquidAttributeConverter {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string {
-    const condition = this.expressionParser.generateLiquidCode(expression.test, true, renames, context)
-    const consequent = this.expressionParser.parseExpression(expression.consequent, renames, context)
-    const alternate = this.expressionParser.parseExpression(expression.alternate, renames, context)
-
-    const cleanConsequent = this.escapeQuotes(consequent.replace(/^{{\s*|\s*}}$/g, ''))
-    const cleanAlternate = this.escapeQuotes(alternate.replace(/^{{\s*|\s*}}$/g, ''))
-
-    return ` ${attributeName}="{% if ${condition} %}${cleanConsequent}{% else %}${cleanAlternate}{% endif %}"`
+    return ` ${attributeName}="${this.renderValue(expression, renames, context)}"`
   }
 
   private handleDefaultExpression(
@@ -214,18 +263,7 @@ export class LiquidAttributeConverter {
       return ` ${attributeName}="liquidify['${kebabName}'].${expression.name}(event)"`
     }
 
-    const parsed = this.expressionParser.parseExpression(expression, renames, context)
-    const trimmed = parsed.trim()
-
-    if (this.isLiquidSyntax(trimmed)) return ` ${attributeName}="${this.escapeQuotes(parsed)}"`
-
-    const generated = this.expressionParser.generateLiquidCode(expression, false, renames, context)
-    if (trimmed === generated && !this.isLiquidSyntax(generated)) {
-      return ` ${attributeName}="${this.escapeQuotes(generated)}"`
-    }
-
-    const finalGenerated = generated.includes('| escape') ? generated : `${generated} | escape`
-    return ` ${attributeName}="{{ ${finalGenerated} }}"`
+    return ` ${attributeName}="${this.renderValue(expression, renames, context)}"`
   }
 
   private isEventArrowFunction(
@@ -294,60 +332,6 @@ export class LiquidAttributeConverter {
     return ` ${attributeName}="${this.escapeQuotes(code)}"`
   }
 
-  private isClassTemplate(name: string, expression: any): boolean {
-    return name === 'class' && isTemplateLiteral(expression)
-  }
-
-  private getClassName(attribute: JSXAttribute | JSXSpreadAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
-    const classNames: string[] = []
-    const expression = _Maybe
-      .of(attribute)
-      .map((attribute) => attribute.value)
-      .map((identifier) => identifier.expression)
-      .map((expression) => expression)
-      .getOrElse(null)
-
-    _Maybe
-      .of(expression)
-      .map((expression) => expression.quasis)
-      .map((quasis) => quasis)
-      .getOrElse([])
-      .forEach(({ value: { raw } }: any) => {
-        const value = raw.trim().replace(/,/g, '')
-        value && classNames.push(...value.split(/\s+/).filter(Boolean))
-      })
-
-    _Maybe
-      .of(expression)
-      .map((expression) => expression.expressions)
-      .map((expressions) => expressions)
-      .getOrElse([])
-      .forEach((expression: any) => {
-        if (isMemberExpression(expression) && isIdentifier(expression.property)) {
-          classNames.push(expression.property.name)
-          return
-        }
-
-        if (isIdentifier(expression)) {
-          classNames.push(`{{ ${expression.name} }}`)
-          return
-        }
-
-        classNames.push(this.expressionParser.generateLiquidCode(expression, false, renames, context))
-      })
-
-    const finalClasses = classNames
-      .filter(Boolean)
-      .map((className) => className.replace(/"/g, ''))
-      .join(' ')
-
-    return ` class="${finalClasses}"`
-  }
-
-  private isLiquidSyntax(value: string): boolean {
-    return value.startsWith('{{') || value.startsWith('{%') || value.includes('{{')
-  }
-
   private normalizeAttributeName(attribute: JSXAttribute): string {
     const name = _Maybe
       .of(attribute)
@@ -356,7 +340,7 @@ export class LiquidAttributeConverter {
       .map((name) => name)
       .getOrElse('')
 
-    let attributeName = this.htmlAttributeConverter.toHtmlAttribute(name)
+    let attributeName = this.htmlAttributeConverter.toHtmlAttribute(name as string)
 
     if (attributeName && attributeName.startsWith('on')) {
       attributeName = attributeName.toLowerCase()

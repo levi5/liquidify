@@ -18,8 +18,8 @@ import {
   isReturnStatement,
   type ObjectPattern,
 } from '@babel/types'
-import { _Maybe, _Object } from 'funcio'
-
+import { _Maybe, _Object, _match } from 'funcio'
+import { ValidationError } from '../../../../../core/errors/validation-error'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidVariableParser {
@@ -38,100 +38,167 @@ export class LiquidVariableParser {
       .of(_Object.getPathValue(['init'], declaration))
       .map((value) => value)
       .getOrElse(null)
+    return _Maybe
+      .of(!id || !init)
+      .map((missing) => (missing ? [] : this.dispatchDeclaration(id, init, renames, context)))
+      .getOrElse([])
+  }
 
-    if (!id || !init) return []
+  private dispatchDeclaration(id: any, init: any, renames?: Record<string, string>, context?: ParsingContext): string[] {
+    return _match(true)
+      .with(isIdentifier(id) && isTemplateLiteral(init) && init.expressions.length === 0, () => [
+        this.assignConstant(id.name, init.quasis[0].value.raw),
+      ])
+      .with(isIdentifier(id) && isConditionalExpression(init), () =>
+        this.parseConditionalExpressionRecursive(id.name, init, renames, context),
+      )
+      .with(isIdentifier(id) && isLogicalExpression(init) && init.operator === '||', () =>
+        this.parseOrFallback(id.name, init, renames, context),
+      )
+      .with(isIdentifier(id) && isLogicalExpression(init) && init.operator === '??', () =>
+        this.parseNilFallback(id.name, init, renames, context),
+      )
+      .with(isIdentifier(id) && this.isFilterCall(init), () => this.parseFilterAssign(id.name, init, renames, context))
+      .with(isIdentifier(id), () => [`{% assign ${id.name} = ${this.generateLiquidCode(init, false, renames, context)} %}`])
+      .with(isObjectPattern(id), () => this.flattenObjectPattern(id, this.generateLiquidCode(init, false, renames, context)))
+      .with(true, () => [])
+      .exec() as string[]
+  }
 
-    if (isIdentifier(id) && isTemplateLiteral(init) && init.expressions.length === 0) {
-      const raw = init.quasis[0].value.raw
-      return [`{% assign ${id.name} = ${raw} %}`]
-    }
+  private assignConstant(name: string, raw: string): string {
+    return `{% assign ${name} = ${JSON.stringify(raw)} %}`
+  }
 
-    if (isIdentifier(id) && isConditionalExpression(init)) {
-      return this.parseConditionalExpressionRecursive(id.name, init, renames, context)
-    }
+  private isFilterCall(init: any): boolean {
+    return (
+      isCallExpression(init) &&
+      isMemberExpression(init.callee) &&
+      isIdentifier(init.callee.property) &&
+      (init.callee.property.name === 'filter' || init.callee.property.name === 'find')
+    )
+  }
 
-    if (isIdentifier(id) && isLogicalExpression(init) && (init.operator === '||' || init.operator === '??')) {
-      const extractOrPartsNodes = (expr: any): any[] => {
-        if (isLogicalExpression(expr) && (expr.operator === '||' || expr.operator === '??')) {
-          return [...extractOrPartsNodes(expr.left), expr.right]
-        }
-        return [expr]
-      }
+  private collectOrParts(expr: any): any[] {
+    return _match(true)
+      .with(isLogicalExpression(expr) && (expr.operator === '||' || expr.operator === '??'), () => [
+        ...this.collectOrParts(expr.left),
+        expr.right,
+      ])
+      .with(true, () => [expr])
+      .exec() as any[]
+  }
 
-      const nodes = extractOrPartsNodes(init)
-      const baseNode = nodes.shift()
-      const baseCode = this.generateLiquidCode(baseNode, false, renames, context)
-
-      const hasObjectLiteral = nodes.some((n) => isObjectExpression(n))
-
-      if (hasObjectLiteral) {
-        const lines = [`{% assign ${id.name} = ${baseCode} %}`]
-        for (const node of nodes) {
+  private parseOrFallback(idName: string, init: any, renames?: Record<string, string>, context?: ParsingContext): string[] {
+    const nodes = this.collectOrParts(init)
+    const baseNode = nodes.shift()
+    const baseCode = this.generateLiquidCode(baseNode, false, renames, context)
+    const hasObjectLiteral = nodes.some((n) => isObjectExpression(n))
+    return _match(hasObjectLiteral)
+      .with(true, () => {
+        const lines = [`{% assign ${idName} = ${baseCode} %}`]
+        nodes.forEach((node) => {
           const code = this.generateLiquidCode(node, false, renames, context)
-          lines.push(`{% if ${id.name} == nil or ${id.name} == "" or ${id.name} == false %}`)
-          if (!isObjectExpression(node)) {
-            lines.push(`  {% assign ${id.name} = ${code} %}`)
-          }
+          lines.push(`{% if ${idName} == nil or ${idName} == "" or ${idName} == false %}`)
+          _Maybe
+            .of(!isObjectExpression(node))
+            .map((assignable) => (assignable ? lines.push(`  {% assign ${idName} = ${code} %}`) : null))
+            .getOrElse(null)
           lines.push(`{% endif %}`)
-        }
+        })
         return lines
-      }
+      })
+      .with(hasObjectLiteral, () => {
+        const defaults = nodes.map((n) => ` | default: ${this.generateLiquidCode(n, false, renames, context)}`).join('')
+        return [`{% assign ${idName} = ${baseCode}${defaults} %}`]
+      })
+      .exec() as string[]
+  }
 
-      const parts = nodes.map((n) => this.generateLiquidCode(n, false, renames, context))
-      const defaults = parts.map((p) => ` | default: ${p}`).join('')
-      return [`{% assign ${id.name} = ${baseCode}${defaults} %}`]
-    }
+  private parseNilFallback(idName: string, init: any, renames?: Record<string, string>, context?: ParsingContext): string[] {
+    const nodes = this.collectOrParts(init)
+    const baseNode = nodes.shift()
+    const baseCode = this.generateLiquidCode(baseNode, false, renames, context)
+    const lines = [`{% assign ${idName} = ${baseCode} %}`]
+    nodes.forEach((node) => {
+      const code = this.generateLiquidCode(node, false, renames, context)
+      lines.push(`{% if ${idName} == nil %}`)
+      lines.push(`  {% assign ${idName} = ${code} %}`)
+      lines.push(`{% endif %}`)
+    })
+    return lines
+  }
 
-    const valueCode = this.generateLiquidCode(init, false, renames, context)
+  private parseFilterAssign(idName: string, init: any, renames?: Record<string, string>, context?: ParsingContext): string[] {
+    const methodName = (init.callee.property as any).name
+    const callback = init.arguments[0]
+    return _Maybe
+      .of(isArrowFunctionExpression(callback) && callback.params.length > 0)
+      .map(
+        (valid) =>
+          _match(valid)
+            .with(false, () => [`{% assign ${idName} = ${this.generateLiquidCode(init, false, renames, context)} %}`])
+            .with(valid, () => {
+              const arrayName = this.generateLiquidCode(init.callee.object, false, renames, context)
+              const itemName = isIdentifier(callback.params[0]) ? (callback.params[0] as any).name : 'item'
+              const where = this.whereFilter(arrayName, itemName, callback.body)
+              return (
+                _Maybe
+                  .of(where)
+                  .map(
+                    (filtered) =>
+                      _match(methodName)
+                        .with('find', () => [`{% assign ${idName} = ${filtered} | first %}`])
+                        .with(methodName, () => [`{% assign ${idName} = ${filtered} %}`])
+                        .exec() as string[],
+                  )
+                  .getOrElse(null) ?? this.unsupportedFilter(idName, context)
+              )
+            })
+            .exec() as string[],
+      )
+      .getOrElse([`{% assign ${idName} = ${this.generateLiquidCode(init, false, renames, context)} %}`])
+  }
 
-    if (isIdentifier(id)) {
-      if (
-        isCallExpression(init) &&
-        isMemberExpression(init.callee) &&
-        isIdentifier(init.callee.property) &&
-        (init.callee.property.name === 'filter' || init.callee.property.name === 'find')
-      ) {
-        const methodName = init.callee.property.name
-        const callback = init.arguments[0]
-        if (isArrowFunctionExpression(callback) && callback.params.length > 0) {
-          const arrayName = this.generateLiquidCode(init.callee.object, false, renames, context)
-          const itemName = isIdentifier(callback.params[0]) ? callback.params[0].name : 'item'
-          const condition = this.generateLiquidCode(callback.body, false, renames, context)
+  private whereFilter(arrayName: string, itemName: string, body: any): string | null {
+    return _match(true)
+      .with(
+        isMemberExpression(body) && isIdentifier((body as any).object, { name: itemName }),
+        () => `${arrayName} | where: "${(body.property as any).name ?? (body.property as any).value}"`,
+      )
+      .with(
+        body?.type === 'BinaryExpression' &&
+          (body.operator === '==' || (body.operator === '===' && true)) &&
+          body.left?.type === 'MemberExpression' &&
+          body.left?.object?.name === itemName,
+        () => `${arrayName} | where: "${body.left.property.name ?? body.left.property.value}", ${generate(body.right).code}`,
+      )
+      .with(true, () => null)
+      .exec() as string | null
+  }
 
-          const loopBody = [
-            `{% for ${itemName} in ${arrayName} %}`,
-            `  {% if ${condition} %}`,
-            `    {% assign ${id.name} = ${itemName} %}`,
-            methodName === 'find' ? `    {% break %}` : '',
-            `  {% endif %}`,
-            `{% endfor %}`,
-          ].filter(Boolean)
-
-          return [`{% assign ${id.name} = "" %}`, ...loopBody]
-        }
-      }
-      return [`{% assign ${id.name} = ${valueCode} %}`]
-    }
-
-    if (isObjectPattern(declaration.id)) {
-      return this.flattenObjectPattern(declaration.id, valueCode)
-    }
-    return []
+  private unsupportedFilter(idName: string, context?: ParsingContext): string[] {
+    throw new ValidationError(
+      `Unsupported filter assignment for "${idName}": only member and equality predicates compile to where filters.`,
+      context?.currentFilePath,
+    )
   }
 
   private flattenObjectPattern(pattern: ObjectPattern, basePath: string): string[] {
-    const assigns: string[] = []
-    for (const prop of pattern.properties) {
-      if (!isObjectProperty(prop) || !isIdentifier(prop.key)) continue
-      const keyName = prop.key.name
-      const fullPath = `${basePath}.${keyName}`
-      if (isIdentifier(prop.value)) {
-        assigns.push(`{% assign ${prop.value.name} = ${fullPath} %}`)
-      } else if (isObjectPattern(prop.value)) {
-        assigns.push(...this.flattenObjectPattern(prop.value, fullPath))
-      }
-    }
-    return assigns
+    return pattern.properties.flatMap((prop) =>
+      _Maybe
+        .of(!isObjectProperty(prop) || !isIdentifier(prop.key))
+        .map((skip) => (skip ? [] : this.flattenProperty(prop as any, basePath)))
+        .getOrElse([]),
+    )
+  }
+
+  private flattenProperty(prop: any, basePath: string): string[] {
+    const fullPath = `${basePath}.${prop.key.name}`
+    return _match(true)
+      .with(isIdentifier(prop.value), () => [`{% assign ${prop.value.name} = ${fullPath} %}`])
+      .with(isObjectPattern(prop.value), () => this.flattenObjectPattern(prop.value, fullPath))
+      .with(true, () => [])
+      .exec() as string[]
   }
 
   private parseConditionalExpressionRecursive(
@@ -140,23 +207,25 @@ export class LiquidVariableParser {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string[] {
-    const lines: string[] = []
-    lines.push(`{% if ${this.generateLiquidCode(expr.test, true, renames, context)} %}`)
-    lines.push(`  {% assign ${idName} = ${this.generateLiquidCode(expr.consequent, false, renames, context)} %}`)
-
+    const lines: string[] = [
+      `{% if ${this.generateLiquidCode(expr.test, true, renames, context)} %}`,
+      `  {% assign ${idName} = ${this.generateLiquidCode(expr.consequent, false, renames, context)} %}`,
+    ]
     let alternate = expr.alternate
     while (isConditionalExpression(alternate)) {
       lines.push(`{% elsif ${this.generateLiquidCode(alternate.test, true, renames, context)} %}`)
       lines.push(`  {% assign ${idName} = ${this.generateLiquidCode(alternate.consequent, false, renames, context)} %}`)
       alternate = alternate.alternate
     }
-
-    if (alternate) {
-      lines.push(`{% else %}`)
-      lines.push(`  {% assign ${idName} = ${this.generateLiquidCode(alternate, false, renames, context)} %}`)
-    }
+    _Maybe
+      .of(Boolean(alternate))
+      .map((hasElse) =>
+        hasElse
+          ? lines.push(`{% else %}`, `  {% assign ${idName} = ${this.generateLiquidCode(alternate, false, renames, context)} %}`)
+          : null,
+      )
+      .getOrElse(null)
     lines.push(`{% endif %}`)
-
     return lines
   }
 
@@ -167,26 +236,29 @@ export class LiquidVariableParser {
     context?: ParsingContext,
   ): string[] {
     const lines: string[] = []
-
-    const parseBranch = (stmt: IfStatement, isElsif = false) => {
-      const keyword = isElsif ? 'elsif' : 'if'
+    const parseBranch = (stmt: IfStatement, isElsif = false): void => {
+      const keyword = _match(isElsif)
+        .with(true, () => 'elsif')
+        .with(isElsif, () => 'if')
+        .exec() as string
       lines.push(`{% ${keyword} ${this.generateLiquidCode(stmt.test, true, renames, context)} %}`)
-
       lines.push(...this.extractAssignments(stmt.consequent, onReturn, renames, context).map((s) => `  ${s}`))
-
-      if (stmt.alternate) {
-        if (isIfStatement(stmt.alternate)) {
-          parseBranch(stmt.alternate, true)
-        } else {
-          lines.push(`{% else %}`)
-          lines.push(...this.extractAssignments(stmt.alternate, onReturn, renames, context).map((s) => `  ${s}`))
-        }
-      }
+      _Maybe
+        .of(stmt.alternate)
+        .map((alternate) => {
+          if (!alternate) return null
+          return _match(isIfStatement(alternate))
+            .with(true, () => parseBranch(alternate as IfStatement, true))
+            .with(isIfStatement(alternate), () => {
+              lines.push(`{% else %}`)
+              lines.push(...this.extractAssignments(alternate, onReturn, renames, context).map((s) => `  ${s}`))
+            })
+            .exec()
+        })
+        .getOrElse(null)
     }
-
     parseBranch(statement)
     lines.push(`{% endif %}`)
-
     return lines
   }
 
@@ -196,58 +268,49 @@ export class LiquidVariableParser {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string[] {
-    const assignments: string[] = []
-    if (isBlockStatement(node)) {
-      for (const stmt of node.body) {
-        if (isExpressionStatement(stmt)) {
-          if (isAssignmentExpression(stmt.expression)) {
-            if (isIdentifier(stmt.expression.left)) {
-              const rightCode = this.generateLiquidCode(stmt.expression.right, false, renames, context)
-              if (stmt.expression.operator === '+=') {
-                assignments.push(`{% assign ${stmt.expression.left.name} = ${stmt.expression.left.name} | append: ${rightCode} %}`)
-              } else {
-                assignments.push(`{% assign ${stmt.expression.left.name} = ${rightCode} %}`)
-              }
-            }
-          } else if (
-            isCallExpression(stmt.expression) &&
-            isMemberExpression(stmt.expression.callee) &&
-            isIdentifier(stmt.expression.callee.property) &&
-            stmt.expression.callee.property.name === 'map'
-          ) {
-            if (this.parseExpression) {
-              assignments.push(this.parseExpression(stmt.expression, renames, context))
-            }
-          }
-        } else if (isReturnStatement(stmt) && onReturn) {
-          assignments.push(onReturn((stmt as any).argument, context))
-        } else if (isIfStatement(stmt)) {
-          assignments.push(...this.parseIfStatement(stmt, onReturn, renames, context))
-        }
-      }
-    } else if (isExpressionStatement(node)) {
-      if (isAssignmentExpression(node.expression)) {
-        if (isIdentifier(node.expression.left)) {
-          const rightCode = this.generateLiquidCode(node.expression.right, false, renames, context)
-          if (node.expression.operator === '+=') {
-            assignments.push(`{% assign ${node.expression.left.name} = ${node.expression.left.name} | append: ${rightCode} %}`)
-          } else {
-            assignments.push(`{% assign ${node.expression.left.name} = ${rightCode} %}`)
-          }
-        }
-      } else if (
-        isCallExpression(node.expression) &&
-        isMemberExpression(node.expression.callee) &&
-        isIdentifier(node.expression.callee.property) &&
-        node.expression.callee.property.name === 'map'
-      ) {
-        if (this.parseExpression) {
-          assignments.push(this.parseExpression(node.expression, renames, context))
-        }
-      }
-    } else if (isReturnStatement(node) && onReturn) {
-      assignments.push(onReturn(node.argument, context))
-    }
-    return assignments
+    return _match(true)
+      .with(isBlockStatement(node), () => (node.body || []).flatMap((stmt: any) => this.extractSingle(stmt, onReturn, renames, context)))
+      .with(isExpressionStatement(node) || isReturnStatement(node), () => this.extractSingle(node, onReturn, renames, context))
+      .with(true, () => [])
+      .exec() as string[]
+  }
+
+  private extractSingle(
+    stmt: any,
+    onReturn?: (node: any, context?: ParsingContext) => string,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string[] {
+    return _match(true)
+      .with(isExpressionStatement(stmt) && isAssignmentExpression(stmt.expression) && isIdentifier(stmt.expression.left), () => [
+        this.assignLine(
+          stmt.expression.left.name,
+          this.generateLiquidCode(stmt.expression.right, false, renames, context),
+          stmt.expression.operator,
+        ),
+      ])
+      .with(isExpressionStatement(stmt) && this.isMapCall(stmt.expression), () =>
+        _Maybe
+          .of(this.parseExpression)
+          .map((parse: any) => [(parse as any)(stmt.expression, renames, context)])
+          .getOrElse([]),
+      )
+      .with(isReturnStatement(stmt) && Boolean(onReturn), () => [(onReturn as any)((stmt as any).argument, context)])
+      .with(isIfStatement(stmt), () => this.parseIfStatement(stmt, onReturn, renames, context))
+      .with(true, () => [])
+      .exec() as string[]
+  }
+
+  private isMapCall(expr: any): boolean {
+    return (
+      isCallExpression(expr) && isMemberExpression(expr.callee) && isIdentifier(expr.callee.property) && expr.callee.property.name === 'map'
+    )
+  }
+
+  private assignLine(name: string, code: string, operator: string): string {
+    return _match(operator)
+      .with('+=', () => `{% assign ${name} = ${name} | append: ${code} %}`)
+      .with(operator, () => `{% assign ${name} = ${code} %}`)
+      .exec() as string
   }
 }

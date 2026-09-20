@@ -8,10 +8,8 @@ export class FunctionBodyParser {
 
   public parse(node: FunctionDeclaration, metadata: ComponentMetadataType): void {
     metadata.name = _Maybe
-      .of(node)
-      .map((node) => node.id)
-      .map((id) => id.name)
-      .map((name) => name)
+      .of(node.id)
+      .map((id) => id?.name ?? '')
       .getOrElse('')
 
     if (node.body && isBlockStatement(node.body)) {

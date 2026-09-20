@@ -1,3 +1,4 @@
+import type { LiquidifyConfig } from '../../core/entities/config'
 import { ASTParser } from '../../infra/adapters/parsers/babel/ASTParser'
 import { BabelLiquidParser } from '../../infra/adapters/parsers/babel/babel-parser'
 import { ComponentExtractor } from '../../infra/adapters/parsers/babel/component'
@@ -14,7 +15,7 @@ import { ScriptGenerator } from '../../infra/adapters/parsers/babel/script/scrip
 import { TranspileFileUseCase } from '../../application/services/transpile-file'
 import { ValidationService } from '../../application/services/validation-service'
 
-export function makeLiquidifyBuilder(options: { componentsDir: string; output: string }): LiquidifyBuilder {
+export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder {
   const fileSystem = new NodeFileSystem()
   const compiler = new EsbuildCompiler()
 
@@ -23,7 +24,7 @@ export function makeLiquidifyBuilder(options: { componentsDir: string; output: s
     componentExtractor: new ComponentExtractor(),
     cssExtractor: new CSSImportExtractor(),
     jsxConverter: new LiquidParser(compiler),
-    reactCompiler: new ReactComponentCompiler(compiler, new CssInjector()),
+    reactCompiler: new ReactComponentCompiler(compiler, new CssInjector(), options.react),
     schemaExtractor: new SchemaExtractor(),
     scriptGenerator: new ScriptGenerator(compiler),
   })

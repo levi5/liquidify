@@ -11,14 +11,14 @@ const printBanner = (): void => {
   console.clear()
   console.log(
     kleur.cyan(`
-  _      _             _     _ _  __       
- | |    (_)           (_)   | (_)/ _|      
- | |     _  __ _ _   _ _  __| |_| |_ _   _ 
+  _      _             _     _ _  __
+ | |    (_)           (_)   | (_)/ _|
+ | |     _  __ _ _   _ _  __| |_| |_ _   _
  | |    | |/ _\` | | | | |/ _\` | |  _| | | |
  | |____| | (_| | |_| | | (_| | | | | |_| |
  |______|_|\\__, |\\__,_|_|\\__,_|_|_|  \\__, |
               | |                     __/ |
-              |_|                    |___/ 
+              |_|                    |___/
 `),
   )
   console.log(kleur.dim('  Shopify Liquid + React Compiler\n'))
@@ -42,9 +42,9 @@ const showHelp = (): void => {
 
 const runBuild = async (watch: boolean): Promise<void> => {
   const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' }).start()
-  const { ConfigLoader } = await import('../../infra/adapters/config/config-loader')
+  const { loadConfig } = await import('../../infra/adapters/config/config-loader')
   const { makeLiquidifyBuilder } = await import('../../main/factories/make-liquidify-builder')
-  const config = ConfigLoader.load()
+  const config = loadConfig()
   const builder = makeLiquidifyBuilder(config)
 
   spinner.succeed(`Configuration loaded (src: ${config.componentsDir}, out: ${config.output})`)
@@ -58,6 +58,7 @@ const runBuild = async (watch: boolean): Promise<void> => {
     _match(watch)
       .with(true, () => console.log(kleur.dim('\n👀 Watching for changes...')))
       .with(false, () => {})
+      ._(() => {})
       .exec()
   })
 
@@ -94,26 +95,17 @@ const runBuild = async (watch: boolean): Promise<void> => {
     })
   }
 
-  const reportFatal = (error: unknown) => {
-    spinner.fail(kleur.red('Build failed.'))
-    if (error instanceof AggregateError) {
-      console.log(kleur.red(`\nBuild failed with ${error.errors.length} error(s) (see above).`))
-    } else if (error instanceof LiquidifyError) {
-      console.log(`\n${kleur.bgRed().white(' Build Error ')} ${kleur.red(error.message)}`)
-      _match(Boolean(error.filePath))
-        .with(true, () => console.log(kleur.dim(`   ${error.filePath}`)))
-        .with(false, () => {})
-        .exec()
-    } else {
-      console.log(`\n${kleur.bgRed().white(' Build Error ')} ${kleur.red(error instanceof Error ? error.message : String(error))}`)
-    }
-  }
+  builder.on('build:failed', (error: Error) => spinner.fail(error.message))
 
-  const buildResult = await _try.async(() => builder.build())
-  if (buildResult.isLeft()) {
-    reportFatal(buildResult.value)
-    shutdown(1)
-    return
+  try {
+    await builder.build()
+  } catch (error) {
+    spinner.fail(error instanceof Error ? error.message : String(error))
+    if (!watch) {
+      process.exitCode = 1
+      builder.disposeSync()
+      return
+    }
   }
 
   _match(watch)
@@ -150,4 +142,9 @@ export async function cli(): Promise<void> {
   await action()
 }
 
-if (require.main === module) cli()
+if (require.main === module) {
+  cli().catch((error) => {
+    console.error(error instanceof Error ? error.message : String(error))
+    process.exitCode = 1
+  })
+}

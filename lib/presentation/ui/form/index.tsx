@@ -1,14 +1,13 @@
 export const FormBlock = ({
-  name: _name,
-  lang: _lang,
-  className: _className,
-  children: _children,
+  _name,
+  _lang,
+  _className,
+  _children,
 }: {
-  name: string
-  lang?: string
-  className?: string
-  props?: any
-  children?: any
+  _name: string
+  _lang?: string
+  _className?: string
+  _children?: any
 }) => {
   return null
 }

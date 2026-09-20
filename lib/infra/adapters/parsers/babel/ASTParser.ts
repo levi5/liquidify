@@ -1,7 +1,5 @@
 import { parse } from '@babel/parser'
 import type { File } from '@babel/types'
-import { _try } from 'funcio/lib/Monads/Either'
-import { LiquidifyError } from '../../../../core/errors/liquidify-error'
 
 export class ASTParser {
   public parse(source: string, filePath?: string): File {
