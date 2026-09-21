@@ -11,6 +11,14 @@ export class TranspileFileUseCase {
     private validator: ValidationService = new ValidationService(),
   ) {}
 
+  async beginBuild(files: string[], changed: Set<string>): Promise<void> {
+    await this.generator.beginBuild?.(files, changed)
+  }
+
+  async finishBuild(): Promise<void> {
+    await this.generator.finishBuild?.()
+  }
+
   async execute(source: string, filePath?: string): Promise<TranspileStatus> {
     if (!source.trim()) return 'skipped-empty'
     const component = await this.parser.parse(source, filePath)
@@ -18,7 +26,7 @@ export class TranspileFileUseCase {
 
     this.validator.validate(component, filePath)
 
-    await this.generator.generate(component)
+    await this.generator.generate(component, filePath)
     return 'ok'
   }
 }

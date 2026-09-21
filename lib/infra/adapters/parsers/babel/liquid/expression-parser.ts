@@ -1,3 +1,5 @@
+import { renderCondition } from './condition'
+import { ValidationError } from '../../../../../core/errors/validation-error'
 import { TemplateLiteralParser } from './template-literal-parser'
 import generate from '@babel/generator'
 import type { Compiler } from '../../../../../core/protocols/compiler'
@@ -56,6 +58,7 @@ export class ExpressionParser {
   }
 
   private generateNodeCode(node: Node, inCondition = false, renames?: Record<string, string>, context?: ParsingContext): string {
+    if (inCondition && this.hasMixedOperators(node)) return this.stabilizedCondition(node, renames, context)
     const cloned = cloneNode(node, true)
     traverseFast(cloned, (n) => this.normalizeNode(n, inCondition, renames, context))
     const raw = _Maybe.of(generate(cloned).code).getOrElse('')
@@ -65,11 +68,7 @@ export class ExpressionParser {
         right: (result: any) => (result.code as string).replace(/;\n$/, '').trim(),
         left: () => raw,
       }) as string
-    const code = this.postprocess(transpiled)
-    return _match(inCondition && this.hasMixedOperators(node))
-      .with(true, () => this.stabilizedCondition(code, context))
-      .with(false, () => code)
-      .exec() as string
+    return this.postprocess(transpiled)
   }
 
   private normalizeNode(n: any, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -94,7 +93,7 @@ export class ExpressionParser {
       .getOrElse(null)
     this.normalizeCall(n, inCondition, renames, context)
     this.normalizeUnary(n, renames, context)
-    this.normalizeBinary(n)
+    this.normalizeBinary(n, renames, context)
     this.normalizeMember(n)
   }
 
@@ -180,21 +179,31 @@ export class ExpressionParser {
 
   private rewriteFind(n: any, renames?: Record<string, string>, context?: ParsingContext): void {
     const callback = n.arguments[0]
-    _Maybe
-      .of(isArrowFunctionExpression(callback) && callback.params.length > 0)
-      .map(() => {
-        const objectCode = generate(n.callee.object).code
-        const param = callback.params[0]
-        const itemName = isIdentifier(param) ? param.name : 'item'
-        const varName = `${objectCode.replace(/[^a-zA-Z0-9_]/g, '_')}_found`
-        const condition = this.generateLiquidCode(callback.body, true, renames, context)
-        context?.addPendingAssign(
-          `{% assign ${varName} = nil %}\n{% for ${itemName} in ${objectCode} %}\n  {% if ${condition} %}\n    {% assign ${varName} = ${itemName} %}\n    {% break %}\n  {% endif %}\n{% endfor %}`,
-        )
-        Object.assign(n, identifier(varName))
-        return true
-      })
-      .getOrElse(null)
+    if (
+      !isArrowFunctionExpression(callback) ||
+      callback.async ||
+      callback.params.length !== 1 ||
+      !isIdentifier(callback.params[0]) ||
+      callback.body.type === 'BlockStatement'
+    ) {
+      throw new ValidationError(
+        'Liquid .find() requires an inline arrow predicate such as items.find(item => item.available).',
+        context?.currentFilePath,
+        n.loc ? { line: n.loc.start.line, column: n.loc.start.column + 1 } : undefined,
+      )
+    }
+    if (!context) throw new ValidationError('Liquid .find() requires a parsing context.', undefined)
+    const objectCode = this.generateLiquidCode(n.callee.object, false, renames, context)
+    const itemName = callback.params[0].name
+    const varName = context.allocateName('found')
+    const precedingAssigns = context.getPendingAssigns()
+    const condition = this.generateLiquidCode(callback.body, true, renames, context)
+    const predicateAssigns = context.getPendingAssigns()
+    if (precedingAssigns) context.addPendingAssign(precedingAssigns.trimEnd())
+    context.addPendingAssign(
+      `{% assign ${varName} = nil %}\n{% for ${itemName} in ${objectCode} %}\n${predicateAssigns}  {% if ${condition} %}\n    {% assign ${varName} = ${itemName} %}\n    {% break %}\n  {% endif %}\n{% endfor %}`,
+    )
+    Object.assign(n, identifier(varName))
   }
 
   private normalizeUnary(n: any, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -213,18 +222,18 @@ export class ExpressionParser {
       .getOrElse(null)
   }
 
-  private normalizeBinary(n: any): void {
+  private normalizeBinary(n: any, renames?: Record<string, string>, context?: ParsingContext): void {
     _Maybe
       .of(isBinaryExpression(n))
       .map(() => {
         _match(n.operator)
           .with('===', () => ((n as any).operator = '=='))
           .with('!==', () => ((n as any).operator = '!='))
-          .with('+', () => this.rewriteArithmetic(n, 'plus'))
-          .with('-', () => this.rewriteArithmetic(n, 'minus'))
-          .with('*', () => this.rewriteArithmetic(n, 'times'))
-          .with('/', () => this.rewriteArithmetic(n, 'divided_by'))
-          .with('%', () => this.rewriteArithmetic(n, 'modulo'))
+          .with('+', () => this.rewriteArithmetic(n, 'plus', renames, context))
+          .with('-', () => this.rewriteArithmetic(n, 'minus', renames, context))
+          .with('*', () => this.rewriteArithmetic(n, 'times', renames, context))
+          .with('/', () => this.rewriteArithmetic(n, 'divided_by', renames, context))
+          .with('%', () => this.rewriteArithmetic(n, 'modulo', renames, context))
           .with(n.operator, () => null)
           .exec()
         return true
@@ -232,9 +241,15 @@ export class ExpressionParser {
       .getOrElse(null)
   }
 
-  private rewriteArithmetic(n: any, filter: string): void {
-    const left = generate(n.left).code
-    const right = generate(n.right).code
+  private rewriteArithmetic(n: any, filter: string, renames?: Record<string, string>, context?: ParsingContext): void {
+    const left = this.generateLiquidCode(n.left, false, renames, context)
+    let right = this.generateLiquidCode(n.right, false, renames, context)
+    if (right.includes(' | ')) {
+      if (!context) throw new ValidationError('Nested arithmetic requires a parsing context.')
+      const temporary = context.allocateName('arithmetic')
+      context.addPendingAssign(`{% assign ${temporary} = ${right} %}`)
+      right = temporary
+    }
     Object.assign(n, identifier(`${left} | ${filter}: ${right}`))
   }
 
@@ -257,13 +272,17 @@ export class ExpressionParser {
   }
 
   private postprocess(code: string): string {
-    return code
+    const literals: string[] = []
+    const protectedCode = code.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, (literal) => {
+      literals.push(literal)
+      return `__LIQUIDIFY_LITERAL_${literals.length - 1}__`
+    })
+    return protectedCode
       .replace(/\s*===\s*/g, ' == ')
       .replace(/\s*!==\s*/g, ' != ')
       .replace(/\s*&&\s*/g, ' and ')
       .replace(/\s*\|\|\s*/g, ' or ')
       .replace(/\?\./g, '.')
-      .replace(/\?/g, '')
       .replace(/\.toLowerCase\s*\(\)/g, ' | downcase')
       .replace(/\.toUpperCase\s*\(\)/g, ' | upcase')
       .replace(/\.trim\s*\(\)/g, ' | strip')
@@ -275,26 +294,26 @@ export class ExpressionParser {
       .replace(/\.moneyWithoutCurrency\s*\(\)/g, ' | money_without_currency')
       .replace(/\.money_without_currency\s*\(\)/g, ' | money_without_currency')
       .replace(/\.includes\s*\(([^)]+)\)/g, ' contains $1')
+      .replace(/__LIQUIDIFY_LITERAL_(\d+)__/g, (_, index) => literals[Number(index)])
       .trim()
   }
 
   private hasMixedOperators(node: Node): boolean {
-    const code = generate(cloneNode(node, true)).code
-    return code.includes('&&') && code.includes('||')
+    const operators = new Set<string>()
+    traverseFast(node, (child) => {
+      if (isLogicalExpression(child)) operators.add(child.operator)
+    })
+    return operators.has('&&') && operators.has('||')
   }
 
-  private stabilizedCondition(code: string, context?: ParsingContext): string {
-    return _Maybe
-      .of(context)
-      .map((ctx) => {
-        const temp = ctx!.allocateName('cond')
-        const parts = code.split(/\s+or\s+/)
-        const last = parts.pop() as string
-        const head = parts.join(' or ')
-        ctx!.addPendingAssign(`{% assign ${temp} = ${head} %}`)
-        return `${temp} or ${last}`
-      })
-      .getOrElse(code)
+  private stabilizedCondition(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {
+    if (!context) throw new ValidationError('Mixed Liquid conditions require a parsing context.')
+    const temporary = context.allocateName('condition')
+    const markup = renderCondition(node, `{% assign ${temporary} = true %}`, `{% assign ${temporary} = false %}`, (leaf) =>
+      this.generateLiquidCode(leaf, true, renames, context),
+    )
+    context.addPendingAssign(markup)
+    return temporary
   }
 
   public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {

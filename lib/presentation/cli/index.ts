@@ -67,7 +67,9 @@ const runBuild = async (watch: boolean): Promise<void> => {
     const prefix = error.name === 'ValidationError' ? 'Validation' : 'Build'
     console.log(`\n${kleur.bgRed().white(` ${prefix} Error `)} ${kleur.red(error.message)}`)
     _match(Boolean(error.filePath))
-      .with(true, () => console.log(kleur.dim(`   ${error.filePath}`)))
+      .with(true, () =>
+        console.log(kleur.dim(`   ${error.filePath}${error.location ? `:${error.location.line}:${error.location.column}` : ''}`)),
+      )
       .with(false, () => {})
       .exec()
   })

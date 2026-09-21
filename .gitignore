@@ -25,3 +25,5 @@ liquidx_docs*
 # Build artifact: default compiler output when run at repo root
 /liquidify/
 review.md
+# Generated file ownership metadata
+.liquidify-manifest.json

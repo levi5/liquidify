@@ -1,3 +1,4 @@
+import { OutputManifest } from './output-manifest'
 import { join } from 'node:path'
 import { _Maybe, _match, _try } from 'funcio'
 
@@ -10,6 +11,8 @@ import { pascalToKebab } from '../../../../shared/string'
 export class LiquidFileSystemGenerator implements IGenerator {
   private readonly options: ResolvedGeneratorOptions
   private readonly fileSystem: IFileSystem
+  private readonly manifest: OutputManifest
+  private inBuild = false
 
   constructor(options: GeneratorOptions, fileSystem: IFileSystem) {
     this.options = {
@@ -20,27 +23,48 @@ export class LiquidFileSystemGenerator implements IGenerator {
       assetsDir: options.assetsDir || join(options.outputDir, 'assets'),
     }
     this.fileSystem = fileSystem
+    this.manifest = new OutputManifest(options.outputDir, fileSystem)
   }
 
-  public async generate(component: ParsedComponent): Promise<void> {
+  public async beginBuild(files: string[], changed: Set<string>): Promise<void> {
+    await this.manifest.begin(files, changed)
+    this.inBuild = true
+  }
+
+  public async finishBuild(): Promise<void> {
+    await this.manifest.finish()
+    this.inBuild = false
+  }
+
+  private async writeOutput(file: string, content: string, sourcePath?: string): Promise<void> {
+    if (sourcePath) await this.manifest.write(sourcePath, file, content)
+    else await this.fileSystem.writeFile(file, content)
+  }
+
+  public async generate(component: ParsedComponent, sourcePath?: string): Promise<void> {
+    if (!this.inBuild) sourcePath = undefined
     await this.ensureDirectories()
 
     const fileName = pascalToKebab(component.name)
 
     if (component.mode !== 'react') {
-      await this.generateLiquidFile(component, fileName)
+      await this.generateLiquidFile(component, fileName, sourcePath)
     }
 
-    await this.handleScripts(component, fileName)
+    await this.handleScripts(component, fileName, sourcePath)
 
-    if (component.globalCss) {
+    if (sourcePath) {
+      const scripts = component.mode === 'dom:global' && component.hasScript ? [...(component.scriptAssets || []), `${fileName}.js`] : []
+      this.manifest.contributions(sourcePath, scripts, component.globalCss || '')
+    }
+    if (component.globalCss && !sourcePath) {
       await this.appendGlobalCss(component.globalCss)
     }
 
     await this.touchDirectory(this.options.outputDir)
   }
 
-  private async handleScripts(component: ParsedComponent, fileName: string): Promise<void> {
+  private async handleScripts(component: ParsedComponent, fileName: string, sourcePath?: string): Promise<void> {
     if (!component.hasScript) return
 
     if (!component.script) {
@@ -48,7 +72,8 @@ export class LiquidFileSystemGenerator implements IGenerator {
       return
     }
 
-    await this.generateScriptFile(component, fileName)
+    await this.generateScriptFile(component, fileName, sourcePath)
+    if (sourcePath) return
 
     const scriptAssets = component.scriptAssets?.map((asset) => asset.replace(/\.js$/, '')) || []
     const scripts = component.mode === 'dom:global' ? [...scriptAssets, fileName] : [fileName, ...scriptAssets]
@@ -104,7 +129,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
     }
   }
 
-  private async generateLiquidFile(component: ParsedComponent, fileName: string): Promise<void> {
+  private async generateLiquidFile(component: ParsedComponent, fileName: string, sourcePath?: string): Promise<void> {
     const type = component.type || 'sections'
     const targetDirName = `${type}Dir` as keyof ResolvedGeneratorOptions
     const targetDir = this.options[targetDirName] as string
@@ -113,7 +138,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
 
     const content = this.buildLiquidContent(component, fileName)
 
-    await this.fileSystem.writeFile(liquidPath, content)
+    await this.writeOutput(liquidPath, content, sourcePath)
 
     if (isNewFile) {
       await this.touchDirectory(this.options.sectionsDir)
@@ -174,12 +199,12 @@ export class LiquidFileSystemGenerator implements IGenerator {
     }
   }
 
-  private async generateScriptFile(component: ParsedComponent, fileName: string): Promise<void> {
+  private async generateScriptFile(component: ParsedComponent, fileName: string, sourcePath?: string): Promise<void> {
     const scriptPath = join(this.options.assetsDir, `${fileName}.js`)
     const isNewFile = !(await this.fileSystem.exists(scriptPath))
 
     const result = await _try.async(async () => {
-      await this.fileSystem.writeFile(scriptPath, component.script)
+      await this.writeOutput(scriptPath, component.script, sourcePath)
 
       if (isNewFile) {
         await this.touchDirectory(this.options.assetsDir)

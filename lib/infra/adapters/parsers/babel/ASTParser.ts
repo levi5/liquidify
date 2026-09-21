@@ -14,7 +14,12 @@ export class ASTParser {
 
     return result.match({
       left: (error) => {
-        throw new LiquidifyError(`Failed to parse JavaScript/TypeScript: ${error.message}`, filePath)
+        const loc = (error as Error & { loc?: { line: number; column: number } }).loc
+        throw new LiquidifyError(
+          `Failed to parse JavaScript/TypeScript: ${error.message}`,
+          filePath,
+          loc ? { line: loc.line, column: loc.column + 1 } : undefined,
+        )
       },
       right: (ast) => ast,
     })
