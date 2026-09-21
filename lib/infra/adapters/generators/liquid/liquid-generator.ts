@@ -51,10 +51,10 @@ export class LiquidFileSystemGenerator implements IGenerator {
       await this.generateLiquidFile(component, fileName, sourcePath)
     }
 
-    await this.handleScripts(component, fileName, sourcePath)
+    const scriptGenerated = await this.handleScripts(component, fileName, sourcePath)
 
     if (sourcePath) {
-      const scripts = component.mode === 'dom:global' && component.hasScript ? [...(component.scriptAssets || []), `${fileName}.js`] : []
+      const scripts = component.mode === 'dom:global' && scriptGenerated ? [...(component.scriptAssets || []), `${fileName}.js`] : []
       this.manifest.contributions(sourcePath, scripts, component.globalCss || '')
     }
     if (component.globalCss && !sourcePath) {
@@ -64,16 +64,16 @@ export class LiquidFileSystemGenerator implements IGenerator {
     await this.touchDirectory(this.options.outputDir)
   }
 
-  private async handleScripts(component: ParsedComponent, fileName: string, sourcePath?: string): Promise<void> {
-    if (!component.hasScript) return
+  private async handleScripts(component: ParsedComponent, fileName: string, sourcePath?: string): Promise<boolean> {
+    if (!component.hasScript) return false
 
     if (!component.script) {
       console.warn(`⚠️ Script for ${component.name} is empty but hasScript is true`)
-      return
+      return false
     }
 
     await this.generateScriptFile(component, fileName, sourcePath)
-    if (sourcePath) return
+    if (sourcePath) return true
 
     const scriptAssets = component.scriptAssets?.map((asset) => asset.replace(/\.js$/, '')) || []
     const scripts = component.mode === 'dom:global' ? [...scriptAssets, fileName] : [fileName, ...scriptAssets]
@@ -85,6 +85,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
         await this.removeFromGlobalScript(script)
       }
     }
+    return true
   }
 
   private async appendGlobalCss(css: string): Promise<void> {

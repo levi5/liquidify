@@ -69,6 +69,39 @@ test('cleanup preserves manually edited files and unowned theme files', async (t
   assert.equal(fs.readFileSync(path.join(output, 'snippets/manual.liquid'), 'utf8'), 'handwritten')
 })
 
+test('build rejects a generated name that would overwrite a manual file', async (t) => {
+  const { builder, output } = setup(t)
+  fs.mkdirSync(path.join(output, 'snippets'), { recursive: true })
+  fs.writeFileSync(path.join(output, 'snippets/a.liquid'), 'manual content')
+  await assert.rejects(builder.build(), /not managed by Liquidify/)
+  assert.equal(fs.readFileSync(path.join(output, 'snippets/a.liquid'), 'utf8'), 'manual content')
+})
+
+test('failed manifest write restores outputs changed during finalization', async (t) => {
+  const { builder, output, write } = setup(t)
+  await builder.build()
+  const generated = path.join(output, 'snippets/a.liquid')
+  const manifest = path.join(output, '.liquidify-manifest.json')
+  const beforeOutput = fs.readFileSync(generated, 'utf8')
+  const beforeManifest = fs.readFileSync(manifest, 'utf8')
+  write('src/components/A.tsx', '"use snippets"; export default function A(){return <p>Changed</p>}')
+  const outputFileSystem = builder.useCase.generator.fileSystem
+  const originalWrite = outputFileSystem.writeFile.bind(outputFileSystem)
+  let failed = false
+  outputFileSystem.writeFile = async (file, content) => {
+    if (file === manifest && !failed) {
+      failed = true
+      throw new Error('simulated manifest failure')
+    }
+    await originalWrite(file, content)
+  }
+  await assert.rejects(builder.build(), /simulated manifest failure/)
+  assert.equal(fs.readFileSync(generated, 'utf8'), beforeOutput)
+  assert.equal(fs.readFileSync(manifest, 'utf8'), beforeManifest)
+  await builder.build()
+  assert.match(fs.readFileSync(generated, 'utf8'), /Changed/)
+})
+
 test('failed builds do not replace previous output', async (t) => {
   const { builder, output, write } = setup(t)
   await builder.build()
