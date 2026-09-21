@@ -33,5 +33,5 @@ export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder
   const validator = new ValidationService()
   const useCase = new TranspileFileUseCase(parser, generator, validator)
 
-  return new LiquidifyBuilder(options, parser, useCase)
+  return new LiquidifyBuilder(options, parser, useCase, fileSystem)
 }

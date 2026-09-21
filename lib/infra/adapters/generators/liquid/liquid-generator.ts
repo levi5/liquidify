@@ -1,4 +1,5 @@
 import { OutputManifest } from './output-manifest'
+import { buildLiquidContent } from './liquid-content'
 import { join } from 'node:path'
 import { _Array, _Maybe, _match, _try } from 'funcio'
 
@@ -137,66 +138,13 @@ export class LiquidFileSystemGenerator implements IGenerator {
     const liquidPath = join(targetDir, `${fileName}.liquid`)
     const isNewFile = !(await this.fileSystem.exists(liquidPath))
 
-    const content = this.buildLiquidContent(component, fileName)
+    const content = buildLiquidContent(component, fileName)
 
     await this.writeOutput(liquidPath, content, sourcePath)
 
     if (isNewFile) {
       await this.touchDirectory(this.options.sectionsDir)
       console.log(`   🆕 New file created: ${liquidPath}`)
-    }
-  }
-
-  private buildLiquidContent(component: ParsedComponent, fileName: string): string {
-    let content = ''
-
-    if (component.liquidAssignments && component.liquidAssignments.length > 0) {
-      content += `${component.liquidAssignments.join('\n')}\n\n`
-    }
-
-    content += this.formatHtml(component.html)
-
-    if (component.mode !== 'dom:global') {
-      const scriptAssets = component.scriptAssets || []
-      const scriptsToInclude: string[] = []
-
-      if (component.type !== 'snippets' && component.hasScript && !scriptAssets.includes(`${fileName}.js`)) {
-        scriptsToInclude.push(`${fileName}.js`)
-      }
-
-      scriptsToInclude.push(...scriptAssets)
-
-      for (const script of scriptsToInclude) {
-        content += this.buildScriptTag(script)
-      }
-    }
-
-    if (component.type !== 'snippets') {
-      const schemaData = this.buildSchema(component)
-      const schemaJson = JSON.stringify(schemaData, null, 2)
-      content += `\n\n{% schema %}\n${schemaJson}\n{% endschema %}`
-    }
-
-    if (component.css) {
-      content += `\n\n{% stylesheet %}\n${component.css}{% endstylesheet %}`
-    }
-
-    return content
-  }
-
-  private buildScriptTag(scriptFile: string): string {
-    const scriptName = scriptFile.replace(/\.js$/, '')
-    const scriptVar = `script_${scriptName.replace(/[^a-zA-Z0-9]/g, '_')}_loaded`
-    return `\n\n{%- unless ${scriptVar} -%}\n  <script src="{{ '${scriptFile}' | asset_url }}" defer></script>\n  {%- assign ${scriptVar} = true -%}\n{%- endunless -%}`
-  }
-
-  private buildSchema(component: ParsedComponent): Record<string, any> {
-    const baseSchema = component.schema || {}
-    const hasBlocks = component.blocksSchema && component.blocksSchema.length > 0
-
-    return {
-      ...baseSchema,
-      ...(hasBlocks ? { blocks: component.blocksSchema } : {}),
     }
   }
 
@@ -254,32 +202,6 @@ export class LiquidFileSystemGenerator implements IGenerator {
         console.log(`   📝 Global script removed from: ${globalScriptPath}`)
       }
     }
-  }
-
-  private formatHtml(html: string): string {
-    let indent = 0
-    const tokens = html.split(/(<[^>]+>)/g).filter(Boolean)
-
-    return tokens
-      .map((token) => {
-        const trimmed = token.trim()
-        if (!trimmed) return null
-
-        if (token.match(/^<\/\w+>$/)) {
-          indent--
-          return '  '.repeat(Math.max(0, indent)) + token
-        }
-
-        const line = '  '.repeat(Math.max(0, indent)) + (token.startsWith('<') ? token : trimmed)
-
-        if (token.match(/^<\w+[^>]*>$/) && !token.match(/\/>$/)) {
-          indent++
-        }
-
-        return line
-      })
-      .filter(Boolean)
-      .join('\n')
   }
 
   private async ensureDirectories(): Promise<void> {

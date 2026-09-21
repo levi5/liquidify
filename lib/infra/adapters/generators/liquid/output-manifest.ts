@@ -3,6 +3,7 @@ import path from 'node:path'
 import { createHash } from 'node:crypto'
 import type { IFileSystem } from '../../../../core/protocols/file-system'
 import { ValidationError } from '../../../../core/errors/validation-error'
+import { OutputTransaction } from './output-transaction'
 
 type Entry = { files: Record<string, string>; scripts: string[]; css: string }
 type Entries = Record<string, Entry>
@@ -121,26 +122,15 @@ export class OutputManifest {
   }
 
   public async finish(): Promise<void> {
-    const originals = new Map<string, string | undefined>()
-    const remember = async (file: string) => {
-      if (!originals.has(file)) originals.set(file, (await this.fs.exists(file)) ? await this.fs.readFile(file) : undefined)
-    }
-    const write = async (file: string, content: string) => {
-      await remember(file)
-      await this.fs.writeFile(file, content)
-    }
-    const remove = async (file: string) => {
-      await remember(file)
-      await this.fs.unlink(file)
-    }
+    const transaction = new OutputTransaction(this.fs)
     try {
-      await _Array.forEachAsync([...this.writes], ([file, content]) => write(file, content))
+      await _Array.forEachAsync([...this.writes], ([file, content]) => transaction.write(file, content))
       const retained = new Set(Object.values(this.next).flatMap((entry) => Object.keys(entry.files)))
       for (const entry of Object.values(this.previous)) {
         for (const [relative, hash] of Object.entries(entry.files)) {
           if (retained.has(relative)) continue
           const file = this.safePath(relative)
-          if ((await this.fs.exists(file)) && digest(await this.fs.readFile(file)) === hash) await remove(file)
+          if ((await this.fs.exists(file)) && digest(await this.fs.readFile(file)) === hash) await transaction.remove(file)
         }
       }
       const entries = Object.entries(this.next)
@@ -155,20 +145,15 @@ export class OutputManifest {
         scripts,
         '{% comment %}liquidify:start{% endcomment %}',
         '{% comment %}liquidify:end{% endcomment %}',
-        write,
+        (file, content) => transaction.write(file, content),
       )
-      await this.updateAggregate('assets/global.css', css, '/* liquidify:start */', '/* liquidify:end */', write)
-      await write(this.manifestPath, JSON.stringify({ version: 1, entries: this.next }, null, 2))
+      await this.updateAggregate('assets/global.css', css, '/* liquidify:start */', '/* liquidify:end */', (file, content) =>
+        transaction.write(file, content),
+      )
+      await transaction.write(this.manifestPath, JSON.stringify({ version: 1, entries: this.next }, null, 2))
       this.previous = structuredClone(this.next)
     } catch (error) {
-      for (const [file, content] of [...originals].reverse()) {
-        try {
-          if (content === undefined) await this.fs.unlink(file)
-          else await this.fs.writeFile(file, content)
-        } catch {
-          // Preserve the original build error; a later build can retry the output.
-        }
-      }
+      await transaction.rollback()
       throw error
     }
   }
