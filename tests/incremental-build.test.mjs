@@ -141,3 +141,32 @@ test('missing generated outputs are recreated even when sources are unchanged', 
   assert.deepEqual(calls, ['A.tsx'])
   assert.equal(fs.existsSync(path.join(output, 'snippets/a.liquid')), true)
 })
+
+for (const scenario of ['invalid root config', 'invalid inherited config', 'missing inherited config']) {
+  test(`watch recovers after ${scenario} outside componentsDir`, { timeout: 10000 }, async (t) => {
+    const { builder, write, root } = setup(t)
+    const inherited = scenario !== 'invalid root config'
+    const target = inherited ? 'configs/base.json' : 'tsconfig.json'
+    if (inherited) write('tsconfig.json', '{"extends":"./configs/base.json"}')
+    if (scenario !== 'missing inherited config') write(target, '{broken')
+    await assert.rejects(builder.build(), (error) => {
+      assert.equal(error.name, 'ValidationError')
+      assert.equal(error.filePath, path.join(root, target))
+      return true
+    })
+    assert.ok(builder.watchedDependencies.has(path.join(root, target)))
+    builder.watch()
+    await once(builder.watcher, 'ready')
+    const notifications = []
+    builder.on('file:change', (file) => notifications.push(file))
+    const completed = once(builder, 'build:end')
+    write(target, '{"compilerOptions":{}}')
+    await completed
+    if (scenario === 'missing inherited config') {
+      notifications.length = 0
+      write('unrelated.txt', 'outside the dependency graph')
+      await new Promise((resolve) => setTimeout(resolve, 350))
+      assert.deepEqual(notifications, [], 'ancestor watches must ignore generated outputs and unrelated files')
+    }
+  })
+}

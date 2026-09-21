@@ -1,3 +1,4 @@
+import { _Array, _try } from 'funcio'
 import path from 'node:path'
 import { createHash } from 'node:crypto'
 import type { IFileSystem } from '../../../../core/protocols/file-system'
@@ -5,6 +6,7 @@ import { ValidationError } from '../../../../core/errors/validation-error'
 
 type Entry = { files: Record<string, string>; scripts: string[]; css: string }
 type Entries = Record<string, Entry>
+const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value)
 const digest = (content: string) => createHash('sha256').update(content).digest('hex')
 
 export class OutputManifest {
@@ -23,10 +25,16 @@ export class OutputManifest {
 
   public async begin(files: string[], changed: Set<string>): Promise<void> {
     if (await this.fs.exists(this.manifestPath)) {
-      const stored = JSON.parse(await this.fs.readFile(this.manifestPath))
-      if (stored.version !== 1 || !stored.entries || typeof stored.entries !== 'object')
-        throw new ValidationError('Invalid output manifest.', this.manifestPath)
-      this.previous = stored.entries
+      const content = await this.fs.readFile(this.manifestPath)
+      const stored: unknown = _try
+        .sync(() => JSON.parse(content))
+        .match({
+          right: (value) => value,
+          left: (error) => {
+            throw new ValidationError(`Invalid output manifest JSON: ${error.message}`, this.manifestPath)
+          },
+        })
+      this.previous = this.validateManifest(stored)
     }
     this.writes.clear()
     const active = new Set(files.map((file) => path.resolve(file)))
@@ -40,6 +48,35 @@ export class OutputManifest {
       }
     }
     this.next = Object.fromEntries(Object.entries(this.previous).filter(([file]) => active.has(file) && !changed.has(file)))
+  }
+
+  private validateManifest(stored: unknown): Entries {
+    if (!isRecord(stored) || stored.version !== 1 || !isRecord(stored.entries)) {
+      throw new ValidationError('Invalid output manifest: expected version 1 and an entries object.', this.manifestPath)
+    }
+    const entries: Entries = {}
+    for (const [source, entry] of Object.entries(stored.entries)) {
+      if (
+        !path.isAbsolute(source) ||
+        !isRecord(entry) ||
+        !isRecord(entry.files) ||
+        !Array.isArray(entry.scripts) ||
+        !entry.scripts.every((script) => typeof script === 'string') ||
+        typeof entry.css !== 'string'
+      ) {
+        throw new ValidationError(`Invalid output manifest entry for "${source}": expected files, scripts and css.`, this.manifestPath)
+      }
+      const files: Record<string, string> = {}
+      for (const [relative, hash] of Object.entries(entry.files)) {
+        this.safePath(relative)
+        if (typeof hash !== 'string' || !/^[a-f0-9]{64}$/.test(hash)) {
+          throw new ValidationError(`Invalid output manifest hash for "${relative}" in "${source}".`, this.manifestPath)
+        }
+        files[relative] = hash
+      }
+      entries[source] = { files, scripts: [...entry.scripts], css: entry.css }
+    }
+    return entries
   }
 
   public async write(source: string, file: string, content: string): Promise<void> {
@@ -80,7 +117,7 @@ export class OutputManifest {
   }
 
   public async finish(): Promise<void> {
-    for (const [file, content] of this.writes) await this.fs.writeFile(file, content)
+    await _Array.forEachAsync([...this.writes], ([file, content]) => this.fs.writeFile(file, content))
     const retained = new Set(Object.values(this.next).flatMap((entry) => Object.keys(entry.files)))
     for (const entry of Object.values(this.previous)) {
       for (const [relative, hash] of Object.entries(entry.files)) {

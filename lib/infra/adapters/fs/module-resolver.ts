@@ -4,9 +4,14 @@ import { _try } from 'funcio'
 import type { IFileSystem } from '../../../core/protocols/file-system'
 import { ValidationError } from '../../../core/errors/validation-error'
 
+interface ResolvedConfig {
+  baseUrl?: string
+  pathsBasePath: string
+  paths: Record<string, string[]>
+}
+
 const extensions = ['.ts', '.tsx', '.js', '.jsx', '.json', '.css', '.scss']
 
-// tsconfig accepts comments and trailing commas, which Babel handles without evaluating code.
 function configValue(node: any): any {
   if (node.type === 'ObjectExpression') {
     return Object.fromEntries(
@@ -30,7 +35,7 @@ export class ModuleResolver {
       const configPath = this.findConfig(importer)
       if (configPath) {
         const config = this.readConfig(configPath)
-        const base = config.baseUrl
+        const base = config.baseUrl ?? config.pathsBasePath
         const aliases = Object.entries(config.paths).sort(([a], [b]) => b.replace('*', '').length - a.replace('*', '').length)
         for (const [pattern, targets] of aliases) {
           const [prefix, suffix = ''] = pattern.split('*')
@@ -70,15 +75,16 @@ export class ModuleResolver {
     }
   }
 
-  public configFiles(importer: string): string[] {
+  public configFiles(importer: string, onDiscover?: (file: string) => void): string[] {
     const config = this.findConfig(importer)
     if (!config) return []
     const visited = new Set<string>()
-    this.readConfig(config, visited)
+    this.readConfig(config, visited, onDiscover)
     return [...visited]
   }
 
-  private readConfig(file: string, visited = new Set<string>()): { baseUrl: string; paths: Record<string, string[]> } {
+  private readConfig(file: string, visited = new Set<string>(), onDiscover?: (file: string) => void): ResolvedConfig {
+    onDiscover?.(file)
     if (visited.has(file)) throw new ValidationError('Circular tsconfig extends chain.', file)
     visited.add(file)
     const result = _try.sync(() => configValue(parseExpression(this.fs.readFileSync(file))))
@@ -88,14 +94,15 @@ export class ModuleResolver {
         throw new ValidationError(`Invalid tsconfig: ${error.message}`, file)
       },
     })
-    let inherited = { baseUrl: path.dirname(file), paths: {} as Record<string, string[]> }
+    let inherited: ResolvedConfig = { pathsBasePath: path.dirname(file), paths: {} }
     if (typeof config.extends === 'string' && config.extends.startsWith('.')) {
       const parent = path.resolve(path.dirname(file), config.extends)
-      inherited = this.readConfig(parent.endsWith('.json') ? parent : `${parent}.json`, visited)
+      inherited = this.readConfig(parent.endsWith('.json') ? parent : `${parent}.json`, visited, onDiscover)
     }
     const options = config.compilerOptions ?? {}
     return {
-      baseUrl: options.baseUrl ? path.resolve(path.dirname(file), options.baseUrl) : inherited.baseUrl,
+      baseUrl: options.baseUrl !== undefined ? path.resolve(path.dirname(file), options.baseUrl) : inherited.baseUrl,
+      pathsBasePath: options.paths !== undefined ? path.dirname(file) : inherited.pathsBasePath,
       paths: options.paths ?? inherited.paths,
     }
   }

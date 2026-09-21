@@ -27,7 +27,7 @@ export class DependencyTracker {
       }
       const source = this.fs.readFileSync(file)
       sources.set(file, source)
-      for (const config of resolver.configFiles(file)) {
+      for (const config of resolver.configFiles(file, (config) => dependencies.add(config))) {
         if (config !== file) {
           imports.add(config)
           visit(config)

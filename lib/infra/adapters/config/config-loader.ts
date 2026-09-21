@@ -49,5 +49,4 @@ function validateConfig(fullPath: string, value: unknown): LiquidifyConfig {
   return { ...merged, react: { ...DEFAULT_CONFIG.react, ...(raw.react as LiquidifyConfig['react']) } }
 }
 
-/** Compatibility facade for consumers of the original configuration API. */
 export const ConfigLoader = { load: loadConfig }

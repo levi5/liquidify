@@ -39,7 +39,7 @@ export const RecommendationLoader = ({
           target.setAttribute('data-recommendations-state', 'loaded')
         }
       } catch {
-        // The collection-based recommendations remain available if the request fails.
+
       }
     }
     const observer = new IntersectionObserver(

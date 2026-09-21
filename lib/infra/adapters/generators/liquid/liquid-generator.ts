@@ -1,6 +1,6 @@
 import { OutputManifest } from './output-manifest'
 import { join } from 'node:path'
-import { _Maybe, _match, _try } from 'funcio'
+import { _Array, _Maybe, _match, _try } from 'funcio'
 
 import type { GeneratorOptions, ResolvedGeneratorOptions } from '../../../../core/entities/liquid'
 import type { IFileSystem } from '../../../../core/protocols/file-system'
@@ -113,7 +113,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
       const now = new Date()
       const dirs = [dir, this.options.sectionsDir, this.options.assetsDir, this.options.blocksDir, this.options.snippetsDir]
 
-      for (const targetDir of dirs) {
+      await _Array.forEachAsync(dirs, async (targetDir) => {
         if (await this.fileSystem.exists(targetDir)) {
           await this.fileSystem.utimes(targetDir, now, now)
 
@@ -121,7 +121,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
           await this.fileSystem.writeFile(tempFile, '')
           await this.fileSystem.unlink(tempFile)
         }
-      }
+      })
     })
 
     if (result.isLeft()) {
@@ -284,13 +284,13 @@ export class LiquidFileSystemGenerator implements IGenerator {
   private async ensureDirectories(): Promise<void> {
     const dirs = [this.options.sectionsDir, this.options.assetsDir, this.options.snippetsDir, this.options.blocksDir]
 
-    for (const dir of dirs) {
+    await _Array.forEachAsync(dirs, async (dir) => {
       if (!(await this.fileSystem.exists(dir))) {
         await this.fileSystem.mkdir(dir, true)
         const gitkeep = join(dir, '.gitkeep')
         await this.fileSystem.writeFile(gitkeep, '')
       }
-    }
+    })
 
     await _try.async(async () => {
       const now = new Date()

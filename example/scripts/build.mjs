@@ -10,7 +10,6 @@ builder.on('error', (error) => errors.push(error))
 
 try {
   await builder.build()
-  // The alpha compiler emits recoverable errors without rejecting build().
   if (errors.length) throw new AggregateError(errors, 'Falha ao compilar os componentes do tema.')
   await buildAssets()
   await verifyBuild()

@@ -6,6 +6,8 @@ Depois do primeiro `builder.build()`, a mesma instância reutiliza o runtime e r
 
 O cache de compilação fica em memória. Uma nova instância faz um build completo. A resolução não acompanha caminhos calculados dinamicamente nem alterações em pacotes instalados em `node_modules`.
 
+Configurações `tsconfig.json` encontradas durante um build que falhou continuam no watch, inclusive arquivos herdados ausentes. Corrigir ou criar esses arquivos dispara uma nova tentativa de compilação.
+
 Para encerrar o watch e aguardar o fechamento dos observadores:
 
 ```ts
@@ -17,6 +19,8 @@ await builder.dispose()
 ## Saídas geradas e limpeza
 
 Cada build concluído registra os arquivos gerados em `.liquidify-manifest.json`, dentro da pasta de saída. Mantenha esse arquivo local entre builds; ele não deve ser publicado no tema nem versionado.
+
+Um manifesto com JSON, entradas, hashes ou caminhos inválidos interrompe o build com um diagnóstico que identifica o manifesto, antes de processar suas saídas registradas.
 
 Ao remover ou renomear um componente, o próximo build remove saídas antigas registradas no manifesto. Um arquivo só é apagado se seu conteúdo ainda coincidir com a versão gerada. Arquivos editados manualmente e arquivos não registrados são preservados. A limpeza também funciona após reiniciar o compilador.
 
@@ -37,6 +41,8 @@ O parser Liquid e o extrator de schemas compartilham a resolução de:
 - Objetos e arrays estáticos, identificadores locais, spreads e `as const`.
 
 Ciclos entre imports e reexports geram um diagnóstico. A resolução estática de dados não executa funções nem substitui o bundler JavaScript. Herança de tsconfig por nome de pacote e exportações namespace não fazem parte deste suporte.
+
+Sem `baseUrl`, os destinos de `paths` são relativos à configuração que declara esses aliases. Um `baseUrl` explícito, inclusive herdado, define a base usada pelos aliases.
 
 ## Expressões e diagnósticos
 

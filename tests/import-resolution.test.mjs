@@ -46,3 +46,34 @@ test('component schema can be reexported directly from another file', () => {
   const ast = parse('export {default as schema} from "./schema"', { sourceType: 'module' })
   assert.deepEqual(new SchemaExtractor(fs).extract(ast, '/theme/src/Hero.tsx'), { name: 'Hero' })
 })
+
+for (const scenario of [
+  { name: 'child paths without baseUrl', parent: {}, child: { paths: { '@/*': ['src/*'] } }, target: '/theme/app/src/data.ts' },
+  { name: 'inherited paths without baseUrl', parent: { paths: { '@/*': ['shared/*'] } }, child: {}, target: '/theme/shared/data.ts' },
+  {
+    name: 'child paths with inherited baseUrl',
+    parent: { baseUrl: './base' },
+    child: { paths: { '@/*': ['data/*'] } },
+    target: '/theme/base/data/data.ts',
+  },
+  {
+    name: 'child baseUrl with inherited paths',
+    parent: { paths: { '@/*': ['data/*'] } },
+    child: { baseUrl: './local' },
+    target: '/theme/app/local/data/data.ts',
+  },
+  {
+    name: 'explicit empty baseUrl',
+    parent: { baseUrl: './base' },
+    child: { baseUrl: '', paths: { '@/*': ['src/*'] } },
+    target: '/theme/app/src/data.ts',
+  },
+]) {
+  test(`aliases preserve configuration origins: ${scenario.name}`, () => {
+    const { files, fs } = fixture()
+    files.set('/theme/base.json', JSON.stringify({ compilerOptions: scenario.parent }))
+    files.set('/theme/app/tsconfig.json', JSON.stringify({ extends: '../base.json', compilerOptions: scenario.child }))
+    files.set(scenario.target, 'export const value = "resolved"')
+    assert.equal(new ImportResolver(fs).resolveExternalVariable('@/data', 'value', '/theme/app/Card.tsx'), 'resolved')
+  })
+}

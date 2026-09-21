@@ -55,7 +55,7 @@ export class LiquidifyBuilder extends EventEmitter {
     const files = (await glob(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}'))).map((file) => path.resolve(file)).sort()
     const planning = _try.sync(() => this.dependencies.plan(files))
     this.watchedDependencies = new Set(this.dependencies.watchedFiles)
-    this.watcher?.add([...this.watchedDependencies])
+    this.watcher?.add(this.watchTargets())
     const plan = planning.match({
       right: (value) => value,
       left: (error) => {
@@ -97,10 +97,32 @@ export class LiquidifyBuilder extends EventEmitter {
   public watch() {
     if (this.watcher) return
     this.disposed = false
-    this.watcher = chokidar.watch([this.options.componentsDir, ...this.watchedDependencies], { ignoreInitial: true })
-    ;['add', 'change', 'unlink', 'addDir', 'unlinkDir'].forEach((event) => {
+    this.watcher = chokidar.watch(this.watchTargets(), {
+      ignoreInitial: true,
+      ignored: (file) => !this.isWatchedPath(file),
+    })
+    ;(['add', 'change', 'unlink', 'addDir', 'unlinkDir'] as const).forEach((event) => {
       this.watcher!.on(event, (file) => this.schedule(file))
     })
+  }
+
+  private watchTargets(): string[] {
+    const targets = new Set([path.resolve(this.options.componentsDir), ...this.watchedDependencies])
+    for (const file of this.watchedDependencies) {
+      let ancestor = file
+      while (!this.fileSystem.existsSync(ancestor) && path.dirname(ancestor) !== ancestor) ancestor = path.dirname(ancestor)
+      targets.add(ancestor)
+    }
+    return [...targets]
+  }
+
+  private isWatchedPath(file: string): boolean {
+    const absolute = path.resolve(file)
+    const components = path.resolve(this.options.componentsDir)
+    if (absolute === components || absolute.startsWith(`${components}${path.sep}`) || components.startsWith(`${absolute}${path.sep}`)) {
+      return true
+    }
+    return [...this.watchedDependencies].some((dependency) => dependency === absolute || dependency.startsWith(`${absolute}${path.sep}`))
   }
 
   private schedule(file: string): void {
