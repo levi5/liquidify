@@ -3,7 +3,18 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { parseInitArgs, resolveTemplate, copyTemplate } from '../dist/presentation/cli/commands/init.js'
+import { parseInitArgs, resolveTemplate, copyTemplate, normalizeTemplateName } from '../dist/presentation/cli/commands/init.js'
+
+test('normalizeTemplateName normalizes aliases', () => {
+  assert.equal(normalizeTemplateName('example'), 'example')
+  assert.equal(normalizeTemplateName('fashion'), 'example')
+  assert.equal(normalizeTemplateName('store'), 'example')
+  assert.equal(normalizeTemplateName('shopify-starter'), 'shopify-starter')
+  assert.equal(normalizeTemplateName('starter'), 'shopify-starter')
+  assert.equal(normalizeTemplateName('start'), 'shopify-starter')
+  assert.equal(normalizeTemplateName('default'), 'shopify-starter')
+  assert.equal(normalizeTemplateName(), 'shopify-starter')
+})
 
 test('parseInitArgs handles various argument combinations', () => {
   assert.deepEqual(parseInitArgs([]), { targetDir: '.', template: 'shopify-starter' })
@@ -14,6 +25,9 @@ test('parseInitArgs handles various argument combinations', () => {
   assert.deepEqual(parseInitArgs(['--template=example']), { targetDir: '.', template: 'example' })
   assert.deepEqual(parseInitArgs(['-t=example']), { targetDir: '.', template: 'example' })
   assert.deepEqual(parseInitArgs(['--template']), { targetDir: '.', template: 'example' })
+  assert.deepEqual(parseInitArgs(['my-store', '--template', 'fashion']), { targetDir: 'my-store', template: 'example' })
+  assert.deepEqual(parseInitArgs(['my-store', '--template', 'start']), { targetDir: 'my-store', template: 'shopify-starter' })
+  assert.deepEqual(parseInitArgs(['my-store', '--template', 'starter']), { targetDir: 'my-store', template: 'shopify-starter' })
 })
 
 test('resolveTemplate finds shopify-starter and example templates', () => {

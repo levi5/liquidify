@@ -19,6 +19,17 @@ export interface InitOptions {
   template: string
 }
 
+export const normalizeTemplateName = (templateName = 'shopify-starter'): string => {
+  const clean = (templateName || '').trim().toLowerCase()
+  if (['example', 'fashion', 'store', 'fashion-store'].includes(clean)) {
+    return 'example'
+  }
+  if (['shopify-starter', 'starter', 'start', 'default'].includes(clean)) {
+    return 'shopify-starter'
+  }
+  return clean || 'shopify-starter'
+}
+
 export function parseInitArgs(args: string[]): InitOptions {
   let targetDir = '.'
   let template = 'shopify-starter'
@@ -48,11 +59,19 @@ export function parseInitArgs(args: string[]): InitOptions {
     }
   }
 
-  return { targetDir, template }
+  return { targetDir, template: normalizeTemplateName(template) }
 }
 
 export const resolveTemplate = (templateName = 'shopify-starter'): string => {
-  const normalized = templateName === 'fashion' ? 'example' : templateName
+  const normalized = normalizeTemplateName(templateName)
+
+  const isValidTemplateDir = (dir: string): boolean => {
+    try {
+      return fs.existsSync(dir) && fs.existsSync(path.join(dir, 'package.json'))
+    } catch {
+      return false
+    }
+  }
 
   const candidates: string[] = [
     path.resolve(__dirname, '../../../../resources/templates', normalized),
@@ -63,16 +82,7 @@ export const resolveTemplate = (templateName = 'shopify-starter'): string => {
     path.resolve(process.cwd(), 'templates', normalized),
   ]
 
-  if (normalized === 'example') {
-    candidates.unshift(
-      path.resolve(__dirname, '../../../../example'),
-      path.resolve(__dirname, '../../../example'),
-      path.resolve(__dirname, '../../example'),
-      path.resolve(process.cwd(), 'example'),
-    )
-  }
-
-  const matched = candidates.find((dir) => fs.existsSync(dir))
+  const matched = candidates.find(isValidTemplateDir)
   return _Maybe.of(matched).getOrElse(candidates[0]) as string
 }
 
@@ -93,7 +103,7 @@ const getLiquidifyVersion = (): string => {
       }
     } catch {}
   }
-  return '^1.1.0-alpha.1'
+  return '^1.1.0-alpha.2'
 }
 
 const syncPackageName = (targetDir: string, projectName: string): void => {
@@ -173,22 +183,23 @@ export const reportInitSuccess = (targetDirArg: string, templateName = 'shopify-
 }
 
 export async function runInit(targetDirArg = '.', templateName = 'shopify-starter'): Promise<void> {
+  const normalized = normalizeTemplateName(templateName)
   const targetDir = path.resolve(process.cwd(), targetDirArg)
   const baseName = path.basename(targetDir)
   const isDefaultName = baseName === '.' || !baseName
   const projectName = _match(isDefaultName)
-    .with(true, () => (templateName === 'example' ? 'liquidify-fashion-theme' : 'shopify-liquidify-theme'))
+    .with(true, () => (normalized === 'example' ? 'liquidify-fashion-theme' : 'shopify-liquidify-theme'))
     .with(false, () => baseName)
     .exec()
 
   console.log(kleur.bold().cyan('\n🚀 Liquidify — Initializing Shopify Project Template\n'))
   console.log(kleur.dim(`Target Directory: ${targetDir}`))
-  console.log(kleur.dim(`Template:         ${templateName}\n`))
+  console.log(kleur.dim(`Template:         ${normalized}\n`))
 
   const spinner = ora('Copying template files...').start()
 
   const copyResult = _try.sync(() => {
-    const sourceDir = resolveTemplate(templateName)
+    const sourceDir = resolveTemplate(normalized)
     if (!fs.existsSync(sourceDir)) {
       throw new Error(`Template "${templateName}" not found at ${sourceDir}`)
     }
@@ -203,7 +214,7 @@ export async function runInit(targetDirArg = '.', templateName = 'shopify-starte
   copyResult.match({
     right: () => {
       spinner.succeed(kleur.green('Template created successfully!'))
-      reportInitSuccess(targetDirArg, templateName)
+      reportInitSuccess(targetDirArg, normalized)
     },
     left: (error) => {
       spinner.fail(kleur.red(`Failed to initialize template: ${error.message}`))

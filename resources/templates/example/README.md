@@ -1,34 +1,50 @@
 # Liquidify — Shopify Fashion Store
 
-E-commerce theme built in **TSX inside `src`**, using **Liquidify from this repository** and Preact. The catalog originates from the Shopify store; banner images replicate assets from the development catalog.
+E-commerce theme built in **TSX inside `src`**, using **Liquidify** and Preact.
 
-## Development
+## Quick Start
 
-Install dependencies at the **repository root** and run:
-
-```bash
-pnpm install
-npm run build:example
-npm run dev:example
-```
-
-The example reuses root dependencies; installing packages inside `example` is not required. Commands compile the library in `dist` before building the theme. TypeScript resolves `liquidify` imports to the local build typings.
-
-If already inside `example`, use `npm run build`, `npm run dev`, and `npm run typecheck`. Watch mode tracks components, shared files in `src`, CSS, JavaScript, templates, configuration, and layout. Changes in `dist` also recompile the theme; when editing the library in `lib`, run `npm run build` at the root.
-
-In another terminal, start the store preview:
+### 1. Install dependencies
 
 ```bash
-npm --prefix example run preview
+npm install
 ```
 
-The CLI shows the available port. To select a specific port:
+### 2. Start development mode
 
 ```bash
-npm --prefix example run preview -- --port 9393
+npm run dev
 ```
 
-Configured store: `mm-solution-2141.myshopify.com`. Preview requires the Shopify CLI installed and store access. To use another store, run `npm --prefix example run preview -- --store your-store.myshopify.com`. Preview uses a development theme; checkout, payments, and customer accounts are handled by Shopify.
+Watch mode tracks components, shared files in `src`, CSS, JavaScript, templates, configuration, and layout.
+
+### 3. Build for production
+
+```bash
+npm run build
+```
+
+### 4. Preview with Shopify CLI
+
+In another terminal, start the store preview with your Shopify store:
+
+```bash
+shopify theme dev --store your-store.myshopify.com
+```
+
+Or using the npm script:
+
+```bash
+npm run preview -- --store your-store.myshopify.com
+```
+
+To select a specific port:
+
+```bash
+npm run preview -- --store your-store.myshopify.com --port 9393
+```
+
+> **Note:** Preview requires the Shopify CLI installed and store access. Preview uses a development theme; checkout, payments, and customer accounts are handled by Shopify.
 
 ## Included Features
 
@@ -69,12 +85,10 @@ Assign `page.contact.json` to the contact page in Shopify Admin. Available filte
 
 ## Verification
 
-At repository root:
-
 ```bash
-npm run build:example
-npm run typecheck:example
-npm --prefix example run check
+npm run build
+npm run typecheck
+npm run check
 ```
 
 `check` runs Shopify Theme Check CLI. Verification validates against empty outputs, missing section references, and known serialization constraints. See [Liquidify Notes](docs/LIQUIDIFY-NOTES.md).
