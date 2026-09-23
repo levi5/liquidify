@@ -8,7 +8,7 @@
   </p>
   <nav class="pagination" aria-label="Paginação">
     {% if pager.previous %}
-    <a class="pagination-direction" href="{{ pager.previous.url }}" aria-label="Página anterior" rel="prev">
+    <a class="pagination-direction" href="{{ pager.previous.url | escape }}" aria-label="Página anterior" rel="prev">
       ←
       <span>
         Anterior
@@ -16,7 +16,7 @@
     </a>
     {% endif %}{% for part in pager.parts %}{% assign page_number = part.title | plus: 0 %}
 {% if part.is_link %}
-    <a href="{{ part.url }}" aria-label="Ir para a página {{ part.title | escape }}">
+    <a href="{{ part.url | escape }}" aria-label="Ir para a página {{ part.title | escape }}">
       {{ part.title | escape }}
     </a>
     {% else %}
@@ -30,7 +30,7 @@
     </span>
     {% endif %}
 {% endif %}{% endfor %}{% if pager.next %}
-    <a class="pagination-direction" href="{{ pager.next.url }}" aria-label="Próxima página" rel="next">
+    <a class="pagination-direction" href="{{ pager.next.url | escape }}" aria-label="Próxima página" rel="next">
       <span>
         Próxima
       </span>

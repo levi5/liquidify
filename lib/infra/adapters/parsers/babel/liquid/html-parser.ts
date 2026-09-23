@@ -29,9 +29,10 @@ export class LiquidHtmlParser {
     const state = { hasRawHtml: false, rawHtml: '', bridge: [] as any[] }
     const filteredAttributes = node.openingElement.attributes.filter((attr) => this.keepAttribute(attr, tagName, state, renames, context))
     const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, context)
+    const childContext = tagName === 'style' || tagName === 'script' ? new ParsingContext({ ...context, outputContext: 'raw' }) : context
     const children = _match(state.hasRawHtml)
       .with(true, () => state.rawHtml)
-      .with(state.hasRawHtml, () => this.renderChildren(node.children, renames, context))
+      .with(state.hasRawHtml, () => this.renderChildren(node.children, renames, childContext))
       .exec() as string
     const withBridge = _match(tagName === 'liquid-data' && state.bridge.length > 0)
       .with(true, () => `${this.bridgeScripts(state.bridge, renames, context)}${children}`)

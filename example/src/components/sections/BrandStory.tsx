@@ -5,8 +5,8 @@ export const BrandStory = () => {
     <section className="brand-campaign container" id="essencia">
       <div className="campaign-copy">
         <p className="eyebrow">LIQUIDIFY / EVERYDAY CULTURE</p>
-        <h2>{'section.settings.heading | escape'}</h2>
-        <p>{'section.settings.description | escape'}</p>
+        <h2>{'section.settings.heading | default: "Vista o que faz sentido para você." | escape'}</h2>
+        <p>{'section.settings.description | default: "O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é." | escape'}</p>
         <a
           className="button button-dark"
           href="{{ section.settings.link | default: routes.all_products_collection_url }}"

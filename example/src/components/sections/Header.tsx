@@ -9,7 +9,7 @@ export const Header = () => {
     <div className="header-shell">
       <style>
         {
-          '.nav-dropdown{position:relative}.nav-dropdown>summary{display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;list-style:none}.nav-dropdown>summary::-webkit-details-marker{display:none}.nav-chevron{width:6px;height:6px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);margin:0 2px 4px;transition:transform .15s}.nav-dropdown[open]>summary .nav-chevron{transform:rotate(225deg);margin-bottom:0}.nav-submenu{position:absolute;top:100%;left:-20px;min-width:230px;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px #0000000f;z-index:40}.desktop-nav .nav-submenu a{display:block;padding:12px;border-radius:4px;font-size:12px;line-height:1.5}.desktop-nav .nav-submenu a:hover,.desktop-nav .nav-submenu a:focus-visible{background:var(--surface,#f5f5f3)}.desktop-nav .nav-submenu a:hover::after{content:none}.nav-submenu .nav-overview{font-weight:600;border-bottom:1px solid var(--line);margin-bottom:5px}.nav-submenu .nav-grandchild{padding-left:25px;font-size:11px;color:var(--muted)}.mobile-menu-group{border-bottom:1px solid var(--line)}.mobile-menu-group>summary{display:flex;align-items:center;justify-content:space-between;padding:20px 0;font-size:22px;letter-spacing:-.5px;list-style:none;cursor:pointer}.mobile-menu-group>summary::-webkit-details-marker{display:none}.mobile-menu-group[open]>summary .nav-chevron{transform:rotate(225deg)}.mobile-menu-group .mobile-sub-link{padding:12px 14px;font-size:15px;letter-spacing:0}.mobile-menu-group .mobile-grandchild{padding-left:28px;font-size:13px}.mobile-submenu{padding-bottom:12px}'
+          '.nav-dropdown{position:relative}.nav-dropdown>summary{display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;list-style:none}.nav-dropdown>summary::-webkit-details-marker{display:none}.nav-chevron{width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);display:inline-block;margin:0 2px 2px;transition:transform .2s ease;pointer-events:none}.nav-dropdown[open]>summary .nav-chevron{transform:rotate(225deg)}.nav-submenu{position:absolute;top:100%;left:-20px;min-width:230px;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px #0000000f;z-index:40}.desktop-nav .nav-submenu a{display:block;padding:12px;border-radius:4px;font-size:12px;line-height:1.5}.desktop-nav .nav-submenu a:hover,.desktop-nav .nav-submenu a:focus-visible{background:var(--surface,#f5f5f3)}.desktop-nav .nav-submenu a:hover::after{content:none}.nav-submenu .nav-overview{font-weight:600;border-bottom:1px solid var(--line);margin-bottom:5px}.nav-submenu .nav-grandchild{padding-left:25px;font-size:11px;color:var(--muted)}.mobile-menu-group{border-bottom:1px solid var(--line)}.mobile-menu-group>summary{display:flex;align-items:center;justify-content:space-between;padding:20px 0;font-size:22px;letter-spacing:-.5px;list-style:none;cursor:pointer}.mobile-menu-group>summary::-webkit-details-marker{display:none}.mobile-menu-group[open]>summary .nav-chevron{transform:rotate(225deg)}.mobile-menu-group .mobile-sub-link{padding:12px 14px;font-size:15px;letter-spacing:0}.mobile-menu-group .mobile-grandchild{padding-left:28px;font-size:13px}.mobile-submenu{padding-bottom:12px}'
         }
       </style>
       <div className="announcement" data-announcement>
@@ -50,7 +50,7 @@ export const Header = () => {
       </div>
       <header className="site-header container">
         <a className="wordmark" href={routes.root_url} aria-label="Liquidify — página inicial">
-          {'settings.brand_name | default: "Liquidify" | escape'}
+          {'settings.brand_name | default: shop.name | escape'}
         </a>
         <nav className="desktop-nav" aria-label="Menu principal">
           {section.settings.menu.links.length > 0 ? (
@@ -104,19 +104,19 @@ export const Header = () => {
                   </a>
                   <a
                     data-menu-child
-                    href="{{ routes.search_url }}?type=product&q=tag%3AFeminino%20AND%20%28top%20OR%20shirt%29"
+                    href="{{ routes.root_url }}collections/all/feminino+blusas"
                   >
                     Blusas e camisetas
                   </a>
                   <a
                     data-menu-child
-                    href="{{ routes.search_url }}?type=product&q=tag%3AFeminino%20AND%20jacket"
+                    href="{{ routes.root_url }}collections/all/feminino+jaquetas"
                   >
                     Jaquetas
                   </a>
                   <a
                     data-menu-child
-                    href="{{ routes.search_url }}?type=product&q=tag%3AFeminino%20AND%20skirt"
+                    href="{{ routes.root_url }}collections/all/feminino+saias"
                   >
                     Saias e conjuntos
                   </a>
@@ -136,19 +136,19 @@ export const Header = () => {
                   </a>
                   <a
                     data-menu-child
-                    href="{{ routes.search_url }}?type=product&q=tag%3AMasculino%20AND%20shirt"
+                    href="{{ routes.root_url }}collections/all/masculino+camisas"
                   >
                     Camisas
                   </a>
                   <a
                     data-menu-child
-                    href="{{ routes.search_url }}?type=product&q=tag%3AMasculino%20AND%20jacket"
+                    href="{{ routes.root_url }}collections/all/masculino+jaquetas"
                   >
                     Jaquetas
                   </a>
                   <a
                     data-menu-child
-                    href="{{ routes.search_url }}?type=product&q=tag%3AMasculino%20AND%20tuxedo"
+                    href="{{ routes.root_url }}collections/all/masculino+alfaiataria"
                   >
                     Alfaiataria
                   </a>
@@ -162,16 +162,16 @@ export const Header = () => {
                   <a
                     className="nav-overview"
                     data-menu-overview
-                    href="{{ section.settings.accessories_link | default: '/search?type=product&q=bag%20OR%20shoes' }}"
+                    href="{{ section.settings.accessories_link | default: '/collections/all/acessorios' }}"
                   >
                     Ver todos os acessórios ↗
                   </a>
-                  <a data-menu-child href="{{ routes.search_url }}?type=product&q=bag">
+                  <a data-menu-child href="{{ routes.root_url }}collections/all/bolsas">
                     Bolsas
                   </a>
                   <a
                     data-menu-child
-                    href="{{ routes.search_url }}?type=product&q=shoes%20OR%20%22high%20tops%22"
+                    href="{{ routes.root_url }}collections/all/calcados"
                   >
                     Calçados
                   </a>

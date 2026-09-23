@@ -7,11 +7,11 @@
       {{ page.title | default: "Vamos conversar." | escape }}
     </h1>
     <div class="rich-text">
-      {{ page.content }}
+      {{ page.content | escape }}
     </div>
   </div>
   {% form 'contact', id: 'ContactForm', class: 'contact-form' %}
-{% if form["posted_successfully?"] %}
+{% if form["posted_successfully"] %}
   <p class="form-success" role="status">
     Recebemos sua mensagem. Nossa equipe vai responder pelo e-mail informado.
   </p>
@@ -32,7 +32,7 @@
   </label>
   <label>
     Como podemos ajudar?
-    <textarea name="contact[body]" rows="{{ 6 }}" required>
+    <textarea name="contact[body]" rows="{{ 6 | escape }}" required>
     </textarea>
   </label>
   {% if form.errors %}
