@@ -1,0 +1,10 @@
+!assets/
+!blocks/
+!snippets/
+!sections/
+!config/
+!layout/
+!locales/
+!src/
+!templates/
+node_modules/

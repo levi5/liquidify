@@ -50,6 +50,8 @@ Generate a complete Shopify theme structure and Liquidify configuration with rea
 
 ```bash
 npx liquidify init [project-name]
+# or initialize with the full fashion store example:
+npx liquidify init [project-name] --template example
 # or initialize in the current folder:
 npx liquidify init
 ```
@@ -233,12 +235,13 @@ your-shopify-theme/
 ```
 Usage:
   liquidify [options]
-  liquidify init [directory]
+  liquidify init [directory] [options]
 
 Commands:
   init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
 
 Options:
+  --template, -t  Template to initialize (default: shopify-starter, options: shopify-starter, example)
   --watch, -w     Watch for file changes and rebuild automatically
   --help, -h      Show help
 

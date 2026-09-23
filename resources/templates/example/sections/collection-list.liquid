@@ -1,0 +1,54 @@
+<section class="container section-space">
+  <div class="page-heading">
+    <p class="eyebrow">
+      UM UNIVERSO DE POSSIBILIDADES
+    </p>
+    <h1>
+      Nossas coleções.
+    </h1>
+  </div>
+  {% paginate collections by 24 %}
+  <div class="category-grid">
+    {% for item in collections %}
+    <a class="category-card" href="{{ item.url | escape }}">
+      {% if item.image %}
+      <img src="{{ item.image | image_url: width: 900 | escape }}" alt="{{ item.title | escape }}" width="900" height="1000" loading="lazy" />
+      {% else %}
+      <div class="product-placeholder">
+        ✳
+      </div>
+      {% endif %}
+      <span class="category-label">
+        <strong>
+          {{ item.title | escape }}
+        </strong>
+        <span class="circle-arrow">
+          ↗
+        </span>
+      </span>
+    </a>
+    {% endfor %}
+  </div>
+  {% render 'pagination', pager: paginate %}
+{% endpaginate %}
+</section>
+
+{% schema %}
+{
+  "name": "Lista de coleções",
+  "settings": []
+}
+{% endschema %}
+
+{% stylesheet %}
+.product-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 32px;
+  aspect-ratio: 1/1.03;
+}
+
+{% endstylesheet %}

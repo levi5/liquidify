@@ -1,0 +1,47 @@
+import { test } from 'node:test'
+import assert from 'node:assert/strict'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { parseInitArgs, resolveTemplate, copyTemplate } from '../dist/presentation/cli/commands/init.js'
+
+test('parseInitArgs handles various argument combinations', () => {
+  assert.deepEqual(parseInitArgs([]), { targetDir: '.', template: 'shopify-starter' })
+  assert.deepEqual(parseInitArgs(['my-store']), { targetDir: 'my-store', template: 'shopify-starter' })
+  assert.deepEqual(parseInitArgs(['my-store', '--template', 'example']), { targetDir: 'my-store', template: 'example' })
+  assert.deepEqual(parseInitArgs(['--template', 'example', 'my-store']), { targetDir: 'my-store', template: 'example' })
+  assert.deepEqual(parseInitArgs(['-t', 'example', 'my-store']), { targetDir: 'my-store', template: 'example' })
+  assert.deepEqual(parseInitArgs(['--template=example']), { targetDir: '.', template: 'example' })
+  assert.deepEqual(parseInitArgs(['-t=example']), { targetDir: '.', template: 'example' })
+  assert.deepEqual(parseInitArgs(['--template']), { targetDir: '.', template: 'example' })
+})
+
+test('resolveTemplate finds shopify-starter and example templates', () => {
+  const starter = resolveTemplate('shopify-starter')
+  assert.ok(fs.existsSync(starter), `Starter template should exist at ${starter}`)
+  assert.ok(fs.existsSync(path.join(starter, 'package.json')))
+
+  const example = resolveTemplate('example')
+  assert.ok(fs.existsSync(example), `Example template should exist at ${example}`)
+  assert.ok(fs.existsSync(path.join(example, 'package.json')))
+})
+
+test('copyTemplate copies template and updates package.json', (t) => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'liquidify-init-test-'))
+  t.after(() => {
+    fs.rmSync(tempDir, { recursive: true, force: true })
+  })
+
+  const targetDir = path.join(tempDir, 'my-new-store')
+  const exampleSource = resolveTemplate('example')
+  const result = copyTemplate(exampleSource, targetDir, 'my-new-store')
+
+  assert.ok(result.isRight(), 'copyTemplate should succeed')
+  assert.ok(fs.existsSync(path.join(targetDir, 'package.json')))
+  assert.ok(fs.existsSync(path.join(targetDir, 'src/components')))
+
+  const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf-8'))
+  assert.equal(pkg.name, 'my-new-store')
+  assert.ok(pkg.dependencies.liquidify.startsWith('^'), `Liquidify dependency should be semver range, got ${pkg.dependencies.liquidify}`)
+  assert.equal(fs.existsSync(path.join(targetDir, 'node_modules')), false)
+})

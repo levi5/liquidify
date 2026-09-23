@@ -1,0 +1,11 @@
+.article-page {
+  max-width: 820px;
+}
+
+.article-cover {
+  margin-block: 40px;
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 8px;
+}

@@ -1,0 +1,160 @@
+<section class="brand-campaign container" id="essencia">
+  <div class="campaign-copy">
+    <p class="eyebrow">
+      LIQUIDIFY / EVERYDAY CULTURE
+    </p>
+    <h2>
+      {{ section.settings.heading | default: "Vista o que faz sentido para você." | escape }}
+    </h2>
+    <p>
+      {{ section.settings.description | default: "O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é." | escape }}
+    </p>
+    <a class="button button-dark" href="{{ section.settings.link | default: routes.all_products_collection_url | escape }}">
+      Encontre seu essencial
+      <span>
+        ↗
+      </span>
+    </a>
+    <span class="campaign-watermark" aria-hidden="true">
+      LQ.
+    </span>
+  </div>
+  <div class="campaign-image">
+    {% if section.settings.image %}
+    <img src="{{ section.settings.image | image_url: width: 1400 | escape }}" alt="{{ section.settings.image.alt | default: 'Editorial Liquidify' | escape }}" width="1100" height="950" loading="lazy" />
+    {% else %}
+    <img src="{{ 'liquidify-editorial.jpg' | asset_url | escape }}" alt="Estilo urbano e peças para todos os dias" width="1100" height="950" loading="lazy" />
+    {% endif %}
+    <span>
+      NOT JUST CLOTHES. YOUR EXPRESSION.
+    </span>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Editorial da marca",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Título",
+      "default": "Vista o que faz sentido para você."
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Descrição",
+      "default": "O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Imagem"
+    },
+    {
+      "type": "url",
+      "id": "link",
+      "label": "Link"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Editorial da marca"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+.brand-campaign {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 70px;
+  background: #ededed;
+  min-height: 450px;
+}
+
+.campaign-copy {
+  padding: 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.campaign-copy h2 {
+  font-size: 44px;
+  letter-spacing: -2px;
+  max-width: 380px;
+  margin: 23px 0;
+  position: relative;
+  z-index: 1;
+}
+
+.campaign-copy > p:not(.eyebrow) {
+  max-width: 350px;
+  color: #6d6d6d;
+  font-size: 12px;
+  line-height: 1.9;
+  margin-bottom: 28px;
+  position: relative;
+  z-index: 1;
+}
+
+.campaign-copy .button {
+  position: relative;
+  z-index: 1;
+}
+
+.campaign-image {
+  position: relative;
+  overflow: hidden;
+}
+
+.campaign-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  object-position: center 40%;
+}
+
+.campaign-image > span {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: white;
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  z-index: 1;
+}
+
+.campaign-watermark {
+  position: absolute;
+  right: -20px;
+  bottom: -40px;
+  font-size: 160px;
+  font-weight: 800;
+  color: #00000008;
+  pointer-events: none;
+  line-height: 1;
+}
+
+@media (max-width: 900px) {
+  .brand-campaign {
+    grid-template-columns: 1fr;
+  }
+  .campaign-copy {
+    padding: 35px 25px;
+  }
+  .campaign-copy h2 {
+    font-size: 32px;
+  }
+  .campaign-image {
+    height: 300px;
+  }
+}
+
+{% endstylesheet %}

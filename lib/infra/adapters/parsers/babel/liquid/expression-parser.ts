@@ -133,6 +133,20 @@ export class ExpressionParser {
             .getOrElse(null)
         },
       )
+      .with(isIdentifier(n.callee) && ['classNames', 'classnames', 'clsx'].includes(n.callee.name), () => {
+        const args = n.arguments
+        if (args.length === 1) {
+          _Maybe
+            .of(args[0] && 'type' in args[0])
+            .map(() => Object.assign(n, identifier(this.generateLiquidCode(args[0] as Expression, inCondition, renames, context))))
+            .getOrElse(null)
+        } else if (args.length > 1) {
+          const joined = args
+            .map((arg: any) => this.generateLiquidCode(arg as Expression, inCondition, renames, context))
+            .join(' | append: " " | append: ')
+          Object.assign(n, identifier(joined))
+        }
+      })
       .with(isMemberExpression(n.callee) && isIdentifier((n.callee as any).property), () =>
         this.rewriteMethod(n, inCondition, renames, context),
       )
@@ -266,7 +280,7 @@ export class ExpressionParser {
     const rightCode = this.generateLiquidCode(n.right, false, renames, context)
     const isLeftString = isStringLiteral(n.left) || this.isLikelyString(n.left)
     const isRightString = isStringLiteral(n.right) || this.isLikelyString(n.right)
-    
+
     if (isLeftString || isRightString) {
       Object.assign(n, identifier(`${leftCode} | append: ${rightCode}`))
     } else {
@@ -280,7 +294,19 @@ export class ExpressionParser {
       const callee = node.callee as any
       if (isMemberExpression(callee) && isIdentifier(callee.property)) {
         const method = callee.property.name
-        return ['toString', 'join', 'toLowerCase', 'toUpperCase', 'trim', 'markdownify', 'handleize', 'strip', 'strip_html', 'money', 'money_without_currency'].includes(method)
+        return [
+          'toString',
+          'join',
+          'toLowerCase',
+          'toUpperCase',
+          'trim',
+          'markdownify',
+          'handleize',
+          'strip',
+          'strip_html',
+          'money',
+          'money_without_currency',
+        ].includes(method)
       }
     }
     if (isMemberExpression(node) && isIdentifier(node.property)) {

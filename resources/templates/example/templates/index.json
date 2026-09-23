@@ -1,0 +1,77 @@
+{
+  "sections": {
+    "hero": {
+      "type": "hero",
+      "settings": {
+        "heading": "Your style.",
+        "highlight": "No limits.",
+        "description": "New pieces. New possibilities. Find the essentials that match your pace.",
+        "button": "Explore new arrivals"
+      }
+    },
+    "values": {
+      "type": "values",
+      "settings": {}
+    },
+    "featured": {
+      "type": "featured-collection",
+      "settings": {
+        "heading": "On your radar."
+      }
+    },
+    "categories": {
+      "type": "categories",
+      "settings": {
+        "heading": "What's your vibe?"
+      },
+      "blocks": {
+        "women": {
+          "type": "category",
+          "settings": {
+            "title": "Women",
+            "subtitle": "YOUR STYLE IN EVERY MOMENT",
+            "fallback": "liquidify-women.jpg",
+            "link": "/collections/all/women"
+          }
+        },
+        "men": {
+          "type": "category",
+          "settings": {
+            "title": "Men",
+            "subtitle": "ESSENTIALS FOR YOUR PACE",
+            "fallback": "liquidify-men.jpg",
+            "link": "/collections/all/men"
+          }
+        },
+        "accessories": {
+          "type": "category",
+          "settings": {
+            "title": "Accessories",
+            "subtitle": "THE DETAILS MAKE THE LOOK",
+            "fallback": "liquidify-accessories.jpg",
+            "link": "/collections/all/accessories"
+          }
+        }
+      },
+      "block_order": [
+        "women",
+        "men",
+        "accessories"
+      ]
+    },
+    "story": {
+      "type": "brand-story",
+      "settings": {
+        "heading": "Wear what feels right for you.",
+        "description": "Style happens when you feel good. Mix your favorites, discover new possibilities, and make every day an expression of who you are."
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "values",
+    "featured",
+    "categories",
+    "story"
+  ]
+}

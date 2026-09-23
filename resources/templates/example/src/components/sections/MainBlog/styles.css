@@ -1,0 +1,30 @@
+.journal-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 35px;
+}
+
+.journal-grid img {
+  width: 100%;
+  aspect-ratio: 1.4;
+  object-fit: cover;
+  margin-bottom: 22px;
+  border-radius: 6px;
+}
+
+.journal-grid h2 {
+  font-size: 25px;
+  margin: 13px 0 22px;
+}
+
+@media (max-width: 900px) {
+  .journal-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .journal-grid {
+    grid-template-columns: 1fr;
+  }
+}

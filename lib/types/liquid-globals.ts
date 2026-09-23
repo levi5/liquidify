@@ -245,6 +245,8 @@ declare global {
   const all_products: Record<string, Product> & Product[];
   const page: Page;
   const pages: Record<string, Page> & Page[];
+  const article: Article;
+  const articles: Record<string, Article> & Article[];
   const blog: Blog;
   const blogs: Record<string, Blog> & Blog[];
   const template: Template;

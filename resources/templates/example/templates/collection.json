@@ -1,0 +1,9 @@
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": { "filter_heading": "Filtros", "products_per_page": 12 }
+    }
+  },
+  "order": ["main"]
+}

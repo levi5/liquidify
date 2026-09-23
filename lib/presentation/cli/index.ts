@@ -2,7 +2,7 @@
 import ora from 'ora'
 import kleur from 'kleur'
 import { _match } from 'funcio'
-import { runInit } from './commands/init'
+import { parseInitArgs, runInit } from './commands/init'
 import type { LiquidifyError } from '../../core/errors/liquidify-error'
 
 const printBanner = (): void => {
@@ -26,12 +26,13 @@ const showHelp = (): void => {
   console.log(`
   ${kleur.bold('Usage:')}
     liquidify [options]
-    liquidify init [directory]
+    liquidify init [directory] [options]
 
   ${kleur.bold('Commands:')}
     init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
 
   ${kleur.bold('Options:')}
+    --template, -t  Template to initialize (default: shopify-starter, options: shopify-starter, example)
     --watch, -w     Watch for file changes and rebuild automatically
     --help, -h      Show help
 `)
@@ -129,7 +130,10 @@ const resolveAction = (args: string[]) => {
 
   return _match(command)
     .with('help', () => showHelp)
-    .with('init', () => () => runInit(args[1] || '.'))
+    .with('init', () => {
+      const { targetDir, template } = parseInitArgs(args.slice(1))
+      return () => runInit(targetDir, template)
+    })
     .with('build', () => () => runBuild(watch))
     .exec()
 }

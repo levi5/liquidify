@@ -1,0 +1,38 @@
+<section class="empty-state not-found container">
+  <p class="eyebrow">
+    404 · UM PEQUENO DESVIO
+  </p>
+  <span class="empty-spark">
+    ✳
+  </span>
+  <h1>
+    Esse look ainda não existe.
+  </h1>
+  <p>
+    A página que você procura não está aqui. Mas há muito para descobrir.
+  </p>
+  <a class="button button-dark" href="{{ routes.root_url | escape }}">
+    Ir para o início ↗
+  </a>
+</section>
+
+{% schema %}
+{
+  "name": "Página não encontrada",
+  "settings": []
+}
+{% endschema %}
+
+{% stylesheet %}
+.not-found {
+  text-align: center;
+  padding-block: 90px;
+}
+
+.not-found p {
+  color: var(--muted);
+  max-width: 440px;
+  margin: 0 auto 35px;
+}
+
+{% endstylesheet %}

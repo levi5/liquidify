@@ -1,0 +1,151 @@
+'use sections'
+
+import classNames from 'classnames'
+import styles from './styles.css'
+
+export const Categories = () => {
+  return (
+    <section className={classNames(styles.categories, 'container', 'section-space')} id="categorias">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">ENCONTRE O SEU PRÓXIMO LOOK</p>
+          <h2>{'section.settings.heading | default: "Qual é a sua vibe?" | escape'}</h2>
+        </div>
+        <span className={classNames('muted', styles['category-intro'])}>
+          Do básico ao inesperado.
+          <br />
+          Sempre do seu jeito.
+        </span>
+      </div>
+      <div className={classNames(styles['category-grid'])}>
+        {section.blocks.map((block) => (
+          <a
+            className={classNames(styles['category-card'])}
+            href="{{ block.settings.link | default: routes.all_products_collection_url }}"
+            data-block-id={block.id}
+          >
+            {block.settings.image ? (
+              <img
+                src="{{ block.settings.image | image_url: width: 900 }}"
+                alt="{{ block.settings.title | escape }}"
+                width="900"
+                height="1000"
+                loading="lazy"
+              />
+            ) : (
+              <img
+                src="{{ block.settings.fallback | asset_url }}"
+                alt="{{ block.settings.title | escape }}"
+                width="900"
+                height="1000"
+                loading="lazy"
+              />
+            )}
+            <span className={classNames(styles['category-label'])}>
+              <span>
+                <small>{'block.settings.subtitle | escape'}</small>
+                <strong>{'block.settings.title | escape'}</strong>
+              </span>
+              <span className={classNames(styles['circle-arrow'])} aria-hidden="true">
+                ↗
+              </span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  )
+}
+export const schema = {
+  name: 'Categorias de moda',
+  settings: [
+    {
+      type: 'text',
+      id: 'heading',
+      label: 'Título',
+      default: 'Qual é a sua vibe?',
+    },
+  ],
+  max_blocks: 4,
+  blocks: [
+    {
+      type: 'category',
+      name: 'Categoria',
+      settings: [
+        {
+          type: 'text',
+          id: 'title',
+          label: 'Título',
+          default: 'Feminino',
+        },
+        {
+          type: 'text',
+          id: 'subtitle',
+          label: 'Subtítulo',
+          default: 'NOVAS FORMAS DE SER VOCÊ',
+        },
+        {
+          type: 'image_picker',
+          id: 'image',
+          label: 'Imagem',
+        },
+        {
+          type: 'url',
+          id: 'link',
+          label: 'Coleção ou página',
+        },
+        {
+          type: 'select',
+          id: 'fallback',
+          label: 'Imagem de exemplo',
+          default: 'liquidify-women.jpg',
+          options: [
+            {
+              value: 'liquidify-women.jpg',
+              label: 'Feminino',
+            },
+            {
+              value: 'liquidify-men.jpg',
+              label: 'Masculino',
+            },
+            {
+              value: 'liquidify-accessories.jpg',
+              label: 'Acessórios',
+            },
+          ],
+        },
+      ],
+    },
+  ],
+  presets: [
+    {
+      name: 'Categorias de moda',
+      blocks: [
+        {
+          type: 'category',
+          settings: {
+            title: 'Feminino',
+            subtitle: 'NOVAS FORMAS DE SER VOCÊ',
+            fallback: 'liquidify-women.jpg',
+          },
+        },
+        {
+          type: 'category',
+          settings: {
+            title: 'Masculino',
+            subtitle: 'ESSENCIAIS COM PERSONALIDADE',
+            fallback: 'liquidify-men.jpg',
+          },
+        },
+        {
+          type: 'category',
+          settings: {
+            title: 'Acessórios',
+            subtitle: 'OS DETALHES FAZEM O LOOK',
+            fallback: 'liquidify-accessories.jpg',
+          },
+        },
+      ],
+    },
+  ],
+}

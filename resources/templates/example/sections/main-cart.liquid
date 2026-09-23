@@ -1,0 +1,108 @@
+<section class="cart-page container section-space">
+  <div class="page-heading">
+    <p class="eyebrow">
+      SUAS PRÓXIMAS BOAS ESCOLHAS
+    </p>
+    <h1>
+      Minha sacola.
+    </h1>
+  </div>
+  <div class="island-bridge" data-liquid-store="{{ cart | json | escape }}">
+    <react-island data-hydrate="eager" style="display: flex;" component="CartPage">
+      {% if cart.item_count > 0 %}
+      <form method="post" action="{{ routes.cart_url | escape }}" class="fallback-cart">
+        {% for item in cart.items %}
+        <div class="cart-line">
+          <a href="{{ item.url | escape }}">
+            {{ item.title | escape }}
+          </a>
+          <label>
+            Quantidade
+            <input type="number" name="updates[]" value="{{ item.quantity | escape }}" min="0" />
+          </label>
+          <span>
+            {{ item.final_line_price | money }}
+          </span>
+        </div>
+        {% endfor %}
+        <p class="detail-price">
+          Subtotal: {{ cart.total_price | money | escape }}
+        </p>
+        <button class="button button-outline" name="update" type="submit">
+          Atualizar sacola
+        </button>
+        <button class="button button-dark" type="submit" name="checkout">
+          Finalizar compra ↗
+        </button>
+      </form>
+      {% else %}
+      <div class="empty-state">
+        <h2>
+          Sua sacola ainda está vazia.
+        </h2>
+        <a class="button button-dark" href="{{ routes.all_products_collection_url | escape }}">
+          Explorar a loja ↗
+        </a>
+      </div>
+      {% endif %}
+      </react-island>
+    </div>
+  </section>
+
+{%- unless script_cart_page_loaded -%}
+  <script src="{{ 'cart-page.js' | asset_url }}" defer></script>
+  {%- assign script_cart_page_loaded = true -%}
+{%- endunless -%}
+
+{% schema %}
+{
+  "name": "Sacola",
+  "settings": []
+}
+{% endschema %}
+
+{% stylesheet %}
+.cart-page > .page-heading {
+  margin-bottom: 25px;
+}
+
+.cart-page .cart-contents {
+  padding: 0;
+}
+
+.cart-page .cart-line {
+  grid-template-columns: 110px 1fr;
+}
+
+.cart-page .cart-line img {
+  width: 110px;
+  height: 145px;
+}
+
+.cart-page .cart-line-info h3 {
+  font-size: 17px;
+}
+
+.cart-page .cart-line-info > strong {
+  font-size: 15px;
+}
+
+.cart-page .cart-summary {
+  max-width: 400px;
+  margin-left: auto;
+}
+
+.fallback-cart .cart-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.fallback-cart .button {
+  margin-top: 10px;
+}
+
+{% endstylesheet %}

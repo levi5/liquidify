@@ -1,8 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { parseExpression } from '@babel/parser'
+import { parse, parseExpression } from '@babel/parser'
 import { LiquidAttributeConverter } from '../dist/infra/adapters/parsers/babel/liquid/attribute-parser.js'
 import { ExpressionParser } from '../dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
+import { LiquidVariableParser } from '../dist/infra/adapters/parsers/babel/liquid/variable-parser.js'
 import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
 import { ParsingContext } from '../dist/core/entities/parsing-context.js'
 
@@ -102,4 +103,62 @@ test('string literal with liquid filter expression is wrapped in liquid output',
   const plainText = parser.parseExpression(parseExpression('"Plain Text"'))
   assert.equal(plainText, 'Plain Text')
 })
+
+test('LiquidVariableParser parses variable declarations, destructuring, and fallbacks', () => {
+  const ast = parse(
+    'const { a, b: { c } } = props; const x = cond ? 1 : 2; const y = name || "default"; const z = opt ?? "nil_fallback";',
+    { plugins: ['jsx', 'typescript'] },
+  )
+  const variableParser = new LiquidVariableParser((node) => {
+    if (node.type === 'Identifier') return node.name
+    if (node.type === 'StringLiteral') return `"${node.value}"`
+    if (node.type === 'NumericLiteral') return String(node.value)
+    return 'val'
+  })
+  const decls = ast.program.body.flatMap((stmt) => variableParser.parseVariableDeclaration(stmt.declarations[0]))
+  assert.deepEqual(decls, [
+    '{% assign a = props.a %}',
+    '{% assign c = props.b.c %}',
+    '{% if cond %}',
+    '  {% assign x = 1 %}',
+    '{% else %}',
+    '  {% assign x = 2 %}',
+    '{% endif %}',
+    '{% assign y = name | default: "default" %}',
+    '{% assign z = opt %}',
+    '{% if z == nil %}',
+    '  {% assign z = "nil_fallback" %}',
+    '{% endif %}',
+  ])
+})
+
+test('LiquidVariableParser parses if statement assignments and map calls', () => {
+  const ast = parse(
+    'if (available) { count = 1; items.map(i => i); } else { count += 2; }',
+    { plugins: ['jsx', 'typescript'] },
+  )
+  const variableParser = new LiquidVariableParser((node) => {
+    if (node.type === 'Identifier') return node.name
+    if (node.type === 'NumericLiteral') return String(node.value)
+    return 'expr'
+  })
+  variableParser.parseExpression = () => '{% for item in items %}{% endfor %}'
+
+  const lines = variableParser.parseIfStatement(ast.program.body[0])
+  assert.deepEqual(lines, [
+    '{% if available %}',
+    '  {% assign count = 1 %}',
+    '  {% for item in items %}{% endfor %}',
+    '{% else %}',
+    '  {% assign count = count | append: 2 %}',
+    '{% endif %}',
+  ])
+})
+
+test('expression parser rewrites dynamic classNames calls to append filters', () => {
+  const parser = expressions()
+  const result = parser.generateLiquidCode(parseExpression('classNames(styles.base, dynamicClass)'), false)
+  assert.equal(result, 'styles.base | append: " " | append: dynamicClass')
+})
+
 

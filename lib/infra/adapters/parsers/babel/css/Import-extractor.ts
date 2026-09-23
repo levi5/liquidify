@@ -45,11 +45,7 @@ function evaluateStatic(node: Node): any {
     const obj: Record<string, any> = {}
     for (const prop of node.properties) {
       if (isObjectProperty(prop)) {
-        const key = isIdentifier(prop.key)
-          ? prop.key.name
-          : isStringLiteral(prop.key)
-            ? prop.key.value
-            : null
+        const key = isIdentifier(prop.key) ? prop.key.name : isStringLiteral(prop.key) ? prop.key.value : null
         if (!key) return NOT_STATIC
         const val = evaluateStatic(prop.value)
         if (val === NOT_STATIC) return NOT_STATIC
@@ -131,11 +127,7 @@ export class CSSImportExtractor {
     return { componentCss, globalCss }
   }
 
-  private replaceStyleReferences(
-    ast: File,
-    importedStyleNames: Set<string>,
-    classNamesIdentifiers: Set<string>,
-  ): void {
+  private replaceStyleReferences(ast: File, importedStyleNames: Set<string>, classNamesIdentifiers: Set<string>): void {
     if (importedStyleNames.size > 0) {
       traverse(ast, {
         MemberExpression(pathNode) {
@@ -157,8 +149,7 @@ export class CSSImportExtractor {
     traverse(ast, {
       CallExpression(pathNode) {
         const callee = pathNode.node.callee
-        const isClassNames =
-          isIdentifier(callee) && classNamesIdentifiers.has(callee.name)
+        const isClassNames = isIdentifier(callee) && classNamesIdentifiers.has(callee.name)
 
         if (isClassNames) {
           const args = pathNode.node.arguments
@@ -183,4 +174,3 @@ export class CSSImportExtractor {
     })
   }
 }
-
