@@ -19,7 +19,7 @@ export const FilterDrawer = ({ sectionId }: { sectionId: string; eager?: boolean
     const body = contents.current
     if (!form || !sidebar || !source || !filters || !modal || !body) return
 
-    // Keep one native Shopify form as the viewport changes, including unsent selections.
+
     const mobile = window.matchMedia('(max-width: 680px)')
     const moveFilters = () => {
       if (mobile.matches) {

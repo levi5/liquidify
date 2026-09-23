@@ -16,7 +16,7 @@ import {
 } from '@babel/types'
 
 import { parse } from '@babel/parser'
-import * as path from 'node:path'
+import { ModuleResolver } from '../../../fs/module-resolver'
 import type { IFileSystem } from '../../../../../core/protocols/file-system'
 import { NodeFileSystem } from '../../../fs/node-file-system'
 
@@ -38,7 +38,7 @@ interface ExtractionState {
 }
 
 export class SchemaExtractor {
-  private readonly allowedExtensions = ['.ts', '.tsx', '.js', '.jsx']
+  private readonly resolving = new Set<string>()
 
   constructor(private readonly fs: IFileSystem = new NodeFileSystem()) {}
 
@@ -60,6 +60,20 @@ export class SchemaExtractor {
       schema = value
     }
     traverse(ast, {
+      ExportNamedDeclaration: (nodePath) => {
+        for (const specifier of nodePath.node.specifiers) {
+          if (specifier.type !== 'ExportSpecifier') continue
+          const exported = isIdentifier(specifier.exported) ? specifier.exported.name : specifier.exported.value
+          if (exported !== 'schema') continue
+          const value =
+            nodePath.node.source && currentFilePath
+              ? this.resolveExternalSchema(nodePath.node.source.value, specifier.local.name, currentFilePath)
+              : this.parseObject(specifier.local, state)
+          if (!value || typeof value !== 'object' || Array.isArray(value))
+            throw new ValidationError('Schema must resolve to a static object.', currentFilePath)
+          schema = value
+        }
+      },
       ExportDefaultDeclaration: (nodePath) => {
         const node = nodePath.node.declaration
         if (isObjectExpression(node)) accept(node)
@@ -139,6 +153,8 @@ export class SchemaExtractor {
       return node.value
     }
 
+    if (node.type === 'TSAsExpression' || node.type === 'TSSatisfiesExpression' || node.type === 'TSNonNullExpression')
+      return this.parseObject(node.expression, state)
     if (isIdentifier(node)) return this.handleIdentifier(node, state)
     if (isArrayExpression(node)) return this.handleArrayExpression(node, state)
     if (isObjectExpression(node)) return this.handleObjectExpression(node, state)
@@ -153,8 +169,8 @@ export class SchemaExtractor {
     }
 
     state.visitedIdentifiers.add(node.name)
-    const resolved = this.resolveIdentifier(node.name, state)
-    const result = this.parseObject(resolved, state)
+    const local = state.localDecls.get(node.name)
+    const result = local ? this.parseObject(local, state) : this.resolveIdentifier(node.name, state)
     state.visitedIdentifiers.delete(node.name)
     return result
   }
@@ -214,22 +230,24 @@ export class SchemaExtractor {
     return null
   }
 
-  private resolveExternalSchema(importPath: string, specifierName: string, currentFilePath: string): any | null {
-    const resolvedPath = this.resolveFilePath(importPath, currentFilePath)
+  public resolveExternalSchema(importPath: string, specifierName: string, currentFilePath: string): any | null {
+    const resolvedPath = new ModuleResolver(this.fs).resolve(importPath, currentFilePath)
     if (!resolvedPath) return null
+    const key = `${resolvedPath}#${specifierName}`
+    if (this.resolving.has(key)) throw new ValidationError(`Circular import while resolving ${specifierName}.`, resolvedPath)
+    this.resolving.add(key)
 
     const result = _try.sync(() => {
       const content = this.fs.readFileSync(resolvedPath)
       const ast = this.parseFile(content)
 
-      const externalExtractor = new SchemaExtractor(this.fs)
-      return externalExtractor.extractExportedNode(ast, specifierName, resolvedPath)
+      return this.extractExportedNode(ast, specifierName, resolvedPath)
     })
 
+    this.resolving.delete(key)
     return result.match({
       left: (error) => {
-        console.warn(`Could not resolve external schema: ${importPath}`, error)
-        return null
+        throw error
       },
       right: (schema) => schema,
     })
@@ -252,21 +270,26 @@ export class SchemaExtractor {
         }
       }
 
+      if (node.type === 'ExportNamedDeclaration') {
+        for (const specifier of node.specifiers) {
+          if (specifier.type !== 'ExportSpecifier') continue
+          const exported = isIdentifier(specifier.exported) ? specifier.exported.name : specifier.exported.value
+          if (exported !== specifierName) continue
+          if (node.source && currentFilePath) return this.resolveExternalSchema(node.source.value, specifier.local.name, currentFilePath)
+          return this.handleIdentifier(specifier.local, state)
+        }
+      }
+      if (node.type === 'ExportAllDeclaration' && specifierName !== 'default' && currentFilePath) {
+        const value = this.resolveExternalSchema(node.source.value, specifierName, currentFilePath)
+        if (value !== null) return value
+      }
+
       if (node.type === 'ExportDefaultDeclaration' && specifierName === 'default') {
         return this.parseObject(node.declaration, state)
       }
     }
 
     return null
-  }
-
-  private resolveFilePath(importPath: string, currentFilePath: string): string | null {
-    const basePath = path.resolve(path.dirname(currentFilePath), importPath)
-
-    if (this.fs.existsSync(basePath)) return basePath
-
-    const foundExt = this.allowedExtensions.find((ext) => this.fs.existsSync(basePath + ext))
-    return foundExt ? basePath + foundExt : null
   }
 
   private parseFile(content: string) {

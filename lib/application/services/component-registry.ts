@@ -1,3 +1,5 @@
+import { ASTParser } from '../../infra/adapters/parsers/babel/ASTParser'
+import { ValidationError } from '../../core/errors/validation-error'
 import { _Array } from 'funcio'
 import path from 'node:path'
 import type { IParser } from '../../core/protocols/parser'
@@ -5,29 +7,42 @@ import type { IFileSystem } from '../../core/protocols/file-system'
 import type { ReactComponentConfig } from '../../types/liquid'
 import { pascalToKebab } from '../../shared/string'
 
-export function detectDirectives(src: string) {
-  const isReact = src.match(/['"]use react(?:\s*\(([^)]+)\))?['"]/)
+export function detectDirectives(src: string, filePath?: string) {
+  const ast = new ASTParser().parse(src, filePath)
+  const values = ast.program.directives.map((directive) => directive.value.value)
+  const react = values.map((value) => value.match(/^use react(?:\s*\(([^)]+)\))?$/)).find(Boolean)
   return {
-    isReact: !!isReact,
-    isDom: !!src.match(/['"]use\s+(dom(:global)?|script)['"]/),
-    isSnippet: !!src.match(/['"]use snippets['"]/),
-    rootId: isReact && isReact[1] ? isReact[1].replace(/^#/, '') : '',
+    isReact: !!react,
+    isDom: values.some((value) => /^use (dom(?::global)?|script)$/.test(value)),
+    isSnippet: values.includes('use snippets'),
+    rootId: react?.[1]?.replace(/^#/, '') || '',
   }
 }
 
 export class ComponentRegistry {
+  private readonly cache = new Map<string, { name: string; config: ReactComponentConfig } | null>()
   constructor(
     private readonly parser: IParser,
     private readonly fileSystem: IFileSystem,
   ) {}
 
-  public async scan(files: string[]): Promise<Map<string, ReactComponentConfig>> {
+  public async scan(files: string[], changed?: Set<string>): Promise<Map<string, ReactComponentConfig>> {
     const registry = new Map<string, ReactComponentConfig>()
 
+    const active = new Set(files.map((file) => path.resolve(file)))
+    for (const file of this.cache.keys()) if (!active.has(file)) this.cache.delete(file)
+    const owners = new Map<string, string>()
     await _Array.forEachAsync(files, async (file) => {
       const filePath = path.resolve(file)
-      const component = await this.scanFile(filePath)
-      if (component) registry.set(component.name, component.config)
+      if (!changed || changed.has(filePath) || !this.cache.has(filePath)) this.cache.set(filePath, await this.scanFile(filePath))
+      const component = this.cache.get(filePath)
+      if (component) {
+        const key = pascalToKebab(component.name)
+        const previous = owners.get(key)
+        if (previous) throw new ValidationError(`Component name conflict: "${component.name}" is also defined in ${previous}.`, filePath)
+        owners.set(key, filePath)
+        registry.set(component.name, { ...component.config, scriptAssets: [...(component.config.scriptAssets || [])] })
+      }
     })
 
     this.resolveDependencies(registry)
@@ -36,7 +51,7 @@ export class ComponentRegistry {
 
   private async scanFile(filePath: string): Promise<{ name: string; config: ReactComponentConfig } | null> {
     const src = this.fileSystem.readFileSync(filePath)
-    const directives = detectDirectives(src)
+    const directives = detectDirectives(src, filePath)
     const isTSorJS = filePath.endsWith('.ts') || filePath.endsWith('.js')
 
     if (!directives.isReact && !directives.isDom && !directives.isSnippet) return null

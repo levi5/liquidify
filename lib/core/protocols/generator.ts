@@ -1,5 +1,7 @@
 import type { ParsedComponent } from '../entities/parsed-component'
 
 export interface IGenerator {
-  generate(component: ParsedComponent): Promise<void>
+  generate(component: ParsedComponent, sourcePath?: string): Promise<void>
+  beginBuild?(files: string[], changed: Set<string>): Promise<void>
+  finishBuild?(): Promise<void>
 }

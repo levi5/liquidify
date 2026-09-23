@@ -56,7 +56,6 @@ export function announceCart(cart: StoreCart, open = false) {
 
 export async function addItem(id: number, quantity: number) {
   await cartRequest('cart/add.js', { items: [{ id, quantity }] })
-  // A successful add must stay successful even if the following cart refresh fails.
   try {
     announceCart(await cartRequest(), true)
   } catch {
