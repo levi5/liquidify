@@ -1,5 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
+import path from 'node:path'
 import { makeParser } from './helpers.mjs'
 
 describe('BabelLiquidParser golden outputs', () => {
@@ -197,7 +198,7 @@ export default function Hero() {
     </section>
   )
 }`,
-      '/home/levis/Desktop/lib/liquidify/example/src/components/sections/Hero/index.tsx',
+      path.resolve(import.meta.dirname, '../resources/templates/example/src/components/sections/Hero/index.tsx'),
     )
     assert.ok(component.html.includes('<section class="fashion-hero container">'))
     assert.ok(component.html.includes('<h1 class="title">Title</h1>'))

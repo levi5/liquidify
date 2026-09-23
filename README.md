@@ -34,16 +34,6 @@ yarn add liquidify@alpha
 
 ## 🚀 Quick Start
 
-### Run the example in this repository
-
-```bash
-pnpm install
-npm run build:example
-npm run dev:example
-```
-
-The example uses the local compiler and the dependencies installed at the repository root. The build generates the Liquid theme, JavaScript bundles, and CSS, then validates the output. Run `npm run typecheck:example` to check its TypeScript. See [example/README.md](example/README.md) for Shopify preview instructions.
-
 ### 1. Initialize a new theme template (Recommended)
 
 Generate a complete Shopify theme structure and Liquidify configuration with ready-to-use example components:

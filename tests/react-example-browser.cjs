@@ -16,7 +16,7 @@ const ROOT_PROBE_SOURCE =
 const CHILD_PROBE_SOURCE = "function ChildProbe({ children }) { return window.React.createElement('em', {}, children) }"
 
 async function main() {
-  const example = path.resolve(__dirname, '../example')
+  const example = path.resolve(__dirname, '../resources/templates/example')
   const fixtures = path.join(__dirname, 'fixtures')
   const output = mkdtempSync(path.join(os.tmpdir(), 'liquidify-browser-'))
 
