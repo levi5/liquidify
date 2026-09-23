@@ -1,6 +1,6 @@
 {
   "name": "liquidify",
-  "version": "1.1.0-alpha.3",
+  "version": "1.1.0-alpha.4",
   "description": "TSX to Shopify Liquid compiler with Babel & esbuild",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -21,9 +21,9 @@
   ],
   "bin": {
     "liquidify": "dist/presentation/cli/index.js",
-    "liquidify:watch": "dist/presentation/cli/watch.js",
+    "liquidify-watch": "dist/presentation/cli/watch.js",
     "liquidx": "dist/presentation/cli/index.js",
-    "liquidx:watch": "dist/presentation/cli/watch.js"
+    "liquidx-watch": "dist/presentation/cli/watch.js"
   },
   "scripts": {
     "format": "biome format lib  --write",

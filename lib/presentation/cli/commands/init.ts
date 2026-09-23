@@ -110,7 +110,7 @@ const getLiquidifyVersion = (): string => {
       }
     } catch {}
   }
-  return '^1.1.0-alpha.3'
+  return '^1.1.0-alpha.4'
 }
 
 const syncPackageName = (targetDir: string, projectName: string): void => {
