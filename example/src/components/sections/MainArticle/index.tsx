@@ -14,15 +14,15 @@ export const MainArticle = () => {
           {'article.published_at | date: "%d.%m.%Y"'} · {'article.author | escape'}
         </p>
       </div>
-      {'{% if article.image %}'}
-      <img
-        className="article-cover"
-        src="{{ article.image | image_url: width: 1800 }}"
-        alt="{{ article.image.alt | default: article.title | escape }}"
-        width="1500"
-        height="850"
-      />
-      {'{% endif %}'}
+      {article.image && (
+        <img
+          className="article-cover"
+          src="{{ article.image | image_url: width: 1800 }}"
+          alt="{{ article.image.alt | default: article.title | escape }}"
+          width="1500"
+          height="850"
+        />
+      )}
       <div className="rich-text page-content">{'{{ article.content }}'}</div>
       <a className="text-link" href={blog.url}>
         ← Voltar para o journal

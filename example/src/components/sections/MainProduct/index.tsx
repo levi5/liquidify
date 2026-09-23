@@ -54,9 +54,11 @@ export const MainProduct = () => {
               ))}
             </div>
           )}
-          {'{% for media in product.media %}{% unless media.media_type == "image" %}'}
-          <div className={classNames(styles['product-media'])}>{'media | media_tag: image_size: "1000x", controls: true'}</div>
-          {'{% endunless %}{% endfor %}'}
+          {product.media?.filter((media) => media.media_type !== 'image').map((media) => (
+            <div key={media.id} className={classNames(styles['product-media'])}>
+              {media.media_tag}
+            </div>
+          ))}
         </div>
         <div className={classNames(styles['product-detail-copy'])}>
           <p className="eyebrow">{'product.vendor | escape'}</p>
@@ -128,12 +130,12 @@ export const MainProduct = () => {
               <p>
                 Informe seu endereço no checkout para consultar os prazos e as opções de entrega disponíveis.
               </p>
-              {'{% if shop.shipping_policy != blank %}'}
-              <a href="{{ shop.shipping_policy.url }}">Política de envio ↗</a>
-              {'{% endif %}'}
-              {'{% if shop.refund_policy != blank %}'}
-              <a href="{{ shop.refund_policy.url }}">Política de devolução ↗</a>
-              {'{% endif %}'}
+              {shop.shipping_policy && (
+                <a href={shop.shipping_policy.url}>Política de envio ↗</a>
+              )}
+              {shop.refund_policy && (
+                <a href={shop.refund_policy.url}>Política de devolução ↗</a>
+              )}
             </div>
           </details>
         </div>

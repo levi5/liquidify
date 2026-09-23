@@ -155,6 +155,7 @@ export class ExpressionParser {
       .with('toUpperCase', () => this.rewriteStringFilter(n, 'upcase', inCondition, renames, context))
       .with('trim', () => this.rewriteStringFilter(n, 'strip', inCondition, renames, context))
       .with('find', () => this.rewriteFind(n, renames, context))
+      .with('some', () => this.rewriteSome(n, renames, context))
       .with(methodName, () => null)
       .exec()
   }
@@ -206,6 +207,25 @@ export class ExpressionParser {
     Object.assign(n, identifier(varName))
   }
 
+  private rewriteSome(n: any, renames?: Record<string, string>, context?: ParsingContext): void {
+    const callback = n.arguments[0]
+    _Maybe
+      .of(isArrowFunctionExpression(callback) && callback.params.length > 0)
+      .map(() => {
+        const objectCode = generate(n.callee.object).code
+        const param = callback.params[0]
+        const itemName = isIdentifier(param) ? param.name : 'item'
+        const varName = `${objectCode.replace(/[^a-zA-Z0-9_]/g, '_')}_some`
+        const condition = this.generateLiquidCode(callback.body, true, renames, context)
+        context?.addPendingAssign(
+          `{% assign ${varName} = false %}\n{% for ${itemName} in ${objectCode} %}\n  {% if ${condition} %}\n    {% assign ${varName} = true %}\n    {% break %}\n  {% endif %}\n{% endfor %}`,
+        )
+        Object.assign(n, identifier(varName))
+        return true
+      })
+      .getOrElse(null)
+  }
+
   private normalizeUnary(n: any, renames?: Record<string, string>, context?: ParsingContext): void {
     _Maybe
       .of(isUnaryExpression(n) && n.operator === '!')
@@ -229,7 +249,7 @@ export class ExpressionParser {
         _match(n.operator)
           .with('===', () => ((n as any).operator = '=='))
           .with('!==', () => ((n as any).operator = '!='))
-          .with('+', () => this.rewriteArithmetic(n, 'plus', renames, context))
+          .with('+', () => this.rewritePlus(n, renames, context))
           .with('-', () => this.rewriteArithmetic(n, 'minus', renames, context))
           .with('*', () => this.rewriteArithmetic(n, 'times', renames, context))
           .with('/', () => this.rewriteArithmetic(n, 'divided_by', renames, context))
@@ -239,6 +259,34 @@ export class ExpressionParser {
         return true
       })
       .getOrElse(null)
+  }
+
+  private rewritePlus(n: any, renames?: Record<string, string>, context?: ParsingContext): void {
+    const leftCode = this.generateLiquidCode(n.left, false, renames, context)
+    const rightCode = this.generateLiquidCode(n.right, false, renames, context)
+    const isLeftString = isStringLiteral(n.left) || this.isLikelyString(n.left)
+    const isRightString = isStringLiteral(n.right) || this.isLikelyString(n.right)
+    
+    if (isLeftString || isRightString) {
+      Object.assign(n, identifier(`${leftCode} | append: ${rightCode}`))
+    } else {
+      this.rewriteArithmetic(n, 'plus', renames, context)
+    }
+  }
+
+  private isLikelyString(node: any): boolean {
+    if (isTemplateLiteral(node)) return true
+    if (isCallExpression(node)) {
+      const callee = node.callee as any
+      if (isMemberExpression(callee) && isIdentifier(callee.property)) {
+        const method = callee.property.name
+        return ['toString', 'join', 'toLowerCase', 'toUpperCase', 'trim', 'markdownify', 'handleize', 'strip', 'strip_html', 'money', 'money_without_currency'].includes(method)
+      }
+    }
+    if (isMemberExpression(node) && isIdentifier(node.property)) {
+      return ['length', 'size'].includes(node.property.name) === false
+    }
+    return false
   }
 
   private rewriteArithmetic(n: any, filter: string, renames?: Record<string, string>, context?: ParsingContext): void {

@@ -34,11 +34,11 @@
         </a>
         {% endfor %}
       </div>
-      {% endif %}{% for media in product.media %}{% unless media.media_type == "image" %}
+      {% endif %}{% for media in product.media %}{% if media.media_type != "image" %}
       <div class="product-media">
-        {{ media | media_tag: image_size: "1000x", controls: true }}
+        {{ media.media_tag | escape }}
       </div>
-      {% endunless %}{% endfor %}
+      {% endif %}{% endfor %}
     </div>
     <div class="product-detail-copy">
       <p class="eyebrow">
@@ -115,11 +115,11 @@
             <p>
               Informe seu endereço no checkout para consultar os prazos e as opções de entrega disponíveis.
             </p>
-            {% if shop.shipping_policy != blank %}
+            {% if shop.shipping_policy %}
             <a href="{{ shop.shipping_policy.url | escape }}">
               Política de envio ↗
             </a>
-            {% endif %}{% if shop.refund_policy != blank %}
+            {% endif %}{% if shop.refund_policy %}
             <a href="{{ shop.refund_policy.url | escape }}">
               Política de devolução ↗
             </a>

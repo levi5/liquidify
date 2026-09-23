@@ -39,16 +39,12 @@
           <label for="SortBy">
             Sort
           </label>
-          <select id="SortBy" name="sort_by" form="CollectionFilters-{{ section.id | escape }}" data-selected="{{ collection.sort_by | default: collection.default_sort_by | escape }}">
-            {% for option in collection.sort_options %}{% if option.value == selected_sort %}
-            <option value="{{ option.value | escape }}" selected>
+          <select id="SortBy" name="sort_by" form="{{ "CollectionFilters-" | append: section.id | escape }}" data-selected="{{ selected_sort | escape }}">
+            {% for option in collection.sort_options %}
+            <option value="{{ option.value | escape }}"{% if option.value == selected_sort %} selected{% endif %}>
               {{ option.name | escape }}
             </option>
-            {% else %}
-            <option value="{{ option.value | escape }}">
-              {{ option.name | escape }}
-            </option>
-            {% endif %}{% endfor %}
+            {% endfor %}
           </select>
         </div>
       </div>
@@ -78,25 +74,20 @@
   </div>
 </section>
 
-{%- unless script_filter_drawer_loaded -%}
-  <script src="{{ 'filter-drawer.js' | asset_url }}" defer></script>
-  {%- assign script_filter_drawer_loaded = true -%}
-{%- endunless -%}
-
 {% schema %}
 {
-  "name": "Catálogo",
+  "name": "Catalog",
   "settings": [
     {
       "type": "text",
       "id": "filter_heading",
-      "label": "Título dos filtros",
-      "default": "Filtros"
+      "label": "Filters Heading",
+      "default": "Filters"
     },
     {
       "type": "range",
       "id": "products_per_page",
-      "label": "Produtos por página",
+      "label": "Products per page",
       "min": 6,
       "max": 36,
       "step": 6,

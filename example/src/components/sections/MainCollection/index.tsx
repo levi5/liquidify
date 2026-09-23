@@ -40,17 +40,18 @@ export const MainCollection = () => {
               <select
                 id="SortBy"
                 name="sort_by"
-                form="CollectionFilters-{{ section.id }}"
-                data-selected="{{ collection.sort_by | default: collection.default_sort_by }}"
+                form={`CollectionFilters-${section.id}`}
+                data-selected={selected_sort}
               >
-                {'{% for option in collection.sort_options %}'}
-                {'{% if option.value == selected_sort %}'}
-                <option value="{{ option.value }}" selected>
-                  {'option.name | escape'}
-                </option>
-                {'{% else %}'}
-                <option value="{{ option.value }}">{'option.name | escape'}</option>
-                {'{% endif %}{% endfor %}'}
+                {collection.sort_options.map((option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                    selected={option.value === selected_sort}
+                  >
+                    {option.name}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -80,13 +81,13 @@ export const MainCollection = () => {
   )
 }
 export const schema = {
-  name: 'Catálogo',
+  name: 'Catalog',
   settings: [
-    { type: 'text', id: 'filter_heading', label: 'Título dos filtros', default: 'Filtros' },
+    { type: 'text', id: 'filter_heading', label: 'Filters Heading', default: 'Filters' },
     {
       type: 'range',
       id: 'products_per_page',
-      label: 'Produtos por página',
+      label: 'Products per page',
       min: 6,
       max: 36,
       step: 6,

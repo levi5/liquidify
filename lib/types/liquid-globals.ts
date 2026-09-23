@@ -8,6 +8,27 @@ export interface ShopifyImage {
   aspect_ratio: number;
 }
 
+export interface SortOption {
+  value: string;
+  name: string;
+}
+
+export interface Policy {
+  title: string;
+  url: string;
+  body: string;
+}
+
+export interface ProductMedia {
+  id: number;
+  media_type: 'image' | 'video' | 'external_video' | 'model';
+  alt: string | null;
+  src: string | null;
+  preview_image: ShopifyImage | null;
+  media_tag: string;
+  aspect_ratio: number | null;
+}
+
 export interface ProductOptionValue {
   name: string;
   position: number;
@@ -53,6 +74,7 @@ export interface Product {
   url: string;
   collections: Collection[];
   metafields: any;
+  media: ProductMedia[];
 }
 
 export interface FilterValue {
@@ -75,6 +97,7 @@ export interface Filter {
   min_value?: { param_name: string; value: number };
   max_value?: { param_name: string; value: number };
   range_max?: number;
+  url_to_remove?: string;
 }
 
 export interface Collection {
@@ -87,6 +110,9 @@ export interface Collection {
   image: ShopifyImage | null;
   products: Product[];
   filters: Filter[];
+  sort_options: SortOption[];
+  default_sort_by: string;
+  sort_by: string;
   [key: string]: unknown
 }
 
@@ -173,6 +199,11 @@ export interface Shop {
   currency: string;
   money_format: string;
   money_with_currency_format: string;
+  policies: Policy[];
+  shipping_policy?: Policy;
+  refund_policy?: Policy;
+  privacy_policy?: Policy;
+  terms_of_service?: Policy;
 }
 
 export interface Link {

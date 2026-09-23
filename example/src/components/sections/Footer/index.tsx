@@ -66,11 +66,13 @@ export const Footer = () => {
         <div>
           <h3>Informações</h3>
           {section.settings.menu.links.map((link) => (
-            <a href={link.url}>{'link.title | escape'}</a>
+            <a href={link.url}>{link.title}</a>
           ))}
-          {'{% for policy in shop.policies %}'}
-          <a href="{{ policy.url }}">{'policy.title | escape'}</a>
-          {'{% endfor %}'}
+          {shop.policies?.map((policy) => (
+            <a key={policy.url} href={policy.url}>
+              {policy.title}
+            </a>
+          ))}
         </div>
       </div>
       <div className={classNames(styles['footer-bottom'], 'container')}>

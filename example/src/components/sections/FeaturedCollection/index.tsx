@@ -13,11 +13,11 @@ export const FeaturedCollection = () => {
       <div className="section-heading">
         <div>
           <p className="eyebrow">THE EVERYDAY EDIT</p>
-          <h2>{'section.settings.heading | default: "No seu radar." | escape'}</h2>
-          <p className="section-subtitle">A próxima peça favorita do seu guarda-roupa está aqui.</p>
+          <h2>{'section.settings.heading | default: "On your radar." | escape'}</h2>
+          <p className="section-subtitle">Your next wardrobe favorite is here.</p>
         </div>
         <a className="text-link" href="{{ featured.url | default: routes.all_products_collection_url }}">
-          Ver tudo <span aria-hidden="true">↗</span>
+          View all <span aria-hidden="true">↗</span>
         </a>
       </div>
       {featured.products.length > 0 ? (
@@ -28,18 +28,18 @@ export const FeaturedCollection = () => {
         </div>
       ) : (
         <div className={classNames(styles['empty-state'])}>
-          <h3>Novas peças estão chegando.</h3>
-          <p>Acompanhe os próximos lançamentos da Liquidify.</p>
+          <h3>New pieces are coming.</h3>
+          <p>Follow Liquidify's upcoming drops.</p>
         </div>
       )}
     </section>
   )
 }
 export const schema = {
-  name: 'Produtos em destaque',
+  name: 'Featured Products',
   settings: [
-    { type: 'text', id: 'heading', label: 'Título', default: 'No seu radar.' },
-    { type: 'collection', id: 'collection', label: 'Coleção' },
+    { type: 'text', id: 'heading', label: 'Heading', default: 'On your radar.' },
+    { type: 'collection', id: 'collection', label: 'Collection' },
   ],
-  presets: [{ name: 'Produtos em destaque' }],
+  presets: [{ name: 'Featured Products' }],
 }
