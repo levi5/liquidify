@@ -396,10 +396,26 @@ react-island {
   display: flex;
   gap: 10px;
   margin-top: 25px;
+  border-bottom: 1px solid var(--ink);
+  transition: border-color 0.2s ease;
 }
 .page-search input {
   flex: 1;
   min-width: 0;
+  border: 0;
+  padding-inline: 0;
+  font-size: 18px;
+}
+.page-search input:focus,
+.page-search input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.page-search input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+.page-search:focus-within {
+  border-bottom-width: 2px;
 }
 .search-text-result {
   padding: 30px;
@@ -822,6 +838,7 @@ react-island {
   display: flex;
   border-bottom: 1px solid var(--ink);
   margin: 10px 0 35px;
+  transition: border-color 0.2s ease;
 }
 .search-field input {
   border: 0;
@@ -829,6 +846,17 @@ react-island {
   min-width: 0;
   padding-inline: 0;
   font-size: 18px;
+}
+.search-field input:focus,
+.search-field input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+.search-field input::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+.search-field:focus-within {
+  border-bottom-width: 2px;
 }
 .search-panel .eyebrow {
   margin-bottom: 16px;
@@ -958,7 +986,6 @@ react-island {
   font-size: 9px;
   letter-spacing: 1.1px;
   line-height: 1.2;
-  animation: notice-in 0.3s ease;
 }
 .announcement-arrow {
   font-size: 20px;
@@ -993,17 +1020,27 @@ react-island {
   font-size: 12px;
   font-weight: 500;
 }
-.desktop-nav a {
+.desktop-nav > a,
+.desktop-nav .nav-dropdown > summary {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
-.desktop-nav a:hover::after {
+.desktop-nav > a::after {
   content: '';
   position: absolute;
-  bottom: -9px;
+  bottom: 8px;
   left: 0;
   right: 0;
   height: 1px;
   background: currentColor;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+.desktop-nav > a:hover::after {
+  transform: scaleX(1);
 }
 .header-actions {
   display: flex;
@@ -1648,7 +1685,6 @@ react-island {
 }
 .form-row input,
 .contact-form textarea,
-.page-search input,
 .sort-control select {
   border-radius: 5px;
 }

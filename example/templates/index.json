@@ -2,7 +2,12 @@
   "sections": {
     "hero": {
       "type": "hero",
-      "settings": {}
+      "settings": {
+        "heading": "Seu estilo.",
+        "highlight": "Sem limites.",
+        "description": "Novas peças. Novas possibilidades. Encontre os essenciais que acompanham o seu ritmo.",
+        "button": "Explorar novidades"
+      }
     },
     "values": {
       "type": "values",
@@ -10,11 +15,15 @@
     },
     "featured": {
       "type": "featured-collection",
-      "settings": {}
+      "settings": {
+        "heading": "No seu radar."
+      }
     },
     "categories": {
       "type": "categories",
-      "settings": {},
+      "settings": {
+        "heading": "Qual é a sua vibe?"
+      },
       "blocks": {
         "women": {
           "type": "category",
@@ -52,7 +61,10 @@
     },
     "story": {
       "type": "brand-story",
-      "settings": {}
+      "settings": {
+        "heading": "Vista o que faz sentido para você.",
+        "description": "O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é."
+      }
     }
   },
   "order": [

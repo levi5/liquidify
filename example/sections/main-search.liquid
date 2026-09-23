@@ -6,7 +6,7 @@
     <h1>
       Boas descobertas.
     </h1>
-    <form action="{{ routes.search_url }}" method="get" role="search" class="page-search">
+    <form action="{{ routes.search_url | escape }}" method="get" role="search" class="page-search">
       <input type="hidden" name="type" value="product" />
       <label class="visually-hidden" for="PageSearch">
         Buscar produtos
@@ -18,7 +18,7 @@
     </form>
   </div>
   <p class="catalog-meta">
-    {{ search.results_count }}resultados para “{{ search.terms | escape }}”
+    {{ search.results_count | escape }} resultados para “{{ search.terms | escape }}”
   </p>
   {% paginate search.results by section.settings.products_per_page %}
 {% if search.results.size > 0 %}
@@ -27,7 +27,7 @@
 {% render 'product-card', item: item %}
 {% else %}
     <article class="search-text-result">
-      <a href="{{ item.url }}">
+      <a href="{{ item.url | escape }}">
         <h2>
           {{ item.title | escape }}
         </h2>
@@ -49,7 +49,7 @@
     <p>
       Experimente outro termo ou descubra todas as peças da loja.
     </p>
-    <a class="button button-dark" href="{{ routes.all_products_collection_url }}">
+    <a class="button button-dark" href="{{ routes.all_products_collection_url | escape }}">
       Explorar a loja ↗
     </a>
   </div>

@@ -337,8 +337,11 @@ export class ExpressionParser {
   }
 
   private parseStringLiteral(expr: any, context?: ParsingContext): string {
+    const hasLiquidTags = expr.value.includes('{{') || expr.value.includes('{%')
     return _match(true)
-      .with(expr.value.includes('{{') || expr.value.includes('{%') || context?.outputContext === 'raw', () => expr.value)
+      .with(hasLiquidTags, () => expr.value)
+      .with(expr.value.includes('|'), () => `{{ ${expr.value.trim()} }}`)
+      .with(context?.outputContext === 'raw', () => expr.value)
       .with(true, () => escapeHtml(expr.value))
       .exec()
   }

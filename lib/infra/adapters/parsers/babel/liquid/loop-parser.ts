@@ -105,6 +105,7 @@ export class LiquidLoopParser {
           })
           .getOrElse('')
         const slice = this.sliceSuffix(callee)
+        const arrayTarget = filterInfo ? filterInfo.array : this.extractArrayTarget(callee)
         const assignments = this.mapAssignments(callback, context)
         const returnNode = this.extractReturnNode(callback)
         const body = _Maybe
@@ -112,14 +113,28 @@ export class LiquidLoopParser {
           .map((node) => this.jsxToHtml(node as any, localRenames, context))
           .getOrElse('')
         const guarded = filterCondition ? `{% if ${filterCondition} %}${body}{% endif %}` : body
-        return `{% for ${itemName} in ${filterInfo ? this.arrayCodeOf(filterInfo.array) : this.arrayCodeOf(callee.object)}${slice} %}${assignments}${guarded}{% endfor %}`
+        return `{% for ${itemName} in ${this.arrayCodeOf(arrayTarget)}${slice} %}${assignments}${guarded}{% endfor %}`
       })
       .getOrElse('')
   }
 
+  private extractArrayTarget(callee: any): any {
+    const object = callee?.object
+    const isSliceCall =
+      isCallExpression(object) &&
+      isMemberExpression((object as any).callee) &&
+      isIdentifier((object as any).callee.property) &&
+      (object as any).callee.property.name === 'slice'
+    if (isSliceCall) {
+      return (object as any).callee.object
+    }
+    return object
+  }
+
   private extractFilterChain(callee: any): { array: any; param: string; body: any } | null {
+    const target = this.extractArrayTarget(callee)
     return _Maybe
-      .of(callee?.object)
+      .of(target)
       .map((object) => {
         const isChainedCall = isCallExpression(object) || isOptionalCallExpression(object)
         if (!isChainedCall) return null

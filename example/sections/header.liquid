@@ -1,6 +1,6 @@
 <div class="header-shell">
   <style>
-    .nav-dropdown{position:relative}.nav-dropdown>summary{display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;list-style:none}.nav-dropdown>summary::-webkit-details-marker{display:none}.nav-chevron{width:6px;height:6px;border-right:1px solid currentColor;border-bottom:1px solid currentColor;transform:rotate(45deg);margin:0 2px 4px;transition:transform .15s}.nav-dropdown[open]>summary .nav-chevron{transform:rotate(225deg);margin-bottom:0}.nav-submenu{position:absolute;top:100%;left:-20px;min-width:230px;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px #0000000f;z-index:40}.desktop-nav .nav-submenu a{display:block;padding:12px;border-radius:4px;font-size:12px;line-height:1.5}.desktop-nav .nav-submenu a:hover,.desktop-nav .nav-submenu a:focus-visible{background:var(--surface,#f5f5f3)}.desktop-nav .nav-submenu a:hover::after{content:none}.nav-submenu .nav-overview{font-weight:600;border-bottom:1px solid var(--line);margin-bottom:5px}.nav-submenu .nav-grandchild{padding-left:25px;font-size:11px;color:var(--muted)}.mobile-menu-group{border-bottom:1px solid var(--line)}.mobile-menu-group>summary{display:flex;align-items:center;justify-content:space-between;padding:20px 0;font-size:22px;letter-spacing:-.5px;list-style:none;cursor:pointer}.mobile-menu-group>summary::-webkit-details-marker{display:none}.mobile-menu-group[open]>summary .nav-chevron{transform:rotate(225deg)}.mobile-menu-group .mobile-sub-link{padding:12px 14px;font-size:15px;letter-spacing:0}.mobile-menu-group .mobile-grandchild{padding-left:28px;font-size:13px}.mobile-submenu{padding-bottom:12px}
+    .nav-dropdown{position:relative}.nav-dropdown>summary{display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;list-style:none}.nav-dropdown>summary::-webkit-details-marker{display:none}.nav-chevron{width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);display:inline-block;margin:0 2px 2px;transition:transform .2s ease;pointer-events:none}.nav-dropdown[open]>summary .nav-chevron{transform:rotate(225deg)}.nav-submenu{position:absolute;top:100%;left:-20px;min-width:230px;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px #0000000f;z-index:40}.desktop-nav .nav-submenu a{display:block;padding:12px;border-radius:4px;font-size:12px;line-height:1.5}.desktop-nav .nav-submenu a:hover,.desktop-nav .nav-submenu a:focus-visible{background:var(--surface,#f5f5f3)}.desktop-nav .nav-submenu a:hover::after{content:none}.nav-submenu .nav-overview{font-weight:600;border-bottom:1px solid var(--line);margin-bottom:5px}.nav-submenu .nav-grandchild{padding-left:25px;font-size:11px;color:var(--muted)}.mobile-menu-group{border-bottom:1px solid var(--line)}.mobile-menu-group>summary{display:flex;align-items:center;justify-content:space-between;padding:20px 0;font-size:22px;letter-spacing:-.5px;list-style:none;cursor:pointer}.mobile-menu-group>summary::-webkit-details-marker{display:none}.mobile-menu-group[open]>summary .nav-chevron{transform:rotate(225deg)}.mobile-menu-group .mobile-sub-link{padding:12px 14px;font-size:15px;letter-spacing:0}.mobile-menu-group .mobile-grandchild{padding-left:28px;font-size:13px}.mobile-submenu{padding-bottom:12px}
   </style>
   <div class="announcement" data-announcement>
     <button class="announcement-arrow" type="button" data-announcement-prev aria-label="Aviso anterior">
@@ -25,8 +25,8 @@
     </button>
   </div>
   <header class="site-header container">
-    <a class="wordmark" href="{{ routes.root_url }}" aria-label="Liquidify — página inicial">
-      {{ settings.brand_name | default: "Liquidify" | escape }}
+    <a class="wordmark" href="{{ routes.root_url | escape }}" aria-label="Liquidify — página inicial">
+      {{ settings.brand_name | default: shop.name | escape }}
     </a>
     <nav class="desktop-nav" aria-label="Menu principal">
       {% if section.settings.menu.links.size > 0 %}
@@ -38,16 +38,16 @@
           </span>
         </summary>
         <div class="nav-submenu">
-          <a class="nav-overview" data-menu-overview href="{{ link.url }}">
+          <a class="nav-overview" data-menu-overview href="{{ link.url | escape }}">
             Ver tudo em{{ link.title | escape }}↗
           </a>
           {% for child in link.links %}
           <div>
-            <a data-menu-child href="{{ child.url }}">
+            <a data-menu-child href="{{ child.url | escape }}">
               {{ child.title | escape }}
             </a>
             {% for grandchild in child.links %}
-            <a class="nav-grandchild" href="{{ grandchild.url }}">
+            <a class="nav-grandchild" href="{{ grandchild.url | escape }}">
               {{ grandchild.title | escape }}
             </a>
             {% endfor %}
@@ -56,7 +56,7 @@
         </div>
       </details>
       {% else %}
-      <a data-menu-item href="{{ link.url }}">
+      <a data-menu-item href="{{ link.url | escape }}">
         {{ link.title | escape }}
       </a>
       {% endif %}{% endfor %}
@@ -74,13 +74,13 @@
           <a class="nav-overview" data-menu-overview href="{{ section.settings.women_link | default: '/collections/all/feminino' | escape }}">
             Ver coleção feminina ↗
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=tag%3AFeminino%20AND%20%28top%20OR%20shirt%29">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/feminino+blusas">
             Blusas e camisetas
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=tag%3AFeminino%20AND%20jacket">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/feminino+jaquetas">
             Jaquetas
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=tag%3AFeminino%20AND%20skirt">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/feminino+saias">
             Saias e conjuntos
           </a>
         </div>
@@ -95,13 +95,13 @@
           <a class="nav-overview" data-menu-overview href="{{ section.settings.men_link | default: '/collections/all/masculino' | escape }}">
             Ver coleção masculina ↗
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=tag%3AMasculino%20AND%20shirt">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/masculino+camisas">
             Camisas
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=tag%3AMasculino%20AND%20jacket">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/masculino+jaquetas">
             Jaquetas
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=tag%3AMasculino%20AND%20tuxedo">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/masculino+alfaiataria">
             Alfaiataria
           </a>
         </div>
@@ -113,13 +113,13 @@
           </span>
         </summary>
         <div class="nav-submenu">
-          <a class="nav-overview" data-menu-overview href="{{ section.settings.accessories_link | default: '/search?type=product&q=bag%20OR%20shoes' | escape }}">
+          <a class="nav-overview" data-menu-overview href="{{ section.settings.accessories_link | default: '/collections/all/acessorios' | escape }}">
             Ver todos os acessórios ↗
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=bag">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/bolsas">
             Bolsas
           </a>
-          <a data-menu-child href="{{ routes.search_url | escape }}?type=product&q=shoes%20OR%20%22high%20tops%22">
+          <a data-menu-child href="{{ routes.root_url | escape }}collections/all/calcados">
             Calçados
           </a>
         </div>
@@ -127,21 +127,21 @@
       {% endif %}
     </nav>
     <div class="header-actions">
-      <a href="{{ routes.search_url }}" class="icon-button" data-open-panel="search" aria-label="Buscar produtos">
+      <a href="{{ routes.search_url | escape }}" class="icon-button" data-open-panel="search" aria-label="Buscar produtos">
         {% render 'theme-icon', name: 'search' %}
       </a>
-      <a href="{{ routes.account_url }}" class="icon-button account-link" aria-label="Entrar na minha conta">
+      <a href="{{ routes.account_url | escape }}" class="icon-button account-link" aria-label="Entrar na minha conta">
         {% render 'theme-icon', name: 'user' %}
       </a>
-      <a href="{{ routes.cart_url }}" class="icon-button bag-button" data-open-panel="cart" aria-label="Abrir sacola">
+      <a href="{{ routes.cart_url | escape }}" class="icon-button bag-button" data-open-panel="cart" aria-label="Abrir sacola">
         <span class="bag-icon" style="position: relative; display: inline-flex; flex-shrink: 0; ">
           {% render 'theme-icon', name: 'bag' %}
           <span class="cart-count" data-cart-count aria-live="polite" aria-atomic="true" style="position: absolute; top: -8px; right: -9px; min-width: 18px; height: 18px; padding: 0 4px; background: var(--ink); color: var(--paper); border: 2px solid var(--paper); font-size: 9px; font-weight: 600; pointer-events: none; ">
-            {{ cart.item_count }}
+            {{ cart.item_count | escape }}
           </span>
         </span>
       </a>
-      <a href="{{ routes.all_products_collection_url }}" class="icon-button mobile-menu-trigger" data-open-panel="menu" aria-label="Abrir menu">
+      <a href="{{ routes.all_products_collection_url | escape }}" class="icon-button mobile-menu-trigger" data-open-panel="menu" aria-label="Abrir menu">
         {% render 'theme-icon', name: 'menu' %}
       </a>
     </div>

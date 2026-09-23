@@ -48,5 +48,4 @@ function validateConfig(fullPath: string, value: unknown): LiquidifyConfig {
   }
   return { ...merged, react: { ...DEFAULT_CONFIG.react, ...(raw.react as LiquidifyConfig['react']) } }
 }
-
 export const ConfigLoader = { load: loadConfig }

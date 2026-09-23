@@ -10,10 +10,11 @@ builder.on('error', (error) => errors.push(error))
 
 try {
   await builder.build()
-  if (errors.length) throw new AggregateError(errors, 'Falha ao compilar os componentes do tema.')
+  // The alpha compiler emits recoverable errors without rejecting build().
+  if (errors.length) throw new AggregateError(errors, 'Failed to compile theme components.')
   await buildAssets()
   await verifyBuild()
-  console.log('Tema compilado com o Liquidify local.')
+  console.log('Theme compiled with local Liquidify.')
 } catch (error) {
   console.error(error)
   process.exitCode = 1

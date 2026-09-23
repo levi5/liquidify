@@ -6,6 +6,8 @@
 
 ---
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-GitHub-EA4AAA?style=for-the-badge&logo=githubsponsors&logoColor=white)](https://github.com/sponsors/levi5)
+
 ## ✨ Features
 
 - ⚛️ Write Shopify sections and snippets using **TSX/JSX** syntax

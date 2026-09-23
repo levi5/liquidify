@@ -5,7 +5,7 @@
         ENCONTRE O SEU PRÓXIMO LOOK
       </p>
       <h2>
-        {{ section.settings.heading | escape }}
+        {{ section.settings.heading | default: "Qual é a sua vibe?" | escape }}
       </h2>
     </div>
     <span class="muted category-intro">
@@ -16,7 +16,7 @@
   </div>
   <div class="category-grid">
     {% for block in section.blocks %}
-    <a class="category-card" href="{{ block.settings.link | default: routes.all_products_collection_url | escape }}" data-block-id="{{ block.id }}">
+    <a class="category-card" href="{{ block.settings.link | default: routes.all_products_collection_url | escape }}" data-block-id="{{ block.id | escape }}">
       {% if block.settings.image %}
       <img src="{{ block.settings.image | image_url: width: 900 | escape }}" alt="{{ block.settings.title | escape }}" width="900" height="1000" loading="lazy" />
       {% else %}

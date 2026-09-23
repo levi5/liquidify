@@ -75,6 +75,18 @@ export default function List({ items }) {
     assert.equal(component.html, '<ul>{% for item in items %}<li>{{ item.title | escape }}</li>{% endfor %}</ul>')
   })
 
+  it('compiles .slice().map() into a liquid for loop with limit and offset', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function List({ items }) {
+  return <ul>{items.slice(0, 8).map((item) => <li>{item.title}</li>)}</ul>
+}`,
+      '/theme/src/components/snippets/List.tsx',
+    )
+    assert.equal(component.html, '<ul>{% for item in items limit: 8 %}<li>{{ item.title | escape }}</li>{% endfor %}</ul>')
+  })
+
   it('detects dom mode and keeps plain html', async () => {
     const parser = makeParser()
     const component = await parser.parse(
@@ -87,5 +99,84 @@ export default function MobileMenu() {
 
     assert.equal(component.mode, 'dom')
     assert.equal(component.html, '<nav id="mobile-menu"><button>Menu</button></nav>')
+  })
+
+  it('compiles liquid filter expressions with default into correct liquid html (both quoted and unquoted)', async () => {
+    const parser = makeParser()
+
+    const unquoted = await parser.parse(
+      `export default function Header() {
+  return (
+    <a className="wordmark" href={routes.root_url}>
+      {settings.brand_name | default: shop.name | escape}
+    </a>
+  )
+}`,
+      '/theme/src/components/sections/Header.tsx',
+    )
+    assert.equal(
+      unquoted.html.trim(),
+      '<a class="wordmark" href="{{ routes.root_url | escape }}">{{ settings.brand_name | default: shop.name | escape }}</a>',
+    )
+
+    const quoted = await parser.parse(
+      `export default function Header() {
+  return (
+    <a className="wordmark" href={routes.root_url}>
+      {'settings.brand_name | default: shop.name | escape'}
+    </a>
+  )
+}`,
+      '/theme/src/components/sections/Header.tsx',
+    )
+    assert.equal(
+      quoted.html.trim(),
+      '<a class="wordmark" href="{{ routes.root_url | escape }}">{{ settings.brand_name | default: shop.name | escape }}</a>',
+    )
+
+    const backticks = await parser.parse(
+      `export default function Header() {
+  return (
+    <a className="wordmark" href={routes.root_url}>
+      {\`settings.brand_name | default: shop.name | escape\`}
+    </a>
+  )
+}`,
+      '/theme/src/components/sections/Header.tsx',
+    )
+    assert.equal(
+      backticks.html.trim(),
+      '<a class="wordmark" href="{{ routes.root_url | escape }}">{{ settings.brand_name | default: shop.name | escape }}</a>',
+    )
+
+    const inAttr = await parser.parse(
+      `export default function Card() {
+  return <img alt={settings.brand_name | default: shop.name | escape} />
+}`,
+      '/theme/src/components/snippets/Card.tsx',
+    )
+    assert.equal(
+      inAttr.html.trim(),
+      '<img alt="{{ settings.brand_name | default: shop.name | escape }}" />',
+    )
+  })
+
+  it('correctly compiles ternary expressions containing liquid filter strings without turning them into raw JS', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function ProductCard({ item }) {
+  return (
+    <span className="product-options-note">
+      {item.variants.length === 1 ? '1 opção' : "item.variants.size | append: ' opções'"}
+    </span>
+  )
+}`,
+      '/theme/src/components/snippets/ProductCard.tsx',
+    )
+    assert.ok(!component.html.includes('item.variants.length === 1'))
+    assert.ok(component.html.includes('{% if item.variants.size == 1 %}'))
+    assert.ok(component.html.includes('1 opção'))
+    assert.ok(component.html.includes("{{ item.variants.size | append: ' opções' }}"))
   })
 })

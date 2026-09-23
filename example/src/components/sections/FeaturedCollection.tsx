@@ -10,7 +10,7 @@ export const FeaturedCollection = () => {
       <div className="section-heading">
         <div>
           <p className="eyebrow">THE EVERYDAY EDIT</p>
-          <h2>{'section.settings.heading | escape'}</h2>
+          <h2>{'section.settings.heading | default: "No seu radar." | escape'}</h2>
           <p className="section-subtitle">A próxima peça favorita do seu guarda-roupa está aqui.</p>
         </div>
         <a className="text-link" href="{{ featured.url | default: routes.all_products_collection_url }}">

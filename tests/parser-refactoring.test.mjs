@@ -90,3 +90,16 @@ test('null coalescing emits pending fallback assignments before using them', () 
   assert.match(output, /{{ __liquidify_found_\d+ \| escape }}/)
   assert.equal(context.getPendingAssigns(), '')
 })
+
+test('string literal with liquid filter expression is wrapped in liquid output', () => {
+  const parser = expressions()
+  const output = parser.parseExpression(parseExpression('"settings.brand_name | default: shop.name | escape"'))
+  assert.equal(output, '{{ settings.brand_name | default: shop.name | escape }}')
+
+  const alreadyWrapped = parser.parseExpression(parseExpression('"{{ settings.brand_name | default: shop.name | escape }}"'))
+  assert.equal(alreadyWrapped, '{{ settings.brand_name | default: shop.name | escape }}')
+
+  const plainText = parser.parseExpression(parseExpression('"Plain Text"'))
+  assert.equal(plainText, 'Plain Text')
+})
+

@@ -6,17 +6,17 @@
       NEW SEASON / ESSENTIALS
     </p>
     <h1>
-      {{ section.settings.heading | escape }}
+      {{ section.settings.heading | default: "Seu estilo." | escape }}
       <br />
       <span>
-        {{ section.settings.highlight | escape }}
+        {{ section.settings.highlight | default: "Sem limites." | escape }}
       </span>
     </h1>
     <p class="hero-description">
-      {{ section.settings.description | escape }}
+      {{ section.settings.description | default: "Novas peças. Novas possibilidades. Encontre os essenciais que acompanham o seu ritmo." | escape }}
     </p>
     <a class="button button-dark" href="{{ section.settings.link | default: routes.all_products_collection_url | escape }}">
-      {{ section.settings.button | escape }}
+      {{ section.settings.button | default: "Explorar novidades" | escape }}
       <span aria-hidden="true">
         ↗
       </span>

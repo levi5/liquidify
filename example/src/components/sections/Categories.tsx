@@ -6,7 +6,7 @@ export const Categories = () => {
       <div className="section-heading">
         <div>
           <p className="eyebrow">ENCONTRE O SEU PRÓXIMO LOOK</p>
-          <h2>{'section.settings.heading | escape'}</h2>
+          <h2>{'section.settings.heading | default: "Qual é a sua vibe?" | escape'}</h2>
         </div>
         <span className="muted category-intro">
           Do básico ao inesperado.
