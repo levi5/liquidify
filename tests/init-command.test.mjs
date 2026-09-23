@@ -28,6 +28,8 @@ test('parseInitArgs handles various argument combinations', () => {
   assert.deepEqual(parseInitArgs(['my-store', '--template', 'fashion']), { targetDir: 'my-store', template: 'example' })
   assert.deepEqual(parseInitArgs(['my-store', '--template', 'start']), { targetDir: 'my-store', template: 'shopify-starter' })
   assert.deepEqual(parseInitArgs(['my-store', '--template', 'starter']), { targetDir: 'my-store', template: 'shopify-starter' })
+  assert.deepEqual(parseInitArgs(['my-store', '--force']), { targetDir: 'my-store', template: 'shopify-starter', force: true })
+  assert.deepEqual(parseInitArgs(['my-store', '-f']), { targetDir: 'my-store', template: 'shopify-starter', force: true })
 })
 
 test('resolveTemplate finds shopify-starter and example templates', () => {

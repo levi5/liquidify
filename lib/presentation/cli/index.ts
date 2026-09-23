@@ -34,16 +34,18 @@ const showHelp = (): void => {
   ${kleur.bold('Options:')}
     --template, -t  Template to initialize (default: shopify-starter, options: shopify-starter, example)
     --watch, -w     Watch for file changes and rebuild automatically
+    --force, -f     Force overwrite existing files during build or init
     --help, -h      Show help
 `)
   process.exit(0)
 }
 
-const runBuild = async (watch: boolean): Promise<void> => {
+const runBuild = async (watch: boolean, force = false): Promise<void> => {
   const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' }).start()
   const { loadConfig } = await import('../../infra/adapters/config/config-loader')
   const { makeLiquidifyBuilder } = await import('../../main/factories/make-liquidify-builder')
   const config = loadConfig()
+  if (force) config.force = true
   const builder = makeLiquidifyBuilder(config)
 
   spinner.succeed(`Configuration loaded (src: ${config.componentsDir}, out: ${config.output})`)
@@ -127,14 +129,15 @@ const resolveCommand = (args: string[]): string => {
 const resolveAction = (args: string[]) => {
   const command = resolveCommand(args)
   const watch = args.includes('--watch') || args.includes('-w')
+  const force = args.includes('--force') || args.includes('-f')
 
   return _match(command)
     .with('help', () => showHelp)
     .with('init', () => {
-      const { targetDir, template } = parseInitArgs(args.slice(1))
-      return () => runInit(targetDir, template)
+      const { targetDir, template, force: initForce } = parseInitArgs(args.slice(1))
+      return () => runInit(targetDir, template, initForce || force)
     })
-    .with('build', () => () => runBuild(watch))
+    .with('build', () => () => runBuild(watch, force))
     .exec()
 }
 

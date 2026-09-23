@@ -17,6 +17,7 @@ const IGNORED_ENTRIES = new Set([
 export interface InitOptions {
   targetDir: string
   template: string
+  force?: boolean
 }
 
 export const normalizeTemplateName = (templateName = 'shopify-starter'): string => {
@@ -33,6 +34,7 @@ export const normalizeTemplateName = (templateName = 'shopify-starter'): string 
 export function parseInitArgs(args: string[]): InitOptions {
   let targetDir = '.'
   let template = 'shopify-starter'
+  let force = false
   let i = 0
 
   while (i < args.length) {
@@ -51,6 +53,9 @@ export function parseInitArgs(args: string[]): InitOptions {
     } else if (arg.startsWith('-t=')) {
       template = arg.slice('-t='.length) || 'example'
       i += 1
+    } else if (arg === '--force' || arg === '-f') {
+      force = true
+      i += 1
     } else if (!arg.startsWith('-')) {
       targetDir = arg
       i += 1
@@ -59,7 +64,9 @@ export function parseInitArgs(args: string[]): InitOptions {
     }
   }
 
-  return { targetDir, template: normalizeTemplateName(template) }
+  const result: InitOptions = { targetDir, template: normalizeTemplateName(template) }
+  if (force) result.force = true
+  return result
 }
 
 export const resolveTemplate = (templateName = 'shopify-starter'): string => {
@@ -103,7 +110,7 @@ const getLiquidifyVersion = (): string => {
       }
     } catch {}
   }
-  return '^1.1.0-alpha.2'
+  return '^1.1.0-alpha.3'
 }
 
 const syncPackageName = (targetDir: string, projectName: string): void => {
@@ -123,9 +130,10 @@ const syncPackageName = (targetDir: string, projectName: string): void => {
   })
 }
 
-export const copyTemplate = (sourceDir: string, targetDir: string, projectName: string) => {
+export const copyTemplate = (sourceDir: string, targetDir: string, projectName: string, force = false) => {
   return _try.sync(() => {
     const checkConflicts = (source: string, target: string): void => {
+      if (force) return
       const existing = (() => {
         try {
           return fs.lstatSync(target)
@@ -135,7 +143,7 @@ export const copyTemplate = (sourceDir: string, targetDir: string, projectName: 
         }
       })()
       if (existing && (!existing.isDirectory() || existing.isSymbolicLink())) {
-        throw new Error(`Refusing to overwrite existing path: ${target}. Initialize in an empty directory.`)
+        throw new Error(`Refusing to overwrite existing path: ${target}. Initialize in an empty directory or use --force.`)
       }
       for (const entry of fs.readdirSync(source, { withFileTypes: true })) {
         if (IGNORED_ENTRIES.has(entry.name)) continue
@@ -148,7 +156,7 @@ export const copyTemplate = (sourceDir: string, targetDir: string, projectName: 
             if ((error as NodeJS.ErrnoException).code === 'ENOENT') continue
             throw error
           }
-          throw new Error(`Refusing to overwrite existing file: ${destination}. Initialize in an empty directory.`)
+          throw new Error(`Refusing to overwrite existing file: ${destination}. Initialize in an empty directory or use --force.`)
         }
       }
     }
@@ -156,8 +164,8 @@ export const copyTemplate = (sourceDir: string, targetDir: string, projectName: 
     fs.mkdirSync(targetDir, { recursive: true })
     fs.cpSync(sourceDir, targetDir, {
       recursive: true,
-      force: false,
-      errorOnExist: true,
+      force: force,
+      errorOnExist: !force,
       filter: (src) => !IGNORED_ENTRIES.has(path.basename(src)),
     })
     syncPackageName(targetDir, projectName)
@@ -182,7 +190,7 @@ export const reportInitSuccess = (targetDirArg: string, templateName = 'shopify-
   console.log(`  ${kleur.cyan('shopify theme dev')}\n`)
 }
 
-export async function runInit(targetDirArg = '.', templateName = 'shopify-starter'): Promise<void> {
+export async function runInit(targetDirArg = '.', templateName = 'shopify-starter', force = false): Promise<void> {
   const normalized = normalizeTemplateName(templateName)
   const targetDir = path.resolve(process.cwd(), targetDirArg)
   const baseName = path.basename(targetDir)
@@ -203,7 +211,7 @@ export async function runInit(targetDirArg = '.', templateName = 'shopify-starte
     if (!fs.existsSync(sourceDir)) {
       throw new Error(`Template "${templateName}" not found at ${sourceDir}`)
     }
-    const result = copyTemplate(sourceDir, targetDir, projectName)
+    const result = copyTemplate(sourceDir, targetDir, projectName, force)
     return result.isLeft()
       ? (() => {
           throw result.value

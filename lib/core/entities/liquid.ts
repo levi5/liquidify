@@ -4,6 +4,7 @@ export interface GeneratorOptions {
   blocksDir?: string
   snippetsDir?: string
   assetsDir?: string
+  force?: boolean
 }
 
 export interface ResolvedGeneratorOptions {
@@ -12,4 +13,5 @@ export interface ResolvedGeneratorOptions {
   blocksDir: string
   snippetsDir: string
   assetsDir: string
+  force?: boolean
 }

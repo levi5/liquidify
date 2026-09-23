@@ -22,9 +22,10 @@ export class LiquidFileSystemGenerator implements IGenerator {
       blocksDir: options.blocksDir || join(options.outputDir, 'blocks'),
       snippetsDir: options.snippetsDir || join(options.outputDir, 'snippets'),
       assetsDir: options.assetsDir || join(options.outputDir, 'assets'),
+      force: options.force,
     }
     this.fileSystem = fileSystem
-    this.manifest = new OutputManifest(options.outputDir, fileSystem)
+    this.manifest = new OutputManifest(options.outputDir, fileSystem, { force: options.force })
   }
 
   public async beginBuild(files: string[], changed: Set<string>): Promise<void> {

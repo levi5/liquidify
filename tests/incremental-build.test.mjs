@@ -77,6 +77,42 @@ test('build rejects a generated name that would overwrite a manual file', async 
   assert.equal(fs.readFileSync(path.join(output, 'snippets/a.liquid'), 'utf8'), 'manual content')
 })
 
+test('build with force: true overwrites manual file and records it in manifest', async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'liquidify-force-'))
+  const componentsDir = path.join(root, 'src/components')
+  const output = path.join(root, 'out')
+  fs.mkdirSync(componentsDir, { recursive: true })
+  fs.mkdirSync(path.join(output, 'snippets'), { recursive: true })
+  fs.writeFileSync(path.join(componentsDir, 'A.tsx'), '"use snippets"; export default function A(){return <p>Fresh</p>}')
+  fs.writeFileSync(path.join(output, 'snippets/a.liquid'), 'manual content')
+  const builder = makeLiquidifyBuilder({ componentsDir, output, force: true })
+  t.after(async () => {
+    await builder.watcher?.close()
+    fs.rmSync(root, { recursive: true, force: true })
+  })
+  await builder.build()
+  assert.equal(fs.readFileSync(path.join(output, 'snippets/a.liquid'), 'utf8'), '<p>\n  Fresh\n</p>')
+  assert.ok(fs.existsSync(path.join(output, '.liquidify-manifest.json')))
+})
+
+test('build adopts pre-existing output if content is identical without error', async (t) => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'liquidify-adopt-'))
+  const componentsDir = path.join(root, 'src/components')
+  const output = path.join(root, 'out')
+  fs.mkdirSync(componentsDir, { recursive: true })
+  fs.mkdirSync(path.join(output, 'snippets'), { recursive: true })
+  fs.writeFileSync(path.join(componentsDir, 'A.tsx'), '"use snippets"; export default function A(){return <p>Same</p>}')
+  fs.writeFileSync(path.join(output, 'snippets/a.liquid'), '<p>\n  Same\n</p>')
+  const builder = makeLiquidifyBuilder({ componentsDir, output })
+  t.after(async () => {
+    await builder.watcher?.close()
+    fs.rmSync(root, { recursive: true, force: true })
+  })
+  await builder.build()
+  assert.equal(fs.readFileSync(path.join(output, 'snippets/a.liquid'), 'utf8'), '<p>\n  Same\n</p>')
+  assert.ok(fs.existsSync(path.join(output, '.liquidify-manifest.json')))
+})
+
 test('failed manifest write restores outputs changed during finalization', async (t) => {
   const { builder, output, write } = setup(t)
   await builder.build()

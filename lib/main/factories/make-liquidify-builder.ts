@@ -29,7 +29,7 @@ export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder
     scriptGenerator: new ScriptGenerator(compiler),
   })
 
-  const generator = new LiquidFileSystemGenerator({ outputDir: options.output }, fileSystem)
+  const generator = new LiquidFileSystemGenerator({ outputDir: options.output, force: options.force }, fileSystem)
   const validator = new ValidationService()
   const useCase = new TranspileFileUseCase(parser, generator, validator)
 
