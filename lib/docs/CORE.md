@@ -1,41 +1,42 @@
-# Camada Core (Domínio)
+# Core Layer (Domain)
 
-A camada `core` define as regras de negócio fundamentais e os contratos (interfaces) que o restante do sistema deve seguir. Ela não possui dependências externas de infraestrutura.
+The `core` layer defines the fundamental business rules and contracts (interfaces) that the rest of the system must adhere to. It has no external infrastructure dependencies.
 
-## Entidades (`lib/core/entities`)
+## Entities (`lib/core/entities`)
 
 ### `Config`
-Representa a configuração global do Liquidify, carregada a partir do arquivo `.liquidifyrc`. Define as pastas de entrada/saída e comportamentos do compilador.
+Represents the global Liquidify configuration loaded from `.liquidifyrc` or `liquidify.config.json`. Defines input/output directories and compiler behaviors.
 
 ### `ParsedComponent`
-O resultado final da transpilação de um arquivo. Contém:
-- `html`: O código Liquid gerado.
-- `script`: JavaScript compilado (se houver).
-- `schema`: O schema JSON do Shopify extraído.
-- `mode`: O modo de execução (`liquid`, `react`, `dom`, `dom:global`).
-- `type`: Se o componente é um `section`, `snippet` ou `block`.
+The final result of transpiling a file. Contains:
+- `html`: The generated Liquid code.
+- `script`: Compiled JavaScript (if applicable).
+- `schema`: The extracted Shopify JSON schema.
+- `mode`: Execution mode (`liquid`, `react`, `dom`, `dom:global`).
+- `type`: Whether the component is a `section`, `snippet`, or `block`.
 
 ### `Liquid`
-Define tipos e utilitários básicos relacionados à sintaxe do Liquid.
+Defines core types and utilities related to Liquid syntax.
 
-## Protocolos (`lib/core/protocols`)
+## Protocols (`lib/core/protocols`)
 
-Os protocolos são interfaces que permitem o desacoplamento. A implementação real reside na camada de `infra`.
+Protocols are interfaces enabling decoupling. Concrete implementations reside in the `infra` layer.
 
 ### `IParser`
-Contrato para análise de arquivos fonte. Recebe uma string e retorna um `ParsedComponent`.
-- **Implementação Principal**: `BabelLiquidParser`.
+Contract for parsing source files. Receives source string and returns a `ParsedComponent`.
+- **Main Implementation**: `BabelLiquidParser`.
 
 ### `Compiler`
-Define como o código (TS/JS/CSS) deve ser compilado.
-- **Implementações**: `EsbuildCompiler`, `ReactComponentCompiler`.
+Defines how code (TS/JS/CSS) should be compiled.
+- **Implementations**: `EsbuildCompiler`, `ReactComponentCompiler`.
 
 ### `FileSystem`
-Interface para abstrair o acesso ao disco, permitindo o uso de sistemas de arquivos virtuais em testes.
-- **Implementação**: `NodeFileSystem`.
+Interface abstracting disk access, enabling the use of virtual file systems during tests.
+- **Implementation**: `NodeFileSystem`.
 
 ### `Generator`
-Contrato para geração de código final a partir de uma estrutura interna.
+Contract for generating target code from an internal structure.
 
 ### `PathResolver`
-Resolve caminhos de arquivos, especialmente útil para imports com aliases do TypeScript.
+Resolves file paths, particularly useful for TypeScript alias imports.
+

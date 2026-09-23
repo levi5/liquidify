@@ -1,37 +1,37 @@
 # Liquidify Library Documentation
 
-Esta pasta contém o núcleo do Liquidify, um compilador que transforma componentes JSX/TSX em código Liquid para Shopify.
+This folder contains the core of Liquidify, a compiler that transforms JSX/TSX components into Liquid code for Shopify.
 
-## Documentação Detalhada
+## Detailed Documentation
 
-Para detalhes técnicos profundos, consulte os documentos específicos:
+For in-depth technical details, refer to the specific documents:
 
-- [**Arquitetura Core (Domínio)**](CORE.md): Entidades e protocolos.
-- [**Lógica de Parser (Babel)**](PARSER_LOGIC.md): Transformação JSX para Liquid.
-- [**Extração e Hidratação**](COMPONENT_EXTRACTION.md): Como o JS do cliente é isolado.
-- [**Algoritmos Complexos**](COMPLEX_ALGORITHMS.md): Detalhes sobre recursividade e manipulação de AST.
-- [**Adaptadores de Infra**](INFRA_ADAPTERS.md): Compiladores (Esbuild/React) e FileSystem.
-- [**Serviços e Fluxo**](APPLICATION.md): Orquestração da transpilação.
-
+- [**Core Architecture (Domain)**](CORE.md): Entities and protocols.
+- [**Parser Logic (Babel)**](PARSER_LOGIC.md): JSX to Liquid transformation.
+- [**Extraction and Hydration**](COMPONENT_EXTRACTION.md): How client-side JS is isolated.
+- [**Complex Algorithms**](COMPLEX_ALGORITHMS.md): Details on recursion and AST manipulation.
+- [**Infrastructure Adapters**](INFRA_ADAPTERS.md): Compilers (Esbuild/React) and FileSystem.
+- [**Services and Flow**](APPLICATION.md): Transpilation orchestration.
 
 ---
 
-## Mapeamento de Arquivos Principais
+## Main File Mapping
 
 ### `lib/infra/adapters/parsers/babel/`
-- **`ASTParser.ts`**: Wrapper sobre o parser do Babel.
-- **`babel-parser.ts`**: Adaptador principal que coordena o fluxo de análise.
-- **`liquid-parser.ts`**: Orquestrador da conversão JSX -> Liquid.
-- **`liquid/`**: Sub-parsers para atributos, expressões, loops, etc.
+- **`ASTParser.ts`**: Wrapper around the Babel parser.
+- **`babel-parser.ts`**: Main adapter coordinating the analysis flow.
+- **`liquid-parser.ts`**: Orchestrator of the JSX -> Liquid conversion.
+- **`liquid/`**: Sub-parsers for attributes, expressions, loops, etc.
 
 ### `lib/application/services/`
-- **`transpile-file.ts`**: Pipeline de leitura, parse e gravação.
-- **`validation-service.ts`**: Validador de regras do framework.
+- **`transpile-file.ts`**: Read, parse, and write pipeline.
+- **`validation-service.ts`**: Framework rules validator.
 
 ---
 
-## Filosofia de Código
+## Code Philosophy
 
-- **Clean Architecture**: Separação clara entre domínio, aplicação e infraestrutura.
-- **Injeção de Dependência**: Facilitar testes e manutenibilidade.
-- **Documentação Externa**: A documentação reside em arquivos `.md`, mantendo o código limpo (sem comentários internos).
+- **Clean Architecture**: Clear separation between domain, application, and infrastructure.
+- **Dependency Injection**: Facilitates testing and maintainability.
+- **External Documentation**: Documentation resides in `.md` files, keeping the codebase clean (without excessive inline comments).
+

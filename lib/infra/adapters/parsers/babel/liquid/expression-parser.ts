@@ -246,8 +246,11 @@ export class ExpressionParser {
           .with(
             isIdentifier((n as any).object) &&
               this.importResolver.getCssModules().has((n as any).object.name) &&
-              isIdentifier((n as any).property),
-            () => Object.assign(n, stringLiteral((n as any).property.name)),
+              (isIdentifier((n as any).property) || isStringLiteral((n as any).property)),
+            () => {
+              const name = isIdentifier((n as any).property) ? (n as any).property.name : (n as any).property.value
+              return Object.assign(n, stringLiteral(name))
+            },
           )
           .with(isIdentifier((n as any).property, { name: 'length' }) && !(n as any).computed, () => ((n as any).property.name = 'size'))
           .with(true, () => null)

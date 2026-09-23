@@ -3,10 +3,10 @@
     "hero": {
       "type": "hero",
       "settings": {
-        "heading": "Seu estilo.",
-        "highlight": "Sem limites.",
-        "description": "Novas peças. Novas possibilidades. Encontre os essenciais que acompanham o seu ritmo.",
-        "button": "Explorar novidades"
+        "heading": "Your style.",
+        "highlight": "No limits.",
+        "description": "New pieces. New possibilities. Find the essentials that match your pace.",
+        "button": "Explore new arrivals"
       }
     },
     "values": {
@@ -16,40 +16,40 @@
     "featured": {
       "type": "featured-collection",
       "settings": {
-        "heading": "No seu radar."
+        "heading": "On your radar."
       }
     },
     "categories": {
       "type": "categories",
       "settings": {
-        "heading": "Qual é a sua vibe?"
+        "heading": "What's your vibe?"
       },
       "blocks": {
         "women": {
           "type": "category",
           "settings": {
-            "title": "Feminino",
-            "subtitle": "SEU ESTILO EM TODOS OS MOMENTOS",
+            "title": "Women",
+            "subtitle": "YOUR STYLE IN EVERY MOMENT",
             "fallback": "liquidify-women.jpg",
-            "link": "/collections/all/feminino"
+            "link": "/collections/all/women"
           }
         },
         "men": {
           "type": "category",
           "settings": {
-            "title": "Masculino",
-            "subtitle": "ESSENCIAIS PARA O SEU RITMO",
+            "title": "Men",
+            "subtitle": "ESSENTIALS FOR YOUR PACE",
             "fallback": "liquidify-men.jpg",
-            "link": "/collections/all/masculino"
+            "link": "/collections/all/men"
           }
         },
         "accessories": {
           "type": "category",
           "settings": {
-            "title": "Acessórios",
-            "subtitle": "OS DETALHES FAZEM O LOOK",
+            "title": "Accessories",
+            "subtitle": "THE DETAILS MAKE THE LOOK",
             "fallback": "liquidify-accessories.jpg",
-            "link": "/search?type=product&q=bag%20OR%20shoes"
+            "link": "/collections/all/accessories"
           }
         }
       },
@@ -62,8 +62,8 @@
     "story": {
       "type": "brand-story",
       "settings": {
-        "heading": "Vista o que faz sentido para você.",
-        "description": "O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é."
+        "heading": "Wear what feels right for you.",
+        "description": "Style happens when you feel good. Mix your favorites, discover new possibilities, and make every day an expression of who you are."
       }
     }
   },

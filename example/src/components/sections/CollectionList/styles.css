@@ -1,0 +1,9 @@
+.product-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 32px;
+  aspect-ratio: 1/1.03;
+}

@@ -22,7 +22,7 @@ export const CartContents = ({
       onUpdate(next)
       announceCart(next)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Tente novamente.')
+      setError(error instanceof Error ? error.message : 'Try again.')
     } finally {
       setBusy(false)
     }
@@ -39,10 +39,10 @@ export const CartContents = ({
           <span className="empty-spark" aria-hidden="true">
             ✳
           </span>
-          <h3>Seu próximo look começa aqui.</h3>
-          <p>Sua sacola está vazia. Explore a coleção e adicione seus favoritos.</p>
+          <h3>Your next look starts here.</h3>
+          <p>Your bag is empty. Explore the collection and add your favorites.</p>
           <a className="button button-dark" href={`${rootUrl()}collections/all`} onClick={onClose}>
-            Explore a loja <span>↗</span>
+            Explore the store <span>↗</span>
           </a>
         </div>
       ) : (
@@ -74,7 +74,7 @@ export const CartContents = ({
                       <button
                         disabled={busy || item.quantity <= 1}
                         onClick={() => change(item.key, item.quantity - 1)}
-                        aria-label={`Diminuir quantidade de ${item.product_title}`}
+                        aria-label={`Decrease quantity of ${item.product_title}`}
                       >
                         −
                       </button>
@@ -82,13 +82,13 @@ export const CartContents = ({
                       <button
                         disabled={busy}
                         onClick={() => change(item.key, item.quantity + 1)}
-                        aria-label={`Aumentar quantidade de ${item.product_title}`}
+                        aria-label={`Increase quantity of ${item.product_title}`}
                       >
                         +
                       </button>
                     </div>
                     <button className="remove-button" disabled={busy} onClick={() => change(item.key, 0)}>
-                      Remover
+                      Remove
                     </button>
                   </div>
                 </div>
@@ -106,18 +106,18 @@ export const CartContents = ({
               <strong>Subtotal</strong>
               <strong>{moneyText(cart.total_price, cart.currency)}</strong>
             </p>
-            <p className="muted">Frete e impostos calculados na finalização da compra.</p>
+            <p className="muted">Shipping and taxes calculated at checkout.</p>
             <form method="post" action={`${rootUrl()}cart`}>
               <button className="button button-dark full-width" type="submit" name="checkout" disabled={busy}>
-                Finalizar compra <span>↗</span>
+                Checkout <span>↗</span>
               </button>
             </form>
             {onClose && (
               <a className="cart-page-link" href={`${rootUrl()}cart`}>
-                Ver minha sacola
+                View my bag
               </a>
             )}
-            <p className="secure-note">Pagamento seguro com Shopify</p>
+            <p className="secure-note">Secure payment with Shopify</p>
           </div>
         </>
       )}

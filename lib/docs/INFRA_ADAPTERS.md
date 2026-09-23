@@ -1,19 +1,20 @@
-# Adaptadores de Infraestrutura
+# Infrastructure Adapters
 
-Esta camada contém as implementações que dependem de ferramentas externas.
+This layer contains implementations that depend on external tooling.
 
-## Compiladores (`lib/infra/adapters/compilers`)
+## Compilers (`lib/infra/adapters/compilers`)
 
 ### `EsbuildCompiler`
-Utiliza o **Esbuild** para transpilar TypeScript e minificar JavaScript/CSS. É escolhido pela sua performance extrema, permitindo que o `watch` do Liquidify seja quase instantâneo.
+Uses **Esbuild** to transpile TypeScript and minify JavaScript/CSS. Chosen for its extreme performance, making Liquidify's `watch` mode virtually instantaneous.
 
 ### `ReactComponentCompiler`
-Usado quando o modo é `'use react'`.
-- Gera um bundle independente para o componente.
-- Utiliza o `runtime-builder.ts` para injetar as bibliotecas necessárias (React, ReactDOM) de forma otimizada.
-- Garante que estilos CSS associados ao componente React sejam injetados via `CssInjector`.
+Used when the mode is `'use react'`:
+- Generates an independent bundle for the component.
+- Uses `runtime-builder.ts` to inject required libraries (React, ReactDOM/Preact) in an optimized manner.
+- Ensures CSS styles associated with the React component are injected via `CssInjector`.
 
-## Sistema de Arquivos (`lib/infra/adapters/fs`)
+## File System (`lib/infra/adapters/fs`)
 
 ### `NodeFileSystem`
-Implementação baseada no módulo `fs` do Node.js. Inclui lógica para criar pastas recursivamente, garantindo que a estrutura do tema Shopify seja mantida ao salvar os arquivos gerados.
+Implementation based on the Node.js `fs` module. Includes recursive folder creation logic, ensuring that Shopify theme structures are properly maintained when writing generated files.
+

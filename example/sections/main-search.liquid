@@ -1,24 +1,24 @@
 <section class="search-page container section-space">
   <div class="page-heading">
     <p class="eyebrow">
-      ENCONTRE O QUE COMBINA COM VOCÊ
+      FIND WHAT MATCHES YOU
     </p>
     <h1>
-      Boas descobertas.
+      Great finds.
     </h1>
     <form action="{{ routes.search_url | escape }}" method="get" role="search" class="page-search">
       <input type="hidden" name="type" value="product" />
       <label class="visually-hidden" for="PageSearch">
-        Buscar produtos
+        Search products
       </label>
-      <input type="search" id="PageSearch" name="q" value="{{ search.terms | escape }}" placeholder="O que você está procurando?" required />
+      <input type="search" id="PageSearch" name="q" value="{{ search.terms | escape }}" placeholder="What are you looking for?" required />
       <button class="button button-dark" type="submit">
-        Buscar ↗
+        Search ↗
       </button>
     </form>
   </div>
   <p class="catalog-meta">
-    {{ search.results_count | escape }} resultados para “{{ search.terms | escape }}”
+    {{ search.results_count | escape }} results for “{{ search.terms | escape }}”
   </p>
   {% paginate search.results by section.settings.products_per_page %}
 {% if search.results.size > 0 %}
@@ -32,7 +32,7 @@
           {{ item.title | escape }}
         </h2>
         <span>
-          Saiba mais ↗
+          Learn more ↗
         </span>
       </a>
     </article>
@@ -44,13 +44,13 @@
       ✳
     </span>
     <h2>
-      Vamos tentar de outro jeito?
+      Let's try another way?
     </h2>
     <p>
-      Experimente outro termo ou descubra todas as peças da loja.
+      Try another term or discover all pieces in the store.
     </p>
     <a class="button button-dark" href="{{ routes.all_products_collection_url | escape }}">
-      Explorar a loja ↗
+      Explore the store ↗
     </a>
   </div>
   {% endif %}{% render 'pagination', pager: paginate %}
@@ -59,12 +59,12 @@
 
 {% schema %}
 {
-  "name": "Resultados da busca",
+  "name": "Search Results",
   "settings": [
     {
       "type": "range",
       "id": "products_per_page",
-      "label": "Resultados por página",
+      "label": "Results per page",
       "min": 6,
       "max": 36,
       "step": 6,
@@ -73,3 +73,32 @@
   ]
 }
 {% endschema %}
+
+{% stylesheet %}
+.search-page {
+  min-height: 50vh;
+}
+
+.page-search {
+  display: flex;
+  gap: 12px;
+  max-width: 580px;
+  margin-top: 25px;
+}
+
+.page-search input {
+  flex: 1;
+}
+
+.search-text-result {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.search-text-result h2 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+{% endstylesheet %}

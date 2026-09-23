@@ -1,7 +1,4 @@
 <div class="header-shell">
-  <style>
-    .nav-dropdown{position:relative}.nav-dropdown>summary{display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;list-style:none}.nav-dropdown>summary::-webkit-details-marker{display:none}.nav-chevron{width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);display:inline-block;margin:0 2px 2px;transition:transform .2s ease;pointer-events:none}.nav-dropdown[open]>summary .nav-chevron{transform:rotate(225deg)}.nav-submenu{position:absolute;top:100%;left:-20px;min-width:230px;padding:12px;background:var(--paper);border:1px solid var(--line);border-radius:8px;box-shadow:0 12px 32px #0000000f;z-index:40}.desktop-nav .nav-submenu a{display:block;padding:12px;border-radius:4px;font-size:12px;line-height:1.5}.desktop-nav .nav-submenu a:hover,.desktop-nav .nav-submenu a:focus-visible{background:var(--surface,#f5f5f3)}.desktop-nav .nav-submenu a:hover::after{content:none}.nav-submenu .nav-overview{font-weight:600;border-bottom:1px solid var(--line);margin-bottom:5px}.nav-submenu .nav-grandchild{padding-left:25px;font-size:11px;color:var(--muted)}.mobile-menu-group{border-bottom:1px solid var(--line)}.mobile-menu-group>summary{display:flex;align-items:center;justify-content:space-between;padding:20px 0;font-size:22px;letter-spacing:-.5px;list-style:none;cursor:pointer}.mobile-menu-group>summary::-webkit-details-marker{display:none}.mobile-menu-group[open]>summary .nav-chevron{transform:rotate(225deg)}.mobile-menu-group .mobile-sub-link{padding:12px 14px;font-size:15px;letter-spacing:0}.mobile-menu-group .mobile-grandchild{padding-left:28px;font-size:13px}.mobile-submenu{padding-bottom:12px}
-  </style>
   <div class="announcement" data-announcement>
     <button class="announcement-arrow" type="button" data-announcement-prev aria-label="Aviso anterior">
       ‹
@@ -202,3 +199,119 @@
   ]
 }
 {% endschema %}
+
+{% stylesheet %}
+.nav-dropdown {
+    position: relative
+}
+
+.nav-dropdown>summary {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 44px;
+    cursor: pointer;
+    list-style: none
+}
+
+.nav-dropdown>summary::-webkit-details-marker {
+    display: none
+}
+
+.nav-chevron {
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    display: inline-block;
+    margin: 0 2px 2px;
+    transition: transform .2s ease;
+    pointer-events: none
+}
+
+.nav-dropdown[open]>summary .nav-chevron {
+    transform: rotate(225deg)
+}
+
+.nav-submenu {
+    position: absolute;
+    top: 100%;
+    left: -20px;
+    min-width: 230px;
+    padding: 12px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 12px 32px #0000000f;
+    z-index: 40
+}
+
+.desktop-nav .nav-submenu a {
+    display: block;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    line-height: 1.5
+}
+
+.desktop-nav .nav-submenu a:hover,
+.desktop-nav .nav-submenu a:focus-visible {
+    background: var(--surface, #f5f5f3)
+}
+
+.desktop-nav .nav-submenu a:hover::after {
+    content: none
+}
+
+.nav-submenu .nav-overview {
+    font-weight: 600;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 5px
+}
+
+.nav-submenu .nav-grandchild {
+    padding-left: 25px;
+    font-size: 11px;
+    color: var(--muted)
+}
+
+.mobile-menu-group {
+    border-bottom: 1px solid var(--line)
+}
+
+.mobile-menu-group>summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    font-size: 22px;
+    letter-spacing: -.5px;
+    list-style: none;
+    cursor: pointer
+}
+
+.mobile-menu-group>summary::-webkit-details-marker {
+    display: none
+}
+
+.mobile-menu-group[open]>summary .nav-chevron {
+    transform: rotate(225deg)
+}
+
+.mobile-menu-group .mobile-sub-link {
+    padding: 12px 14px;
+    font-size: 15px;
+    letter-spacing: 0
+}
+
+.mobile-menu-group .mobile-grandchild {
+    padding-left: 28px;
+    font-size: 13px
+}
+
+.mobile-submenu {
+    padding-bottom: 12px
+}
+
+{% endstylesheet %}

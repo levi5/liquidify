@@ -6,17 +6,17 @@
       NEW SEASON / ESSENTIALS
     </p>
     <h1>
-      {{ section.settings.heading | default: "Seu estilo." | escape }}
+      {{ section.settings.heading | default: "Your style." | escape }}
       <br />
       <span>
-        {{ section.settings.highlight | default: "Sem limites." | escape }}
+        {{ section.settings.highlight | default: "No limits." | escape }}
       </span>
     </h1>
     <p class="hero-description">
-      {{ section.settings.description | default: "Novas peças. Novas possibilidades. Encontre os essenciais que acompanham o seu ritmo." | escape }}
+      {{ section.settings.description | default: "New pieces. New possibilities. Find the essentials that match your pace." | escape }}
     </p>
     <a class="button button-dark" href="{{ section.settings.link | default: routes.all_products_collection_url | escape }}">
-      {{ section.settings.button | default: "Explorar novidades" | escape }}
+      {{ section.settings.button | default: "Explore new arrivals" | escape }}
       <span aria-hidden="true">
         ↗
       </span>
@@ -26,19 +26,19 @@
         DROP 01
       </span>
       <span>
-        EXPRESSE QUEM VOCÊ É.
+        EXPRESS WHO YOU ARE.
       </span>
     </div>
   </div>
-  <a class="fashion-hero-photo hero-women" href="{{ section.settings.women_link | default: '/collections/all/feminino' | escape }}">
+  <a class="fashion-hero-photo hero-women" href="{{ section.settings.women_link | default: '/collections/all/women' | escape }}">
     {% if section.settings.image %}
-    <img src="{{ section.settings.image | image_url: width: 1200 | escape }}" alt="{{ section.settings.image.alt | default: 'Coleção feminina Liquidify' | escape }}" width="900" height="1200" fetchpriority="high" />
+    <img src="{{ section.settings.image | image_url: width: 1200 | escape }}" alt="{{ section.settings.image.alt | default: 'Liquidify women collection' | escape }}" width="900" height="1200" fetchpriority="high" />
     {% else %}
-    <img src="{{ 'liquidify-women.jpg' | asset_url | escape }}" alt="Moda feminina Liquidify — estilo urbano e denim" width="900" height="1200" fetchpriority="high" />
+    <img src="{{ 'liquidify-women.jpg' | asset_url | escape }}" alt="Liquidify women&#39;s fashion — urban style and denim" width="900" height="1200" fetchpriority="high" />
     {% endif %}
     <span class="hero-photo-label">
       <strong>
-        Feminino
+        Women
       </strong>
       <span aria-hidden="true">
         ↗
@@ -48,15 +48,15 @@
       THE NEW EDIT
     </span>
   </a>
-  <a class="fashion-hero-photo hero-men" href="{{ section.settings.men_link | default: '/collections/all/masculino' | escape }}">
+  <a class="fashion-hero-photo hero-men" href="{{ section.settings.men_link | default: '/collections/all/men' | escape }}">
     {% if section.settings.men_image %}
-    <img src="{{ section.settings.men_image | image_url: width: 1000 | escape }}" alt="{{ section.settings.men_image.alt | default: 'Coleção masculina Liquidify' | escape }}" width="900" height="1200" fetchpriority="high" />
+    <img src="{{ section.settings.men_image | image_url: width: 1000 | escape }}" alt="{{ section.settings.men_image.alt | default: 'Liquidify men collection' | escape }}" width="900" height="1200" fetchpriority="high" />
     {% else %}
-    <img src="{{ 'liquidify-men.jpg' | asset_url | escape }}" alt="Moda masculina Liquidify — jaquetas e essenciais" width="900" height="1200" fetchpriority="high" />
+    <img src="{{ 'liquidify-men.jpg' | asset_url | escape }}" alt="Liquidify men&#39;s fashion — jackets and essentials" width="900" height="1200" fetchpriority="high" />
     {% endif %}
     <span class="hero-photo-label">
       <strong>
-        Masculino
+        Men
       </strong>
       <span aria-hidden="true">
         ↗
@@ -67,62 +67,253 @@
 
 {% schema %}
 {
-  "name": "Capa de moda",
+  "name": "Fashion Hero",
   "settings": [
     {
       "type": "text",
       "id": "heading",
-      "label": "Título",
-      "default": "Seu estilo."
+      "label": "Heading",
+      "default": "Your style."
     },
     {
       "type": "text",
       "id": "highlight",
-      "label": "Destaque",
-      "default": "Sem limites."
+      "label": "Highlight",
+      "default": "No limits."
     },
     {
       "type": "textarea",
       "id": "description",
-      "label": "Descrição",
-      "default": "Novas peças. Novas possibilidades. Encontre os essenciais que acompanham o seu ritmo."
+      "label": "Description",
+      "default": "New pieces. New possibilities. Find the essentials that match your pace."
     },
     {
       "type": "text",
       "id": "button",
-      "label": "Botão",
-      "default": "Explorar novidades"
+      "label": "Button",
+      "default": "Explore new arrivals"
     },
     {
       "type": "url",
       "id": "link",
-      "label": "Link principal"
+      "label": "Main Link"
     },
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Foto feminina"
+      "label": "Women's Photo"
     },
     {
       "type": "image_picker",
       "id": "men_image",
-      "label": "Foto masculina"
+      "label": "Men's Photo"
     },
     {
       "type": "url",
       "id": "women_link",
-      "label": "Link Feminino"
+      "label": "Women's Link"
     },
     {
       "type": "url",
       "id": "men_link",
-      "label": "Link Masculino"
+      "label": "Men's Link"
     }
   ],
   "presets": [
     {
-      "name": "Capa de moda"
+      "name": "Fashion Hero"
     }
   ]
 }
 {% endschema %}
+
+{% stylesheet %}
+.fashion-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr 0.85fr;
+  gap: 10px;
+  margin-top: 24px;
+  min-height: 560px;
+}
+
+.fashion-hero-copy {
+  background: #eeeeeb;
+  border-radius: 10px 0 0 10px;
+  padding: 54px 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+.new-season-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
+  border-radius: 50%;
+  margin-right: 7px;
+}
+
+.fashion-hero h1 {
+  font-size: clamp(48px, 5vw, 75px);
+  font-weight: 650;
+  letter-spacing: -4.2px;
+  line-height: 1.04;
+  margin: 55px 0 25px;
+}
+
+.fashion-hero h1 > span {
+  color: #787878;
+}
+
+.hero-description {
+  max-width: 260px;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #656565;
+  margin-bottom: 30px;
+}
+
+.fashion-hero .button {
+  gap: 32px;
+  min-width: 210px;
+}
+
+.hero-bottom-note {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 45px;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.fashion-hero-photo {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: #eee;
+}
+
+.hero-men {
+  border-radius: 0 10px 10px 0;
+}
+
+.fashion-hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  transition: transform 0.8s;
+}
+
+.fashion-hero-photo:hover img {
+  transform: scale(1.035);
+}
+
+.hero-women img {
+  object-position: 45% center;
+}
+
+.hero-men img {
+  object-position: 48% center;
+}
+
+.fashion-hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 65% 0 0;
+  background: linear-gradient(transparent, #0009);
+}
+
+.hero-photo-label {
+  position: absolute;
+  bottom: 27px;
+  left: 25px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1;
+  color: white;
+}
+
+.hero-photo-label strong {
+  font-size: 23px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+
+.hero-photo-label > span {
+  font-size: 25px;
+}
+
+.hero-photo-tag {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: white;
+  border: 1px solid #ffffff85;
+  padding: 7px 10px;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+}
+
+@media (max-width: 1200px) {
+  .fashion-hero {
+    grid-template-columns: 1.2fr 1fr;
+    min-height: 480px;
+  }
+  .fashion-hero h1 {
+    font-size: 55px;
+    margin: 30px 0 20px;
+  }
+  .fashion-hero-copy {
+    padding: 35px 25px 20px;
+  }
+}
+
+@media (max-width: 990px) {
+  .fashion-hero {
+    grid-template-columns: 1fr;
+    margin-top: 15px;
+  }
+  .fashion-hero-copy {
+    border-radius: 10px;
+    padding: 45px 30px;
+  }
+  .hero-men {
+    display: none;
+  }
+  .hero-women {
+    border-radius: 10px;
+    height: 380px;
+  }
+}
+
+@media (max-width: 680px) {
+  .fashion-hero {
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .fashion-hero-copy {
+    padding: 32px 20px 24px;
+    border-radius: 8px;
+  }
+  .fashion-hero h1 {
+    font-size: 44px;
+    letter-spacing: -2px;
+    margin: 20px 0 16px;
+  }
+  .fashion-hero-photo {
+    height: 320px;
+    border-radius: 8px;
+  }
+}
+
+{% endstylesheet %}

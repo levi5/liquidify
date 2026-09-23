@@ -1,67 +1,68 @@
-# Lógica de Parser e Transformação (Babel)
+# Parser and Transformation Logic (Babel)
 
-Esta seção detalha como o Liquidify utiliza o Babel para transformar JSX/TypeScript em Liquid e JavaScript.
+This section details how Liquidify leverages Babel to transform JSX/TypeScript into Liquid and JavaScript.
 
-## Fluxo de Análise (`BabelLiquidParser`)
+## Analysis Flow (`BabelLiquidParser`)
 
-O processo de `parse` segue esta sequência:
-1.  **Geração da AST**: O código fonte é transformado em uma Árvore de Sintaxe Abstrata (AST).
-2.  **Extração de Metadados (`ComponentExtractor`)**: Analisa imports, export default, diretivas e identifica se há um elemento JSX principal.
-3.  **Validação**: O `ValidationService` verifica se o código é permitido na pasta alvo.
-4.  **Processamento de CSS**: Extrai estilos e imports de CSS Modules.
-5.  **Conversão JSX -> Liquid (`LiquidParser`)**: Onde a mágica acontece.
+The `parse` process follows this sequence:
+1. **AST Generation**: Source code is transformed into an Abstract Syntax Tree (AST).
+2. **Metadata Extraction (`ComponentExtractor`)**: Analyzes imports, export default, directives, and identifies whether a main JSX element exists.
+3. **Validation**: `ValidationService` verifies whether the code is allowed in the target directory.
+4. **CSS Processing**: Extracts styles and CSS Modules imports.
+5. **JSX -> Liquid Conversion (`LiquidParser`)**: Where the transformation happens.
 
 ---
 
-## Componentes do `LiquidParser`
+## `LiquidParser` Sub-Components
 
-O `LiquidParser` orquestra vários sub-parsers especializados:
+`LiquidParser` orchestrates several specialized sub-parsers:
 
 ### `LiquidAttributeConverter`
-Transforma atributos JSX em atributos HTML/Liquid.
-- **Event Handlers**: Converte `onClick={handler}` em chamadas globais do Liquidify (ex: `onclick="liquidify['comp'].handler(event)"`) se estiver no modo DOM.
-- **Classes Dinâmicas**: Trata `className` e literais de template.
-- **Booleanos**: Converte condicionais simples em tags `{% if %}` inline.
+Transforms JSX attributes into HTML/Liquid attributes.
+- **Event Handlers**: Converts `onClick={handler}` into global Liquidify calls (e.g., `onclick="liquidify['comp'].handler(event)"`) in DOM mode.
+- **Dynamic Classes**: Handles `className` and template literals.
+- **Booleans**: Converts simple conditionals into inline `{% if %}` tags.
 
 ### `LiquidExpressionParser`
-Analisa expressões dentro de `{ }`.
-- Suporta mapeamento de métodos JS para filtros Liquid (ex: `.toLowerCase()` -> `| downcase`).
-- Resolve variáveis importadas de outros arquivos.
+Parses expressions inside `{ }`.
+- Supports mapping JS methods to Liquid filters (e.g., `.toLowerCase()` -> `| downcase`).
+- Resolves variables imported from other files.
 
 ### `LiquidLoopParser`
-Identifica padrões de `.map()` no JSX e os transforma em blocos `{% for item in collection %}`.
+Identifies `.map()` patterns in JSX and transforms them into `{% for item in collection %}` blocks.
 
 ### `LiquidBlockParser`
-Trata a tag especial `<DynamicBlock />`, que o Shopify usa para permitir que usuários arrastem e soltem blocos dentro de uma seção. Ele gera o código `{% content_for 'blocks' %}` e extrai o schema correspondente.
+Handles the special `<DynamicBlock />` tag, which Shopify uses to allow merchant drag-and-drop blocks inside a section. It generates `{% content_for 'blocks' %}` code and extracts the corresponding schema.
 
 ### `LiquidConditionalParser`
-Transforma Operadores Ternários (`a ? b : c`) e Curto-circuitos (`a && b`) em blocos `{% if %}` e `{% unless %}`. Ele gerencia a geração de código recursiva para garantir que condicionais aninhadas funcionem corretamente no Liquid.
+Transforms Ternary Operators (`a ? b : c`) and Short-circuits (`a && b`) into `{% if %}` and `{% unless %}` blocks. It manages recursive code generation to ensure nested conditionals function correctly in Liquid.
 
 ### `LiquidPaginateParser`
-Transforma o componente `<PaginateByLiquid />` na tag `{% paginate %}` do Shopify, permitindo paginação nativa controlada via JSX.
+Transforms the `<PaginateByLiquid />` component into Shopify's `{% paginate %}` tag, enabling native pagination controlled via JSX.
 
 ### `LiquidSvgParser`
-Trata a renderização de SVGs através de tags personalizadas, facilitando o reuso de ícones no tema.
+Handles SVG rendering via custom tags, facilitating icon reuse across the theme.
 
 ### `LiquidVariableParser`
-Gerencia a conversão de identificadores e variáveis, garantindo que nomes renomeados (como em loops) sejam propagados corretamente para o código Liquid final.
+Manages identifier and variable conversions, ensuring that renamed variables (such as inside loops) are properly propagated to the final Liquid code.
 
 ### `LiquidSnippetParser`
-Detecta o uso de componentes que devem ser renderizados como snippets do Shopify (`{% render 'snippet' %}`).
+Detects components that should render as Shopify snippets (`{% render 'snippet' %}`).
 
 ### `LiquidHtmlParser`
-Responsável pela renderização final de tags HTML padrão.
-- Trata o atributo `dangerouslySetInnerHTML`.
-- Garante a abertura e fechamento correto de tags.
+Responsible for the final rendering of standard HTML tags:
+- Handles `dangerouslySetInnerHTML`.
+- Ensures proper tag opening and closing.
 
 ---
 
-## Extração de Schema (`SchemaExtractor`)
+## Schema Extraction (`SchemaExtractor`)
 
-O Liquidify procura por uma variável chamada `schema` ou um comentário específico para gerar o arquivo `.json` que o Shopify usa para configurar seções e blocos. Ele analisa o objeto JavaScript e o converte fielmente para o formato JSON exigido pelo Shopify.
+Liquidify looks for a variable named `schema` or a specific comment to generate the `.json` file that Shopify uses to configure sections and blocks. It analyzes the JavaScript object and converts it faithfully to the JSON schema format required by Shopify.
 
-## Geração de Scripts (`ScriptGenerator`)
+## Script Generation (`ScriptGenerator`)
 
-Quando a diretiva `'use dom'` ou `'use script'` é encontrada:
-1.  O compilador coleta todas as declarações de funções e variáveis no escopo superior.
-2.  Elas são "embrulhadas" em uma estrutura que permite a hidratação e execução segura no cliente, mantendo o contexto do componente.
+When the `'use dom'` or `'use script'` directive is found:
+1. The compiler collects all top-level function and variable declarations.
+2. They are wrapped in an isolated structure that allows hydration and safe execution on the client while preserving component context.
+

@@ -1,0 +1,31 @@
+.contact-page {
+  max-width: 950px;
+}
+
+.contact-form {
+  max-width: 760px;
+}
+
+.contact-form label {
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+
+.contact-form input,
+.contact-form textarea {
+  display: block;
+  width: 100%;
+  margin-top: 7px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 25px;
+}
+
+@media (max-width: 680px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -179,4 +179,28 @@ export default function ProductCard({ item }) {
     assert.ok(component.html.includes('1 opção'))
     assert.ok(component.html.includes("{{ item.variants.size | append: ' opções' }}"))
   })
+
+  it('correctly resolves styles and classnames calls at compile-time', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use sections'
+import styles from './styles.css'
+import classNames from 'classnames'
+
+export default function Hero() {
+  return (
+    <section className={classNames(styles['fashion-hero'], styles.container)}>
+      <h1 className={classNames(styles.title)}>Title</h1>
+      <button className={classNames(styles.button, { [styles['button-dark']]: true, [styles['button-outline']]: false })}>
+        Button
+      </button>
+    </section>
+  )
+}`,
+      '/home/levis/Desktop/lib/liquidify/example/src/components/sections/Hero/index.tsx',
+    )
+    assert.ok(component.html.includes('<section class="fashion-hero container">'))
+    assert.ok(component.html.includes('<h1 class="title">Title</h1>'))
+    assert.ok(component.html.includes('<button class="button button-dark">Button</button>'))
+  })
 })

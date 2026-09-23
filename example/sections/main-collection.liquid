@@ -1,8 +1,8 @@
 {% assign selected_sort = collection.sort_by | default: collection.default_sort_by %}
 <section class="catalog container section-space">
-  <nav class="breadcrumbs" aria-label="Navegação estrutural">
+  <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
     <a href="{{ routes.root_url | escape }}">
-      Início
+      Home
     </a>
     <span>
       /
@@ -13,7 +13,7 @@
   </nav>
   <div class="page-heading">
     <p class="eyebrow">
-      ESCOLHAS QUE TRANSFORMAM
+      CHOICES THAT TRANSFORM
     </p>
     <h1>
       {% if current_tags.size > 0 %}
@@ -33,11 +33,11 @@
     <div class="catalog-results">
       <div class="catalog-toolbar">
         <span class="catalog-meta">
-          {{ collection.products_count | append: " produtos" }}
+          {{ collection.products_count | append: " products" }}
         </span>
         <div class="sort-control">
           <label for="SortBy">
-            Ordenar
+            Sort
           </label>
           <select id="SortBy" name="sort_by" form="CollectionFilters-{{ section.id | escape }}" data-selected="{{ collection.sort_by | default: collection.default_sort_by | escape }}">
             {% for option in collection.sort_options %}{% if option.value == selected_sort %}
@@ -63,13 +63,13 @@
           ✳
         </span>
         <h2>
-          Nenhuma peça por aqui.
+          No pieces here.
         </h2>
         <p>
-          Tente ajustar os filtros ou explorar toda a coleção.
+          Try adjusting the filters or explore the full collection.
         </p>
         <a class="button button-dark" href="{{ routes.all_products_collection_url | escape }}">
-          Ver todos os produtos ↗
+          View all products ↗
         </a>
       </div>
       {% endif %}{% render 'pagination', pager: paginate %}
@@ -77,6 +77,11 @@
     </div>
   </div>
 </section>
+
+{%- unless script_filter_drawer_loaded -%}
+  <script src="{{ 'filter-drawer.js' | asset_url }}" defer></script>
+  {%- assign script_filter_drawer_loaded = true -%}
+{%- endunless -%}
 
 {% schema %}
 {
@@ -100,3 +105,75 @@
   ]
 }
 {% endschema %}
+
+{% stylesheet %}
+.catalog {
+  padding-top: 20px;
+}
+
+.breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 35px;
+}
+
+.breadcrumbs span:last-child {
+  color: var(--ink);
+}
+
+.page-heading {
+  margin-bottom: 45px;
+  max-width: 820px;
+}
+
+.page-heading h1 {
+  font-size: clamp(36px, 5vw, 66px);
+  letter-spacing: -2.8px;
+  margin: 15px 0 22px;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px 22px;
+}
+
+.empty-state {
+  padding: 70px 20px;
+  text-align: center;
+}
+
+.empty-state h2 {
+  font-size: 28px;
+  margin-bottom: 12px;
+}
+
+.empty-state p {
+  color: var(--muted);
+  font-size: 13px;
+  margin-bottom: 24px;
+}
+
+.empty-spark {
+  display: inline-block;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+@media (max-width: 900px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+{% endstylesheet %}

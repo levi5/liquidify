@@ -1,30 +1,31 @@
-# Camada de Aplicação
+# Application Layer
 
-A camada `application` coordena o fluxo de dados entre o usuário (CLI) e a lógica interna (Core/Infra).
+The `application` layer coordinates the data flow between the user (CLI) and the internal logic (Core/Infra).
 
-## Serviços (`lib/application/services`)
+## Services (`lib/application/services`)
 
 ### `TranspileFile`
-Este é o serviço principal chamado durante o build ou watch.
-1.  Recebe um caminho de arquivo.
-2.  Lê o conteúdo usando o `FileSystem`.
-3.  Chama o `Parser` (`BabelLiquidParser`) para obter o `ParsedComponent`.
-4.  Salva os arquivos gerados (.liquid, .json, .js, .css) nas pastas corretas do tema Shopify, respeitando a estrutura do projeto.
+This is the main service called during build or watch operations:
+1. Receives a file path.
+2. Reads the content using `FileSystem`.
+3. Calls the `Parser` (`BabelLiquidParser`) to obtain the `ParsedComponent`.
+4. Saves the generated files (.liquid, .json, .js, .css) in the corresponding Shopify theme folders, maintaining the project structure.
 
 ### `ValidationService`
-Garante a integridade do código Liquid gerado.
-- Impede o uso de lógica complexa de React em pastas onde o Shopify exige Liquid puro.
-- Alerta sobre o uso de JavaScript sem a diretiva necessária (`'use dom'`).
+Ensures the integrity of the generated Liquid code:
+- Prevents complex React logic from being used in directories where Shopify requires pure Liquid.
+- Warns against JavaScript usage missing the required directive (`'use dom'`).
 
 ---
 
-# Camada Principal (Main)
+# Main Layer (`lib/main`)
 
-### Fábricas (`lib/main/factories`)
+### Factories (`lib/main/factories`)
 
-O Liquidify utiliza o padrão Factory para instanciar o sistema. O `makeLiquidifyBuilder` (ou similar) é responsável por:
-1.  Instanciar os adaptadores de infraestrutura (Esbuild, Babel, NodeFS).
-2.  Injetá-los nos serviços de aplicação.
-3.  Retornar uma fachada simples para a CLI utilizar.
+Liquidify uses the Factory pattern to instantiate the system. `makeLiquidifyBuilder` (or similar) is responsible for:
+1. Instantiating infrastructure adapters (Esbuild, Babel, NodeFS).
+2. Injecting them into the application services.
+3. Returning a simple facade for the CLI to consume.
 
-Isso permite que, no futuro, possamos trocar o `esbuild` por outro compilador ou o Babel por outro parser sem alterar a lógica de aplicação.
+This enables future replacement of `esbuild` with another compiler or Babel with another parser without changing application logic.
+

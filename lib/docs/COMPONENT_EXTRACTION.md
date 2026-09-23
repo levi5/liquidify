@@ -1,50 +1,51 @@
-# Extração de Componentes e Hidratação
+# Component Extraction and Hydration
 
-Este documento detalha como o Liquidify analisa um arquivo `.tsx` para separar o que deve ser processado no servidor (Shopify/Liquid) e o que deve ser enviado para o navegador (Client-side JS).
+This document details how Liquidify analyzes a `.tsx` file to separate what should be processed on the server (Shopify/Liquid) and what should be sent to the browser (Client-side JS).
 
-## O extrator principal (`ComponentExtractor`)
+## The Main Extractor (`ComponentExtractor`)
 
-O `ComponentExtractor` é responsável por varrer o arquivo e preencher o objeto de metadados. Ele utiliza sub-parsers fundamentais:
+`ComponentExtractor` scans the file and populates the metadata object using key sub-parsers:
 
-1.  **`DirectiveParser`**: Procura por diretivas no topo do arquivo ou funções, como `'use dom'`, `'use script'` ou `'use react'`.
-2.  **`ExportParser`**: Identifica o `export default` para determinar o nome do componente e o ponto de entrada da renderização.
-3.  **`StatementCollector`**: O "cérebro" que classifica cada linha de código.
-
----
-
-## Classificação de Código (`StatementCollector`)
-
-O `StatementCollector` percorre as declarações do arquivo e as divide em categorias:
-
-### 1. Elemento JSX Principal
-Identifica o `return` da função principal. Este elemento é enviado para o `LiquidParser` para ser transformado em HTML/Liquid.
-
-### 2. Atribuições Liquid (`liquidAssignments`)
-Se o componente estiver no modo `liquid` puro, variáveis declaradas no escopo superior (ex: `const title = 'Hello'`) são convertidas em tags `{% assign title = 'Hello' %}`.
-
-### 3. Declarações de Script (`scriptStatements`)
-Se o modo for `dom` ou `dom:global`, as funções e variáveis são coletadas para serem enviadas ao navegador.
+1. **`DirectiveParser`**: Looks for directives at the top of the file or functions, such as `'use dom'`, `'use script'`, or `'use react'`.
+2. **`ExportParser`**: Identifies `export default` to determine the component name and render entry point.
+3. **`StatementCollector`**: The core classifier that categorizes each line of code.
 
 ---
 
-## Geração de Scripts e Escopo (`ScriptGenerator`)
+## Code Classification (`StatementCollector`)
 
-Para evitar conflitos entre múltiplos componentes na mesma página, o `ScriptGenerator` encapsula o código em um **IIFE (Immediately Invoked Function Expression)** e cria um escopo global:
+`StatementCollector` walks through statements and categorizes them:
 
-### O Objeto `window.liquidify`
-O código gerado segue este padrão:
+### 1. Main JSX Element
+Identifies the `return` of the main function. This element is forwarded to `LiquidParser` to be transformed into HTML/Liquid.
+
+### 2. Liquid Assignments (`liquidAssignments`)
+In pure `liquid` mode, variables declared at the top-level scope (e.g., `const title = 'Hello'`) are converted into `{% assign title = 'Hello' %}` tags.
+
+### 3. Script Statements (`scriptStatements`)
+In `dom` or `dom:global` mode, functions and variables are collected to be bundled and served to the browser.
+
+---
+
+## Script Generation and Scoping (`ScriptGenerator`)
+
+To prevent collisions between multiple components on the same page, `ScriptGenerator` wraps code in an **IIFE (Immediately Invoked Function Expression)** and creates a global scope:
+
+### The `window.liquidify` Object
+The generated code follows this pattern:
 ```javascript
 (function() {
   window.liquidify = window.liquidify || {};
-  window.liquidify['nome-do-componente'] = {};
-  const scope = window.liquidify['nome-do-componente'];
+  window.liquidify['component-name'] = {};
+  const scope = window.liquidify['component-name'];
   
-  // O código do usuário entra aqui
+  // User code goes here
   function handleClick() { ... }
   
-  // Exportação automática para o escopo
+  // Automatic export to the scope
   scope.handleClick = handleClick;
 })();
 ```
 
-Isso permite que os Event Handlers no Liquid (como `onclick`) chamem as funções corretas sem poluir o escopo global do window.
+This allows Liquid Event Handlers (such as `onclick`) to invoke the correct functions without polluting the global `window` scope.
+

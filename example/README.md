@@ -1,10 +1,10 @@
-# Liquidify — loja de moda Shopify
+# Liquidify — Shopify Fashion Store
 
-Tema de e-commerce em português, desenvolvido em **TSX dentro de `src`**, usando o **Liquidify deste repositório** e Preact. O catálogo vem da loja Shopify; as fotos dos banners são cópias de imagens do próprio catálogo de desenvolvimento.
+E-commerce theme built in **TSX inside `src`**, using **Liquidify from this repository** and Preact. The catalog originates from the Shopify store; banner images replicate assets from the development catalog.
 
-## Desenvolvimento
+## Development
 
-Instale as dependências na **raiz do repositório** e execute:
+Install dependencies at the **repository root** and run:
 
 ```bash
 pnpm install
@@ -12,75 +12,70 @@ npm run build:example
 npm run dev:example
 ```
 
-O exemplo reutiliza as dependências da raiz; não é necessário instalar pacotes dentro de `example`. Os comandos compilam a biblioteca em `dist` antes de gerar o tema. O TypeScript resolve os imports de `liquidify` para os tipos desse build local.
+The example reuses root dependencies; installing packages inside `example` is not required. Commands compile the library in `dist` before building the theme. TypeScript resolves `liquidify` imports to the local build typings.
 
-Se já estiver dentro de `example`, use `npm run build`, `npm run dev` e `npm run typecheck`. O modo de desenvolvimento acompanha componentes, arquivos compartilhados de `src`, CSS, JavaScript, templates, configuração e layout. Alterações em `dist` também recompilam o tema; ao editar a biblioteca em `lib`, rode `npm run build` na raiz.
+If already inside `example`, use `npm run build`, `npm run dev`, and `npm run typecheck`. Watch mode tracks components, shared files in `src`, CSS, JavaScript, templates, configuration, and layout. Changes in `dist` also recompile the theme; when editing the library in `lib`, run `npm run build` at the root.
 
-Em outro terminal, inicie a prévia na loja configurada:
+In another terminal, start the store preview:
 
 ```bash
 npm --prefix example run preview
 ```
 
-A CLI mostra a porta disponível. Para escolher uma porta:
+The CLI shows the available port. To select a specific port:
 
 ```bash
 npm --prefix example run preview -- --port 9393
 ```
 
-Loja configurada: `mm-solution-2141.myshopify.com`. A prévia requer a CLI da Shopify instalada e acesso à loja. Para usar outra loja, execute `npm --prefix example run preview -- --store sua-loja.myshopify.com`. A prévia usa um tema de desenvolvimento; o checkout, os pagamentos e as contas de clientes são fornecidos pela Shopify.
+Configured store: `mm-solution-2141.myshopify.com`. Preview requires the Shopify CLI installed and store access. To use another store, run `npm --prefix example run preview -- --store your-store.myshopify.com`. Preview uses a development theme; checkout, payments, and customer accounts are handled by Shopify.
 
-## O que está incluído
+## Included Features
 
-- Página inicial de moda, marca Liquidify e paleta preto, branco e cinza.
-- Avisos rotativos com três mensagens editáveis, setas, pausa e respeito à preferência por movimento reduzido.
-- Menus Novidades, Feminino, Masculino e Acessórios, com submenus no desktop e no celular; menu personalizado aceita até três níveis configurados na Shopify.
-- Cabeçalho com ícones de busca, login e sacola, sem rótulos visuais; contador sobre a sacola atualizado após cada alteração.
-- Cards com segunda imagem no hover, preço, disponibilidade e compra rápida para produtos com uma variante; produtos com opções levam à seleção na página de produto.
-- Catálogo com filtros em uma lateral de 280px no desktop e em um drawer até 680px. Filtros ativos com remoção individual, limpeza que mantém a ordenação e ordenação automática.
-- Paginação numerada no catálogo e na busca, com 12 resultados por página. A quantidade pode ser ajustada de 6 a 36 no editor. Links preservam os filtros, a ordenação e o termo buscado.
-- Produto com galeria, mídias Shopify, variantes, quantidade, botão de adicionar limitado a 320px, indicação de combinações indisponíveis e formulário que preserva a variante da URL mesmo sem JavaScript.
-- Produtos relacionados pela API de recomendações da Shopify, com alternativas da coleção enquanto a resposta não chega ou se o serviço falha. O produto aberto não é repetido.
-- Minicarrinho e página de sacola com atualização pela Ajax API, erros de estoque, remoção e encaminhamento ao checkout.
-- Busca, páginas institucionais, formulário de contato, lista de coleções, blog, artigo e página 404.
-- Newsletter nativa Shopify, políticas da loja, metadados sociais e dados estruturados de produto.
+- Fashion home page, Liquidify branding, and a black, white, and gray palette.
+- Rotating announcements with three editable messages, arrows, pause, and reduced motion support.
+- New Arrivals, Women, Men, and Accessories menus with submenus on desktop and mobile; custom menu supports up to three levels configured in Shopify.
+- Header with search, login, and cart icons without visual labels; cart counter updates after every mutation.
+- Product cards with secondary image on hover, price, availability, and quick-add for single-variant products; products with multiple options direct to the product page.
+- Catalog with sidebar filters (280px on desktop) and a filter drawer on screens up to 680px. Active filters support individual removal, clear-all preserving sort order, and auto-submit sorting.
+- Numbered pagination in catalog and search with 12 items per page. The count is configurable from 6 to 36 in the theme editor. Links preserve filters, sort order, and search queries.
+- Product page with gallery, Shopify media, variants, quantity picker, add-to-cart button capped at 320px, unavailable combination feedback, and a URL-synced form fallback without JavaScript.
+- Related products via the Shopify Recommendations API, falling back to collection alternatives while loading or if unavailable. The currently viewed product is excluded.
+- Mini-cart drawer and full cart page updated via the Shopify Ajax API, with inventory errors, item removal, and checkout redirection.
+- Search, institutional pages, contact form, collection list, blog, article, and 404 page.
+- Native Shopify newsletter, store policies, social metadata, and structured product data.
 
-## Onde editar
+## File Organization
 
-| Local | Conteúdo |
+| Path | Content |
 | --- | --- |
-| `src/components/sections/` | Seções TSX e schemas do editor Shopify |
-| `src/components/snippets/` | Cards, filtros, ícones SVG e paginação reutilizáveis |
-| `src/components/islands/` | Minicarrinho, busca, submenus mobile, drawer de filtros e compra em Preact |
-| `src/ui/` | Componentes compartilhados pelas ilhas |
-| `src/lib/shopify.ts` | Integração da sacola e formatação monetária |
-| `src/scripts/theme.ts` | Avisos rotativos, compra rápida e galeria |
-| `src/styles/theme.css` | Estilos e responsividade |
-| `templates/` | Composição das páginas Shopify |
-| `config/` | Nome e cores da marca |
-| `scripts/` | Só para o monorepo: compilação com a biblioteca local, assets, watch e verificação (fora daqui use `npx liquidify`) |
+| `src/components/sections/` | TSX sections and Shopify theme editor schemas |
+| `src/components/snippets/` | Reusable cards, filters, SVG icons, and pagination |
+| `src/components/islands/` | Mini-cart, search, mobile submenus, filter drawer, and Preact purchase flow |
+| `src/ui/` | Shared UI components for islands |
+| `src/lib/shopify.ts` | Cart integration and currency formatting |
+| `src/scripts/theme.ts` | Rotating notices, quick add, and product gallery |
+| `src/styles/theme.css` | Styles and responsive layouts |
+| `templates/` | Shopify page composition templates |
+| `config/` | Brand name and color settings |
 
-`sections/*.liquid`, os snippets correspondentes aos componentes TSX e os bundles JavaScript são resultados do build. Edite o TSX de origem para preservar as alterações nas próximas compilações. O layout, os templates JSON e `snippets/css-variables.liquid` são arquivos nativos do tema.
+`sections/*.liquid`, snippets generated from TSX components, and JavaScript bundles are build outputs. Edit the source TSX to retain modifications on subsequent builds. Layout, JSON templates, and `snippets/css-variables.liquid` are native theme files.
 
-Os estilos dos submenus e filtros estão nos próprios arquivos TSX. `MainCollection.tsx` inclui `CollectionFilters.tsx`, com a ilha `FilterDrawer.tsx`, e é referenciado por `templates/collection.json`. A ilha reutiliza o mesmo formulário Liquid na lateral e no drawer, mantendo as seleções ao redimensionar. Sem JavaScript, os filtros continuam acessíveis na página e o botão “Aplicar filtros” também envia a ordenação escolhida.
+Submenu and filter styles reside within their respective TSX components. `MainCollection` includes `CollectionFilters`, which embeds the `FilterDrawer` island referenced by `templates/collection.json`. The island reuses the same Liquid form across the sidebar and drawer, preserving user selections on resize. Without JavaScript, filters remain fully usable on the page and the "Apply filters" button submits both filters and selected sort order.
 
-`ProductRecommendations.tsx` está ligado ao template de produto. A paginação usa o snippet `Pagination.tsx` e o componente `PaginateByLiquid` exportado pela biblioteca local, que já aceita o nome Liquid da configuração de tamanho de página.
+`ProductRecommendations` links to the product template. Pagination utilizes `Pagination` and the `PaginateByLiquid` component exported by the library, accepting dynamic Liquid page-size settings.
 
-> **Nota de monorepo:** a pasta `scripts/` só existe por causa deste monorepo. `build.mjs` usa a API do compilador local (`../../dist`), `build-assets.mjs` compila o CSS e o JavaScript compartilhado, `dev.mjs` recompila o tema quando os arquivos mudam e `verify-build.mjs` valida os arquivos gerados. Em um projeto normal instalado via npm você não precisa dela — basta `npx liquidify` / `npx liquidify --watch`. Erros emitidos pelo compilador fazem o build terminar com falha, mesmo quando a versão alpha consegue continuar compilando outros componentes.
+Assign `page.contact.json` to the contact page in Shopify Admin. Available filters depend on Shopify Search & Discovery configuration. Women and Men links map to existing catalog tags; destinations can be customized to collections in the editor.
 
-A página `page.contact.json` deve ser atribuída à página de contato no administrador. Os filtros disponíveis dependem da configuração do Shopify Search & Discovery. Os links Feminino e Masculino usam as tags existentes no catálogo; os destinos podem ser substituídos por coleções no editor. Produtos que exigem assinatura precisam de um seletor de plano adicional; o tema bloqueia a compra sem o plano obrigatório.
+## Verification
 
-## Verificações
-
-Na raiz do repositório:
+At repository root:
 
 ```bash
 npm run build:example
 npm run typecheck:example
-npm --prefix example run verify
 npm --prefix example run check
 ```
 
-`check` usa o Theme Check da CLI da Shopify. Esta cópia não inclui o teste de navegador do projeto original. Os fluxos com catálogo, variantes, filtros e sacola devem ser conferidos na prévia da sua loja, inclusive com JavaScript desabilitado.
+`check` runs Shopify Theme Check CLI. Verification validates against empty outputs, missing section references, and known serialization constraints. See [Liquidify Notes](docs/LIQUIDIFY-NOTES.md).
 
-O build também verifica saídas vazias, referências a seções inexistentes e problemas conhecidos de serialização. Veja [as observações sobre a biblioteca](docs/LIQUIDIFY-NOTES.md).

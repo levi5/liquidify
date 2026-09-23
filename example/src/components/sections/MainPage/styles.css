@@ -1,0 +1,14 @@
+.content-page {
+  min-height: 55vh;
+}
+
+.content-page > h1,
+.content-page > .eyebrow {
+  text-align: center;
+}
+
+.page-content {
+  max-width: 800px;
+  margin: 40px auto;
+  font-size: 15px;
+}

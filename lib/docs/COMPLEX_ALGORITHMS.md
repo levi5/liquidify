@@ -1,35 +1,36 @@
-# Algoritmos Complexos e Manipulação de AST
+# Complex Algorithms and AST Manipulation
 
-Este documento detalha os algoritmos mais sofisticados do Liquidify.
-
----
-
-## 1. Resolução Recursiva de Schemas (`SchemaExtractor`)
-
-O `SchemaExtractor` é capaz de resolver definições de objetos através de múltiplos arquivos:
-- **Fluxo**: Ele identifica um identificador, verifica se ele foi importado, localiza o arquivo fonte, analisa a exportação naquele arquivo e extrai o valor literal.
-- **Detecção de Ciclos**: Mantém um histórico de identificadores visitados para evitar loops infinitos em referências circulares.
+This document details the most sophisticated algorithms implemented in Liquidify.
 
 ---
 
-## 2. Transformação AST Dinâmica (`ExpressionParser`)
+## 1. Recursive Schema Resolution (`SchemaExtractor`)
 
-Durante a geração de código Liquid, o `ExpressionParser` realiza mutações em tempo real na árvore AST:
-- **Filtros Liquid**: Métodos nativos de JS (`toLowerCase`, `trim`) são identificados e o nó da AST é substituído por uma representação que o gerador de código entende como um filtro Liquid (`| downcase`, `| strip`).
-- **Lógica de Curto-Circuito**: Expressões como `isVisible && <Element />` são decompostas para gerar blocos `{% if %}` equivalentes, mantendo a semântica do JSX.
-
----
-
-## 3. Isolamento de Escopo e Hidratação (`ScriptGenerator`)
-
-Para permitir que o JavaScript do cliente funcione sem conflitos:
-- **Mapeamento de Escopo**: O gerador identifica todas as variáveis e funções de nível superior e as anexa a um objeto de escopo global (`window.liquidify['component-name']`).
-- **Encapsulamento**: Todo o código é envolvido em uma IIFE, garantindo isolamento total e impedindo que variáveis locais vazem para o escopo global do tema Shopify.
+`SchemaExtractor` can resolve object definitions across multiple files:
+- **Flow**: It identifies an identifier, checks if it was imported, locates the source file, analyzes the export in that file, and extracts the literal value.
+- **Cycle Detection**: Maintains a visited identifier history to prevent infinite loops in circular references.
 
 ---
 
-## 4. Normalização de Eventos (`LiquidAttributeConverter`)
+## 2. Dynamic AST Transformation (`ExpressionParser`)
 
-Ao converter eventos como `onClick`, o parser analisa a função de callback:
-- Ele detecta o nome dado ao argumento de evento (ex: `e`, `evt`, `event`).
-- Normaliza todas as referências internas para usar o objeto `event` padrão do navegador no atributo HTML final.
+During Liquid code generation, `ExpressionParser` performs real-time mutations on the AST:
+- **Liquid Filters**: Native JS methods (`toLowerCase`, `trim`) are identified and replaced with AST nodes that the code generator interprets as Liquid filters (`| downcase`, `| strip`).
+- **Short-Circuit Logic**: Expressions like `isVisible && <Element />` are decomposed into equivalent `{% if %}` blocks while preserving JSX semantics.
+
+---
+
+## 3. Scope Isolation and Hydration (`ScriptGenerator`)
+
+To allow client-side JavaScript to execute without conflicts:
+- **Scope Mapping**: The generator identifies all top-level variables and functions and attaches them to a global scope object (`window.liquidify['component-name']`).
+- **Encapsulation**: All code is wrapped in an IIFE, guaranteeing full isolation and preventing local variables from leaking into the Shopify theme's global scope.
+
+---
+
+## 4. Event Normalization (`LiquidAttributeConverter`)
+
+When converting events such as `onClick`, the parser analyzes the callback function:
+- It detects the argument name given to the event (e.g., `e`, `evt`, `event`).
+- Normalizes all internal references to use the browser standard `event` object in the final HTML attribute.
+

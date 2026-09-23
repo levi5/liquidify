@@ -1,0 +1,13 @@
+.related-products:not(:has(.product-card)) {
+  display: none;
+}
+
+.related-products .product-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 900px) {
+  .related-products .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
