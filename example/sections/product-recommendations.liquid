@@ -1,5 +1,4 @@
 {% assign related_collection = product.collections[0] | default: collections.all %}
-
 <section class="related-products container section-space" id="RelatedProducts-{{ section.id | escape }}">
   <style>
     .related-products:not(:has(.product-card)){display:none}.related-products .product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:900px){.related-products .product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -13,7 +12,7 @@
         {{ section.settings.heading | escape }}
       </h2>
     </div>
-    <a class="text-link" href="{{ routes.all_products_collection_url }}">
+    <a class="text-link" href="{{ routes.all_products_collection_url | escape }}">
       Ver coleção ↗
     </a>
   </div>
@@ -30,10 +29,10 @@
   </div>
   <react-island data-hydrate="eager" style="display: flex;" component="RecommendationLoader">
     <script type="application/json" data-react-props>
-      {"productId": {{ product.id | json }}, "sectionId": {{ section.id | json }}}
-    </script>
-    </react-island>
-  </section>
+      {"productId": {{ product.id | json | replace: '
+      <', '\u003c' }}, "sectionId": {{ section.id | json | replace: '<', '\u003c' }}}</script>
+      </react-island>
+    </section>
 
 {%- unless script_recommendation_loader_loaded -%}
   <script src="{{ 'recommendation-loader.js' | asset_url }}" defer></script>

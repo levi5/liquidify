@@ -138,7 +138,12 @@ export class LiquidAttributeConverter {
   }
 
   private renderValue(expression: any, renames?: Record<string, string>, context?: ParsingContext): string {
-    if (isStringLiteral(expression)) return escapeAttributeTemplate(expression.value)
+    if (isStringLiteral(expression)) {
+      if (expression.value.includes('|') && !expression.value.includes('{{') && !expression.value.includes('{%')) {
+        return escapedOutput(expression.value.trim())
+      }
+      return escapeAttributeTemplate(expression.value)
+    }
     if (isConditionalExpression(expression)) {
       const yes = this.renderValue(expression.consequent, renames, context)
       const no = this.renderValue(expression.alternate, renames, context)

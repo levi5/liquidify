@@ -22,7 +22,7 @@
           ↗
         </button>
       </div>
-      {% if form["posted_successfully?"] %}
+      {% if form["posted_successfully"] %}
       <p role="status">
         Você está na lista. Até o próximo encontro!
       </p>
@@ -39,7 +39,7 @@
   </div>
   <div class="footer-main container">
     <div class="footer-brand">
-      <a class="wordmark" href="{{ routes.root_url }}">
+      <a class="wordmark" href="{{ routes.root_url | escape }}">
         {{ settings.brand_name | default: shop.name | escape }}
       </a>
       <p>
@@ -52,10 +52,10 @@
       <h3>
         Explore
       </h3>
-      <a href="{{ routes.all_products_collection_url }}">
+      <a href="{{ routes.all_products_collection_url | escape }}">
         Todos os produtos
       </a>
-      <a href="{{ routes.collections_url }}">
+      <a href="{{ routes.collections_url | escape }}">
         Nossas coleções
       </a>
       <a href="{{ routes.root_url | escape }}#essencia">
@@ -66,10 +66,10 @@
       <h3>
         Podemos ajudar?
       </h3>
-      <a href="{{ routes.account_url }}">
+      <a href="{{ routes.account_url | escape }}">
         Minha conta
       </a>
-      <a href="{{ routes.cart_url }}">
+      <a href="{{ routes.cart_url | escape }}">
         Minha sacola
       </a>
       <a href="mailto:{{ shop.email | escape }}">
@@ -81,7 +81,7 @@
         Informações
       </h3>
       {% for link in section.settings.menu.links %}
-      <a href="{{ link.url }}">
+      <a href="{{ link.url | escape }}">
         {{ link.title | escape }}
       </a>
       {% endfor %}{% for policy in shop.policies %}
@@ -93,8 +93,7 @@
   </div>
   <div class="footer-bottom container">
     <span>
-      ©{{ "now" | date: "%Y" }}{{ settings.brand_name | default: shop.name | escape }}. Todos os
-          direitos reservados.
+      ©{{ "now" | date: "%Y" }} {{ settings.brand_name | default: shop.name | escape }}. Todos os direitos reservados.
     </span>
     <span>
       LIQUIDIFY / EVERYDAY CULTURE

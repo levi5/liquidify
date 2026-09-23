@@ -1,5 +1,4 @@
 {% assign featured = section.settings.collection | default: collections.all %}
-
 <section class="featured section-space container" id="favoritos">
   <div class="section-heading">
     <div>
@@ -7,7 +6,7 @@
         THE EVERYDAY EDIT
       </p>
       <h2>
-        {{ section.settings.heading | escape }}
+        {{ section.settings.heading | default: "No seu radar." | escape }}
       </h2>
       <p class="section-subtitle">
         A próxima peça favorita do seu guarda-roupa está aqui.

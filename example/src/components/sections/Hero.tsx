@@ -8,16 +8,16 @@ export const Hero = () => {
           <span className="new-season-dot"></span> NEW SEASON / ESSENTIALS
         </p>
         <h1>
-          {'section.settings.heading | escape'}
+          {'section.settings.heading | default: "Seu estilo." | escape'}
           <br />
-          <span>{'section.settings.highlight | escape'}</span>
+          <span>{'section.settings.highlight | default: "Sem limites." | escape'}</span>
         </h1>
-        <p className="hero-description">{'section.settings.description | escape'}</p>
+        <p className="hero-description">{'section.settings.description | default: "Novas peças. Novas possibilidades. Encontre os essenciais que acompanham o seu ritmo." | escape'}</p>
         <a
           className="button button-dark"
           href="{{ section.settings.link | default: routes.all_products_collection_url }}"
         >
-          {'section.settings.button | escape'}
+          {'section.settings.button | default: "Explorar novidades" | escape'}
           <span aria-hidden="true">↗</span>
         </a>
         <div className="hero-bottom-note">

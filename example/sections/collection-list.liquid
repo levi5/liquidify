@@ -10,7 +10,7 @@
   {% paginate collections by 24 %}
   <div class="category-grid">
     {% for item in collections %}
-    <a class="category-card" href="{{ item.url }}">
+    <a class="category-card" href="{{ item.url | escape }}">
       {% if item.image %}
       <img src="{{ item.image | image_url: width: 900 | escape }}" alt="{{ item.title | escape }}" width="900" height="1000" loading="lazy" />
       {% else %}

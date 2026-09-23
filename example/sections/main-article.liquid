@@ -1,13 +1,13 @@
 <article class="article-page container section-space">
   <div class="page-heading">
-    <a class="eyebrow" href="{{ blog.url }}">
+    <a class="eyebrow" href="{{ blog.url | escape }}">
       {{ blog.title | escape }}
     </a>
     <h1>
       {{ article.title | escape }}
     </h1>
     <p class="muted">
-      {{ article.published_at | date: "%d.%m.%Y" }}·{{ article.author | escape }}
+      {{ article.published_at | date: "%d.%m.%Y" }} · {{ article.author | escape }}
     </p>
   </div>
   {% if article.image %}
@@ -16,7 +16,7 @@
   <div class="rich-text page-content">
     {{ article.content }}
   </div>
-  <a class="text-link" href="{{ blog.url }}">
+  <a class="text-link" href="{{ blog.url | escape }}">
     ← Voltar para o journal
   </a>
 </article>

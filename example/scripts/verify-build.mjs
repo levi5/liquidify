@@ -17,9 +17,9 @@ export async function verifyBuild() {
   const errors = new Set()
   const requireFile = async (file, source) => {
     try {
-      if (!(await stat(path.join(themeRoot, file))).size) errors.add(`${source}: ${file} está vazio.`)
+      if (!(await stat(path.join(themeRoot, file))).size) errors.add(`${source}: ${file} is empty.`)
     } catch {
-      errors.add(`${source}: arquivo ausente: ${file}.`)
+      errors.add(`${source}: missing file: ${file}.`)
     }
   }
   const liquidFiles = (await Promise.all(
@@ -33,18 +33,18 @@ export async function verifyBuild() {
       try {
         JSON.parse(schema[1])
       } catch {
-        errors.add(`${file}: schema JSON inválido.`)
+        errors.add(`${file}: invalid schema JSON.`)
       }
     }
     const markup = source.replace(/{%-?\s*(schema|comment)\s*-?%}[\s\S]*?{%-?\s*end\1\s*-?%}/g, '')
-    if (file.startsWith('sections/') && !markup.trim()) errors.add(`${file}: seção sem conteúdo.`)
+    if (file.startsWith('sections/') && !markup.trim()) errors.add(`${file}: section has no content.`)
     if (/<(?:span|div|button|a|p|textarea|select)\b[^>]*\/\s*>/i.test(markup)) {
-      errors.add(`${file}: elemento HTML não vazio foi autoencerrado.`)
+      errors.add(`${file}: non-empty HTML element was self-closed.`)
     }
-    if (/{%\s*paginate\b[^%]*\bby\s*%}/.test(markup)) errors.add(`${file}: paginação sem tamanho.`)
-    if (/{{\s*{%/.test(markup)) errors.add(`${file}: tag Liquid dentro de uma expressão de saída.`)
+    if (/{%\s*paginate\b[^%]*\bby\s*%}/.test(markup)) errors.add(`${file}: pagination without size.`)
+    if (/{{\s*{%/.test(markup)) errors.add(`${file}: Liquid tag inside output expression.`)
     if (/\s(?:checked|disabled|selected|multiple|required|readonly)="(?:false|true|{{[\s\S]*?}})"/.test(markup)) {
-      errors.add(`${file}: atributo booleano dinâmico serializado como texto.`)
+      errors.add(`${file}: dynamic boolean attribute serialized as text.`)
     }
     for (const match of markup.matchAll(/{%-?\s*render\s+['"]([^'"]+)['"]/g)) {
       await requireFile(`snippets/${match[1]}.liquid`, file)
@@ -76,8 +76,8 @@ export async function verifyBuild() {
     }
   }
 
-  if (errors.size) throw new Error(`Verificação do tema falhou:\n- ${[...errors].join('\n- ')}`)
-  console.log(`Verificação concluída: ${liquidFiles.length} arquivos Liquid e ${jsonFiles.length} arquivos JSON.`)
+  if (errors.size) throw new Error(`Theme verification failed:\n- ${[...errors].join('\n- ')}`)
+  console.log(`Verification complete: ${liquidFiles.length} Liquid files and ${jsonFiles.length} JSON files.`)
 }
 
 if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {

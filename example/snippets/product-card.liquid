@@ -1,5 +1,5 @@
 <article class="product-card">
-  <a class="product-image-link" href="{{ item.url }}" aria-label="{{ item.title | escape }}">
+  <a class="product-image-link" href="{{ item.url | escape }}" aria-label="{{ item.title | escape }}">
     {% if item.featured_image %}
     <img class="product-primary-image" src="{{ item.featured_image | image_url: width: 700 | escape }}" alt="{{ item.featured_image.alt | default: item.title | escape }}" loading="lazy" width="700" height="880" />
     {% else %}
@@ -37,7 +37,7 @@
       </span>
     </div>
     <h3>
-      <a href="{{ item.url }}">
+      <a href="{{ item.url | escape }}">
         {{ item.title | escape }}
       </a>
     </h3>
@@ -47,17 +47,17 @@
         <small>
           A partir de
         </small>
-        {% endif %}{{ item.price | money }}
+        {% endif %}{{ item.price | money | escape }}
       </strong>
       {% if item.compare_at_price > item.price %}
       <s>
-        {{ item.compare_at_price | money }}
+        {{ item.compare_at_price | money | escape }}
       </s>
       {% endif %}
     </div>
     {% if item.available %}
 {% if item.variants.size == 1 and item.requires_selling_plan != true %}
-    <form action="{{ routes.cart_add_url }}" method="post" data-quick-add>
+    <form action="{{ routes.cart_add_url | escape }}" method="post" data-quick-add>
       <input type="hidden" name="id" value="{{ item.variants.first.id | escape }}" />
       <input type="hidden" name="quantity" value="1" />
       <button class="card-buy-button" type="submit">
@@ -73,7 +73,7 @@
       </p>
     </form>
     {% else %}
-    <a class="card-buy-button" href="{{ item.url }}">
+    <a class="card-buy-button" href="{{ item.url | escape }}">
       {% render 'theme-icon', name: 'bag' %}
       <span>
         Escolher opções
