@@ -4,8 +4,11 @@ import { parseExpression } from '@babel/parser'
 import { ExpressionParser } from '../dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
 import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
 import { ParsingContext } from '../dist/core/entities/parsing-context.js'
-import { detectDirectives, ComponentRegistry } from '../dist/application/services/component-registry.js'
+import { ComponentRegistry, DirectiveScanner } from '../dist/application/services/component-registry.js'
 import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
+
+const scanner = () => new DirectiveScanner(new ASTParser())
+const detectDirectives = (source) => scanner().scan(source)
 
 const expressions = () =>
   new ExpressionParser(new EsbuildCompiler(), { getCssModules: () => new Map() }, { isMapCallExpression: () => false })
@@ -77,6 +80,7 @@ test('registry rejects duplicate names and normalized script name collisions', a
     const registry = new ComponentRegistry(
       { parse: async () => ({ name: names[index++], mode: 'react' }) },
       { readFileSync: () => '"use react"' },
+      scanner(),
     )
     await assert.rejects(registry.scan(['/a.tsx', '/b.tsx']), /name conflict/)
   }

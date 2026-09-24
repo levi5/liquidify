@@ -1,15 +1,35 @@
-import { isLogicalExpression, isUnaryExpression, type Node } from '@babel/types'
+import { isLogicalExpression, isUnaryExpression, type LogicalExpression, type Node, type UnaryExpression } from '@babel/types'
 import { _match } from 'funcio'
 
 export function renderCondition(node: Node, yes: string, no: string, generate: (node: Node) => string): string {
   return _match(true)
-    .with(isUnaryExpression(node) && (node as any).operator === '!', () => renderCondition((node as any).argument, no, yes, generate))
-    .with(isLogicalExpression(node) && (node as any).operator === '&&', () =>
-      renderCondition((node as any).left, renderCondition((node as any).right, yes, no, generate), no, generate),
+    .with(isUnaryExpression(node) && (node as UnaryExpression).operator === '!', () =>
+      renderCondition((node as UnaryExpression).argument as Node, no, yes, generate),
     )
-    .with(isLogicalExpression(node) && (node as any).operator === '||', () =>
-      renderCondition((node as any).left, yes, renderCondition((node as any).right, yes, no, generate), generate),
+    .with(isLogicalExpression(node) && (node as LogicalExpression).operator === '&&', () =>
+      renderCondition(
+        (node as LogicalExpression).left,
+        renderCondition((node as LogicalExpression).right, yes, no, generate),
+        no,
+        generate,
+      ),
     )
-    .with(true, () => `{% if ${generate(node)} %}${yes}${no ? `{% else %}${no}` : ''}{% endif %}`)
+    .with(isLogicalExpression(node) && (node as LogicalExpression).operator === '||', () =>
+      renderCondition(
+        (node as LogicalExpression).left,
+        yes,
+        renderCondition((node as LogicalExpression).right, yes, no, generate),
+        generate,
+      ),
+    )
+    .with(true, () => renderBranch(node, yes, no, generate))
     .exec() as string
+}
+
+function renderBranch(node: Node, yes: string, no: string, generate: (node: Node) => string): string {
+  const otherwise = _match(no === '')
+    .with(true, () => '')
+    .with(false, () => `{% else %}${no}`)
+    .exec() as string
+  return `{% if ${generate(node)} %}${yes}${otherwise}{% endif %}`
 }

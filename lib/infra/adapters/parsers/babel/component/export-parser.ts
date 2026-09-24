@@ -8,35 +8,43 @@ import {
   identifier,
   type ExportDefaultDeclaration,
   type ExportNamedDeclaration,
+  type FunctionDeclaration,
+  type VariableDeclaration,
+  type ArrowFunctionExpression,
 } from '@babel/types'
-import { _Maybe, _match } from 'funcio'
+import { _match } from 'funcio'
 import type { ComponentMetadataType } from '../../../../../types/component'
 import type { VariableParser } from './variable-parser'
 import type { FunctionBodyParser } from './function-body-parser'
 
 export class ExportParser {
   constructor(
-    private functionBodyParser: FunctionBodyParser,
-    private VariableParser: VariableParser,
+    private readonly functionBodyParser: FunctionBodyParser,
+    private readonly variableParser: VariableParser,
   ) {}
 
   public parse(path: NodePath<ExportNamedDeclaration | ExportDefaultDeclaration>, metadata: ComponentMetadataType): void {
     const declaration = path.node.declaration
-    _Maybe
-      .of(Boolean(declaration))
-      .map((present) => (present ? this.dispatch(declaration as any, metadata) : null))
-      .getOrElse(null)
+    _match(declaration === null || declaration === undefined)
+      .with(true, () => undefined)
+      .with(false, () => this.dispatch(declaration as FunctionDeclaration | VariableDeclaration | ArrowFunctionExpression, metadata))
+      .exec()
   }
 
-  private dispatch(declaration: any, metadata: ComponentMetadataType): void {
+  private dispatch(
+    declaration: FunctionDeclaration | VariableDeclaration | ArrowFunctionExpression,
+    metadata: ComponentMetadataType,
+  ): void {
     _match(true)
-      .with(isFunctionDeclaration(declaration), () => this.functionBodyParser.parse(declaration, metadata))
-      .with(isVariableDeclaration(declaration), () => this.VariableParser.parse(declaration, metadata))
-      .with(isArrowFunctionExpression(declaration), () => {
-        this.VariableParser.parse(variableDeclaration('const', [variableDeclarator(identifier('Component'), declaration)]), metadata)
-        metadata.name = ''
-      })
-      .with(true, () => null)
+      .with(isFunctionDeclaration(declaration), () => this.functionBodyParser.parse(declaration as FunctionDeclaration, metadata))
+      .with(isVariableDeclaration(declaration), () => this.variableParser.parse(declaration as VariableDeclaration, metadata))
+      .with(isArrowFunctionExpression(declaration), () => this.parseAnonymousArrow(declaration as ArrowFunctionExpression, metadata))
+      .with(true, () => undefined)
       .exec()
+  }
+
+  private parseAnonymousArrow(declaration: ArrowFunctionExpression, metadata: ComponentMetadataType): void {
+    this.variableParser.parse(variableDeclaration('const', [variableDeclarator(identifier('Component'), declaration)]), metadata)
+    metadata.name = ''
   }
 }

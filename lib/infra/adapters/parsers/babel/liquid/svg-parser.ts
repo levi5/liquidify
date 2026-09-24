@@ -1,33 +1,43 @@
 import {
   type JSXElement,
+  type JSXAttribute,
+  type StringLiteral,
+  type JSXExpressionContainer,
   isJSXAttribute,
   isJSXIdentifier,
   isJSXExpressionContainer,
   isStringLiteral,
-  type JSXAttribute,
 } from '@babel/types'
+import { _match } from 'funcio'
 
 export class LiquidSvgParser {
   public transformRenderSvg(node: JSXElement): string {
-    const openingElement = node.openingElement
-    const nameAttr = openingElement.attributes.find(
-      (attr) => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'name',
-    ) as JSXAttribute | undefined
+    const svgName = this.svgName(
+      node.openingElement.attributes.find(
+        (attr): attr is JSXAttribute => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'name',
+      ),
+    )
+    return _match(svgName === '')
+      .with(true, () => '')
+      .with(false, () => `{{ '${svgName}' | inline_asset_content }}`)
+      .exec() as string
+  }
 
-    let svgName = ''
+  private svgName(nameAttr: JSXAttribute | undefined): string {
+    return _match(nameAttr === undefined)
+      .with(true, () => '')
+      .with(false, () => this.slotValue(nameAttr as JSXAttribute))
+      .exec() as string
+  }
 
-    if (nameAttr && isJSXExpressionContainer(nameAttr.value)) {
-      if (isStringLiteral(nameAttr.value.expression)) {
-        svgName = nameAttr.value.expression.value
-      }
-    } else if (nameAttr && isStringLiteral(nameAttr.value)) {
-      svgName = nameAttr.value.value
-    }
-
-    if (!svgName) {
-      return ''
-    }
-
-    return `{{ '${svgName}' | inline_asset_content }}`
+  private slotValue(nameAttr: JSXAttribute): string {
+    return _match(true)
+      .with(
+        isJSXExpressionContainer(nameAttr.value) && isStringLiteral((nameAttr.value as JSXExpressionContainer).expression),
+        () => ((nameAttr.value as JSXExpressionContainer).expression as StringLiteral).value,
+      )
+      .with(isStringLiteral(nameAttr.value), () => (nameAttr.value as StringLiteral).value)
+      .with(true, () => '')
+      .exec() as string
   }
 }

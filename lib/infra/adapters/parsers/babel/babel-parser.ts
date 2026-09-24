@@ -1,16 +1,19 @@
 import path from 'node:path'
-import traverse from '@babel/traverse'
-import { isIdentifier } from '@babel/types'
+import traverse, { type NodePath } from '@babel/traverse'
+import { _match } from 'funcio'
+import { isIdentifier, type CallExpression, type File, type Statement } from '@babel/types'
 import type { ASTParser } from './ASTParser'
 import type { Compiler } from '../../../../core/protocols/compiler'
 import type { ComponentExtractor } from './component'
-import type { CSSImportExtractor } from './css/Import-extractor'
+import type { CSSImportExtractor } from './css/import-extractor'
 import type { IParser } from '../../../../core/protocols/parser'
 import type { LiquidParser, ReactComponentConfig } from './liquid-parser'
 import type { ParsedComponent } from '../../../../core/entities/parsed-component'
 import type { ReactComponentCompiler } from '../../compilers/react/component-compiler'
 import type { SchemaExtractor } from './schema/schema-extractor'
 import type { ScriptGenerator } from './script/script-generator'
+import type { ComponentMetadataType } from '../../../../types/component'
+import type { JSXResult } from '../../../../types/liquid'
 import { ValidationError } from '../../../../core/errors/validation-error'
 
 export interface BabelLiquidParserOptions {
@@ -24,6 +27,19 @@ export interface BabelLiquidParserOptions {
   scriptGenerator?: ScriptGenerator
 }
 
+const FORBIDDEN_REACT_FILTERS = new Set([
+  'markdownify',
+  'handleize',
+  'downcase',
+  'upcase',
+  'strip',
+  'strip_html',
+  'money',
+  'money_without_currency',
+])
+
+const emptyJsx = (): JSXResult => ({ html: '', blocksSchema: [], scriptAssets: [] })
+
 export class BabelLiquidParser implements IParser {
   private readonly astParser: ASTParser
   private readonly componentExtractor: ComponentExtractor
@@ -34,67 +50,98 @@ export class BabelLiquidParser implements IParser {
   private readonly cssExtractor: CSSImportExtractor
 
   constructor(options: BabelLiquidParserOptions) {
-    this.astParser = options.astParser!
-    this.componentExtractor = options.componentExtractor!
-    this.schemaExtractor = options.schemaExtractor!
-    this.scriptGenerator = options.scriptGenerator!
-    this.jsxConverter = options.jsxConverter!
-    this.reactCompiler = options.reactCompiler!
-    this.cssExtractor = options.cssExtractor!
+    const missing = (
+      ['astParser', 'componentExtractor', 'schemaExtractor', 'scriptGenerator', 'jsxConverter', 'reactCompiler', 'cssExtractor'] as const
+    ).filter((key) => !options[key])
+    _match(missing.length > 0)
+      .with(true, () => {
+        throw new ValidationError(`BabelLiquidParser missing dependencies: ${missing.join(', ')}.`)
+      })
+      .with(false, () => undefined)
+      .exec()
+    this.astParser = options.astParser as ASTParser
+    this.componentExtractor = options.componentExtractor as ComponentExtractor
+    this.schemaExtractor = options.schemaExtractor as SchemaExtractor
+    this.scriptGenerator = options.scriptGenerator as ScriptGenerator
+    this.jsxConverter = options.jsxConverter as LiquidParser
+    this.reactCompiler = options.reactCompiler as ReactComponentCompiler
+    this.cssExtractor = options.cssExtractor as CSSImportExtractor
   }
 
-  public setReactRegistry(registry: Map<string, ReactComponentConfig>) {
+  public setReactRegistry(registry: Map<string, ReactComponentConfig>): void {
     this.jsxConverter.setReactRegistry(registry)
   }
 
   public async parse(source: string, filePath?: string): Promise<ParsedComponent> {
     const ast = this.astParser.parse(source, filePath)
     const componentMetadata = this.componentExtractor.extract(ast, source)
-    if (!componentMetadata.name && componentMetadata.liquidBody && filePath) {
-      componentMetadata.name = path.basename(filePath, path.extname(filePath))
-    }
+    this.applyFileNameFallback(componentMetadata, filePath)
     const schema = this.schemaExtractor.extract(ast, filePath)
-
-    if (componentMetadata.mode === 'react') {
-      this.validateNoLiquidFiltersInReact(ast, filePath)
-      return this.handleReactMode(ast, source, componentMetadata, schema, filePath)
-    }
-
-    return this.handleDefaultMode(ast, componentMetadata, schema, filePath)
+    return _match(componentMetadata.mode === 'react')
+      .with(true, () => this.parseReactMode(ast, source, componentMetadata, schema, filePath))
+      .with(false, () => this.handleDefaultMode(ast, componentMetadata, schema, filePath))
+      .exec() as Promise<ParsedComponent>
   }
 
-  private validateNoLiquidFiltersInReact(ast: any, filePath?: string): void {
-    const forbiddenFilters = new Set([
-      'markdownify',
-      'handleize',
-      'downcase',
-      'upcase',
-      'strip',
-      'strip_html',
-      'money',
-      'money_without_currency',
-    ])
+  private applyFileNameFallback(metadata: ComponentMetadataType, filePath?: string): void {
+    _match(!metadata.name && metadata.liquidBody != null && filePath !== undefined)
+      .with(true, () => {
+        metadata.name = path.basename(filePath as string, path.extname(filePath as string))
+      })
+      .with(false, () => undefined)
+      .exec()
+  }
 
-    traverse(ast as any, {
-      CallExpression(path) {
-        const callee = path.node.callee
-        if (isIdentifier(callee) && forbiddenFilters.has(callee.name)) {
-          throw new ValidationError(
-            `Liquid filter method '${callee.name}' cannot be used inside a React component. It is a Liquid-only filter.`,
-            filePath,
-          )
-        }
-      },
+  private async parseReactMode(
+    ast: File,
+    source: string,
+    metadata: ComponentMetadataType,
+    schema: Record<string, unknown>,
+    filePath?: string,
+  ): Promise<ParsedComponent> {
+    this.validateNoLiquidFiltersInReact(ast, filePath)
+    return this.handleReactMode(ast, source, metadata, schema, filePath)
+  }
+
+  private validateNoLiquidFiltersInReact(ast: File, filePath?: string): void {
+    traverse(ast, {
+      CallExpression: (pathNode: NodePath<CallExpression>) => this.checkFilterCall(pathNode, filePath),
     })
   }
 
-  private async handleReactMode(ast: any, source: string, metadata: any, schema: any, filePath?: string): Promise<ParsedComponent> {
+  private checkFilterCall(pathNode: NodePath<CallExpression>, filePath?: string): void {
+    const callee = pathNode.node.callee
+    _match(isIdentifier(callee) && FORBIDDEN_REACT_FILTERS.has(callee.name))
+      .with(true, () => {
+        throw new ValidationError(
+          `Liquid filter method '${(callee as { name: string }).name}' cannot be used inside a React component. It is a Liquid-only filter.`,
+          filePath,
+        )
+      })
+      .with(false, () => undefined)
+      .exec()
+  }
+
+  private async handleReactMode(
+    ast: File,
+    source: string,
+    metadata: ComponentMetadataType,
+    schema: Record<string, unknown>,
+    filePath?: string,
+  ): Promise<ParsedComponent> {
     const reactBuild = await this.reactCompiler.compile(metadata, source, filePath)
-    const { componentCss } = filePath ? this.cssExtractor.extract(ast, filePath) : { componentCss: '' }
-
-    const combinedCss = `${reactBuild.css || ''}\n${componentCss}`.trim()
-    const html = combinedCss ? `<style>\n${combinedCss}\n</style>\n${reactBuild.html}` : reactBuild.html
-
+    const componentCss = _match(filePath === undefined)
+      .with(true, () => '')
+      .with(false, () => this.cssExtractor.extract(ast, filePath as string).componentCss)
+      .exec() as string
+    const combinedCss = `${_match(!reactBuild.css)
+      .with(true, () => '')
+      .with(false, () => reactBuild.css as string)
+      .exec()}\n${componentCss}`.trim()
+    const html = _match(combinedCss === '')
+      .with(true, () => reactBuild.html)
+      .with(false, () => `<style>\n${combinedCss}\n</style>\n${reactBuild.html}`)
+      .exec() as string
     return {
       name: metadata.name,
       html,
@@ -112,40 +159,74 @@ export class BabelLiquidParser implements IParser {
     }
   }
 
-  private handleDefaultMode(ast: any, metadata: any, schema: any, filePath?: string): ParsedComponent {
-    const { componentCss, globalCss } = filePath ? this.cssExtractor.extract(ast, filePath) : { componentCss: '', globalCss: '' }
-
-    const jsxResult = metadata.liquidBody
-      ? this.jsxConverter.convertBody(metadata.liquidBody, ast, filePath, metadata.name, metadata.inlineComponents)
-      : metadata.jsxElement
-        ? this.jsxConverter.convert(metadata.jsxElement, ast, filePath, metadata.name, metadata.mode, metadata.inlineComponents)
-        : { html: '', blocksSchema: [], scriptAssets: [] }
-
-    const script = metadata.hasUseScript ? this.scriptGenerator.generate(metadata.scriptStatements, metadata.name) : ''
-
+  private handleDefaultMode(
+    ast: File,
+    metadata: ComponentMetadataType,
+    schema: Record<string, unknown>,
+    filePath?: string,
+  ): ParsedComponent {
+    const css = _match(filePath === undefined)
+      .with(true, () => ({ componentCss: '', globalCss: '' }))
+      .with(false, () => this.cssExtractor.extract(ast, filePath as string))
+      .exec() as { componentCss: string; globalCss: string }
+    const jsxResult = this.convertJsx(ast, metadata, filePath)
+    const scriptStatements = _match(Array.isArray(metadata.scriptStatements))
+      .with(true, () => metadata.scriptStatements)
+      .with(false, () => [] as Statement[])
+      .exec() as Statement[]
+    const script = _match(metadata.hasUseScript && scriptStatements.length > 0)
+      .with(true, () => this.scriptGenerator.generate(scriptStatements, metadata.name))
+      .with(false, () => '')
+      .exec() as string
     return {
       name: this.resolveComponentName(metadata, filePath),
       html: jsxResult.html,
       script,
       liquidAssignments: metadata.liquidAssignments,
       type: metadata.type,
-      hasScript: metadata.hasUseScript && metadata.scriptStatements.length > 0,
+      hasScript: Boolean(metadata.hasUseScript) && scriptStatements.length > 0,
       schema,
       blocksSchema: jsxResult.blocksSchema,
       scriptAssets: jsxResult.scriptAssets,
       mode: metadata.mode,
-      css: componentCss,
-      globalCss,
+      css: css.componentCss,
+      globalCss: css.globalCss,
       hasUncoveredJs: metadata.hasUncoveredJs,
-      hasJsLogic: metadata.scriptStatements.length > 0,
+      hasJsLogic: scriptStatements.length > 0,
     }
   }
 
-  private resolveComponentName(metadata: any, filePath?: string): string {
-    if (metadata.name) return metadata.name
-    if (!filePath || (metadata.mode !== 'dom' && metadata.mode !== 'dom:global')) return metadata.name
+  private convertJsx(ast: File, metadata: ComponentMetadataType, filePath?: string): JSXResult {
+    return _match(true)
+      .with(metadata.liquidBody != null, () =>
+        this.jsxConverter.convertBody(metadata.liquidBody as Statement[], ast, filePath, metadata.name, metadata.inlineComponents),
+      )
+      .with(metadata.jsxElement != null, () =>
+        this.jsxConverter.convert(
+          metadata.jsxElement as NonNullable<ComponentMetadataType['jsxElement']>,
+          ast,
+          filePath,
+          metadata.name,
+          metadata.mode,
+          metadata.inlineComponents,
+        ),
+      )
+      .with(true, () => emptyJsx())
+      .exec() as JSXResult
+  }
 
+  private resolveComponentName(metadata: ComponentMetadataType, filePath?: string): string {
+    return _match(!metadata.name && filePath !== undefined && (metadata.mode === 'dom' || metadata.mode === 'dom:global'))
+      .with(true, () => this.fileBaseName(filePath as string))
+      .with(false, () => metadata.name)
+      .exec() as string
+  }
+
+  private fileBaseName(filePath: string): string {
     const baseName = path.basename(filePath, path.extname(filePath))
-    return baseName === 'index' ? path.basename(path.dirname(filePath)) : baseName
+    return _match(baseName === 'index')
+      .with(true, () => path.basename(path.dirname(filePath)))
+      .with(false, () => baseName)
+      .exec() as string
   }
 }

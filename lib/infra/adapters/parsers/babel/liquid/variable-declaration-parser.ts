@@ -6,7 +6,7 @@ import {
   isLogicalExpression,
   type VariableDeclarator,
 } from '@babel/types'
-import { _Maybe, _Object, _match } from 'funcio'
+import { _Object, _match } from 'funcio'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 import type { FilterCallParser } from './filter-call-parser'
 import type { FallbackParser } from './fallback-parser'
@@ -28,18 +28,12 @@ export class VariableDeclarationParser {
   ) {}
 
   public parse(declaration: VariableDeclarator, renames?: Record<string, string>, context?: ParsingContext): string[] {
-    const id = _Maybe
-      .of(_Object.getPathValue(['id'], declaration))
-      .map((value) => value)
-      .getOrElse(null)
-    const init = _Maybe
-      .of(_Object.getPathValue(['init'], declaration))
-      .map((value) => value)
-      .getOrElse(null)
-    return _Maybe
-      .of(!id || !init)
-      .map((missing) => (missing ? [] : this.dispatchDeclaration(id, init, renames, context)))
-      .getOrElse([])
+    const id = _Object.getPathValue(['id'], declaration)
+    const init = _Object.getPathValue(['init'], declaration)
+    return _match(id === null || id === undefined || init === null || init === undefined)
+      .with(true, () => [] as string[])
+      .with(false, () => this.dispatchDeclaration(id, init, renames, context))
+      .exec() as string[]
   }
 
   private dispatchDeclaration(id: any, init: any, renames?: Record<string, string>, context?: ParsingContext): string[] {

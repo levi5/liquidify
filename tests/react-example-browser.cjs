@@ -8,6 +8,7 @@ const esbuild = require('esbuild')
 const { makeLiquidifyBuilder } = require('../dist/main/factories/make-liquidify-builder')
 const { ReactComponentCompiler } = require('../dist/infra/adapters/compilers/react/component-compiler')
 const { CssInjector } = require('../dist/infra/adapters/compilers/react/runtime/css-injector')
+const { SilentLogger } = require('../dist/shared/logger')
 
 const REQUIRED_FOLDERS = ['assets', 'snippets', 'sections', 'blocks']
 const STRICT_BUNDLES = ['product-purchase', 'filter-drawer', 'cart-page', 'recommendation-loader', 'storefront', 'probe', 'shopify-probe', 'react-runtime']
@@ -70,7 +71,7 @@ async function compileExampleTheme(example, directory, strictCsp) {
 }
 
 async function compileProbeScripts(fixtures, directory, strictCsp) {
-  const compiler = new ReactComponentCompiler(esbuild, new CssInjector(), { strictCsp })
+  const compiler = new ReactComponentCompiler(esbuild, new CssInjector(), { strictCsp }, process.cwd(), new SilentLogger())
   const compileFixture = async (name, fileName) => {
     const sourcePath = path.join(fixtures, fileName)
     const probe = await compiler.compile({ name }, readFileSync(sourcePath, 'utf8'), sourcePath)

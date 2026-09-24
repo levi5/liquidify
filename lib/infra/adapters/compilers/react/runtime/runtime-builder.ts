@@ -1,3 +1,4 @@
+import { _match } from 'funcio'
 import { LiquidifyError } from '../../../../../core/errors/liquidify-error'
 import { readReactTemplate, reactTemplatesDirectory } from './template-loader'
 import type { Compiler } from '../../../../../core/protocols/compiler'
@@ -21,10 +22,11 @@ export class ReactRuntimeBuilder {
     })
 
     const output = result.outputFiles?.[0]?.text
-    if (!output) {
-      throw new LiquidifyError('Failed to bundle the React runtime: esbuild returned no output.')
-    }
-
-    return output
+    return _match(output === undefined || output === '')
+      .with(true, () => {
+        throw new LiquidifyError('Failed to bundle the React runtime: esbuild returned no output.')
+      })
+      .with(false, () => output as string)
+      .exec() as string
   }
 }

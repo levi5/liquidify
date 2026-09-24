@@ -1,37 +1,68 @@
+import { _Maybe, _match } from 'funcio'
 import type { ParsedComponent } from '../../core/entities/parsed-component'
 import { ValidationError } from '../../core/errors/validation-error'
-import { validateSchema } from './schema-validation'
+import type { SchemaValidator } from './schema-validation'
+
+const JS_EXTENSIONS = ['.tsx', '.jsx', '.js', '.ts']
 
 export class ValidationService {
+  constructor(private readonly schemaValidator: SchemaValidator) {}
+
   public validate(component: ParsedComponent, filePath?: string): void {
-    validateSchema(component.schema ?? {}, filePath)
-    if (!filePath) return
+    this.schemaValidator.validate(component.schema ?? {}, filePath)
+    _match(filePath === undefined)
+      .with(true, () => null)
+      .with(false, () => this.validatePath(component, filePath as string))
+      .exec()
+  }
 
-    const normalizedPath = filePath.replace(/\\/g, '/')
-    const isSection = normalizedPath.includes('/sections/') || component.type === 'sections'
-    const isSnippet = normalizedPath.includes('/snippets/') || component.type === 'snippets'
-    const isBlock = normalizedPath.includes('/blocks/') || component.type === 'blocks'
-
-    if (!isSection && !isSnippet && !isBlock) return
-
-    const folderName = isSection ? 'sections' : isSnippet ? 'snippets' : 'blocks'
-
-    if (component.mode === 'react') {
-      throw new ValidationError(
-        `React code is not allowed in "${folderName}". Use 'use dom' for plain JavaScript or keep it as pure Liquid.`,
-        filePath,
+  private validatePath(component: ParsedComponent, filePath: string): void {
+    _Maybe
+      .of(this.folderOf(component, filePath))
+      .map((folder) =>
+        _match(folder === '')
+          .with(true, () => null)
+          .with(false, () => this.validateMode(component, folder, filePath))
+          .exec(),
       )
-    }
+      .getOrElse(null)
+  }
 
-    const isJsFile = filePath.endsWith('.tsx') || filePath.endsWith('.jsx') || filePath.endsWith('.js') || filePath.endsWith('.ts')
+  private folderOf(component: ParsedComponent, filePath: string): string {
+    const normalized = filePath.replace(/\\/g, '/')
+    return _match(true)
+      .with(normalized.includes('/sections/') || component.type === 'sections', () => 'sections')
+      .with(normalized.includes('/snippets/') || component.type === 'snippets', () => 'snippets')
+      .with(normalized.includes('/blocks/') || component.type === 'blocks', () => 'blocks')
+      .with(true, () => '')
+      .exec() as string
+  }
 
-    const hasJsLogic = component.hasUncoveredJs || component.hasJsLogic
+  private validateMode(component: ParsedComponent, folder: string, filePath: string): void {
+    _match(component.mode === 'react')
+      .with(true, () => {
+        throw new ValidationError(
+          `React code is not allowed in "${folder}". Use 'use dom' for plain JavaScript or keep it as pure Liquid.`,
+          filePath,
+        )
+      })
+      .with(false, () => this.validateJsLogic(component, folder, filePath))
+      .exec()
+  }
 
-    if (isJsFile && component.mode === 'liquid' && hasJsLogic) {
-      throw new ValidationError(
-        `Using JavaScript in "${folderName}" requires the 'use dom' or 'use script' directive. (Logic detected in the function body or at the top level)`,
-        filePath,
-      )
-    }
+  private validateJsLogic(component: ParsedComponent, folder: string, filePath: string): void {
+    _match(this.isJsFile(filePath) && component.mode === 'liquid' && (component.hasUncoveredJs || component.hasJsLogic))
+      .with(true, () => {
+        throw new ValidationError(
+          `Using JavaScript in "${folder}" requires the 'use dom' or 'use script' directive. (Logic detected in the function body or at the top level)`,
+          filePath,
+        )
+      })
+      .with(false, () => null)
+      .exec()
+  }
+
+  private isJsFile(filePath: string): boolean {
+    return JS_EXTENSIONS.some((extension) => filePath.endsWith(extension))
   }
 }

@@ -1,4 +1,5 @@
 import { appendFileSync, existsSync, mkdirSync, readFileSync, unlinkSync, utimesSync, writeFileSync } from 'node:fs'
+import { _match } from 'funcio'
 import type { IFileSystem } from '../../../core/protocols/file-system'
 
 export class NodeFileSystem implements IFileSystem {
@@ -19,21 +20,24 @@ export class NodeFileSystem implements IFileSystem {
   }
 
   public async mkdir(path: string, recursive = true): Promise<void> {
-    if (!existsSync(path)) {
-      mkdirSync(path, { recursive })
-    }
+    _match(existsSync(path))
+      .with(true, () => undefined)
+      .with(false, () => mkdirSync(path, { recursive }))
+      .exec()
   }
 
   public async unlink(path: string): Promise<void> {
-    if (existsSync(path)) {
-      unlinkSync(path)
-    }
+    _match(existsSync(path))
+      .with(true, () => unlinkSync(path))
+      .with(false, () => undefined)
+      .exec()
   }
 
   public async utimes(path: string, atime: Date, mtime: Date): Promise<void> {
-    if (existsSync(path)) {
-      utimesSync(path, atime, mtime)
-    }
+    _match(existsSync(path))
+      .with(true, () => utimesSync(path, atime, mtime))
+      .with(false, () => undefined)
+      .exec()
   }
 
   public existsSync(path: string): boolean {
@@ -49,8 +53,9 @@ export class NodeFileSystem implements IFileSystem {
   }
 
   public mkdirSync(path: string, recursive = true): void {
-    if (!existsSync(path)) {
-      mkdirSync(path, { recursive })
-    }
+    _match(existsSync(path))
+      .with(true, () => undefined)
+      .with(false, () => mkdirSync(path, { recursive }))
+      .exec()
   }
 }

@@ -1,6 +1,8 @@
 import {
   type JSXOpeningElement,
   type JSXElement,
+  type JSXAttribute,
+  type Node,
   isJSXAttribute,
   isJSXIdentifier,
   isJSXExpressionContainer,
@@ -9,6 +11,7 @@ import {
   type Identifier,
   isIdentifier,
 } from '@babel/types'
+import { _match } from 'funcio'
 import { pascalToKebab } from '../../../../../shared/string'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
@@ -20,50 +23,59 @@ export class LiquidBlockParser {
   ) {}
 
   public processDynamicBlocks(node: JSXElement, context?: ParsingContext): { type: string }[] {
-    const blocksSchema: { type: string }[] = []
-    this.traverse(node, blocksSchema)
-    if (context) {
-      blocksSchema.forEach((b) => {
-        context.addBlockSchema(b)
+    const blocksSchema = this.collectBlocks(node, [])
+    _match(context === undefined)
+      .with(true, () => undefined)
+      .with(false, () => {
+        blocksSchema.forEach((block) => {
+          ;(context as ParsingContext).addBlockSchema(block)
+        })
       })
-    }
+      .exec()
     return blocksSchema
   }
 
-  private traverse(node: JSXElement, blocksSchema: { type: string }[]): void {
-    const tagName = this.getTagName(node.openingElement)
-
-    if (tagName === this.dynamicBlockTag || tagName === this.renderSnippetTag) {
-      const slots = this.extractDynamicBlockSlots(node)
-      slots.forEach((name) => {
-        blocksSchema.push({
-          type: pascalToKebab(name),
+  private collectBlocks(node: JSXElement, blocksSchema: { type: string }[]): { type: string }[] {
+    _match(this.getTagName(node.openingElement) === this.dynamicBlockTag || this.getTagName(node.openingElement) === this.renderSnippetTag)
+      .with(true, () => {
+        this.extractDynamicBlockSlots(node).forEach((name) => {
+          blocksSchema.push({ type: pascalToKebab(name) })
         })
       })
-    }
-
+      .with(false, () => undefined)
+      .exec()
     node.children.forEach((child) => {
-      if (isJSXElement(child)) {
-        this.traverse(child, blocksSchema)
-      }
+      this.collectChildBlocks(child, blocksSchema)
     })
+    return blocksSchema
+  }
+
+  private collectChildBlocks(child: JSXElement['children'][number], blocksSchema: { type: string }[]): void {
+    _match(isJSXElement(child))
+      .with(true, () => this.collectBlocks(child as JSXElement, blocksSchema))
+      .with(false, () => undefined)
+      .exec()
   }
 
   private extractDynamicBlockSlots(node: JSXElement): string[] {
     const slotAttr = node.openingElement.attributes.find(
-      (attr) => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'slot',
+      (attr): attr is JSXAttribute => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'slot',
     )
+    return _match(slotAttr === undefined || !isJSXAttribute(slotAttr) || !slotAttr.value || !isJSXExpressionContainer(slotAttr.value))
+      .with(true, () => [] as string[])
+      .with(false, () => this.slotNames((slotAttr as JSXAttribute).value))
+      .exec() as string[]
+  }
 
-    if (!slotAttr || !isJSXAttribute(slotAttr) || !slotAttr.value || !isJSXExpressionContainer(slotAttr.value)) {
-      return []
-    }
+  private slotNames(value: JSXAttribute['value']): string[] {
+    const expression = (value as { expression: Node }).expression
+    return _match(!isArrayExpression(expression))
+      .with(true, () => [] as string[])
+      .with(false, () => this.identifierNames(expression as { elements: (Node | null)[] }))
+      .exec() as string[]
+  }
 
-    const expr = slotAttr.value.expression
-
-    if (!isArrayExpression(expr)) {
-      return []
-    }
-
-    return expr.elements.filter((el): el is Identifier => isIdentifier(el)).map((el) => el.name)
+  private identifierNames(expression: { elements: (Node | null)[] }): string[] {
+    return expression.elements.filter((element): element is Identifier => isIdentifier(element)).map((element) => element.name)
   }
 }

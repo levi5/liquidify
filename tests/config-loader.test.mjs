@@ -26,7 +26,11 @@ describe('ConfigLoader', () => {
     fs.writeFileSync(path.join(cwd, '.liquidifyrc.json'), JSON.stringify({ output: 'ignored' }))
     fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ componentsDir: 'src/components', output: '.' }))
 
-    assert.deepEqual(ConfigLoader.load(cwd), { ...DEFAULT_CONFIG, componentsDir: 'src/components', output: '.' })
+    assert.deepEqual(ConfigLoader.load(cwd), {
+      ...DEFAULT_CONFIG,
+      componentsDir: path.resolve(cwd, 'src/components'),
+      output: path.resolve(cwd, '.'),
+    })
   })
 
   it('rejects corrupt configuration with its file path', () => {

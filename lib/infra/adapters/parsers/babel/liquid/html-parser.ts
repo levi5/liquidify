@@ -15,8 +15,7 @@ import type { LiquidAttributeConverter } from './attribute-parser'
 import type { ExpressionParser } from './expression-parser'
 import { liquidJsonOutput } from '../../../../../shared/html'
 import { ParsingContext } from '../../../../../core/entities/parsing-context'
-
-const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])
+import { VOID_TAGS as voidTags } from '../../../../../shared/liquid-constants'
 
 export class LiquidHtmlParser {
   constructor(
@@ -29,7 +28,10 @@ export class LiquidHtmlParser {
     const state = { hasRawHtml: false, rawHtml: '', bridge: [] as any[] }
     const filteredAttributes = node.openingElement.attributes.filter((attr) => this.keepAttribute(attr, tagName, state, renames, context))
     const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, context)
-    const childContext = tagName === 'style' || tagName === 'script' ? new ParsingContext({ ...context, outputContext: 'raw' }) : context
+    const childContext = _match(tagName === 'style' || tagName === 'script')
+      .with(true, () => ParsingContext.derive(context, { outputContext: 'raw' }))
+      .with(false, () => context)
+      .exec() as ParsingContext | undefined
     const children = _match(state.hasRawHtml)
       .with(true, () => state.rawHtml)
       .with(state.hasRawHtml, () => this.renderChildren(node.children, renames, childContext))
@@ -87,7 +89,10 @@ export class LiquidHtmlParser {
   private bridgeScripts(attrs: any[], renames?: Record<string, string>, context?: ParsingContext): string {
     return attrs
       .map((attr) => {
-        const name = isJSXIdentifier(attr.name) ? attr.name.name : ''
+        const name = _match(isJSXIdentifier(attr.name))
+          .with(true, () => attr.name.name)
+          .with(false, () => '')
+          .exec() as string
         const propName = _match(name)
           .with('data-liquid', () => 'store')
           .with('data-liquid-store', () => 'store')
@@ -123,24 +128,27 @@ export class LiquidHtmlParser {
   private extractDangerouslyContent(attr: any, renames?: Record<string, string>, context?: ParsingContext): string {
     return _Maybe
       .of(attr.value && isJSXExpressionContainer(attr.value) && isObjectExpression(attr.value.expression))
-      .map((valid) => {
-        if (!valid) return ''
-        const htmlProp = (attr.value.expression.properties || []).find(
-          (prop: any) =>
-            isObjectProperty(prop) &&
-            ((isIdentifier(prop.key) && prop.key.name === '__html') || (isStringLiteral(prop.key) && prop.key.value === '__html')),
-        ) as ObjectProperty | undefined
-        return _Maybe
-          .of(htmlProp && isExpression((htmlProp as any)?.value))
-          .map(() =>
-            this.expressionParser.parseExpression(
-              (htmlProp as any).value,
-              renames,
-              new ParsingContext({ ...context, outputContext: 'raw' }),
-            ),
-          )
-          .getOrElse('')
-      })
+      .map(
+        (valid) =>
+          _match(valid)
+            .with(false, () => '')
+            .with(true, () => this.dangerouslyHtml(attr, renames, context))
+            .exec() as string,
+      )
+      .getOrElse('')
+  }
+
+  private dangerouslyHtml(attr: any, renames?: Record<string, string>, context?: ParsingContext): string {
+    const htmlProp = (attr.value.expression.properties || []).find(
+      (prop: any) =>
+        isObjectProperty(prop) &&
+        ((isIdentifier(prop.key) && prop.key.name === '__html') || (isStringLiteral(prop.key) && prop.key.value === '__html')),
+    ) as ObjectProperty | undefined
+    return _Maybe
+      .of(htmlProp && isExpression((htmlProp as any)?.value))
+      .map(() =>
+        this.expressionParser.parseExpression((htmlProp as any).value, renames, ParsingContext.derive(context, { outputContext: 'raw' })),
+      )
       .getOrElse('')
   }
 }

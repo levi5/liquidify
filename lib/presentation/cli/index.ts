@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import ora from 'ora'
 import kleur from 'kleur'
-import { _match } from 'funcio'
+import { _match, _try } from 'funcio'
 import { parseInitArgs, runInit } from './commands/init'
 import type { LiquidifyError } from '../../core/errors/liquidify-error'
 
@@ -10,13 +10,13 @@ const printBanner = (): void => {
   console.log(
     kleur.cyan(`
   _      _             _     _ _  __
- | |    (_)           (_)   | (_)/ _|
- | |     _  __ _ _   _ _  __| |_| |_ _   _
- | |    | |/ _\` | | | | |/ _\` | |  _| | | |
- | |____| | (_| | |_| | | (_| | | | | |_| |
- |______|_|\\__, |\\__,_|_|\\__,_|_|_|  \\__, |
-              | |                     __/ |
-              |_|                    |___/
+  | |    (_)           (_)   | (_)/ _|
+  | |     _  __ _ _   _ _  __| |_| |_ _   _
+  | |    | |/ _\` | | | | |/ _\` | |  _| | | |
+  | |____| | (_| | |_| | | (_| | | | | |_| |
+  |______|_|\\__, |\\__,_|_|\\__,_|_|_|  \\__, |
+               | |                     __/ |
+               |_|                    |___/
 `),
   )
   console.log(kleur.dim('  Shopify Liquid + React Compiler\n'))
@@ -32,7 +32,7 @@ const showHelp = (): void => {
     init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
 
   ${kleur.bold('Options:')}
-    --template, -t  Template to initialize (default: shopify-starter, options: shopify-starter, example)
+    --template, -t  Template to initialize (default: example, options: example)
     --watch, -w     Watch for file changes and rebuild automatically
     --force, -f     Force overwrite existing files during build or init
     --help, -h      Show help
@@ -45,7 +45,12 @@ const runBuild = async (watch: boolean, force = false): Promise<void> => {
   const { loadConfig } = await import('../../infra/adapters/config/config-loader')
   const { makeLiquidifyBuilder } = await import('../../main/factories/make-liquidify-builder')
   const config = loadConfig()
-  if (force) config.force = true
+  _match(force)
+    .with(true, () => {
+      config.force = true
+    })
+    .with(false, () => undefined)
+    .exec()
   const builder = makeLiquidifyBuilder(config)
 
   spinner.succeed(`Configuration loaded (src: ${config.componentsDir}, out: ${config.output})`)
@@ -58,7 +63,7 @@ const runBuild = async (watch: boolean, force = false): Promise<void> => {
     spinner.succeed(kleur.green('Build completed successfully!'))
     _match(watch)
       .with(true, () => console.log(kleur.dim('\n👀 Watching for changes...')))
-      .with(false, () => {})
+      .with(false, () => undefined)
       .exec()
   })
 
@@ -67,78 +72,116 @@ const runBuild = async (watch: boolean, force = false): Promise<void> => {
   })
 
   builder.on('error', (error: LiquidifyError) => {
-    const prefix = error.name === 'ValidationError' ? 'Validation' : 'Build'
-    console.log(`\n${kleur.bgRed().white(` ${prefix} Error `)} ${kleur.red(error.message)}`)
-    _match(Boolean(error.filePath))
-      .with(true, () =>
-        console.log(kleur.dim(`   ${error.filePath}${error.location ? `:${error.location.line}:${error.location.column}` : ''}`)),
-      )
-      .with(false, () => {})
+    console.log(`\n${kleur.bgRed().white(` ${errorPrefix(error)} Error `)} ${kleur.red(error.message)}`)
+    _match(error.filePath === undefined)
+      .with(true, () => undefined)
+      .with(false, () => console.log(kleur.dim(`   ${error.filePath}${errorSuffix(error)}`)))
       .exec()
   })
 
-  const shutdown = (code = 0) => {
+  const shutdown = async (code = 0): Promise<void> => {
     spinner.stop()
-    builder.disposeSync()
-    console.log(kleur.yellow('\n👋 MM!'))
+    await builder.dispose().catch((error) => {
+      console.error(kleur.red(`Failed to dispose builder: ${error instanceof Error ? error.message : String(error)}`))
+    })
+    console.log(kleur.yellow('\n👋 Shutting down...'))
     process.exit(code)
   }
 
-  process.once('SIGINT', () => shutdown())
-  process.once('SIGTERM', () => shutdown())
-  process.once('SIGHUP', () => shutdown())
+  process.once('SIGINT', () => void shutdown())
+  process.once('SIGTERM', () => void shutdown())
+  process.once('SIGHUP', () => void shutdown())
 
-  if (process.stdin.isTTY) {
-    process.stdin.on('data', (data) => {
-      _match(data.toString() === '\u0003')
-        .with(true, () => shutdown())
-        .with(false, () => {})
-        .exec()
-    })
-  }
+  _match(process.stdin.isTTY === true)
+    .with(true, () =>
+      process.stdin.on('data', (data) => {
+        _match(data.toString() === '\u0003')
+          .with(true, () => void shutdown())
+          .with(false, () => undefined)
+          .exec()
+      }),
+    )
+    .with(false, () => undefined)
+    .exec()
 
   builder.on('build:failed', (error: Error) => spinner.fail(error.message))
 
-  try {
-    await builder.build()
-  } catch (error) {
-    spinner.fail(error instanceof Error ? error.message : String(error))
-    if (!watch) {
-      process.exitCode = 1
-      builder.disposeSync()
-      return
-    }
-  }
+  const outcome = await _try.async(() => builder.build())
+  await outcome.match({
+    right: () => finishRun(builder, watch, shutdown),
+    left: (error) => failRun(builder, spinner, error, watch),
+  })
+}
 
-  _match(watch)
+const errorPrefix = (error: LiquidifyError): string =>
+  _match(error.name === 'ValidationError')
+    .with(true, () => 'Validation')
+    .with(false, () => 'Build')
+    .exec() as string
+
+const errorSuffix = (error: LiquidifyError): string =>
+  _match(error.location === undefined)
+    .with(true, () => '')
+    .with(
+      false,
+      () => `:${(error.location as { line: number; column: number }).line}:${(error.location as { line: number; column: number }).column}`,
+    )
+    .exec() as string
+
+const finishRun = async (builder: { watch: () => void }, watch: boolean, shutdown: () => Promise<void>): Promise<void> => {
+  await _match(watch)
     .with(true, () => builder.watch())
     .with(false, () => shutdown())
     .exec()
 }
 
+const failRun = async (
+  builder: { dispose: () => Promise<void> },
+  spinner: { fail: (message: string) => void },
+  error: unknown,
+  watch: boolean,
+): Promise<void> => {
+  spinner.fail(error instanceof Error ? error.message : String(error))
+  await _match(watch)
+    .with(true, () => undefined)
+    .with(false, () => failHard(builder))
+    .exec()
+}
+
+const failHard = async (builder: { dispose: () => Promise<void> }): Promise<void> => {
+  process.exitCode = 1
+  await builder.dispose()
+}
+
 const resolveCommand = (args: string[]): string => {
   const isHelp = args.includes('--help') || args.includes('-h')
   const isInit = args[0] === 'init'
-
   return _match(isHelp)
     .with(true, () => 'help')
-    .with(false, () => (isInit ? 'init' : 'build'))
-    .exec()
+    .with(false, () => resolveBuildCommand(isInit))
+    .exec() as string
 }
+
+const resolveBuildCommand = (isInit: boolean): string =>
+  _match(isInit)
+    .with(true, () => 'init')
+    .with(false, () => 'build')
+    .exec() as string
 
 const resolveAction = (args: string[]) => {
   const command = resolveCommand(args)
   const watch = args.includes('--watch') || args.includes('-w')
   const force = args.includes('--force') || args.includes('-f')
-
   return _match(command)
     .with('help', () => showHelp)
-    .with('init', () => {
-      const { targetDir, template, force: initForce } = parseInitArgs(args.slice(1))
-      return () => runInit(targetDir, template, initForce || force)
-    })
+    .with('init', () => initAction(args, force))
     .with('build', () => () => runBuild(watch, force))
     .exec()
+}
+
+const initAction = (args: string[], force: boolean) => {
+  const { targetDir, template, force: initForce } = parseInitArgs(args.slice(1))
+  return () => runInit(targetDir, template, initForce || force)
 }
 
 export async function cli(): Promise<void> {

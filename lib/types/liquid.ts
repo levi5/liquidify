@@ -18,9 +18,10 @@ export interface JSXToLiquidConfig {
 	renderSvgTag?: string
 }
 
+import type { Node, Expression } from '@babel/types'
 import { ParsingContext } from '../core/entities/parsing-context'
 
 export interface ILiquidExpressionParser {
-	generateLiquidCode(node: any, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext): string
-	parseExpression(node: any, renames?: Record<string, string>, context?: ParsingContext): string
+  generateLiquidCode(node: Node, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext): string
+  parseExpression(node: Expression, renames?: Record<string, string>, context?: ParsingContext): string
 }

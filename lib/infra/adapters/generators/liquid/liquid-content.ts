@@ -1,53 +1,146 @@
+import { _match } from 'funcio'
 import type { ParsedComponent } from '../../../../core/entities/parsed-component'
+import { VOID_TAGS as voidTags } from '../../../../shared/liquid-constants'
 
-const voidTags = new Set(['area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'])
+interface ScanState {
+  tokens: string[]
+  start: number
+  cursor: number
+}
 
 function htmlTokens(html: string): string[] {
-  const tokens: string[] = []
-  let start = 0
-  for (let index = 0; index < html.length; index++) {
-    if (html.startsWith('{%', index) || html.startsWith('{{', index)) {
-      const closing = html[index + 1] === '%' ? '%}' : '}}'
-      const end = html.indexOf(closing, index + 2)
-      if (end >= 0) {
-        index = end + 1
-        continue
-      }
-    }
-    if (html[index] !== '<' || !/[A-Za-z/!?]/.test(html[index + 1] || '')) continue
-    let quote = ''
-    let end = index + 1
-    for (; end < html.length; end++) {
-      const char = html[end]
-      if (quote) {
-        if (char === quote) quote = ''
-      } else if (char === '"' || char === "'") quote = char
-      else if (char === '>') break
-    }
-    if (end === html.length) continue
-    if (start < index) tokens.push(html.slice(start, index))
-    tokens.push(html.slice(index, end + 1))
-    index = end
-    start = end + 1
-  }
-  if (start < html.length) tokens.push(html.slice(start))
-  return tokens
+  const end = Array.from({ length: html.length }, (_, index) => index).reduce((state, index) => stepToken(html, index, state), {
+    tokens: [] as string[],
+    start: 0,
+    cursor: 0,
+  })
+  return _match(end.start < html.length)
+    .with(true, () => [...end.tokens, html.slice(end.start)])
+    .with(false, () => end.tokens)
+    .exec() as string[]
+}
+
+function stepToken(html: string, index: number, state: ScanState): ScanState {
+  return _match(index < state.cursor)
+    .with(true, () => state)
+    .with(false, () => openToken(html, index, state))
+    .exec() as ScanState
+}
+
+function openToken(html: string, index: number, state: ScanState): ScanState {
+  const end = liquidEnd(html, index)
+  return _match(end === null)
+    .with(true, () => openTag(html, index, state))
+    .with(false, () => skipTo(state, (end as number) + 2))
+    .exec() as ScanState
+}
+
+function liquidEnd(html: string, index: number): number | null {
+  return _match(html.startsWith('{%', index) || html.startsWith('{{', index))
+    .with(true, () => findClosing(html, index))
+    .with(false, () => null)
+    .exec() as number | null
+}
+
+function findClosing(html: string, index: number): number | null {
+  const closing = _match(html[index + 1] === '%')
+    .with(true, () => '%}')
+    .with(false, () => '}}')
+    .exec() as string
+  const end = html.indexOf(closing, index + 2)
+  return _match(end >= 0)
+    .with(true, () => end)
+    .with(false, () => null)
+    .exec() as number | null
+}
+
+function openTag(html: string, index: number, state: ScanState): ScanState {
+  return _match(html[index] === '<' && /[A-Za-z/!?]/.test(html[index + 1] || ''))
+    .with(true, () => closeTag(html, index, state))
+    .with(false, () => skipTo(state, index + 1))
+    .exec() as ScanState
+}
+
+function closeTag(html: string, index: number, state: ScanState): ScanState {
+  const end = tagEnd(html, index + 1, '')
+  return _match(end === null)
+    .with(true, () => skipTo(state, index + 1))
+    .with(false, () => emitToken(html, state, index, end as number))
+    .exec() as ScanState
+}
+
+function tagEnd(html: string, pos: number, quote: string): number | null {
+  return _match(pos >= html.length)
+    .with(true, () => null)
+    .with(false, () => tagChar(html, pos, quote))
+    .exec() as number | null
+}
+
+function tagChar(html: string, pos: number, quote: string): number | null {
+  const char = html[pos]
+  return _match(true)
+    .with(quote !== '' && char === quote, () => tagEnd(html, pos + 1, ''))
+    .with(quote !== '', () => tagEnd(html, pos + 1, quote))
+    .with(char === '"' || char === "'", () => tagEnd(html, pos + 1, char))
+    .with(char === '>', () => pos)
+    .with(true, () => tagEnd(html, pos + 1, quote))
+    .exec() as number | null
+}
+
+function skipTo(state: ScanState, cursor: number): ScanState {
+  return { tokens: state.tokens, start: state.start, cursor }
+}
+
+function emitToken(html: string, state: ScanState, index: number, end: number): ScanState {
+  const tokens = _match(state.start < index)
+    .with(true, () => [...state.tokens, html.slice(state.start, index), html.slice(index, end + 1)])
+    .with(false, () => [...state.tokens, html.slice(index, end + 1)])
+    .exec() as string[]
+  return { tokens, start: end + 1, cursor: end + 1 }
+}
+
+interface FormatState {
+  indent: number
+  lines: string[]
 }
 
 export function formatHtml(html: string): string {
-  let indent = 0
   return htmlTokens(html)
-    .map((token) => {
-      const trimmed = token.trim()
-      if (!trimmed) return null
-      if (/^<\/[\w:-]+\s*>$/.test(token)) indent = Math.max(0, indent - 1)
-      const line = '  '.repeat(indent) + (token.startsWith('<') ? token : trimmed)
-      const opening = /^<([\w:-]+)(?=[\s/>])/.exec(token)
-      if (opening && !/\/\s*>$/.test(token) && !voidTags.has(opening[1].toLowerCase())) indent++
-      return line
-    })
-    .filter(Boolean)
-    .join('\n')
+    .reduce((state, token) => formatToken(token, state), { indent: 0, lines: [] as string[] })
+    .lines.join('\n')
+}
+
+function formatToken(token: string, state: FormatState): FormatState {
+  const trimmed = token.trim()
+  return _match(trimmed === '')
+    .with(true, () => state)
+    .with(false, () => indentLine(token, trimmed, state))
+    .exec() as FormatState
+}
+
+function indentLine(token: string, trimmed: string, state: FormatState): FormatState {
+  const dedented = Math.max(0, state.indent - closingDepth(token))
+  const body = _match(token.startsWith('<'))
+    .with(true, () => token)
+    .with(false, () => trimmed)
+    .exec() as string
+  const line = `${'  '.repeat(dedented)}${body}`
+  return { indent: dedented + openingDepth(token), lines: [...state.lines, line] }
+}
+
+function closingDepth(token: string): number {
+  return _match(/^<\/[\w:-]+\s*>$/.test(token))
+    .with(true, () => 1)
+    .with(false, () => 0)
+    .exec() as number
+}
+
+function openingDepth(token: string): number {
+  const opening = /^<([\w:-]+)(?=[\s/>])/.exec(token)
+  return _match(opening !== null && !/\/\s*>$/.test(token) && !voidTags.has((opening as string[])[1].toLowerCase()))
+    .with(true, () => 1)
+    .with(false, () => 0)
+    .exec() as number
 }
 
 function scriptTag(scriptFile: string): string {
@@ -57,23 +150,62 @@ function scriptTag(scriptFile: string): string {
 }
 
 export function buildLiquidContent(component: ParsedComponent, fileName: string): string {
-  let content = component.liquidAssignments?.length ? `${component.liquidAssignments.join('\n')}\n\n` : ''
-  content += formatHtml(component.html)
+  return [
+    assignmentsHead(component),
+    formatHtml(component.html),
+    scriptsSection(component, fileName),
+    schemaSection(component),
+    cssSection(component),
+  ].join('')
+}
 
-  if (component.mode !== 'dom:global') {
-    const scriptAssets = component.scriptAssets || []
-    const scriptsToInclude: string[] = []
-    if (component.type !== 'snippets' && component.hasScript && !scriptAssets.includes(`${fileName}.js`)) {
-      scriptsToInclude.push(`${fileName}.js`)
-    }
-    scriptsToInclude.push(...scriptAssets)
-    for (const script of scriptsToInclude) content += scriptTag(script)
-  }
+function assignmentsHead(component: ParsedComponent): string {
+  const assignments = component.liquidAssignments ?? []
+  return _match(assignments.length > 0)
+    .with(true, () => `${assignments.join('\n')}\n\n`)
+    .with(false, () => '')
+    .exec() as string
+}
 
-  if (component.type !== 'snippets') {
-    const schema = { ...component.schema, ...(component.blocksSchema?.length ? { blocks: component.blocksSchema } : {}) }
-    content += `\n\n{% schema %}\n${JSON.stringify(schema, null, 2)}\n{% endschema %}`
-  }
-  if (component.css) content += `\n\n{% stylesheet %}\n${component.css}{% endstylesheet %}`
-  return content
+function scriptsSection(component: ParsedComponent, fileName: string): string {
+  return _match(component.mode === 'dom:global')
+    .with(true, () => '')
+    .with(false, () =>
+      ownScript(component, fileName)
+        .concat(component.scriptAssets ?? [])
+        .map(scriptTag)
+        .join(''),
+    )
+    .exec() as string
+}
+
+function ownScript(component: ParsedComponent, fileName: string): string[] {
+  const assets = component.scriptAssets ?? []
+  return _match(component.type !== 'snippets' && component.hasScript && !assets.includes(`${fileName}.js`))
+    .with(true, () => [`${fileName}.js`])
+    .with(false, () => [] as string[])
+    .exec() as string[]
+}
+
+function schemaSection(component: ParsedComponent): string {
+  return _match(component.type === 'snippets')
+    .with(true, () => '')
+    .with(false, () => schemaBlock(component))
+    .exec() as string
+}
+
+function schemaBlock(component: ParsedComponent): string {
+  const blocks = _match((component.blocksSchema ?? []).length > 0)
+    .with(true, () => ({ blocks: component.blocksSchema }))
+    .with(false, () => ({}))
+    .exec() as Record<string, unknown>
+  const schema = { ...component.schema, ...blocks }
+  return `\n\n{% schema %}\n${JSON.stringify(schema, null, 2)}\n{% endschema %}`
+}
+
+function cssSection(component: ParsedComponent): string {
+  return _match(!component.css)
+    .with(true, () => '')
+    .with(false, () => `\n\n{% stylesheet %}\n${component.css}{% endstylesheet %}`)
+    .exec() as string
 }

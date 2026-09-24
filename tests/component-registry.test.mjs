@@ -1,7 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import path from 'node:path'
-import { ComponentRegistry } from '../dist/application/services/component-registry.js'
+import { ComponentRegistry, DirectiveScanner } from '../dist/application/services/component-registry.js'
+import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
+
+const scanner = () => new DirectiveScanner(new ASTParser())
 
 test('registry resolves transitive dependencies and terminates on cycles', async () => {
   const metadata = {
@@ -17,6 +20,7 @@ test('registry resolves transitive dependencies and terminates on cycles', async
       },
     },
     { readFileSync: () => "'use react (#root)'" },
+    scanner(),
   )
   const result = await registry.scan(['A.tsx', 'B.tsx', 'C.tsx'])
   for (const config of result.values()) {
@@ -36,6 +40,7 @@ test('registry propagates parser failures', async () => {
     {
       readFileSync: () => "'use react'",
     },
+    scanner(),
   )
   await assert.rejects(registry.scan(['Invalid.tsx']), (error) => error === failure)
 })
@@ -58,6 +63,7 @@ test('registry scans sequentially and stops after the first parser failure', asy
       },
     },
     { readFileSync: () => "'use react'" },
+    scanner(),
   )
   await assert.rejects(registry.scan(['A.tsx', 'B.tsx', 'C.tsx']), (error) => error === failure)
   assert.deepEqual(calls, ['A', 'B'])

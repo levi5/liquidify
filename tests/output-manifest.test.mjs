@@ -2,6 +2,9 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { OutputManifest } from '../dist/infra/adapters/generators/liquid/output-manifest.js'
 import { ValidationError } from '../dist/core/errors/validation-error.js'
+import { SilentLogger } from '../dist/shared/logger.js'
+
+const logger = new SilentLogger()
 
 const validEntry = { files: { 'snippets/card.liquid': 'a'.repeat(64) }, scripts: ['card.js'], css: '' }
 const wrap = (entry) => ({ version: 1, entries: { '/src/Card.tsx': entry } })
@@ -44,7 +47,7 @@ for (const [name, content] of invalid) {
       unlink: async () => {
         assert.fail('must not delete')
       },
-    })
+    }, logger)
     await assert.rejects(manifest.begin([], new Set()), (error) => {
       assert.ok(error instanceof ValidationError)
       assert.equal(error.filePath, '/out/.liquidify-manifest.json')
@@ -61,7 +64,7 @@ test('valid persisted entries still mark missing outputs for regeneration', asyn
   const manifest = new OutputManifest('/out', {
     exists: async (file) => file.endsWith('.liquidify-manifest.json'),
     readFile: async () => JSON.stringify(wrap(validEntry)),
-  })
+  }, logger)
   const changed = new Set()
   await manifest.begin(['/src/Card.tsx'], changed)
   assert.deepEqual([...changed], ['/src/Card.tsx'])

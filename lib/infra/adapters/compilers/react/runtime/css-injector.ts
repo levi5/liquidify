@@ -14,8 +14,4 @@ export class CssInjector {
       ),
     ).code
   }
-
-  escape(css: string): string {
-    return css.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$')
-  }
 }

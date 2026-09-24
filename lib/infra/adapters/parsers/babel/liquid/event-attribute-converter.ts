@@ -7,6 +7,7 @@ import {
   type JSXExpressionContainer,
   type ArrowFunctionExpression,
   type CallExpression,
+  type Node,
 } from '@babel/types'
 import type { ILiquidExpressionParser } from '../../../../../types/liquid'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
@@ -64,15 +65,15 @@ export class EventAttributeConverter {
 
   private interpolateLiquidVariables(code: string): string {
     const regex = /('[^']*'|"[^"]*"|`[^`]*`)|(^|[^.a-zA-Z0-9_'"/:;])\b([a-zA-Z_][a-zA-Z0-9_.]*)\b(?!\s*:)/g
+    return code.replace(regex, (match, str, prefix, id) => this.interpolateMatch(match, str, prefix, id))
+  }
 
-    return code.replace(regex, (match, str, prefix, id) => {
-      if (str) return match
-
-      const baseId = id.split('.')[0]
-      if (jsReserved.has(baseId)) return match
-
-      return `${prefix}{{ ${id} | json | escape }}`
-    })
+  private interpolateMatch(match: string, str: string | undefined, prefix: string, id: string | undefined): string {
+    return _match(true)
+      .with(str !== undefined, () => match)
+      .with(id !== undefined && jsReserved.has(id.split('.')[0]), () => match)
+      .with(true, () => `${prefix}{{ ${id} | json | escape }}`)
+      .exec() as string
   }
 
   public convert(
@@ -83,37 +84,20 @@ export class EventAttributeConverter {
   ): string {
     const arrowFunction = attribute.value.expression
     const firstParam = arrowFunction.params[0]
-    const eventName = isIdentifier(firstParam) ? firstParam.name : 'event'
-    const componentName = context?.componentName || this.componentName
-
-    const domMode = this.isDomMode(context)
-    const prefix = domMode && componentName ? `liquidify['${pascalToKebab(componentName)}'].` : ''
-    const generateCode = (node: Parameters<ILiquidExpressionParser['generateLiquidCode']>[0]) =>
-      this.expressionParser.generateLiquidCode(node, false, renames, context)
-
-    const code = _match(isCallExpression(arrowFunction.body))
-      .with(true, () => {
-        const call = arrowFunction.body as CallExpression
-        let callee = generateCode(call.callee)
-        if (prefix && !callee.includes('.') && !callee.includes('[')) callee = `${prefix}${callee}`
-        const args = call.arguments
-          .map((arg) => {
-            const value = generateCode(arg)
-            return domMode && value === eventName ? 'event' : value
-          })
-          .join(', ')
-        return `${callee}(${args})`
-      })
-      .with(false, () => {
-        let body = generateCode(arrowFunction.body)
-        if (prefix) {
-          if (eventName !== 'event') body = body.replace(new RegExp(`\\b${eventName}\\b`, 'g'), 'event')
-          if (!isBlockStatement(arrowFunction.body)) body = `${prefix}${body}`
-        }
-        return body
-      })
+    const eventName = _match(firstParam !== undefined && isIdentifier(firstParam))
+      .with(true, () => (firstParam as { name: string }).name)
+      .with(false, () => 'event')
       .exec() as string
-
+    const componentName = context?.componentName || this.componentName
+    const domMode = this.isDomMode(context)
+    const prefix = _match(domMode && componentName !== undefined && componentName !== '')
+      .with(true, () => `liquidify['${pascalToKebab(componentName as string)}'].`)
+      .with(false, () => '')
+      .exec() as string
+    const code = _match(isCallExpression(arrowFunction.body))
+      .with(true, () => this.callHandler(arrowFunction.body as CallExpression, prefix, domMode, eventName, renames, context))
+      .with(false, () => this.bodyHandler(arrowFunction, prefix, eventName, renames, context))
+      .exec() as string
     const interpolated = _match(domMode)
       .with(true, () => code)
       .with(false, () => this.interpolateLiquidVariables(code))
@@ -121,10 +105,75 @@ export class EventAttributeConverter {
     return ` ${attributeName}="${interpolated.replace(/"/g, '&quot;')}"`
   }
 
+  private callHandler(
+    body: CallExpression,
+    prefix: string,
+    domMode: boolean,
+    eventName: string,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    const callee = _match(prefix !== '' && !this.isMemberAccess(this.generate(body.callee, renames, context)))
+      .with(true, () => `${prefix}${this.generate(body.callee, renames, context)}`)
+      .with(false, () => this.generate(body.callee, renames, context))
+      .exec() as string
+    const args = body.arguments.map((arg) => this.callArgument(arg, domMode, eventName, renames, context)).join(', ')
+    return `${callee}(${args})`
+  }
+
+  private isMemberAccess(callee: string): boolean {
+    return callee.includes('.') || callee.includes('[')
+  }
+
+  private callArgument(
+    arg: CallExpression['arguments'][number],
+    domMode: boolean,
+    eventName: string,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    const value = this.generate(arg as Node, renames, context)
+    return _match(domMode && value === eventName)
+      .with(true, () => 'event')
+      .with(false, () => value)
+      .exec() as string
+  }
+
+  private bodyHandler(
+    arrowFunction: ArrowFunctionExpression,
+    prefix: string,
+    eventName: string,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    const body = this.generate(arrowFunction.body as Node, renames, context)
+    return _match(prefix === '')
+      .with(true, () => body)
+      .with(false, () => this.prefixBody(body, prefix, eventName, arrowFunction))
+      .exec() as string
+  }
+
+  private prefixBody(body: string, prefix: string, eventName: string, arrowFunction: ArrowFunctionExpression): string {
+    const renamed = _match(eventName !== 'event')
+      .with(true, () => body.replace(new RegExp(`\\b${eventName}\\b`, 'g'), 'event'))
+      .with(false, () => body)
+      .exec() as string
+    return _match(isBlockStatement(arrowFunction.body))
+      .with(true, () => renamed)
+      .with(false, () => `${prefix}${renamed}`)
+      .exec() as string
+  }
+
+  private generate(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {
+    return this.expressionParser.generateLiquidCode(node, false, renames, context)
+  }
+
   public convertReference(name: string, attributeName: string, context?: ParsingContext): string {
     const componentName = context?.componentName || this.componentName
-    if (!this.isDomMode(context) || !componentName) return ''
-    return ` ${attributeName}="liquidify['${pascalToKebab(componentName)}'].${name}(event)"`
+    return _match(!this.isDomMode(context) || !componentName)
+      .with(true, () => '')
+      .with(false, () => ` ${attributeName}="liquidify['${pascalToKebab(componentName as string)}'].${name}(event)"`)
+      .exec() as string
   }
 
   public isDomMode(context?: ParsingContext): boolean {
