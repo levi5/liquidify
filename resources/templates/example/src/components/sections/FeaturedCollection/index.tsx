@@ -3,6 +3,7 @@
 import { RenderSnippet } from 'liquidify'
 import classNames from 'classnames'
 import { ProductCard } from '../../snippets/ProductCard'
+import { ProductShelf } from '../../islands/ProductShelf'
 
 import styles from './styles.css'
 
@@ -21,15 +22,12 @@ export const FeaturedCollection = () => {
         </a>
       </div>
       {featured.products.length > 0 ? (
-        <div
-          className={classNames(styles['product-shelf'])}
-          role="region"
-          aria-label={"'featured.eyebrow' | t"}
-          tabIndex={0}
-        >
-          {featured.products.slice(0, 8).map((item) => (
-            <RenderSnippet slot={ProductCard} item={item} />
-          ))}
+        <div role="region" aria-label={"'featured.eyebrow' | t"}>
+          <ProductShelf eager>
+            {featured.products.slice(0, 8).map((item) => (
+              <RenderSnippet slot={ProductCard} item={item} />
+            ))}
+          </ProductShelf>
         </div>
       ) : (
         <div className={classNames(styles['empty-state'])}>

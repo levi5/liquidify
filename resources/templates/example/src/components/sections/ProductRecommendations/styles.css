@@ -1,13 +1,3 @@
 .related-products:not(:has(.product-card)) {
   display: none;
 }
-
-.related-products .product-shelf {
-  grid-auto-columns: calc((100% - 66px) / 4);
-}
-
-@media (max-width: 900px) {
-  .related-products .product-shelf {
-    grid-auto-columns: calc((100% - 14px) / 2);
-  }
-}

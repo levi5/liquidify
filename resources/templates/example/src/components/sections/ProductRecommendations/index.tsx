@@ -3,6 +3,7 @@
 import { RenderSnippet } from 'liquidify'
 import classNames from 'classnames'
 import { ProductCard } from '../../snippets/ProductCard'
+import { ProductShelf } from '../../islands/ProductShelf'
 import { RecommendationLoader } from '../../islands/RecommendationLoader'
 
 import styles from './styles.css'
@@ -21,28 +22,28 @@ export const ProductRecommendations = () => {
         </a>
       </div>
       <div
-        className={classNames(styles['product-shelf'])}
         role="region"
         aria-label={"'recommendations.eyebrow' | t"}
-        tabIndex={0}
         data-related-grid
         data-recommendations-state="{% if recommendations.performed and recommendations.products_count > 0 %}loaded{% else %}fallback{% endif %}"
       >
-        {recommendations.performed && recommendations.products_count > 0 ? (
-          recommendations.products.map(
-            (item) => item.id !== product.id && <RenderSnippet slot={ProductCard} item={item} />,
-          )
-        ) : (
-          <>
-            {related_collection.products
-              .slice(0, 4)
-              .map(
-                (item) =>
-                  item.id !== product.id &&
-                  item.available && <RenderSnippet slot={ProductCard} item={item} />,
-              )}
-          </>
-        )}
+        <ProductShelf eager>
+          {recommendations.performed && recommendations.products_count > 0 ? (
+            recommendations.products.map(
+              (item) => item.id !== product.id && <RenderSnippet slot={ProductCard} item={item} />,
+            )
+          ) : (
+            <>
+              {related_collection.products
+                .slice(0, 4)
+                .map(
+                  (item) =>
+                    item.id !== product.id &&
+                    item.available && <RenderSnippet slot={ProductCard} item={item} />,
+                )}
+            </>
+          )}
+        </ProductShelf>
       </div>
       <RecommendationLoader productId={product.id} sectionId={section.id} eager />
     </section>
