@@ -1,6 +1,6 @@
 import React from 'preact/compat'
 import { useState } from 'preact/hooks'
-import { announceCart, cartRequest, moneyText, rootUrl, type StoreCart } from '../lib/shopify'
+import { announceCart, cartRequest, moneyText, rootUrl, translate, type StoreCart } from '../lib/shopify'
 
 export const CartContents = ({
   cart,
@@ -22,7 +22,7 @@ export const CartContents = ({
       onUpdate(next)
       announceCart(next)
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Try again.')
+      setError(error instanceof Error ? error.message : translate('cart_try_again', 'Try again.'))
     } finally {
       setBusy(false)
     }
@@ -39,10 +39,10 @@ export const CartContents = ({
           <span className="empty-spark" aria-hidden="true">
             ✳
           </span>
-          <h3>Your next look starts here.</h3>
-          <p>Your bag is empty. Explore the collection and add your favorites.</p>
+          <h3>{translate('cart_empty_heading', 'Your next look starts here.')}</h3>
+          <p>{translate('cart_empty_text', 'Your bag is empty. Explore the collection and add your favorites.')}</p>
           <a className="button button-dark" href={`${rootUrl()}collections/all`} onClick={onClose}>
-            Explore the store <span>↗</span>
+            {translate('cart_explore_store', 'Explore the store')} <span>↗</span>
           </a>
         </div>
       ) : (
@@ -74,7 +74,7 @@ export const CartContents = ({
                       <button
                         disabled={busy || item.quantity <= 1}
                         onClick={() => change(item.key, item.quantity - 1)}
-                        aria-label={`Decrease quantity of ${item.product_title}`}
+                        aria-label={translate('cart_decrease', 'Decrease quantity')}
                       >
                         −
                       </button>
@@ -82,13 +82,13 @@ export const CartContents = ({
                       <button
                         disabled={busy}
                         onClick={() => change(item.key, item.quantity + 1)}
-                        aria-label={`Increase quantity of ${item.product_title}`}
+                        aria-label={translate('cart_increase', 'Increase quantity')}
                       >
                         +
                       </button>
                     </div>
                     <button className="remove-button" disabled={busy} onClick={() => change(item.key, 0)}>
-                      Remove
+                      {translate('general_remove', 'Remove')}
                     </button>
                   </div>
                 </div>
@@ -103,21 +103,21 @@ export const CartContents = ({
               </p>
             ))}
             <p className="summary-row">
-              <strong>Subtotal</strong>
+              <strong>{translate('cart_subtotal', 'Subtotal')}</strong>
               <strong>{moneyText(cart.total_price, cart.currency)}</strong>
             </p>
-            <p className="muted">Shipping and taxes calculated at checkout.</p>
+            <p className="muted">{translate('cart_shipping_taxes', 'Shipping and taxes calculated at checkout.')}</p>
             <form method="post" action={`${rootUrl()}cart`}>
               <button className="button button-dark full-width" type="submit" name="checkout" disabled={busy}>
-                Checkout <span>↗</span>
+                {translate('cart_checkout', 'Checkout ↗')}
               </button>
             </form>
             {onClose && (
               <a className="cart-page-link" href={`${rootUrl()}cart`}>
-                View my bag
+                {translate('cart_open_page', 'Open bag page')}
               </a>
             )}
-            <p className="secure-note">Secure payment with Shopify</p>
+            <p className="secure-note">{translate('cart_secure_payment', 'Secure payment with Shopify')}</p>
           </div>
         </>
       )}

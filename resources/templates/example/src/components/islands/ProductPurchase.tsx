@@ -1,7 +1,7 @@
 'use react'
 
 import { useState } from 'preact/hooks'
-import { addItem, moneyText, rootUrl } from '../../lib/shopify'
+import { addItem, moneyText, rootUrl, translate } from '../../lib/shopify'
 
 interface Variant {
   id: number
@@ -60,9 +60,11 @@ export const ProductPurchase = ({
     setError('')
     try {
       await addItem(variant.id, quantity)
-      setMessage('Adicionado à sua sacola.')
+      setMessage(translate('products_added_to_bag', 'Added to your bag.'))
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'Não foi possível adicionar o produto.')
+      setError(
+        error instanceof Error ? error.message : translate('products_add_error', 'Could not add the product.'),
+      )
     } finally {
       setBusy(false)
     }
@@ -78,7 +80,7 @@ export const ProductPurchase = ({
             )}
           </>
         ) : (
-          <span>Combinação indisponível</span>
+          <span>{translate('products_combination_unavailable', 'Combination unavailable')}</span>
         )}
       </div>
       {!(store.variants.length === 1 && first.title === 'Default Title') &&
@@ -103,7 +105,7 @@ export const ProductPurchase = ({
                     key={value}
                     type="button"
                     aria-pressed={options[index] === value}
-                    aria-label={`${value}${unavailable ? ' — indisponível nesta combinação' : ''}`}
+                    aria-label={`${value}${unavailable ? translate('products_unavailable_suffix', ' — unavailable in this combination') : ''}`}
                     style={
                       unavailable ? { color: 'var(--muted)', textDecoration: 'line-through' } : undefined
                     }
@@ -117,14 +119,14 @@ export const ProductPurchase = ({
           </fieldset>
         ))}
       <input type="hidden" name="id" value={variant?.id || ''} />
-      <label htmlFor="ProductQuantity">Quantidade</label>
+      <label htmlFor="ProductQuantity">{translate('products_quantity', 'Quantity')}</label>
       <div className="purchase-actions">
         <div className="quantity-control">
           <button
             type="button"
             onClick={() => setQuantity(Math.max(1, quantity - 1))}
             disabled={busy || quantity <= 1}
-            aria-label="Diminuir quantidade"
+            aria-label={translate('products_decrease_quantity', 'Decrease quantity')}
           >
             −
           </button>
@@ -142,7 +144,7 @@ export const ProductPurchase = ({
             type="button"
             onClick={() => setQuantity(quantity + 1)}
             disabled={busy}
-            aria-label="Aumentar quantidade"
+            aria-label={translate('products_increase_quantity', 'Increase quantity')}
           >
             +
           </button>
@@ -154,18 +156,18 @@ export const ProductPurchase = ({
           disabled={!variant?.available || busy || store.requires_selling_plan}
         >
           {busy
-            ? 'Adicionando…'
+            ? translate('products_adding', 'Adding…')
             : !variant
-              ? 'Indisponível'
+              ? translate('products_unavailable', 'Unavailable')
               : !variant.available
-                ? 'Esgotado'
-                : 'Adicionar à sacola'}
+                ? translate('products_soldout', 'Sold out')
+                : translate('products_add_to_bag', 'Add to bag')}
           <span aria-hidden="true">↗</span>
         </button>
       </div>
       {store.requires_selling_plan && (
         <p className="form-error">
-          Este produto exige um plano de assinatura. Entre em contato com a loja para escolher seu plano.
+          {translate('products_selling_plan', 'This product requires a subscription plan. Contact the store to choose your plan.')}
         </p>
       )}
       {message && (

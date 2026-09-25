@@ -1,0 +1,148 @@
+{
+  "settings_schema": {
+    "visual_identity": "Identidade visual",
+    "brand_name": { "label": "Nome no logotipo" },
+    "primary_color": { "label": "Cor principal" },
+    "accent_color": { "label": "Cor de destaque" },
+    "background_color": { "label": "Cor de fundo" }
+  },
+  "sections": {
+    "brand_story": {
+      "name": "Editorial da marca",
+      "settings": {
+        "heading": { "label": "Título" },
+        "description": { "label": "Descrição" },
+        "image": { "label": "Imagem" },
+        "link": { "label": "Link" }
+      },
+      "presets": {
+        "default": "Editorial da marca"
+      }
+    },
+    "categories": {
+      "name": "Categorias de moda",
+      "settings": {
+        "heading": { "label": "Título" }
+      },
+      "blocks": {
+        "category": {
+          "name": "Categoria",
+          "settings": {
+            "title": { "label": "Título" },
+            "subtitle": { "label": "Subtítulo" },
+            "image": { "label": "Imagem" },
+            "link": { "label": "Coleção ou página" },
+            "fallback": {
+              "label": "Imagem de exemplo",
+              "options": {
+                "women": "Feminino",
+                "men": "Masculino",
+                "accessories": "Acessórios"
+              }
+            }
+          }
+        }
+      },
+      "presets": {
+        "default": "Categorias de moda"
+      }
+    },
+    "collection_list": {
+      "name": "Lista de coleções"
+    },
+    "contact": {
+      "name": "Formulário de contato"
+    },
+    "featured_collection": {
+      "name": "Produtos em destaque",
+      "settings": {
+        "heading": { "label": "Título" },
+        "collection": { "label": "Coleção" }
+      },
+      "presets": {
+        "default": "Produtos em destaque"
+      }
+    },
+    "footer": {
+      "name": "Rodapé e newsletter",
+      "settings": {
+        "menu": { "label": "Menu de informações" }
+      }
+    },
+    "header": {
+      "name": "Cabeçalho e avisos",
+      "settings": {
+        "announcement": { "label": "Aviso 1" },
+        "announcement_2": { "label": "Aviso 2" },
+        "announcement_3": { "label": "Aviso 3" },
+        "menu": { "label": "Menu personalizado (opcional)" },
+        "women_link": { "label": "Link Feminino" },
+        "men_link": { "label": "Link Masculino" },
+        "accessories_link": { "label": "Link Acessórios" }
+      }
+    },
+    "hero": {
+      "name": "Destaque de moda",
+      "settings": {
+        "heading": { "label": "Título" },
+        "highlight": { "label": "Destaque" },
+        "description": { "label": "Descrição" },
+        "button": { "label": "Botão" },
+        "link": { "label": "Link principal" },
+        "image": { "label": "Foto feminina" },
+        "men_image": { "label": "Foto masculina" },
+        "women_link": { "label": "Link feminino" },
+        "men_link": { "label": "Link masculino" }
+      },
+      "presets": {
+        "default": "Destaque de moda"
+      }
+    },
+    "main_article": {
+      "name": "Artigo"
+    },
+    "main_blog": {
+      "name": "Journal"
+    },
+    "main_cart": {
+      "name": "Sacola"
+    },
+    "main_collection": {
+      "name": "Catálogo",
+      "settings": {
+        "filter_heading": { "label": "Título dos filtros" },
+        "products_per_page": { "label": "Produtos por página" }
+      }
+    },
+    "main_page": {
+      "name": "Página"
+    },
+    "main_product": {
+      "name": "Detalhes do produto"
+    },
+    "main_search": {
+      "name": "Resultados da busca",
+      "settings": {
+        "products_per_page": { "label": "Resultados por página" }
+      }
+    },
+    "not_found": {
+      "name": "Página não encontrada"
+    },
+    "product_recommendations": {
+      "name": "Produtos relacionados",
+      "settings": {
+        "heading": { "label": "Título" }
+      },
+      "presets": {
+        "default": "Produtos relacionados"
+      }
+    },
+    "values": {
+      "name": "Benefícios da loja",
+      "presets": {
+        "default": "Benefícios da loja"
+      }
+    }
+  }
+}

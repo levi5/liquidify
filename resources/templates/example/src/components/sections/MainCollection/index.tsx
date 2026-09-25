@@ -13,13 +13,13 @@ export const MainCollection = () => {
   const selected_sort = collection.sort_by || collection.default_sort_by
   return (
     <section className={classNames(styles.catalog, 'container', 'section-space')}>
-      <nav className={classNames(styles.breadcrumbs)} aria-label="Breadcrumb navigation">
-        <a href={routes.root_url}>Home</a>
+      <nav className={classNames(styles.breadcrumbs)} aria-label={"'collection.breadcrumb' | t"}>
+        <a href={routes.root_url}>{"'general.home' | t"}</a>
         <span>/</span>
         <span>{'collection.title | escape'}</span>
       </nav>
       <div className={classNames(styles['page-heading'])}>
-        <p className="eyebrow">CHOICES THAT TRANSFORM</p>
+        <p className="eyebrow">{"'collection.eyebrow' | t"}</p>
         <h1>
           {current_tags.length > 0 ? "current_tags | join: ' + ' | escape" : 'collection.title | escape'}
         </h1>
@@ -34,9 +34,9 @@ export const MainCollection = () => {
         />
         <div className="catalog-results">
           <div className="catalog-toolbar">
-            <span className="catalog-meta">{'collection.products_count | append: " products"'}</span>
+            <span className="catalog-meta">{"'collection.products_count' | t: count: collection.products_count"}</span>
             <div className="sort-control">
-              <label htmlFor="SortBy">Sort</label>
+              <label htmlFor="SortBy">{"'collection.sort' | t"}</label>
               <select
                 id="SortBy"
                 name="sort_by"
@@ -66,10 +66,10 @@ export const MainCollection = () => {
             ) : (
               <div className={classNames(styles['empty-state'])}>
                 <span className={classNames(styles['empty-spark'])}>✳</span>
-                <h2>No pieces here.</h2>
-                <p>Try adjusting the filters or explore the full collection.</p>
+                <h2>{"'collection.empty_heading' | t"}</h2>
+                <p>{"'collection.empty_text' | t"}</p>
                 <a className="button button-dark" href={routes.all_products_collection_url}>
-                  View all products ↗
+                  {"'collection.view_all' | t"}
                 </a>
               </div>
             )}
@@ -81,13 +81,13 @@ export const MainCollection = () => {
   )
 }
 export const schema = {
-  name: 'Catalog',
+  name: 't:sections.main_collection.name',
   settings: [
-    { type: 'text', id: 'filter_heading', label: 'Filters Heading', default: 'Filters' },
+    { type: 'text', id: 'filter_heading', label: 't:sections.main_collection.settings.filter_heading.label', default: '' },
     {
       type: 'range',
       id: 'products_per_page',
-      label: 'Products per page',
+      label: 't:sections.main_collection.settings.products_per_page.label',
       min: 6,
       max: 36,
       step: 6,

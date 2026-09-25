@@ -8,29 +8,29 @@ import styles from './styles.css'
 
 export const Values = () => {
   return (
-    <section className={classNames(styles['values-strip'], 'container')} aria-label="Shop with confidence">
+    <section className={classNames(styles['values-strip'], 'container')} aria-label={"'values.strip_label' | t"}>
       <div className={classNames(styles['value-item'])}>
         <RenderSnippet slot={ThemeIcon} name="truck" />
         <div>
-          <h3>Your way, to you</h3>
-          <p>Check delivery options at checkout</p>
+          <h3>{"'values.shipping_title' | t"}</h3>
+          <p>{"'values.shipping_text' | t"}</p>
         </div>
       </div>
       <div className={classNames(styles['value-item'])}>
         <RenderSnippet slot={ThemeIcon} name="shield" />
         <div>
-          <h3>Secure purchase</h3>
-          <p>Your data protected at every step</p>
+          <h3>{"'values.secure_title' | t"}</h3>
+          <p>{"'values.secure_text' | t"}</p>
         </div>
       </div>
       <div className={classNames(styles['value-item'])}>
         <RenderSnippet slot={ThemeIcon} name="return" />
         <div>
-          <h3>Count on us</h3>
-          <p>Support to help with your choice</p>
+          <h3>{"'values.support_title' | t"}</h3>
+          <p>{"'values.support_text' | t"}</p>
         </div>
       </div>
     </section>
   )
 }
-export const schema = { name: 'Store Benefits', settings: [], presets: [{ name: 'Store Benefits' }] }
+export const schema = { name: 't:sections.values.name', settings: [], presets: [{ name: 't:sections.values.presets.default' }] }

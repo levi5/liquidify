@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'preact/hooks'
 import { Icon } from '../../ui/Icon'
 import { CartContents } from '../../ui/CartContents'
-import { cartRequest, rootUrl, type StoreCart } from '../../lib/shopify'
+import { cartRequest, rootUrl, translate, type StoreCart } from '../../lib/shopify'
 
 type MenuLink = { title: string; url: string; links?: MenuLink[] }
 export const Storefront = ({
@@ -29,7 +29,7 @@ export const Storefront = ({
     try {
       setCart(await cartRequest())
     } catch {
-      setError('Não foi possível carregar sua sacola. Tente novamente.')
+      setError(translate('cart_load_error', 'Could not load your bag. Try again.'))
     } finally {
       setLoading(false)
     }
@@ -179,16 +179,20 @@ export const Storefront = ({
       >
         <div className="dialog-header">
           <div>
-            <p className="eyebrow">LIQUIDIFY / SUA SELEÇÃO</p>
+            <p className="eyebrow">{translate('cart_dialog_eyebrow', 'LIQUIDIFY / YOUR SELECTION')}</p>
             <h2 id="PanelTitle">
               {panel === 'cart'
-                ? `Sua sacola (${cart.item_count})`
+                ? `${translate('cart_bag_title', 'Your bag')} (${cart.item_count})`
                 : panel === 'search'
-                  ? 'Encontre seu próximo look.'
-                  : 'Explore a Liquidify.'}
+                  ? translate('cart_search_title', 'Find your next look.')
+                  : translate('cart_menu_title', 'Explore Liquidify.')}
             </h2>
           </div>
-          <button className="icon-button" aria-label="Fechar" onClick={close}>
+          <button
+            className="icon-button"
+            aria-label={translate('general_close', 'Close')}
+            onClick={close}
+          >
             <Icon name="close" />
           </button>
         </div>
@@ -196,17 +200,17 @@ export const Storefront = ({
           <>
             {loading && (
               <p className="dialog-status" role="status">
-                Atualizando sua sacola…
+                {translate('cart_updating', 'Updating your bag…')}
               </p>
             )}
             {error ? (
               <div className="dialog-status">
                 <p role="alert">{error}</p>
                 <button className="button button-dark" onClick={refresh}>
-                  Tentar novamente
+                  {translate('cart_try_again', 'Try again')}
                 </button>
                 <a className="text-link" href={`${rootUrl()}cart`}>
-                  Abrir página da sacola
+                  {translate('cart_open_page', 'Open bag page')}
                 </a>
               </div>
             ) : (
@@ -218,7 +222,7 @@ export const Storefront = ({
           <div className="search-panel">
             <form action={`${rootUrl()}search`} method="get" role="search">
               <input type="hidden" name="type" value="product" />
-              <label htmlFor="SearchQuery">Busque por um produto, categoria ou estilo</label>
+              <label htmlFor="SearchQuery">{translate('cart_search_label', 'Search for a product, category or style')}</label>
               <div className="search-field">
                 <input
                   id="SearchQuery"
@@ -226,23 +230,27 @@ export const Storefront = ({
                   type="search"
                   value={query}
                   onInput={(event) => setQuery(event.currentTarget.value)}
-                  placeholder="O seu próximo favorito…"
+                  placeholder={translate('cart_search_placeholder', 'Your next favorite…')}
                   required
                   autoFocus
                 />
-                <button className="icon-button" type="submit" aria-label="Buscar">
+                <button
+                  className="icon-button"
+                  type="submit"
+                  aria-label={translate('general_search', 'Search')}
+                >
                   <Icon name="arrow" />
                 </button>
               </div>
             </form>
-            <p className="eyebrow">COMECE POR AQUI</p>
+            <p className="eyebrow">{translate('cart_start_here', 'START HERE')}</p>
             <a className="button button-outline" href={`${rootUrl()}collections/all`}>
-              Explore todos os produtos ↗
+              {translate('cart_explore_all', 'Explore all products ↗')}
             </a>
           </div>
         )}
         {panel === 'menu' && (
-          <nav className="mobile-nav" aria-label="Menu principal">
+          <nav className="mobile-nav" aria-label={translate('cart_mobile_menu', 'Main menu')}>
             {links.map((link) =>
               link.links?.length ? (
                 <details className="mobile-menu-group" key={link.url}>
@@ -252,7 +260,7 @@ export const Storefront = ({
                   </summary>
                   <div className="mobile-submenu">
                     <a className="mobile-sub-link" href={link.url} onClick={close}>
-                      Ver tudo em {link.title} ↗
+                      {translate('cart_view_all_in', 'See all in {{ title }} ↗').replace('{{ title }}', link.title)}
                     </a>
                     {link.links.map((child) => (
                       <div key={child.url}>
@@ -281,7 +289,7 @@ export const Storefront = ({
               ),
             )}
             <a href={window.LiquidifyTheme?.account || `${rootUrl()}account`}>
-              Minha conta <Icon name="user" />
+              {translate('cart_my_account', 'My account')} <Icon name="user" />
             </a>
           </nav>
         )}

@@ -8,8 +8,8 @@ export const MainCart = () => {
   return (
     <section className="cart-page container section-space">
       <div className="page-heading">
-        <p className="eyebrow">SUAS PRÓXIMAS BOAS ESCOLHAS</p>
-        <h1>Minha sacola.</h1>
+        <p className="eyebrow">{"'cart.eyebrow' | t"}</p>
+        <h1>{"'cart.title' | t"}</h1>
       </div>
       <div className="island-bridge" data-liquid-store="{{ cart | json | escape }}">
         <CartPage eager>
@@ -19,25 +19,25 @@ export const MainCart = () => {
                 <div className="cart-line">
                   <a href={item.url}>{'item.title | escape'}</a>
                   <label>
-                    Quantidade
+                    {"'cart.quantity' | t"}
                     <input type="number" name="updates[]" value={item.quantity} min="0" />
                   </label>
                   <span>{'item.final_line_price | money'}</span>
                 </div>
               ))}
-              <p className="detail-price">Subtotal: {money(cart.total_price)}</p>
+              <p className="detail-price">{"'cart.subtotal' | t"}: {money(cart.total_price)}</p>
               <button className="button button-outline" name="update" type="submit">
-                Atualizar sacola
+                {"'cart.update_bag' | t"}
               </button>
               <button className="button button-dark" type="submit" name="checkout">
-                Finalizar compra ↗
+                {"'cart.checkout' | t"}
               </button>
             </form>
           ) : (
             <div className="empty-state">
-              <h2>Sua sacola ainda está vazia.</h2>
+              <h2>{"'cart.empty_title' | t"}</h2>
               <a className="button button-dark" href={routes.all_products_collection_url}>
-                Explorar a loja ↗
+                {"'cart.explore_store' | t"}
               </a>
             </div>
           )}
@@ -47,6 +47,6 @@ export const MainCart = () => {
   )
 }
 export const schema = {
-  name: 'Sacola',
+  name: 't:sections.main_cart.name',
   settings: [],
 }

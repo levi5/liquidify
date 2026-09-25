@@ -7,14 +7,16 @@ export const BrandStory = () => {
   return (
     <section className={classNames(styles['brand-campaign'], 'container')} id="essencia">
       <div className={classNames(styles['campaign-copy'])}>
-        <p className="eyebrow">LIQUIDIFY / EVERYDAY CULTURE</p>
-        <h2>{'section.settings.heading | default: "Vista o que faz sentido para você." | escape'}</h2>
-        <p>{'section.settings.description | default: "O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é." | escape'}</p>
+        <p className="eyebrow">{"'brand.eyebrow' | t"}</p>
+        <h2>{section.settings.heading ? 'section.settings.heading | escape' : "'brand.heading' | t"}</h2>
+        <p>
+          {section.settings.description ? 'section.settings.description | escape' : "'brand.description' | t"}
+        </p>
         <a
           className="button button-dark"
           href="{{ section.settings.link | default: routes.all_products_collection_url }}"
         >
-          Encontre seu essencial <span>↗</span>
+          {"'brand.button' | t"} <span>↗</span>
         </a>
         <span className={classNames(styles['campaign-watermark'])} aria-hidden="true">
           LQ.
@@ -24,7 +26,7 @@ export const BrandStory = () => {
         {section.settings.image ? (
           <img
             src="{{ section.settings.image | image_url: width: 1400 }}"
-            alt="{{ section.settings.image.alt | default: 'Editorial Liquidify' | escape }}"
+            alt={section.settings.image.alt ? 'section.settings.image.alt | escape' : "'brand.editorial_alt' | t"}
             width="1100"
             height="950"
             loading="lazy"
@@ -32,30 +34,29 @@ export const BrandStory = () => {
         ) : (
           <img
             src="{{ 'liquidify-editorial.jpg' | asset_url }}"
-            alt="Estilo urbano e peças para todos os dias"
+            alt={"'brand.card_alt' | t"}
             width="1100"
             height="950"
             loading="lazy"
           />
         )}
-        <span>NOT JUST CLOTHES. YOUR EXPRESSION.</span>
+        <span>{"'brand.watermark' | t"}</span>
       </div>
     </section>
   )
 }
 export const schema = {
-  name: 'Editorial da marca',
+  name: 't:sections.brand_story.name',
   settings: [
-    { type: 'text', id: 'heading', label: 'Título', default: 'Vista o que faz sentido para você.' },
+    { type: 'text', id: 'heading', label: 't:sections.brand_story.settings.heading.label', default: '' },
     {
       type: 'textarea',
       id: 'description',
-      label: 'Descrição',
-      default:
-        'O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é.',
+      label: 't:sections.brand_story.settings.description.label',
+      default: '',
     },
-    { type: 'image_picker', id: 'image', label: 'Imagem' },
-    { type: 'url', id: 'link', label: 'Link' },
+    { type: 'image_picker', id: 'image', label: 't:sections.brand_story.settings.image.label' },
+    { type: 'url', id: 'link', label: 't:sections.brand_story.settings.link.label' },
   ],
-  presets: [{ name: 'Editorial da marca' }],
+  presets: [{ name: 't:sections.brand_story.presets.default' }],
 }

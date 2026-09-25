@@ -35,9 +35,9 @@ export const ProductCard = ({ item }: { item: Product }) => {
           />
         )}
         {item.available ? (
-          item.compare_at_price > item.price && <span className={classNames(styles['product-tag'])}>SALE</span>
+          item.compare_at_price > item.price && <span className={classNames(styles['product-tag'])}>{"'products.product.sale' | t"}</span>
         ) : (
-          <span className={classNames(styles['product-tag'], styles['sold-out'])}>ESGOTADO</span>
+          <span className={classNames(styles['product-tag'], styles['sold-out'])}>{"'products.product.sold_out' | t"}</span>
         )}
         <span className={classNames(styles['product-image-arrow'])} aria-hidden="true">
           ↗
@@ -45,9 +45,9 @@ export const ProductCard = ({ item }: { item: Product }) => {
       </a>
       <div className={classNames(styles['product-info'])}>
         <div className={classNames(styles['product-info-top'])}>
-          <span className={classNames(styles['product-type'])}>LIQUIDIFY ESSENTIALS</span>
+          <span className={classNames(styles['product-type'])}>{"'products.product.essentials' | t"}</span>
           <span className={classNames(styles['product-options-note'])}>
-            {item.variants.length === 1 ? '1 opção' : "item.variants.size | append: ' opções'"}
+            {"'products.product.options_count' | t: count: item.variants.size"}
           </span>
         </div>
         <h3>
@@ -55,7 +55,7 @@ export const ProductCard = ({ item }: { item: Product }) => {
         </h3>
         <div className={classNames(styles['product-prices'])}>
           <strong>
-            {item.price_min !== item.price_max && <small>A partir de </small>}
+            {item.price_min !== item.price_max && <small>{"'products.product.from_price' | t"}</small>}
             {money(item.price)}
           </strong>
           {item.compare_at_price > item.price && <s>{money(item.compare_at_price)}</s>}
@@ -67,7 +67,7 @@ export const ProductCard = ({ item }: { item: Product }) => {
               <input type="hidden" name="quantity" value="1" />
               <button className={classNames(styles['card-buy-button'])} type="submit">
                 <RenderSnippet slot={ThemeIcon} name="bag" />
-                <span>Adicionar à sacola</span>
+                <span>{"'products.product.add_to_bag' | t"}</span>
                 <span aria-hidden="true">+</span>
               </button>
               <p className="quick-add-message" role="status"></p>
@@ -75,12 +75,12 @@ export const ProductCard = ({ item }: { item: Product }) => {
           ) : (
             <a className={classNames(styles['card-buy-button'])} href={item.url}>
               <RenderSnippet slot={ThemeIcon} name="bag" />
-              <span>Escolher opções</span>
+              <span>{"'products.product.choose_options' | t"}</span>
               <span aria-hidden="true">+</span>
             </a>
           )
         ) : (
-          <span className={classNames(styles['card-buy-button'], styles.unavailable)}>Indisponível</span>
+          <span className={classNames(styles['card-buy-button'], styles.unavailable)}>{"'products.product.unavailable' | t"}</span>
         )}
       </div>
     </article>

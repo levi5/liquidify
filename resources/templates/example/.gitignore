@@ -1,10 +1,10 @@
-!assets/
-!blocks/
-!snippets/
-!sections/
-!config/
-!layout/
-!locales/
-!src/
-!templates/
 node_modules/
+
+# Generated component outputs
+/sections/*.liquid
+/blocks/*.liquid
+/snippets/*.liquid
+!/snippets/css-variables.liquid
+!/snippets/script-global.liquid
+/assets/*.js
+!/assets/theme.js

@@ -17,6 +17,10 @@ This theme demonstrates `use sections`, `use snippets`, `use react`, `RenderSnip
 11. **Logical Expressions in Boolean Attributes:** `disabled={!available || requires_plan}` turns into an invalid text attribute. The fallback uses a `fieldset` with an explicit comparison for required subscription plans and keeps the simple availability condition on the button.
 12. **Liquid Tags in Strings with Filters:** A JSX string containing `{% assign ... | default: ... %}` is wrapped in `{{ ... }}` because of the pipe `|`. The section declares variables in TSX (`const selected_sort = collection.sort_by || collection.default_sort_by`) to emit the `assign`. Strings containing filters remain reserved for output expressions.
 
+13. **Liquid translations in TSX:** Storefront copy uses string literals such as `{"'products.product.add_to_bag' | t"}`. The parser recognizes the Liquid filter expression and emits `{{ 'products.product.add_to_bag' | t }}`. Schema labels use `t:sections.<section>...` keys and resolve from the locale schema files.
+14. **React island translations:** Liquid and Preact components share the active locale through `window.LiquidifyTheme.i18n`, populated in `layout/theme.liquid`. The `translate()` helper in `src/lib/shopify.ts` falls back to English when a key is unavailable.
+15. **Bilingual defaults:** English is the default locale (`en.default.json` and `en.default.schema.json`); Brazilian Portuguese is provided by `pt-BR.json` and `pt-BR.schema.json`. Section settings edited by a merchant are not automatically translated, so fixed copy should use locale keys and merchant-configured content should be treated as store content.
+
 Theme Check may emit `UndefinedObject` warnings for `script_*_loaded` flags injected by the compiler. These are bundle load guards initialized as `nil` in Liquid.
 
 ## Integration References

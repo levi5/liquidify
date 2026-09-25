@@ -16,12 +16,12 @@ export const CollectionFilters = ({
   heading: string
 }) => {
   return (
-    <aside className={classNames(styles['catalog-sidebar'])} aria-label="Filtros de produtos">
+    <aside className={classNames(styles['catalog-sidebar'])} aria-label={"'filters.label' | t"}>
       <FilterDrawer sectionId={section_id} eager />
       <div data-filter-source>
         <details className={classNames(styles['sidebar-sections'])} open>
           <summary className={classNames(styles['sidebar-toggle'])}>
-            {'heading | escape'} <span aria-hidden="true">+</span>
+            {heading ? 'heading | escape' : "'filters.title' | t"} <span aria-hidden="true">+</span>
           </summary>
           <form id="CollectionFilters-{{ section_id }}" method="get" action="{{ request.path }}">
             {collection_filters.map((filter) => (
@@ -32,7 +32,7 @@ export const CollectionFilters = ({
                 {filter.type === 'price_range' ? (
                   <div className={classNames(styles['sidebar-price-fields'])}>
                     <label>
-                      De
+                      {"'filters.from' | t"}
                       <input
                         type="number"
                         name={filter.min_value.param_name}
@@ -43,7 +43,7 @@ export const CollectionFilters = ({
                       />
                     </label>
                     <label>
-                      Até
+                      {"'filters.to' | t"}
                       <input
                         type="number"
                         name={filter.max_value.param_name}
@@ -74,17 +74,17 @@ export const CollectionFilters = ({
               </details>
             ))}
             {collection_filters.length === 0 && (
-              <p className={classNames(styles['sidebar-empty'])}>Não há filtros disponíveis nesta coleção.</p>
+              <p className={classNames(styles['sidebar-empty'])}>{"'filters.empty' | t"}</p>
             )}
             <div className={classNames(styles['sidebar-filter-actions'])}>
               <button className="button button-dark" type="submit">
-                Aplicar filtros
+                {"'filters.apply' | t"}
               </button>
               <a
                 className="text-link"
                 href="{{ request.path }}?sort_by={{ collection.sort_by | default: collection.default_sort_by | url_encode }}"
               >
-                Limpar filtros
+                {"'filters.clear' | t"}
               </a>
             </div>
           </form>

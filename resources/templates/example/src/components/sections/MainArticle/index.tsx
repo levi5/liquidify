@@ -25,12 +25,12 @@ export const MainArticle = () => {
       )}
       <div className="rich-text page-content">{'{{ article.content }}'}</div>
       <a className="text-link" href={blog.url}>
-        ← Voltar para o journal
+        {"'blog.back_to' | t"}
       </a>
     </article>
   )
 }
 export const schema = {
-  name: 'Artigo',
+  name: 't:sections.main_article.name',
   settings: [],
 }

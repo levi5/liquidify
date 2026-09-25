@@ -1,4 +1,4 @@
-import { addItem } from '../lib/shopify'
+import { addItem, translate } from '../lib/shopify'
 
 const announcementCleanup = new WeakMap<HTMLElement, () => void>()
 
@@ -22,7 +22,9 @@ function prepareAnnouncements(root: ParentNode) {
     const updatePause = () => {
       pause.textContent = paused ? '▶' : 'Ⅱ'
       pause.setAttribute('aria-pressed', String(paused))
-      pause.setAttribute('aria-label', paused ? 'Reproduzir avisos' : 'Pausar avisos')
+      pause.setAttribute('aria-label', paused
+        ? translate('theme_play_announcements', 'Play announcements')
+        : translate('theme_pause_announcements', 'Pause announcements'))
     }
     const next = () => show(1)
     const previous = () => show(-1)
@@ -82,13 +84,13 @@ document.addEventListener('submit', async (event) => {
   if (!id) return
   form.dataset.pending = 'true'
   button.disabled = true
-  message.textContent = 'Adicionando…'
+  message.textContent = translate('theme_adding', 'Adding…')
   try {
     await addItem(id, 1)
-    message.textContent = 'Adicionado à sua sacola.'
+    message.textContent = translate('theme_added_to_bag', 'Added to your bag.')
   } catch (error) {
     message.textContent =
-      error instanceof Error ? error.message : 'Não foi possível adicionar. Tente novamente.'
+      error instanceof Error ? error.message : translate('theme_add_error', 'Could not add. Try again.')
   } finally {
     delete form.dataset.pending
     button.disabled = false

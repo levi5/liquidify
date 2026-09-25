@@ -22,8 +22,19 @@ export interface StoreCart {
 declare global {
   interface Window {
     Shopify?: { routes?: { root: string } }
-    LiquidifyTheme?: { currency: string; locale: string; root: string; account: string }
+    LiquidifyTheme?: {
+      currency: string
+      locale: string
+      root: string
+      account: string
+      i18n?: Record<string, string>
+    }
   }
+}
+
+export const translate = (key: string, fallback: string): string => {
+  if (typeof window === 'undefined') return fallback
+  return window.LiquidifyTheme?.i18n?.[key] || fallback
 }
 
 export const rootUrl = () => {
@@ -45,7 +56,7 @@ export async function cartRequest(path = 'cart.js', payload?: unknown): Promise<
   const data = await response.json()
   if (!response.ok)
     throw new Error(
-      data.description || data.message || 'Não foi possível atualizar a sacola. Tente novamente.',
+      data.description || data.message || translate('cart_update_error', 'Could not update your bag. Try again.'),
     )
   return data
 }

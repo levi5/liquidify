@@ -8,13 +8,13 @@ export const Categories = () => {
     <section className={classNames(styles.categories, 'container', 'section-space')} id="categorias">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">ENCONTRE O SEU PRÓXIMO LOOK</p>
-          <h2>{'section.settings.heading | default: "Qual é a sua vibe?" | escape'}</h2>
+          <p className="eyebrow">{"'categories.eyebrow' | t"}</p>
+          <h2>{section.settings.heading ? 'section.settings.heading | escape' : "'categories.heading' | t"}</h2>
         </div>
         <span className={classNames('muted', styles['category-intro'])}>
-          Do básico ao inesperado.
+          {"'categories.intro_1' | t"}
           <br />
-          Sempre do seu jeito.
+          {"'categories.intro_2' | t"}
         </span>
       </div>
       <div className={classNames(styles['category-grid'])}>
@@ -57,60 +57,60 @@ export const Categories = () => {
   )
 }
 export const schema = {
-  name: 'Categorias de moda',
+  name: 't:sections.categories.name',
   settings: [
     {
       type: 'text',
       id: 'heading',
-      label: 'Título',
-      default: 'Qual é a sua vibe?',
+      label: 't:sections.categories.settings.heading.label',
+      default: '',
     },
   ],
   max_blocks: 4,
   blocks: [
     {
       type: 'category',
-      name: 'Categoria',
+      name: 't:sections.categories.blocks.category.name',
       settings: [
         {
           type: 'text',
           id: 'title',
-          label: 'Título',
-          default: 'Feminino',
+          label: 't:sections.categories.blocks.category.settings.title.label',
+          default: 'Women',
         },
         {
           type: 'text',
           id: 'subtitle',
-          label: 'Subtítulo',
-          default: 'NOVAS FORMAS DE SER VOCÊ',
+          label: 't:sections.categories.blocks.category.settings.subtitle.label',
+          default: 'NEW WAYS TO BE YOU',
         },
         {
           type: 'image_picker',
           id: 'image',
-          label: 'Imagem',
+          label: 't:sections.categories.blocks.category.settings.image.label',
         },
         {
           type: 'url',
           id: 'link',
-          label: 'Coleção ou página',
+          label: 't:sections.categories.blocks.category.settings.link.label',
         },
         {
           type: 'select',
           id: 'fallback',
-          label: 'Imagem de exemplo',
+          label: 't:sections.categories.blocks.category.settings.fallback.label',
           default: 'liquidify-women.jpg',
           options: [
             {
               value: 'liquidify-women.jpg',
-              label: 'Feminino',
+              label: 't:sections.categories.blocks.category.settings.fallback.options.women',
             },
             {
               value: 'liquidify-men.jpg',
-              label: 'Masculino',
+              label: 't:sections.categories.blocks.category.settings.fallback.options.men',
             },
             {
               value: 'liquidify-accessories.jpg',
-              label: 'Acessórios',
+              label: 't:sections.categories.blocks.category.settings.fallback.options.accessories',
             },
           ],
         },
@@ -119,29 +119,29 @@ export const schema = {
   ],
   presets: [
     {
-      name: 'Categorias de moda',
+      name: 't:sections.categories.presets.default',
       blocks: [
         {
           type: 'category',
           settings: {
-            title: 'Feminino',
-            subtitle: 'NOVAS FORMAS DE SER VOCÊ',
+            title: 'Women',
+            subtitle: 'NEW WAYS TO BE YOU',
             fallback: 'liquidify-women.jpg',
           },
         },
         {
           type: 'category',
           settings: {
-            title: 'Masculino',
-            subtitle: 'ESSENCIAIS COM PERSONALIDADE',
+            title: 'Men',
+            subtitle: 'ESSENTIALS WITH PERSONALITY',
             fallback: 'liquidify-men.jpg',
           },
         },
         {
           type: 'category',
           settings: {
-            title: 'Acessórios',
-            subtitle: 'OS DETALHES FAZEM O LOOK',
+            title: 'Accessories',
+            subtitle: 'DETAILS MAKE THE LOOK',
             fallback: 'liquidify-accessories.jpg',
           },
         },

@@ -10,28 +10,28 @@ export const MainSearch = () => {
   return (
     <section className="search-page container section-space">
       <div className="page-heading">
-        <p className="eyebrow">FIND WHAT MATCHES YOU</p>
-        <h1>Great finds.</h1>
+        <p className="eyebrow">{"'search.eyebrow' | t"}</p>
+        <h1>{"'search.title' | t"}</h1>
         <form action={routes.search_url} method="get" role="search" className="page-search">
           <input type="hidden" name="type" value="product" />
           <label className="visually-hidden" htmlFor="PageSearch">
-            Search products
+            {"'header.search_products' | t"}
           </label>
           <input
             type="search"
             id="PageSearch"
             name="q"
             value="{{ search.terms | escape }}"
-            placeholder="What are you looking for?"
+            placeholder={"'search.placeholder' | t"}
             required
           />
           <button className="button button-dark" type="submit">
-            Search ↗
+            {"'general.search' | t"} ↗
           </button>
         </form>
       </div>
       <p className="catalog-meta">
-        {search.results_count} results for “{'search.terms | escape'}”
+        {"'search.results' | t: count: search.results_count, terms: search.terms"}
       </p>
       <PaginateByLiquid collection={search.results} by="section.settings.products_per_page">
         {search.results.length > 0 ? (
@@ -43,7 +43,7 @@ export const MainSearch = () => {
                 <article className="search-text-result">
                   <a href={item.url}>
                     <h2>{'item.title | escape'}</h2>
-                    <span>Learn more ↗</span>
+                    <span>{"'search.learn_more' | t"}</span>
                   </a>
                 </article>
               ),
@@ -52,10 +52,10 @@ export const MainSearch = () => {
         ) : (
           <div className="empty-state">
             <span className="empty-spark">✳</span>
-            <h2>Let's try another way?</h2>
-            <p>Try another term or discover all pieces in the store.</p>
+            <h2>{"'search.empty_title' | t"}</h2>
+            <p>{"'search.empty_text' | t"}</p>
             <a className="button button-dark" href={routes.all_products_collection_url}>
-              Explore the store ↗
+              {"'cart.explore_store' | t"}
             </a>
           </div>
         )}
@@ -65,12 +65,12 @@ export const MainSearch = () => {
   )
 }
 export const schema = {
-  name: 'Search Results',
+  name: 't:sections.main_search.name',
   settings: [
     {
       type: 'range',
       id: 'products_per_page',
-      label: 'Results per page',
+      label: 't:sections.main_search.settings.products_per_page.label',
       min: 6,
       max: 36,
       step: 6,

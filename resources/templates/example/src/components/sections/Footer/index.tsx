@@ -10,33 +10,33 @@ export const Footer = () => {
     <footer className={classNames(styles['site-footer'])}>
       <div className={classNames(styles.newsletter, 'container')}>
         <div>
-          <p className="eyebrow">VAMOS FICAR MAIS PERTO?</p>
+          <p className="eyebrow">{"'footer.eyebrow' | t"}</p>
           <h2>
-            Entre para a nossa lista.
+            {"'footer.newsletter_title_1' | t"}
             <br />
-            Fique por dentro do próximo drop.
+            {"'footer.newsletter_title_2' | t"}
           </h2>
         </div>
         <div className={classNames(styles['newsletter-form'])}>
           <FormBlock name="customer" id="FooterNewsletter">
             <input type="hidden" name="contact[tags]" value="newsletter" />
-            <label htmlFor="NewsletterEmail">Seu melhor e-mail</label>
+            <label htmlFor="NewsletterEmail">{"'footer.email_label' | t"}</label>
             <div className={classNames(styles['email-field'])}>
               <input
                 id="NewsletterEmail"
                 type="email"
                 name="contact[email]"
-                placeholder="voce@email.com"
+                placeholder="email@example.com"
                 autoComplete="email"
                 required
               />
-              <button type="submit" aria-label="Inscrever-se na newsletter">
+              <button type="submit" aria-label={"'footer.subscribe' | t"}>
                 ↗
               </button>
             </div>
-            {form['posted_successfully?'] && <p role="status">Você está na lista. Até o próximo encontro!</p>}
+            {form['posted_successfully?'] && <p role="status">{"'footer.subscribed' | t"}</p>}
             {form.errors && <div role="alert">{'form.errors | default_errors'}</div>}
-            <p className={classNames(styles['newsletter-note'])}>Novidades, lançamentos e inspiração. Cancele quando quiser.</p>
+            <p className={classNames(styles['newsletter-note'])}>{"'footer.newsletter_note' | t"}</p>
           </FormBlock>
         </div>
       </div>
@@ -46,25 +46,25 @@ export const Footer = () => {
             {'settings.brand_name | default: shop.name | escape'}
           </a>
           <p>
-            Seu estilo. Suas regras.
+            {"'footer.tagline_1' | t"}
             <br />
-            Isso é Liquidify.
+            {"'footer.tagline_2' | t"}
           </p>
         </div>
         <div>
-          <h3>Explore</h3>
-          <a href={routes.all_products_collection_url}>Todos os produtos</a>
-          <a href={routes.collections_url}>Nossas coleções</a>
-          <a href="{{ routes.root_url }}#essencia">Nossa essência</a>
+          <h3>{"'footer.explore' | t"}</h3>
+          <a href={routes.all_products_collection_url}>{"'footer.all_products' | t"}</a>
+          <a href={routes.collections_url}>{"'footer.our_collections' | t"}</a>
+          <a href="{{ routes.root_url }}#essencia">{"'footer.our_essence' | t"}</a>
         </div>
         <div>
-          <h3>Podemos ajudar?</h3>
-          <a href={routes.account_url}>Minha conta</a>
-          <a href={routes.cart_url}>Minha sacola</a>
-          <a href="mailto:{{ shop.email | escape }}">Fale com a gente</a>
+          <h3>{"'footer.help_title' | t"}</h3>
+          <a href={routes.account_url}>{"'footer.my_account' | t"}</a>
+          <a href={routes.cart_url}>{"'footer.my_bag' | t"}</a>
+          <a href="mailto:{{ shop.email | escape }}">{"'footer.contact_us' | t"}</a>
         </div>
         <div>
-          <h3>Informações</h3>
+          <h3>{"'footer.info_title' | t"}</h3>
           {section.settings.menu.links.map((link) => (
             <a href={link.url}>{link.title}</a>
           ))}
@@ -77,24 +77,23 @@ export const Footer = () => {
       </div>
       <div className={classNames(styles['footer-bottom'], 'container')}>
         <span>
-          ©&nbsp;{'"now" | date: "%Y"'}&nbsp;{'settings.brand_name | default: shop.name | escape'}. Todos os
-          direitos reservados.
+          ©&nbsp;{'"now" | date: "%Y"'}&nbsp;{'settings.brand_name | default: shop.name | escape'}.{"'footer.copyright' | t"}
         </span>
         <span>
-          LIQUIDIFY / EVERYDAY CULTURE <span aria-hidden="true">↗</span>
+          {"'brand.eyebrow' | t"} <span aria-hidden="true">↗</span>
         </span>
-        <span>Pagamento seguro · Shopify</span>
+        <span>{"'footer.secure_payment' | t"}</span>
       </div>
     </footer>
   )
 }
 export const schema = {
-  name: 'Rodapé e newsletter',
+  name: 't:sections.footer.name',
   settings: [
     {
       type: 'link_list',
       id: 'menu',
-      label: 'Menu de informações',
+      label: 't:sections.footer.settings.menu.label',
       default: 'footer',
     },
   ],

@@ -10,8 +10,8 @@ export const CollectionList = () => {
   return (
     <section className="container section-space">
       <div className="page-heading">
-        <p className="eyebrow">UM UNIVERSO DE POSSIBILIDADES</p>
-        <h1>Nossas coleções.</h1>
+        <p className="eyebrow">{"'collections.eyebrow' | t"}</p>
+        <h1>{"'collections.heading' | t"}</h1>
       </div>
       <PaginateByLiquid collection={collections} by={24}>
         <div className="category-grid">
@@ -41,6 +41,6 @@ export const CollectionList = () => {
   )
 }
 export const schema = {
-  name: 'Lista de coleções',
+  name: 't:sections.collection_list.name',
   settings: [],
 }

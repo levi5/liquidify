@@ -16,7 +16,7 @@ export const ActiveFilters = ({ filters }: { filters: Filter[] }) => {
   if (!hasActiveFilters) return null
 
   return (
-    <div className={classNames(styles['active-filters'])} aria-label="Filtros ativos">
+    <div className={classNames(styles['active-filters'])} aria-label={"'filters.active' | t"}>
       {filters.map((filter) => (
         <>
           {filter.active_values.map((value) => (
@@ -24,7 +24,7 @@ export const ActiveFilters = ({ filters }: { filters: Filter[] }) => {
               <a
                 className={classNames(styles['active-filter'])}
                 href={value.url_to_remove}
-                aria-label={`Remover filtro ${filter.label}: ${value.label}`}
+                aria-label={"'filters.remove' | t: filter: filter.label, value: value.label"}
               >
                 <span>{`${filter.label}: ${value.label}`}</span>
                 <span aria-hidden="true">×</span>
@@ -38,10 +38,10 @@ export const ActiveFilters = ({ filters }: { filters: Filter[] }) => {
                   <a
                     className={classNames(styles['active-filter'])}
                     href={filter.url_to_remove}
-                    aria-label="Remover filtro de preço"
+                    aria-label={"'filters.remove_price' | t"}
                   >
                     <span>
-                      Preço: {filter.min_value?.value != null ? filter.min_value.value : 0}{' '}
+                      {"'filters.price' | t"}: {filter.min_value?.value != null ? filter.min_value.value : 0}{' '}
                       {filter.max_value?.value != null
                         ? `— ${filter.max_value.value}`
                         : filter.range_max != null
@@ -56,8 +56,11 @@ export const ActiveFilters = ({ filters }: { filters: Filter[] }) => {
           )}
         </>
       ))}
-      <a className="text-link" href={window.location.pathname + '?sort_by=' + (collection.sort_by || collection.default_sort_by)}>
-        Limpar todos
+      <a
+        className="text-link"
+        href="{{ request.path }}?sort_by={{ collection.sort_by | default: collection.default_sort_by | url_encode }}"
+      >
+        {"'filters.clear_all' | t"}
       </a>
     </div>
   )

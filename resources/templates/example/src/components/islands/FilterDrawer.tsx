@@ -2,6 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'preact/hooks'
 import { Icon } from '../../ui/Icon'
+import { translate } from '../../lib/shopify'
 
 export const FilterDrawer = ({ sectionId }: { sectionId: string; eager?: boolean }) => {
   const dialog = useRef<HTMLDialogElement>(null)
@@ -80,7 +81,7 @@ export const FilterDrawer = ({ sectionId }: { sectionId: string; eager?: boolean
         >
           <path d="M3 7h4m4 0h10M3 17h10m4 0h4M7 4v6m6 4v6" />
         </svg>
-        Filtrar produtos
+        {translate('filters_filter_products', 'Filter products')}
       </button>
       <dialog
         ref={dialog}
@@ -105,10 +106,15 @@ export const FilterDrawer = ({ sectionId }: { sectionId: string; eager?: boolean
       >
         <div className="dialog-header">
           <div>
-            <p className="eyebrow">REFINE SUA SELEÇÃO</p>
-            <h2 id={`FilterTitle-${sectionId}`}>Filtros</h2>
+            <p className="eyebrow">{translate('filters_refine', 'REFINE YOUR SELECTION')}</p>
+            <h2 id={`FilterTitle-${sectionId}`}>{translate('filters_title', 'Filters')}</h2>
           </div>
-          <button type="button" className="icon-button" aria-label="Fechar filtros" onClick={close}>
+          <button
+            type="button"
+            className="icon-button"
+            aria-label={translate('filters_close', 'Close filters')}
+            onClick={close}
+          >
             <Icon name="close" />
           </button>
         </div>

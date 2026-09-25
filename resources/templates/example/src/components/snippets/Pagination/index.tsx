@@ -11,27 +11,27 @@ export const Pagination = ({ pager }: { pager: Paginate }) => {
       {pager.pages > 1 && (
         <div className={classNames(styles['pagination-footer'])}>
           <p className={classNames(styles['pagination-caption'])}>
-            {'pager.current_page | prepend: "Página " | append: " de " | append: pager.pages'}
+            {"'pagination.page_of' | t: current_page: pager.current_page, pages: pager.pages"}
           </p>
-          <nav className={classNames(styles.pagination)} aria-label="Paginação">
+          <nav className={classNames(styles.pagination)} aria-label={"'pagination.label' | t"}>
             {pager.previous && (
               <a
                 className={classNames(styles['pagination-direction'])}
                 href={pager.previous.url}
-                aria-label="Página anterior"
+                aria-label={"'pagination.prev' | t"}
                 rel="prev"
               >
-                ← <span>Anterior</span>
+                ← <span>{"'pagination.previous' | t"}</span>
               </a>
             )}
             {pager.parts.map((part) => {
               const page_number = Number(part.title)
               return part.is_link ? (
-                <a href={part.url} aria-label="Ir para a página {{ part.title }}">
+                <a href={part.url} aria-label={"'pagination.go_to' | t: page: part.title"}>
                   {'part.title | escape'}
                 </a>
               ) : page_number == pager.current_page ? (
-                <span aria-current="page" aria-label="Página {{ part.title }}, atual">
+                <span aria-current="page" aria-label={"'pagination.current' | t: page: part.title"}>
                   {'part.title | escape'}
                 </span>
               ) : (
@@ -44,10 +44,10 @@ export const Pagination = ({ pager }: { pager: Paginate }) => {
               <a
                 className={classNames(styles['pagination-direction'])}
                 href={pager.next.url}
-                aria-label="Próxima página"
+                aria-label={"'pagination.next' | t"}
                 rel="next"
               >
-                <span>Próxima</span> →
+                <span>{"'pagination.next_short' | t"}</span> →
               </a>
             )}
           </nav>

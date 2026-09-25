@@ -1,0 +1,148 @@
+{
+  "settings_schema": {
+    "visual_identity": "Visual identity",
+    "brand_name": { "label": "Logo name" },
+    "primary_color": { "label": "Primary color" },
+    "accent_color": { "label": "Accent color" },
+    "background_color": { "label": "Background color" }
+  },
+  "sections": {
+    "brand_story": {
+      "name": "Brand editorial",
+      "settings": {
+        "heading": { "label": "Heading" },
+        "description": { "label": "Description" },
+        "image": { "label": "Image" },
+        "link": { "label": "Link" }
+      },
+      "presets": {
+        "default": "Brand editorial"
+      }
+    },
+    "categories": {
+      "name": "Fashion categories",
+      "settings": {
+        "heading": { "label": "Heading" }
+      },
+      "blocks": {
+        "category": {
+          "name": "Category",
+          "settings": {
+            "title": { "label": "Title" },
+            "subtitle": { "label": "Subtitle" },
+            "image": { "label": "Image" },
+            "link": { "label": "Collection or page" },
+            "fallback": {
+              "label": "Sample image",
+              "options": {
+                "women": "Women",
+                "men": "Men",
+                "accessories": "Accessories"
+              }
+            }
+          }
+        }
+      },
+      "presets": {
+        "default": "Fashion categories"
+      }
+    },
+    "collection_list": {
+      "name": "Collection list"
+    },
+    "contact": {
+      "name": "Contact form"
+    },
+    "featured_collection": {
+      "name": "Featured products",
+      "settings": {
+        "heading": { "label": "Heading" },
+        "collection": { "label": "Collection" }
+      },
+      "presets": {
+        "default": "Featured products"
+      }
+    },
+    "footer": {
+      "name": "Footer and newsletter",
+      "settings": {
+        "menu": { "label": "Information menu" }
+      }
+    },
+    "header": {
+      "name": "Header and announcements",
+      "settings": {
+        "announcement": { "label": "Announcement 1" },
+        "announcement_2": { "label": "Announcement 2" },
+        "announcement_3": { "label": "Announcement 3" },
+        "menu": { "label": "Custom menu (optional)" },
+        "women_link": { "label": "Women link" },
+        "men_link": { "label": "Men link" },
+        "accessories_link": { "label": "Accessories link" }
+      }
+    },
+    "hero": {
+      "name": "Fashion hero",
+      "settings": {
+        "heading": { "label": "Heading" },
+        "highlight": { "label": "Highlight" },
+        "description": { "label": "Description" },
+        "button": { "label": "Button" },
+        "link": { "label": "Main link" },
+        "image": { "label": "Women's photo" },
+        "men_image": { "label": "Men's photo" },
+        "women_link": { "label": "Women's link" },
+        "men_link": { "label": "Men's link" }
+      },
+      "presets": {
+        "default": "Fashion hero"
+      }
+    },
+    "main_article": {
+      "name": "Article"
+    },
+    "main_blog": {
+      "name": "Journal"
+    },
+    "main_cart": {
+      "name": "Bag"
+    },
+    "main_collection": {
+      "name": "Catalog",
+      "settings": {
+        "filter_heading": { "label": "Filters heading" },
+        "products_per_page": { "label": "Products per page" }
+      }
+    },
+    "main_page": {
+      "name": "Page"
+    },
+    "main_product": {
+      "name": "Product details"
+    },
+    "main_search": {
+      "name": "Search results",
+      "settings": {
+        "products_per_page": { "label": "Results per page" }
+      }
+    },
+    "not_found": {
+      "name": "Page not found"
+    },
+    "product_recommendations": {
+      "name": "Related products",
+      "settings": {
+        "heading": { "label": "Heading" }
+      },
+      "presets": {
+        "default": "Related products"
+      }
+    },
+    "values": {
+      "name": "Store benefits",
+      "presets": {
+        "default": "Store benefits"
+      }
+    }
+  }
+}

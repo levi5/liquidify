@@ -13,11 +13,11 @@ export const ProductRecommendations = () => {
     <section className={classNames(styles['related-products'], 'container', 'section-space')} id="RelatedProducts-{{ section.id }}">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">KEEP DISCOVERING</p>
-          <h2>{'section.settings.heading | escape'}</h2>
+          <p className="eyebrow">{"'recommendations.eyebrow' | t"}</p>
+          <h2>{section.settings.heading ? 'section.settings.heading | escape' : "'recommendations.heading' | t"}</h2>
         </div>
         <a className="text-link" href={routes.all_products_collection_url}>
-          View collection ↗
+          {"'recommendations.view_collection' | t"}
         </a>
       </div>
       <div
@@ -47,7 +47,7 @@ export const ProductRecommendations = () => {
 }
 
 export const schema = {
-  name: 'Related Products',
-  settings: [{ type: 'text', id: 'heading', label: 'Heading', default: 'Complete the look.' }],
-  presets: [{ name: 'Related Products' }],
+  name: 't:sections.product_recommendations.name',
+  settings: [{ type: 'text', id: 'heading', label: 't:sections.product_recommendations.settings.heading.label', default: '' }],
+  presets: [{ name: 't:sections.product_recommendations.presets.default' }],
 }

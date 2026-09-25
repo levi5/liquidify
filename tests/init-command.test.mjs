@@ -51,6 +51,10 @@ test('copyTemplate copies template and updates package.json', (t) => {
   assert.ok(result.isRight(), 'copyTemplate should succeed')
   assert.ok(fs.existsSync(path.join(targetDir, 'package.json')))
   assert.ok(fs.existsSync(path.join(targetDir, 'src/components')))
+  assert.ok(fs.existsSync(path.join(targetDir, 'locales/en.default.json')))
+  assert.ok(fs.existsSync(path.join(targetDir, 'locales/pt-BR.json')))
+  assert.ok(fs.existsSync(path.join(targetDir, 'locales/en.default.schema.json')))
+  assert.ok(fs.existsSync(path.join(targetDir, 'locales/pt-BR.schema.json')))
 
   const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf-8'))
   assert.equal(pkg.name, 'my-new-store')

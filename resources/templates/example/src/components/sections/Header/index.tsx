@@ -15,24 +15,26 @@ export const Header = () => {
           className={classNames(styles['announcement-arrow'])}
           type="button"
           data-announcement-prev
-          aria-label="Aviso anterior"
+          aria-label={"'header.prev_announcement' | t"}
         >
           ‹
         </button>
         <div className={classNames(styles['announcement-messages'])} aria-live="off">
-          <p data-announcement-message>{'section.settings.announcement | escape'}</p>
-          <p data-announcement-message hidden>
-            {'section.settings.announcement_2 | escape'}
+          <p data-announcement-message>
+            {section.settings.announcement ? 'section.settings.announcement | escape' : "'header.announcement_1' | t"}
           </p>
           <p data-announcement-message hidden>
-            {'section.settings.announcement_3 | escape'}
+            {section.settings.announcement_2 ? 'section.settings.announcement_2 | escape' : "'header.announcement_2' | t"}
+          </p>
+          <p data-announcement-message hidden>
+            {section.settings.announcement_3 ? 'section.settings.announcement_3 | escape' : "'header.announcement_3' | t"}
           </p>
         </div>
         <button
           className={classNames(styles['announcement-arrow'])}
           type="button"
           data-announcement-next
-          aria-label="Próximo aviso"
+          aria-label={"'header.next_announcement' | t"}
         >
           ›
         </button>
@@ -40,17 +42,17 @@ export const Header = () => {
           className={classNames(styles['announcement-pause'])}
           type="button"
           data-announcement-pause
-          aria-label="Pausar avisos"
+          aria-label={"'header.pause_announcements' | t"}
           aria-pressed="false"
         >
           Ⅱ
         </button>
       </div>
       <header className={classNames(styles['site-header'], 'container')}>
-        <a className="wordmark" href={routes.root_url} aria-label="Liquidify — página inicial">
+        <a className="wordmark" href={routes.root_url} aria-label={"'header.home_page' | t"}>
           {'settings.brand_name | default: shop.name | escape'}
         </a>
-        <nav className={classNames(styles['desktop-nav'])} aria-label="Menu principal">
+        <nav className={classNames(styles['desktop-nav'])} aria-label={"'header.main_menu' | t"}>
           {section.settings.menu.links.length > 0 ? (
             section.settings.menu.links.map((link) =>
               link.links.length > 0 ? (
@@ -61,7 +63,7 @@ export const Header = () => {
                   </summary>
                   <div className="nav-submenu">
                     <a className="nav-overview" data-menu-overview href={link.url}>
-                      Ver tudo em {'link.title | escape'} ↗
+                      {"'header.view_all_in' | t: title: link.title"}
                     </a>
                     {link.links.map((child) => (
                       <div>
@@ -86,11 +88,11 @@ export const Header = () => {
           ) : (
             <>
               <a data-menu-item href="{{ routes.root_url }}collections/all?sort_by=created-descending">
-                Novidades
+                {"'header.new' | t"}
               </a>
               <details className="nav-dropdown" data-menu-item>
                 <summary>
-                  Feminino<span className="nav-chevron" aria-hidden="true"></span>
+                  {"'header.women' | t"}<span className="nav-chevron" aria-hidden="true"></span>
                 </summary>
                 <div className="nav-submenu">
                   <a
@@ -98,31 +100,31 @@ export const Header = () => {
                     data-menu-overview
                     href="{{ section.settings.women_link | default: '/collections/all/feminino' }}"
                   >
-                    Ver coleção feminina ↗
+                    {"'header.view_women' | t"}
                   </a>
                   <a
                     data-menu-child
                     href="{{ routes.root_url }}collections/all/feminino+blusas"
                   >
-                    Blusas e camisetas
+                    {"'header.women_tops' | t"}
                   </a>
                   <a
                     data-menu-child
                     href="{{ routes.root_url }}collections/all/feminino+jaquetas"
                   >
-                    Jaquetas
+                    {"'header.women_jackets' | t"}
                   </a>
                   <a
                     data-menu-child
                     href="{{ routes.root_url }}collections/all/feminino+saias"
                   >
-                    Saias e conjuntos
+                    {"'header.women_skirts' | t"}
                   </a>
                 </div>
               </details>
               <details className="nav-dropdown" data-menu-item>
                 <summary>
-                  Masculino<span className="nav-chevron" aria-hidden="true"></span>
+                  {"'header.men' | t"}<span className="nav-chevron" aria-hidden="true"></span>
                 </summary>
                 <div className="nav-submenu">
                   <a
@@ -130,31 +132,31 @@ export const Header = () => {
                     data-menu-overview
                     href="{{ section.settings.men_link | default: '/collections/all/masculino' }}"
                   >
-                    Ver coleção masculina ↗
+                    {"'header.view_men' | t"}
                   </a>
                   <a
                     data-menu-child
                     href="{{ routes.root_url }}collections/all/masculino+camisas"
                   >
-                    Camisas
+                    {"'header.men_shirts' | t"}
                   </a>
                   <a
                     data-menu-child
                     href="{{ routes.root_url }}collections/all/masculino+jaquetas"
                   >
-                    Jaquetas
+                    {"'header.men_jackets' | t"}
                   </a>
                   <a
                     data-menu-child
                     href="{{ routes.root_url }}collections/all/masculino+alfaiataria"
                   >
-                    Alfaiataria
+                    {"'header.men_tailoring' | t"}
                   </a>
                 </div>
               </details>
               <details className="nav-dropdown" data-menu-item>
                 <summary>
-                  Acessórios<span className="nav-chevron" aria-hidden="true"></span>
+                  {"'header.accessories' | t"}<span className="nav-chevron" aria-hidden="true"></span>
                 </summary>
                 <div className="nav-submenu">
                   <a
@@ -162,16 +164,16 @@ export const Header = () => {
                     data-menu-overview
                     href="{{ section.settings.accessories_link | default: '/collections/all/acessorios' }}"
                   >
-                    Ver todos os acessórios ↗
+                    {"'header.view_accessories' | t"}
                   </a>
                   <a data-menu-child href="{{ routes.root_url }}collections/all/bolsas">
-                    Bolsas
+                    {"'header.bags' | t"}
                   </a>
                   <a
                     data-menu-child
                     href="{{ routes.root_url }}collections/all/calcados"
                   >
-                    Calçados
+                    {"'header.shoes' | t"}
                   </a>
                 </div>
               </details>
@@ -183,14 +185,14 @@ export const Header = () => {
             href={routes.search_url}
             className="icon-button"
             data-open-panel="search"
-            aria-label="Buscar produtos"
+            aria-label={"'header.search_products' | t"}
           >
             <RenderSnippet slot={ThemeIcon} name="search" />
           </a>
           <a
             href={routes.account_url}
             className="icon-button account-link"
-            aria-label="Entrar na minha conta"
+            aria-label={"'header.account_login' | t"}
           >
             <RenderSnippet slot={ThemeIcon} name="user" />
           </a>
@@ -198,7 +200,7 @@ export const Header = () => {
             href={routes.cart_url}
             className="icon-button bag-button"
             data-open-panel="cart"
-            aria-label="Abrir sacola"
+            aria-label={"'header.open_bag' | t"}
           >
             <span
               className="bag-icon"
@@ -233,7 +235,7 @@ export const Header = () => {
             href={routes.all_products_collection_url}
             className="icon-button mobile-menu-trigger"
             data-open-panel="menu"
-            aria-label="Abrir menu"
+            aria-label={"'header.open_menu' | t"}
           >
             <RenderSnippet slot={ThemeIcon} name="menu" />
           </a>
@@ -251,29 +253,29 @@ export const Header = () => {
 }
 
 export const schema = {
-  name: 'Cabeçalho e avisos',
+  name: 't:sections.header.name',
   settings: [
     {
       type: 'text',
       id: 'announcement',
-      label: 'Aviso 1',
-      default: 'SEU ESTILO, SUAS REGRAS. CONHEÇA A NOVA COLEÇÃO.',
+      label: 't:sections.header.settings.announcement.label',
+      default: '',
     },
     {
       type: 'text',
       id: 'announcement_2',
-      label: 'Aviso 2',
-      default: 'FEMININO, MASCULINO E ACESSÓRIOS EM UM SÓ LUGAR.',
+      label: 't:sections.header.settings.announcement_2.label',
+      default: '',
     },
     {
       type: 'text',
       id: 'announcement_3',
-      label: 'Aviso 3',
-      default: 'ESCOLHA SEUS FAVORITOS. COMPRE COM SEGURANÇA.',
+      label: 't:sections.header.settings.announcement_3.label',
+      default: '',
     },
-    { type: 'link_list', id: 'menu', label: 'Menu personalizado (opcional)' },
-    { type: 'url', id: 'women_link', label: 'Link Feminino' },
-    { type: 'url', id: 'men_link', label: 'Link Masculino' },
-    { type: 'url', id: 'accessories_link', label: 'Link Acessórios' },
+    { type: 'link_list', id: 'menu', label: 't:sections.header.settings.menu.label' },
+    { type: 'url', id: 'women_link', label: 't:sections.header.settings.women_link.label' },
+    { type: 'url', id: 'men_link', label: 't:sections.header.settings.men_link.label' },
+    { type: 'url', id: 'accessories_link', label: 't:sections.header.settings.accessories_link.label' },
   ],
 }

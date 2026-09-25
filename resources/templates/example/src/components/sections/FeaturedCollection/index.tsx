@@ -12,12 +12,12 @@ export const FeaturedCollection = () => {
     <section className={classNames(styles.featured, 'section-space', 'container')} id="favoritos">
       <div className="section-heading">
         <div>
-          <p className="eyebrow">THE EVERYDAY EDIT</p>
-          <h2>{'section.settings.heading | default: "On your radar." | escape'}</h2>
-          <p className="section-subtitle">Your next wardrobe favorite is here.</p>
+          <p className="eyebrow">{"'featured.eyebrow' | t"}</p>
+          <h2>{section.settings.heading ? 'section.settings.heading | escape' : "'featured.heading' | t"}</h2>
+          <p className="section-subtitle">{"'featured.subtitle' | t"}</p>
         </div>
         <a className="text-link" href="{{ featured.url | default: routes.all_products_collection_url }}">
-          View all <span aria-hidden="true">↗</span>
+          {"'featured.view_all' | t"} <span aria-hidden="true">↗</span>
         </a>
       </div>
       {featured.products.length > 0 ? (
@@ -28,18 +28,18 @@ export const FeaturedCollection = () => {
         </div>
       ) : (
         <div className={classNames(styles['empty-state'])}>
-          <h3>New pieces are coming.</h3>
-          <p>Follow Liquidify's upcoming drops.</p>
+          <h3>{"'featured.empty_title' | t"}</h3>
+          <p>{"'featured.empty_text' | t"}</p>
         </div>
       )}
     </section>
   )
 }
 export const schema = {
-  name: 'Featured Products',
+  name: 't:sections.featured_collection.name',
   settings: [
-    { type: 'text', id: 'heading', label: 'Heading', default: 'On your radar.' },
-    { type: 'collection', id: 'collection', label: 'Collection' },
+    { type: 'text', id: 'heading', label: 't:sections.featured_collection.settings.heading.label', default: '' },
+    { type: 'collection', id: 'collection', label: 't:sections.featured_collection.settings.collection.label' },
   ],
-  presets: [{ name: 'Featured Products' }],
+  presets: [{ name: 't:sections.featured_collection.presets.default' }],
 }

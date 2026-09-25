@@ -9,7 +9,7 @@ export const MainBlog = () => {
   return (
     <section className="container section-space">
       <div className="page-heading">
-        <p className="eyebrow">INSPIRAÇÃO PARA O SEU ESTILO</p>
+        <p className="eyebrow">{"'blog.eyebrow' | t"}</p>
         <h1>{'blog.title | escape'}</h1>
       </div>
       <PaginateByLiquid collection={blog.articles} by={9}>
@@ -28,7 +28,7 @@ export const MainBlog = () => {
                 )}
                 <p className="eyebrow">{'post.published_at | date: "%d.%m.%Y"'}</p>
                 <h2>{'post.title | escape'}</h2>
-                <span className="text-link">Ler história ↗</span>
+                <span className="text-link">{"'blog.read_story' | t"}</span>
               </a>
             </article>
           ))}
@@ -39,6 +39,6 @@ export const MainBlog = () => {
   )
 }
 export const schema = {
-  name: 'Journal',
+  name: 't:sections.main_blog.name',
   settings: [],
 }

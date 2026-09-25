@@ -8,10 +8,10 @@ import styles from './styles.css'
 export const MainProduct = () => {
   return (
     <section className={classNames(styles['product-detail'], 'container', 'section-space')}>
-      <nav className="breadcrumbs" aria-label="Navegação estrutural">
-        <a href={routes.root_url}>Início</a>
+      <nav className="breadcrumbs" aria-label={"'products.product.breadcrumbs' | t"}>
+        <a href={routes.root_url}>{"'general.home' | t"}</a>
         <span>/</span>
-        <a href={routes.all_products_collection_url}>Loja</a>
+        <a href={routes.all_products_collection_url}>{"'general.shop' | t"}</a>
         <span>/</span>
         <span>{'product.title | escape'}</span>
       </nav>
@@ -63,7 +63,7 @@ export const MainProduct = () => {
         <div className={classNames(styles['product-detail-copy'])}>
           <p className="eyebrow">{'product.vendor | escape'}</p>
           <h1>{'product.title | escape'}</h1>
-          <p className={classNames(styles['product-intro'])}>Estilo para acompanhar o seu ritmo. Escolha sua combinação.</p>
+          <p className={classNames(styles['product-intro'])}>{"'products.product.intro' | t"}</p>
           <div
             className="island-bridge"
             data-liquid-store="{{ product | json | escape }}"
@@ -72,7 +72,7 @@ export const MainProduct = () => {
             <ProductPurchase eager>
               <form action={routes.cart_add_url} method="post" className="purchase-form">
                 <p className={classNames(styles['detail-price'])}>{money(product.price)}</p>
-                <label htmlFor="FallbackVariant">Escolha uma opção</label>
+                <label htmlFor="FallbackVariant">{"'products.product.choose_option' | t"}</label>
                 <select id="FallbackVariant" name="id">
                   {product.variants.map((variant) => (
                     <option
@@ -84,7 +84,7 @@ export const MainProduct = () => {
                     </option>
                   ))}
                 </select>
-                <label htmlFor="FallbackQuantity">Quantidade</label>
+                <label htmlFor="FallbackQuantity">{"'products.product.quantity' | t"}</label>
                 <input id="FallbackQuantity" name="quantity" type="number" min="1" value="1" />
                 <fieldset
                   disabled={product.requires_selling_plan === true}
@@ -96,45 +96,44 @@ export const MainProduct = () => {
                     type="submit"
                     disabled={!product.available}
                   >
-                    Adicionar à sacola ↗
+                    {"'products.product.add_to_bag' | t"} ↗
                   </button>
                 </fieldset>
               </form>
             </ProductPurchase>
             {product.requires_selling_plan && (
               <noscript>
-                Este produto exige um plano de assinatura. Entre em contato com a loja para escolher seu
-                plano.
+                {"'products.product.selling_plan' | t"}
               </noscript>
             )}
           </div>
           <div className={classNames(styles['purchase-note'])}>
             <span aria-hidden="true">↗</span>
             <span>
-              Frete calculado no checkout.
+              {"'products.product.shipping_note' | t"}
               <br />
-              Seus dados protegidos em cada etapa.
+              {"'products.product.secure_note' | t"}
             </span>
           </div>
           <details className={classNames(styles['product-accordion'])} open>
             <summary>
-              Sobre a peça <span>+</span>
+              {"'products.product.about' | t"} <span>+</span>
             </summary>
             <div className="rich-text">{product.description}</div>
           </details>
           <details className={classNames(styles['product-accordion'])}>
             <summary>
-              Entrega e devolução <span>+</span>
+              {"'products.product.shipping_returns' | t"} <span>+</span>
             </summary>
             <div className="rich-text">
               <p>
-                Informe seu endereço no checkout para consultar os prazos e as opções de entrega disponíveis.
+                {"'products.product.shipping_text' | t"}
               </p>
               {shop.shipping_policy && (
-                <a href={shop.shipping_policy.url}>Política de envio ↗</a>
+                <a href={shop.shipping_policy.url}>{"'products.product.shipping_policy' | t"}</a>
               )}
               {shop.refund_policy && (
-                <a href={shop.refund_policy.url}>Política de devolução ↗</a>
+                <a href={shop.refund_policy.url}>{"'products.product.refund_policy' | t"}</a>
               )}
             </div>
           </details>
@@ -145,6 +144,6 @@ export const MainProduct = () => {
   )
 }
 export const schema = {
-  name: 'Detalhes do produto',
+  name: 't:sections.main_product.name',
   settings: [],
 }
