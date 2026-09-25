@@ -21,6 +21,12 @@
   <article class="product-card">Shelf card 7</article>
   <article class="product-card">Shelf card 8</article>
 </react-island>
+<section id="RelatedProducts-recommendation-test">
+  <div data-related-grid data-recommendations-state="fallback">
+    <react-island component="ProductShelf" data-hydrate="eager"></react-island>
+  </div>
+  <react-island component="RecommendationLoader" data-hydrate="eager"><script type="application/json" data-react-props>{"productId":1,"sectionId":"recommendation-test"}</script></react-island>
+</section>
 <react-island component="FilterDrawer" data-hydrate="eager"><script type="application/json" data-react-props>{"sectionId":"test"}</script></react-island>
 <react-island component="CartPage" data-hydrate="eager"><script type="application/json" data-react-props>{"store":{"items":[],"item_count":0,"total_price":0,"total_discount":0,"currency":"BRL"}}</script></react-island>
 <react-island component="ImportProbe" data-hydrate="eager"></react-island>
@@ -47,6 +53,7 @@
 <script nonce="liquidify-test" src="08-readiness.js"></script>
 <script nonce="liquidify-test" src="09-hydration.js"></script>
 <script nonce="liquidify-test" src="10-product-shelf.js"></script>
+<script nonce="liquidify-test" src="11-recommendations.js"></script>
 <script nonce="liquidify-test" src="99-runner.js"></script>
 </body>
 </html>

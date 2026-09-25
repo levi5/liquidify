@@ -20,7 +20,7 @@ export const RecommendationLoader = ({
       const params = new URLSearchParams({
         section_id: sectionId,
         product_id: String(productId),
-        limit: '4',
+        limit: '8',
         intent: 'related',
       })
       try {
@@ -42,19 +42,22 @@ export const RecommendationLoader = ({
 
       }
     }
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          observer.disconnect()
-          void load()
-        }
-      },
-      { rootMargin: '400px' },
-    )
-    if (target.querySelector('.product-card')) observer.observe(container)
+    const observer =
+      'IntersectionObserver' in window
+        ? new IntersectionObserver(
+            (entries) => {
+              if (entries.some((entry) => entry.isIntersecting)) {
+                observer?.disconnect()
+                void load()
+              }
+            },
+            { rootMargin: '400px' },
+          )
+        : null
+    if (target.querySelector('.product-card') && observer) observer.observe(container)
     else void load()
     return () => {
-      observer.disconnect()
+      observer?.disconnect()
       controller.abort()
     }
   }, [productId, sectionId])
