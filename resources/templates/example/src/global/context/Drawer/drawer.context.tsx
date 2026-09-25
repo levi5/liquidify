@@ -23,7 +23,7 @@ export const DrawerProvider: FC<{ name: string }> = ({ children, name }) => {
 		setState({ open: true })
 	}, [])
 
-	// hand focus back to whatever opened the drawer
+
 	useEffect(() => {
 		if (state.open) return
 

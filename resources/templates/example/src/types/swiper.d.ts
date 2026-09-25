@@ -27,6 +27,10 @@ export namespace SwiperComponentType {
 		id: string
 		renderWrapper?: boolean
 		settings?: SwiperOptions
-		slidesPerView?: number
+		slidesPerView?: string | number
+		slidesPerViewTablet?: string | number
+		slidesPerViewMobile?: string | number
+		autoplay?: boolean | string
+		autoplayDelay?: string | number
 	}
 }

@@ -44,30 +44,6 @@
 	min-width: 0;
 }
 
-.shelf .cards > react-island > react-island[id$='-slide'] {
-	flex: 1 1 auto;
-	width: 100%;
-	min-width: 0;
-}
-
-.shelf .cards > react-island > react-island:not([id$='-slide']) {
-	position: absolute;
-	inset-block: 0;
-	width: auto;
-}
-
-.shelf .cards react-island[id$='-slide'] {
-	display: flex !important;
-	width: 100%;
-	min-width: 0;
-	gap: 2rem;
-	overflow: hidden;
-}
-
-.shelf .cards react-island[id$='-slide'] > * {
-	flex-shrink: 0;
-}
-
 .carousel {
 	width: 100%;
 	min-width: 0;
@@ -120,16 +96,21 @@
 		gap: 1rem;
 	}
 
-	.shelf .cards react-island[id$='-slide'] {
-		gap: 1rem;
-	}
-
 	.arrowLeft {
 		left: 0.5rem;
 	}
 
 	.arrowRight {
 		right: 0.5rem;
+	}
+}
+
+/* Sem hover nao existe :hover, entao as setas ficariam permanentemente
+   invisiveis no touch. `hover: none` cobre celular e tablet. */
+@media (hover: none) {
+	.arrowLeft,
+	.arrowRight {
+		opacity: 0.85;
 	}
 }
 

@@ -15,8 +15,7 @@ export const BaseSection = ({
 	contained?: boolean
 	spaced?: boolean
 }) => {
-	// Each flag becomes its own variable: `classNames(contained && 'container')`
-	// would emit `and` inside a filter chain, which is not valid Liquid.
+
 	const containerClass = contained ? 'container' : ''
 	const spaceClass = spaced ? 'section-space' : ''
 

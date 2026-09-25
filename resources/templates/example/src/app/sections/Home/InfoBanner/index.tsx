@@ -31,10 +31,18 @@ export const InfoBanner = () => {
 					<img
 						src={'{{ section.settings.image | image_url: width: 1600 }}'}
 						alt={section.settings.image.alt ? 'section.settings.image.alt | escape' : "'brand.editorial_alt' | t"}
+						width='925'
+						height='617'
 						loading='lazy'
 					/>
 				) : (
-					<img src={"{{ 'liquidify-editorial.jpg' | asset_url }}"} alt={"'brand.editorial_alt' | t"} loading='lazy' />
+					<img
+						src={"{{ 'liquidify-editorial.jpg' | asset_url }}"}
+						alt={"'brand.editorial_alt' | t"}
+						width='925'
+						height='617'
+						loading='lazy'
+					/>
 				)}
 
 				<span>{section.settings.caption || "'brand.watermark' | t"}</span>

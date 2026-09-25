@@ -1,12 +1,13 @@
 /* Categorias */
 
 .categories {
-	padding-top: 12px;
+	margin-bottom: 4.5rem;
 }
 
 .category-intro {
 	font-size: 11px;
 	line-height: 1.8;
+	text-align: right;
 }
 
 .category-grid {
@@ -105,6 +106,10 @@
 		font-size: 32px;
 	}
 
+	.categories {
+		margin-bottom: 3.5rem;
+	}
+
 	.category-grid {
 		gap: 16px;
 	}
@@ -120,7 +125,7 @@
 	}
 
 	.category-label small {
-		font-size: 6px;
+		font-size: 8px;
 	}
 
 	.category-label .circle-arrow {
@@ -132,16 +137,19 @@
 
 @media (max-width: 680px) {
 	.categories {
-		padding-top: 0;
+		margin-bottom: 2.5rem;
 	}
 
 	.section-heading {
+		flex-direction: column;
+		align-items: flex-start;
 		gap: 15px;
 		margin-bottom: 24px;
 	}
 
 	.section-heading h2 {
 		font-size: 30px;
+		letter-spacing: -1.1px;
 	}
 
 	.section-heading .eyebrow {
@@ -149,7 +157,8 @@
 	}
 
 	.category-intro {
-		display: none;
+		text-align: left;
+		max-width: 34ch;
 	}
 
 	.category-grid {
@@ -174,16 +183,19 @@
 		left: 16px;
 		right: 16px;
 		bottom: 17px;
+		gap: 8px;
 	}
 
 	.category-label strong {
 		font-size: 22px;
+		letter-spacing: -0.4px;
 	}
 
 	.category-label small {
-		font-size: 6px;
-		letter-spacing: 0.5px;
-		max-width: 100px;
+		font-size: 8px;
+		line-height: 1.4;
+		letter-spacing: 0.6px;
+		margin-bottom: 6px;
 	}
 
 	.category-label .circle-arrow {

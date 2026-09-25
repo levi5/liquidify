@@ -1,8 +1,6 @@
 'use dom:global'
 
-// NOTE: 'dom:global' scripts are compiled in isolation - `import` statements are
-// stripped and the imported bindings are NOT inlined. Everything this script
-// needs must be declared locally.
+
 const translate = (key: string, fallback: string): string => {
   const i18n = (window as any).LiquidifyTheme?.i18n
   return i18n?.[key] || fallback

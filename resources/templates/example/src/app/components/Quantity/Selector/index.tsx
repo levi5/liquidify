@@ -32,10 +32,8 @@ export const QuantitySelector = ({ ariaLabel = 'Quantidade', className = '', dis
 		prevResetKeyRef.current = resetKey
 
 		if (isReset) {
-			// initialValue or syncKey changed — full reset
 			setQuantityState(clampQuantity(initialValue, min, max))
 		} else {
-			// only max/min changed — clamp existing value without resetting
 			setQuantityState((current) => clampQuantity(current, min, max))
 		}
 	}, [initialValue, max, min, syncKey])

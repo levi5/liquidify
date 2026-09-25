@@ -34,11 +34,14 @@
 }
 
 .arrow.disabled {
-	opacity: 0;
+	opacity: 0.35;
+	pointer-events: none;
+	cursor: default;
 	transition: opacity 400ms ease-in-out;
 }
 
 .disabled {
-	opacity: 0;
+	opacity: 0.35;
+	pointer-events: none;
 	transition: opacity 400ms ease-in-out;
 }

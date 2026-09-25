@@ -101,13 +101,13 @@ window.LiquidxEmitEvent = window.LiquidifyEmitEvent
 const suspendedSections = new WeakSet()
 window.LiquidifyCanMount = (container) => {
   if (!container.isConnected) return false
-  for (let node = container; node; node = node.parentElement) {
+  for (let node = container; node; node = node.parentElement as Element) {
     if (suspendedSections.has(node)) return false
   }
   return true
 }
 window.LiquidifyMount = (container, name = container.getAttribute('component')) => {
-  clearTimeout(container._unmountTimeout)
+  clearTimeout(container._unmountTimeout as ReturnType<typeof setTimeout>)
   container._unmountTimeout = null
   container._liquidifyReadyCleanup?.()
   if (!name || !window.LiquidifyCanMount(container)) return
@@ -128,13 +128,14 @@ window.LiquidifyMount = (container, name = container.getAttribute('component')) 
   }
 }
 window.LiquidifyUnmount = (container) => {
-  clearTimeout(container._unmountTimeout)
+  clearTimeout(container._unmountTimeout as ReturnType<typeof setTimeout>)
   container._unmountTimeout = null
   container._liquidifyReadyCleanup?.()
   container._liquidifyObserver?.disconnect()
   delete container._liquidifyObserver
   if (container._reactRoot) {
-    const result = _try.sync(() => container._reactRoot.unmount())
+    const root = container._reactRoot
+    const result = _try.sync(() => root.unmount())
     if (result.isLeft()) console.error('[Liquidify] Root unmount failed. Check effect cleanup functions.', container, result.value)
     delete container._reactRoot
   }
@@ -184,7 +185,7 @@ const sectionRoots = (section) => {
 }
 if (typeof document !== 'undefined') {
   document.addEventListener('shopify:section:unload', (event) => {
-    const section = event.target
+    const section = event.target as Element | null
     if (!section || section.nodeType !== 1) return
     suspendedSections.add(section)
     for (const container of sectionRoots(section)) {
@@ -194,7 +195,7 @@ if (typeof document !== 'undefined') {
     }
   })
   document.addEventListener('shopify:section:load', (event) => {
-    const section = event.target
+    const section = event.target as Element | null
     if (!section || section.nodeType !== 1) return
     suspendedSections.delete(section)
     for (const container of sectionRoots(section)) {

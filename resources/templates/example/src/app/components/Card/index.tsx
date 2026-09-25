@@ -9,8 +9,7 @@ import { Badges } from '../Badges'
 import styles from './styles.css'
 
 export const Card = ({ item }: { item: any }) => {
-	// `t: count:` sem um inteiro imprime o objeto de pluralizacao cru na
-	// vitrine, entao a contagem precisa cair para 0 antes de ser usada.
+
 	const variantCount = item.variants ? item.variants.size : 0
 
 	return (

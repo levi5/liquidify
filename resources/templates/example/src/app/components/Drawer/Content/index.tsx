@@ -33,13 +33,12 @@ export const DrawerContent: FC<{
 		data ? handleOpen() : handleClose()
 	})
 
-	// lets the consumer react to the drawer becoming visible (focus, scroll, …)
+
 	useEffect(() => {
 		if (open) onOpen?.()
 	}, [open, onOpen])
 
-	// Several drawers share the same <body>, so the page is only unlocked once the
-	// DOM reports that no drawer is open any more — no shared counter to drift.
+
 	useEffect(() => {
 		const body = document.body
 

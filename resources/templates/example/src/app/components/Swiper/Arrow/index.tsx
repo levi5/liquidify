@@ -66,7 +66,7 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 	const disabled = (type === 'right' && state.isEnd) || (type === 'left' && state.isStart) || isSizeWithinLimit
 
 	return (
-		<div style={{ pointerEvents }} className={classNames('arrows', className, {})}>
+		<div style={{ pointerEvents }} className={classNames('arrows', className, {})} aria-hidden={disabled}>
 			<button
 				type='button'
 				style={{ pointerEvents }}
@@ -77,6 +77,8 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 					},
 					'arrow-button',
 				)}
+				disabled={!rewind && disabled && !state.isInfinite}
+				aria-label={type === 'left' ? 'Anterior' : 'Próximo'}
 				onClick={(event) => handleClick(event, type)}
 			>
 				{children}

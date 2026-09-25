@@ -139,6 +139,7 @@
   grid-template-columns: repeat(3, 1fr);
   padding-block: 2.8rem;
   border-bottom: 0.1rem solid var(--line);
+  margin-bottom: 4.5rem;
 }
 
 .value-item {
@@ -215,6 +216,7 @@
 @media (max-width: 900px) {
   .values-strip {
     padding-block: 2.4rem;
+    margin-bottom: 3.5rem;
   }
   .value-item {
     gap: 1rem;
@@ -232,6 +234,7 @@
   .values-strip {
     grid-template-columns: 1fr;
     padding-block: 2rem;
+    margin-bottom: 2.5rem;
   }
   .value-item,
   .value-item:first-child,

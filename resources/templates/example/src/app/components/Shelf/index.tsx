@@ -14,21 +14,11 @@ import { SHELF_SLIDER_SETTINGS } from '../../../settings/slider/shelf.settings'
 import styles from './styles.css'
 
 export const Shelf = () => {
-	// O handle configurado pode nao existir na loja. A colecao do proprio produto
-	// nao serve como fallback: ela costuma ter um unico item e encolheria a
-	// prateleira, entao o catalogo completo e quem garante o limite preenchido.
 	const picked = collections[section.settings.collection]
 	const selectedCollection = picked || collections['all']
 
-	// `slice` sem comprimento devolve 1 item em Liquid, entao um limite vazio
-	// encolheria a prateleira para um unico cartao em vez de usar o padrao.
-	const limit = section.settings.limite || 4
-	// Sem fallback literal: `[]` viraria `{% assign %}` de array, que nao e
-	// Liquid valido e derrubaria a section. `selectedCollection` ja tem fallback
-	// (catalogo completo) e no Liquid o acesso em nil devolve nil, sem erro.
+	const limit = section.settings.limite || 8
 	const candidates = selectedCollection.products
-	// Drops sem id nao sao produtos: renderizados viram cartao sem imagem, titulo
-	// nem preco. Fora da pagina de produto vale um e a prateleira inteira.
 	const other = candidates.filter((item: any) => item.id !== product.id)
 	const valid = other.filter((item: any) => item.id)
 	const products = valid.slice(0, limit)
@@ -39,6 +29,14 @@ export const Shelf = () => {
 	const arrowLeftId = `${arrowId}-left`
 	const arrowRightId = `${arrowId}-right`
 	const slideId = `${carouselId}-slide`
+
+	const showArrows = section.settings.show_arrows || false
+	const autoplay = section.settings.autoplay || false
+
+	const autoplayDelay = section.settings.autoplay_delay || '4000'
+	const columns = section.settings.columns || 4
+	const columnsTablet = section.settings.columns_tablet || 3
+	const columnsMobile = section.settings.columns_mobile || 2
 
 	return (
 		<article className={styles.shelf} data-shelf-id={section.id}>
@@ -66,17 +64,27 @@ export const Shelf = () => {
 			) : (
 				<div className={classNames(styles.cards, 'container')}>
 					<SwiperSliderRoot elementId={carouselId}>
-						<SwiperSliderArrow className={styles.arrowLeft} type='left' id={arrowId} elementId={arrowLeftId} enable>
+						<SwiperSliderArrow className={styles.arrowLeft} type='left' id={arrowId} elementId={arrowLeftId} enable={showArrows}>
 							<RenderSvg name='left-arrow.svg' />
 						</SwiperSliderArrow>
 
-						<SwiperCarousel className={styles.carousel} id={carouselId} elementId={slideId} settings={SHELF_SLIDER_SETTINGS}>
+						<SwiperCarousel
+							className={styles.carousel}
+							id={carouselId}
+							elementId={slideId}
+							settings={SHELF_SLIDER_SETTINGS}
+							slidesPerView={columns}
+							slidesPerViewTablet={columnsTablet}
+							slidesPerViewMobile={columnsMobile}
+							autoplay={autoplay}
+							autoplayDelay={autoplayDelay}
+						>
 							{products.map((item: any) => (
 								<RenderSnippet key={item.id} slot={Card} item={item} />
 							))}
 						</SwiperCarousel>
 
-						<SwiperSliderArrow className={styles.arrowRight} type='right' id={arrowId} elementId={arrowRightId} enable>
+						<SwiperSliderArrow className={styles.arrowRight} type='right' id={arrowId} elementId={arrowRightId} enable={showArrows}>
 							<RenderSvg name='right-arrow.svg' />
 						</SwiperSliderArrow>
 					</SwiperSliderRoot>

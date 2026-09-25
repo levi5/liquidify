@@ -2,13 +2,17 @@
   "sections": {
     "hero": {
       "type": "hero",
-      "settings": {}
+      "settings": {
+        "heading": "Your style.",
+        "highlight": "No limits.",
+        "description": "New pieces. New possibilities. Find the essentials that match your pace."
+      }
     },
     "shelf_featured": {
       "type": "shelf",
       "settings": {
-        "title": "On your radar.",
         "eyebrow": "THE EVERYDAY EDIT",
+        "title": "On your radar.",
         "subtitle": "Your next wardrobe favorite is here.",
         "collection": "all",
         "limite": 4,
@@ -47,293 +51,30 @@
           }
         }
       },
-      "block_order": [
-        "card_1",
-        "card_2",
-        "card_3"
-      ],
+      "block_order": ["card_1", "card_2", "card_3"],
       "settings": {
         "eyebrow": "ENCONTRE O SEU PRÓXIMO LOOK",
         "heading": "What's your vibe?",
-        "intro_1": "Do básico ao inseperado.",
+        "intro_1": "Do básico ao inesperado.",
         "intro_2": "Sempre do seu jeito."
       }
     },
     "info-banner": {
       "type": "info-banner",
       "settings": {
+        "eyebrow": "LIQUIDIFY / EVERYDAY CULTURE",
         "heading": "Wear what feels right for you.",
+        "description": "Style happens when you feel good. Mix your favorites, discover new possibilities, and make every day an expression of who you are.",
+        "button": "Encontre seu essencial",
         "mark": "LQ.",
         "caption": "NOT JUST CLOTHES. YOUR EXPRESSION."
       }
-    },
-    "newsletter": {
-      "type": "newsletter",
-      "settings": {
-        "eyebrow": "VAMOS FICAR MAIS PERTO?",
-        "title_1": "Entre para a nossa lista.",
-        "title_2": "Fique por dentro do próximo drop.",
-        "label": "Seu melhor e-mail",
-        "note": "Novidades, lançamentos e inspiração. Cancele quando quiser.",
-        "background": "#f4f4f4"
-      }
-    },
-    "banner-hero": {
-      "type": "banner-hero",
-      "blocks": {
-        "slider_1": {
-          "type": "slider",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-editorial.jpg",
-            "heading": "Nova Coleção",
-            "button_label": "Descobrir",
-            "button_link": "/collections/nova-colecao"
-          }
-        },
-        "slider_2": {
-          "type": "slider",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-women.jpg",
-            "heading": "Essenciais do Dia a Dia",
-            "button_label": "Comprar",
-            "button_link": "/collections/essenciais"
-          }
-        },
-        "slider_3": {
-          "type": "slider",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-men.jpg",
-            "heading": "Lançamentos Exclusivos",
-            "button_label": "Ver Mais",
-            "button_link": "/collections/lancamentos"
-          }
-        }
-      },
-      "block_order": [
-        "slider_1",
-        "slider_2",
-        "slider_3"
-      ],
-      "settings": {
-        "autoplay": true,
-        "autoplay_speed": 5
-      }
-    },
-    "featured-categories": {
-      "type": "shelf",
-      "settings": {
-        "title": "Novidades",
-        "collection": "novidades",
-        "limite": 6,
-        "eyebrow": "KEEP DISCOVERING",
-        "view_all_label": "Ver coleção",
-        "view_all_link": "/collections/novidades"
-      }
-    },
-    "shelf_novidades": {
-      "type": "shelf",
-      "settings": {
-        "title": "Mais Vendidos",
-        "collection": "mais-vendidos",
-        "limite": 8,
-        "eyebrow": "OS MAIS QUERIDOS",
-        "view_all_label": "Ver coleção",
-        "view_all_link": "/collections/mais-vendidos"
-      }
-    },
-    "shelf_mais_vendidos": {
-      "type": "shelf",
-      "settings": {
-        "title": "Feminino",
-        "collection": "feminino",
-        "limite": 8,
-        "eyebrow": "FEITO PARA ELA",
-        "view_all_label": "Ver coleção",
-        "view_all_link": "/collections/feminino"
-      }
-    },
-    "shelf_destaque": {
-      "type": "shelf",
-      "settings": {
-        "title": "Masculino",
-        "collection": "masculino",
-        "limite": 8,
-        "eyebrow": "FEITO PARA ELE",
-        "view_all_label": "Ver coleção",
-        "view_all_link": "/collections/masculino"
-      }
-    },
-    "shelf_promocao": {
-      "type": "shelf",
-      "settings": {
-        "title": "Ofertas Especiais",
-        "collection": "ofertas",
-        "limite": 8,
-        "eyebrow": "SÓ AGORA",
-        "view_all_label": "Ver coleção",
-        "view_all_link": "/collections/ofertas"
-      }
-    },
-    "info-card_1": {
-      "type": "info-card",
-      "blocks": {
-        "card_1": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-women.jpg",
-            "title": "Transforme seu Quarto",
-            "description": "Descubra o prazer de relaxar em um ambiente pensado para o seu bem-estar.",
-            "button_label": "DESCOBRIR",
-            "button_link": "/collections/quarto",
-            "layout": "left",
-            "background_color": "#ede7f6"
-          }
-        },
-        "card_2": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-accessories.jpg",
-            "title": "Cozinha dos Sonhos",
-            "description": "Utensílios e acessórios que fazem a diferença no seu dia a dia.",
-            "button_label": "COMPRAR AGORA",
-            "button_link": "/collections/cozinha",
-            "layout": "right",
-            "background_color": "#e3f2fd"
-          }
-        }
-      },
-      "block_order": [
-        "card_1",
-        "card_2"
-      ],
-      "settings": {}
-    },
-    "testimonials": {
-      "type": "info-card",
-      "blocks": {
-        "testimonial_1": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-editorial.jpg",
-            "title": "Excelente qualidade!",
-            "description": "\"Os produtos superaram minhas expectativas. Entrega rápida e atendimento impecável.\"",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "#fafafa"
-          }
-        },
-        "testimonial_2": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-men.jpg",
-            "title": "Recomendo a todos",
-            "description": "\"Compro há anos e nunca me decepcionei. Qualidade consistente e preços justos.\"",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "#fafafa"
-          }
-        },
-        "testimonial_3": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-women.jpg",
-            "title": "Melhor custo-benefício",
-            "description": "\"Encontrei exatamente o que procurava. O site é fácil de navegar e o suporte é ótimo.\"",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "#fafafa"
-          }
-        }
-      },
-      "block_order": [
-        "testimonial_1",
-        "testimonial_2",
-        "testimonial_3"
-      ],
-      "settings": {}
-    },
-    "brands": {
-      "type": "info-card",
-      "blocks": {
-        "brand_1": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-women.jpg",
-            "title": "",
-            "description": "",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "transparent"
-          }
-        },
-        "brand_2": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-men.jpg",
-            "title": "",
-            "description": "",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "transparent"
-          }
-        },
-        "brand_3": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-accessories.jpg",
-            "title": "",
-            "description": "",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "transparent"
-          }
-        },
-        "brand_4": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-editorial.jpg",
-            "title": "",
-            "description": "",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "transparent"
-          }
-        },
-        "brand_5": {
-          "type": "card",
-          "settings": {
-            "image": "shopify://shop_images/liquidify-icon.svg",
-            "title": "",
-            "description": "",
-            "button_label": "",
-            "button_link": "",
-            "layout": "center",
-            "background_color": "transparent"
-          }
-        }
-      },
-      "block_order": [
-        "brand_1",
-        "brand_2",
-        "brand_3",
-        "brand_4",
-        "brand_5"
-      ],
-      "settings": {}
     }
   },
   "order": [
     "hero",
     "shelf_featured",
     "home-categories",
-    "newsletter",
     "info-banner"
   ]
 }

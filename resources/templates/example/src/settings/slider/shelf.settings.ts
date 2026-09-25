@@ -1,29 +1,21 @@
+
 export const SHELF_SLIDER_SETTINGS = {
-	slidesPerView: 2,
-	loop: true,
+	slidesPerView: 4,
+	loop: false,
+	watchOverflow: true,
+	speed: 420,
 	observer: true,
-	spaceBetween: 16,
+	spaceBetween: 20,
 	observeParents: true,
 	breakpoints: {
-		200: {
-			slidesPerView: 1.5,
-			spaceBetween: 10,
-		},
-		420: {
-			slidesPerView: 2,
-			spaceBetween: 10,
-		},
 		680: {
-			slidesPerView: 3,
-		},
-
-		768: {
-			slidesPerView: 3,
+			slidesPerView: 2,
+			spaceBetween: 14,
 		},
 
 		1024: {
-			slidesPerView: 4,
-			spaceBetween: 20,
+			slidesPerView: 3,
+			spaceBetween: 16,
 		},
 	},
 }

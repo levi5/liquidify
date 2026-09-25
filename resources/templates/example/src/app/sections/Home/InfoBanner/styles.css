@@ -5,7 +5,7 @@
 	grid-template-columns: 1fr 1fr;
 	border-radius: 10px;
 	overflow: hidden;
-	margin-bottom: 70px;
+	margin-bottom: 4.5rem;
 	background: #ededed;
 	min-height: 450px;
 }
@@ -101,6 +101,7 @@
 
 	.brand-campaign {
 		min-height: 400px;
+		margin-bottom: 3.5rem;
 	}
 }
 
@@ -108,7 +109,7 @@
 	.brand-campaign {
 		grid-template-columns: 1fr;
 		min-height: 0;
-		margin-bottom: 44px;
+		margin-bottom: 2.5rem;
 	}
 
 	.campaign-copy {
@@ -116,7 +117,8 @@
 	}
 
 	.campaign-copy h2 {
-		font-size: 36px;
+		font-size: 30px;
+		letter-spacing: -1.2px;
 		max-width: 320px;
 	}
 

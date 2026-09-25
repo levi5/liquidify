@@ -12,20 +12,10 @@ type SelectorOption = {
 export const Selector = ({ variation, options, mode }: { mode: 'grid' | 'slider' | 'select'; variation: string; options: SelectorOption[] }) => {
 	const matches = variation.toUpperCase()
 
-	// `.map` compiles to a `{% for %}`; `.find` would emit `where_exp`, which
-	// Shopify rejects outside of a loop. Only the matching option renders.
 	return (
 		<>
 			{options.map((option) => {
-				// Two compiler constraints shape this:
-				//  - `.find` emits `where_exp`, which Shopify rejects outside `{% for %}`;
-				//  - `{% assign x = a == b %}` (assigning a comparison) is also rejected,
-				//    so the comparison stays inline in the `if`.
-				// The upcase is split out because a filter followed by `==` is invalid precedence.
 				const optionName = option.name.toUpperCase()
-
-				// Shopify's Liquid linter rejects regex literals in filter
-				// arguments, so the id is built from the lowercased name only.
 				const elementId = `selector-${option.name.toLowerCase()}`
 
 				return (
