@@ -103,6 +103,9 @@
       "settings": {
         "menu": {
           "label": "Information menu"
+        },
+        "background": {
+          "label": "Background color"
         }
       }
     },
@@ -129,6 +132,16 @@
         },
         "accessories_link": {
           "label": "Accessories link"
+        }
+      },
+      "blocks": {
+        "message": {
+          "name": "Message",
+          "settings": {
+            "text": {
+              "label": "Text"
+            }
+          }
         }
       }
     },
@@ -212,7 +225,7 @@
       "name": "Catalog",
       "settings": {
         "filter_heading": {
-          "label": "Filters heading"
+          "label": "Filters"
         },
         "products_per_page": {
           "label": "Products per page"
@@ -258,16 +271,271 @@
         },
         "limit": {
           "label": "Products per shelf"
+        },
+        "eyebrow": {
+          "label": "Subtitle (eyebrow)"
+        },
+        "title": {
+          "label": "Shelf title"
+        },
+        "subtitle": {
+          "label": "Subtitle"
+        },
+        "view_all_label": {
+          "label": "Link text"
+        },
+        "view_all_link": {
+          "label": "Button link"
+        },
+        "limite": {
+          "label": "Products per shelf"
+        },
+        "columns": {
+          "label": "Columns on desktop"
+        },
+        "columns_tablet": {
+          "label": "Columns on tablet"
+        },
+        "columns_mobile": {
+          "label": "Columns on mobile"
+        },
+        "show_arrows": {
+          "label": "Show arrows"
+        },
+        "show_pagination": {
+          "label": "Show pagination"
+        },
+        "autoplay": {
+          "label": "Advance automatically"
+        },
+        "autoplay_delay": {
+          "label": "Autoplay interval (ms)"
         }
       },
       "presets": {
         "default": "Product shelf"
+      },
+      "headers": {
+        "slider": "Slider"
       }
     },
     "values": {
       "name": "Store benefits",
       "presets": {
         "default": "Store benefits"
+      }
+    },
+    "banner_hero": {
+      "name": "Hero banner",
+      "settings": {
+        "autoplay": {
+          "label": "Enable autoplay"
+        },
+        "autoplay_speed": {
+          "label": "Speed (seconds)"
+        }
+      },
+      "blocks": {
+        "slider": {
+          "name": "Slide",
+          "settings": {
+            "image": {
+              "label": "Image"
+            },
+            "heading": {
+              "label": "Heading"
+            },
+            "button_label": {
+              "label": "Button text"
+            },
+            "button_link": {
+              "label": "Button link"
+            }
+          }
+        }
+      },
+      "presets": {
+        "default": "Hero banner"
+      }
+    },
+    "collection": {
+      "name": "Collection",
+      "blocks": {
+        "filter_item": {
+          "name": "Filter",
+          "settings": {
+            "title": {
+              "label": "Title"
+            }
+          }
+        }
+      }
+    },
+    "empty_state": {
+      "name": "Empty state",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        },
+        "text": {
+          "label": "Text"
+        },
+        "action_label": {
+          "label": "Button text"
+        },
+        "action_link": {
+          "label": "Button link"
+        }
+      },
+      "presets": {
+        "default": "Empty state"
+      }
+    },
+    "info_card": {
+      "name": "Info cards",
+      "blocks": {
+        "card": {
+          "name": "Info card",
+          "settings": {
+            "image": {
+              "label": "Image"
+            },
+            "title": {
+              "label": "Title"
+            },
+            "description": {
+              "label": "Description"
+            },
+            "button_label": {
+              "label": "Button text"
+            },
+            "button_link": {
+              "label": "Button link"
+            },
+            "layout": {
+              "label": "Image position",
+              "options": {
+                "left": {
+                  "label": "Image on the left"
+                },
+                "right": {
+                  "label": "Image on the right"
+                }
+              }
+            },
+            "background_color": {
+              "label": "Background color"
+            }
+          }
+        }
+      },
+      "presets": {
+        "default": "Info cards"
+      }
+    },
+    "newsletter": {
+      "name": "Newsletter",
+      "settings": {
+        "eyebrow": {
+          "label": "Eyebrow"
+        },
+        "title_1": {
+          "label": "Title (line 1)"
+        },
+        "title_2": {
+          "label": "Title (line 2)"
+        },
+        "label": {
+          "label": "Field label"
+        },
+        "note": {
+          "label": "Note below the field"
+        },
+        "background": {
+          "label": "Background color"
+        }
+      },
+      "presets": {
+        "default": "Newsletter"
+      }
+    },
+    "product_info": {
+      "name": "Product info",
+      "settings": {
+        "with_thumbnail": {
+          "label": "Show thumbnail"
+        }
+      },
+      "blocks": {
+        "variation": {
+          "name": "Variation",
+          "settings": {
+            "variation": {
+              "label": "Variation name",
+              "info": "E.g. Color, Size, Material"
+            },
+            "mode": {
+              "label": "Selector mode",
+              "options": {
+                "grid": {
+                  "label": "Grid"
+                },
+                "slider": {
+                  "label": "Slider"
+                },
+                "select": {
+                  "label": "Dropdown"
+                }
+              }
+            }
+          }
+        },
+        "benefits": {
+          "name": "Benefit"
+        }
+      }
+    }
+  },
+  "fragments": {
+    "box": {
+      "settings": {
+        "text": {
+          "label": "Text"
+        },
+        "background_color": {
+          "label": "Background color"
+        },
+        "text_color": {
+          "label": "Text color"
+        },
+        "padding_top": {
+          "label": "Padding top"
+        },
+        "padding_right": {
+          "label": "Padding right"
+        },
+        "padding_bottom": {
+          "label": "Padding bottom"
+        },
+        "padding_left": {
+          "label": "Padding left"
+        },
+        "border_radius": {
+          "label": "Corner radius"
+        }
+      }
+    },
+    "picture": {
+      "settings": {
+        "imagemDesktop": {
+          "label": "Desktop image"
+        },
+        "imagemTablet": {
+          "label": "Tablet image"
+        },
+        "imagemMobile": {
+          "label": "Mobile image"
+        }
       }
     }
   }

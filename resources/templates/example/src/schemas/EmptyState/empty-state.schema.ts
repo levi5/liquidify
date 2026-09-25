@@ -1,34 +1,34 @@
 export const EMPTY_STATE_SCHEMA = {
-	name: 'Estado vazio',
+	name: 't:sections.empty_state.name',
 	tag: 'div',
 	settings: [
 		{
 			type: 'text',
 			id: 'heading',
-			label: 'Título',
+			label: 't:sections.empty_state.settings.heading.label',
 			default: 'Seu carrinho está vazio',
 		},
 		{
 			type: 'textarea',
 			id: 'text',
-			label: 'Texto',
+			label: 't:sections.empty_state.settings.text.label',
 			default: 'Navegue pelos produtos e encontre o que combina com você.',
 		},
 		{
 			type: 'text',
 			id: 'action_label',
-			label: 'Texto do botão',
+			label: 't:sections.empty_state.settings.action_label.label',
 			default: 'Ver produtos',
 		},
 		{
 			type: 'url',
 			id: 'action_link',
-			label: 'Link do botão',
+			label: 't:sections.empty_state.settings.action_link.label',
 		},
 	],
 	presets: [
 		{
-			name: 'Estado vazio',
+			name: 't:sections.empty_state.presets.default',
 		},
 	],
 }

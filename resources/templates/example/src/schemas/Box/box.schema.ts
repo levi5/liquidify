@@ -2,24 +2,24 @@ export const BOX_FRAGMENT_SCHEMA = [
 	{
 		type: 'text',
 		id: 'text',
-		label: 'Texto',
+		label: 't:fragments.box.settings.text.label',
 	},
 	{
 		type: 'color',
 		id: 'background_color',
-		label: 'Cor de fundo',
+		label: 't:fragments.box.settings.background_color.label',
 		default: '#f5f5f5',
 	},
 	{
 		type: 'color',
 		id: 'text_color',
-		label: 'Cor da fonte',
+		label: 't:fragments.box.settings.text_color.label',
 		default: '#000000',
 	},
 	{
 		type: 'range',
 		id: 'padding_top',
-		label: 'Padding superior',
+		label: 't:fragments.box.settings.padding_top.label',
 		min: 0,
 		max: 100,
 		step: 1,
@@ -29,7 +29,7 @@ export const BOX_FRAGMENT_SCHEMA = [
 	{
 		type: 'range',
 		id: 'padding_right',
-		label: 'Padding direito',
+		label: 't:fragments.box.settings.padding_right.label',
 		min: 0,
 		max: 100,
 		step: 1,
@@ -39,7 +39,7 @@ export const BOX_FRAGMENT_SCHEMA = [
 	{
 		type: 'range',
 		id: 'padding_bottom',
-		label: 'Padding inferior',
+		label: 't:fragments.box.settings.padding_bottom.label',
 		min: 0,
 		max: 100,
 		step: 1,
@@ -49,7 +49,7 @@ export const BOX_FRAGMENT_SCHEMA = [
 	{
 		type: 'range',
 		id: 'padding_left',
-		label: 'Padding esquerdo',
+		label: 't:fragments.box.settings.padding_left.label',
 		min: 0,
 		max: 100,
 		step: 1,
@@ -59,7 +59,7 @@ export const BOX_FRAGMENT_SCHEMA = [
 	{
 		type: 'range',
 		id: 'border_radius',
-		label: 'Arredondamento da borda',
+		label: 't:fragments.box.settings.border_radius.label',
 		min: 0,
 		max: 50,
 		step: 1,

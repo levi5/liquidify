@@ -35,16 +35,16 @@ export const Header = () => {
 }
 
 export default (Header.schema = {
-	name: 'Header',
+	name: 't:sections.header.name',
 	blocks: [
 		{
 			type: 'message',
-			name: 'Mensagem',
+			name: 't:sections.header.blocks.message.name',
 			settings: [
 				{
 					type: 'text',
 					id: 'text',
-					label: 'Texto',
+					label: 't:sections.header.blocks.message.settings.text.label',
 					default: 'Escolha seus favoritos. Compre com segurança.',
 				},
 			],

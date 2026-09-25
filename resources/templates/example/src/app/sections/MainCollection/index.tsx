@@ -63,7 +63,15 @@ export const MainCollection = () => {
 export default (MainCollection.schema = {
 	...COLLECTION_SCHEMA,
 	settings: [
-		{ type: 'text', id: 'filter_heading', label: 'Filtros', default: 'Filtros' },
-		{ type: 'range', id: 'products_per_page', label: 'Produtos por página', min: 6, max: 36, step: 6, default: 12 },
+		{ type: 'text', id: 'filter_heading', label: 't:sections.main_collection.settings.filter_heading.label', default: 'Filtros' },
+		{
+			type: 'range',
+			id: 'products_per_page',
+			label: 't:sections.main_collection.settings.products_per_page.label',
+			min: 6,
+			max: 36,
+			step: 6,
+			default: 12,
+		},
 	],
 })

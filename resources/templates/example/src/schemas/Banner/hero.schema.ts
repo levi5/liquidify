@@ -1,18 +1,18 @@
 export const BANNER_HERO_SCHEMA = {
-	name: 'Banner Hero',
+	name: 't:sections.banner_hero.name',
 	tag: 'section',
 	class: 'hero-banner',
 	settings: [
 		{
 			type: 'checkbox',
 			id: 'autoplay',
-			label: 'Ativar autoplay',
+			label: 't:sections.banner_hero.settings.autoplay.label',
 			default: true,
 		},
 		{
 			type: 'range',
 			id: 'autoplay_speed',
-			label: 'Velocidade (segundos)',
+			label: 't:sections.banner_hero.settings.autoplay_speed.label',
 			min: 2,
 			max: 10,
 			step: 1,
@@ -22,27 +22,27 @@ export const BANNER_HERO_SCHEMA = {
 	blocks: [
 		{
 			type: 'slider',
-			name: 'Slide',
+			name: 't:sections.banner_hero.blocks.slider.name',
 			settings: [
 				{
 					type: 'image_picker',
 					id: 'image',
-					label: 'Imagem',
+					label: 't:sections.banner_hero.blocks.slider.settings.image.label',
 				},
 				{
 					type: 'text',
 					id: 'heading',
-					label: 'Título',
+					label: 't:sections.banner_hero.blocks.slider.settings.heading.label',
 				},
 				{
 					type: 'text',
 					id: 'button_label',
-					label: 'Texto do botão',
+					label: 't:sections.banner_hero.blocks.slider.settings.button_label.label',
 				},
 				{
 					type: 'url',
 					id: 'button_link',
-					label: 'Link do botão',
+					label: 't:sections.banner_hero.blocks.slider.settings.button_link.label',
 				},
 			],
 		},
@@ -50,7 +50,7 @@ export const BANNER_HERO_SCHEMA = {
 	max_blocks: 10,
 	presets: [
 		{
-			name: 'Banner Hero',
+			name: 't:sections.banner_hero.presets.default',
 			blocks: [{ type: 'slider' }],
 		},
 	],

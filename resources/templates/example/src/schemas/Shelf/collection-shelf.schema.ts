@@ -1,41 +1,41 @@
 export const COLLECTION_SHELF_SCHEMA = {
-	name: 'Prateleira',
+	name: 't:sections.shelf.name',
 	settings: [
 		{
 			type: 'text',
 			id: 'eyebrow',
-			label: 'Subtítulo (Eyebrow)',
+			label: 't:sections.shelf.settings.eyebrow.label',
 		},
 		{
 			type: 'text',
 			id: 'title',
-			label: 'Título da prateleira',
+			label: 't:sections.shelf.settings.title.label',
 			default: 'Produtos em destaque',
 		},
 		{
 			type: 'text',
 			id: 'subtitle',
-			label: 'Subtítulo',
+			label: 't:sections.shelf.settings.subtitle.label',
 		},
 		{
 			type: 'text',
 			id: 'view_all_label',
-			label: 'Texto do link',
+			label: 't:sections.shelf.settings.view_all_label.label',
 		},
 		{
 			type: 'url',
 			id: 'view_all_link',
-			label: 'Link do botão',
+			label: 't:sections.shelf.settings.view_all_link.label',
 		},
 		{
 			type: 'collection',
 			id: 'collection',
-			label: 'Escolher coleção',
+			label: 't:sections.shelf.settings.collection.label',
 		},
 		{
 			type: 'range',
 			id: 'limite',
-			label: 'Quantidade de produtos',
+			label: 't:sections.shelf.settings.limite.label',
 			min: 2,
 			max: 12,
 			step: 1,
@@ -43,12 +43,12 @@ export const COLLECTION_SHELF_SCHEMA = {
 		},
 		{
 			type: 'header',
-			content: 'Slider',
+			content: 't:sections.shelf.headers.slider',
 		},
 		{
 			type: 'range',
 			id: 'columns',
-			label: 'Colunas no desktop',
+			label: 't:sections.shelf.settings.columns.label',
 			min: 2,
 			max: 6,
 			step: 1,
@@ -57,7 +57,7 @@ export const COLLECTION_SHELF_SCHEMA = {
 		{
 			type: 'range',
 			id: 'columns_tablet',
-			label: 'Colunas no tablet',
+			label: 't:sections.shelf.settings.columns_tablet.label',
 			min: 2,
 			max: 5,
 			step: 1,
@@ -66,7 +66,7 @@ export const COLLECTION_SHELF_SCHEMA = {
 		{
 			type: 'range',
 			id: 'columns_mobile',
-			label: 'Colunas no mobile',
+			label: 't:sections.shelf.settings.columns_mobile.label',
 			min: 1,
 			max: 3,
 			step: 1,
@@ -75,25 +75,25 @@ export const COLLECTION_SHELF_SCHEMA = {
 		{
 			type: 'checkbox',
 			id: 'show_arrows',
-			label: 'Mostrar setas',
+			label: 't:sections.shelf.settings.show_arrows.label',
 			default: true,
 		},
 		{
 			type: 'checkbox',
 			id: 'show_pagination',
-			label: 'Mostrar paginação',
+			label: 't:sections.shelf.settings.show_pagination.label',
 			default: true,
 		},
 		{
 			type: 'checkbox',
 			id: 'autoplay',
-			label: 'Avançar automaticamente',
+			label: 't:sections.shelf.settings.autoplay.label',
 			default: false,
 		},
 		{
 			type: 'range',
 			id: 'autoplay_delay',
-			label: 'Intervalo do autoplay (ms)',
+			label: 't:sections.shelf.settings.autoplay_delay.label',
 			min: 2000,
 			max: 10000,
 			step: 500,
@@ -102,7 +102,7 @@ export const COLLECTION_SHELF_SCHEMA = {
 	],
 	presets: [
 		{
-			name: 'Prateleira',
+			name: 't:sections.shelf.presets.default',
 		},
 	],
 }

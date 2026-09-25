@@ -1,15 +1,15 @@
 export const COLLECTION_SCHEMA = {
-	name: 'Coleção',
+	name: 't:sections.collection.name',
 	settings: [],
 	blocks: [
 		{
 			type: 'filter_item',
-			name: 'Filtro',
+			name: 't:sections.collection.blocks.filter_item.name',
 			settings: [
 				{
 					type: 'text',
 					id: 'title',
-					label: 'Título',
+					label: 't:sections.collection.blocks.filter_item.settings.title.label',
 					default: 'Filtro',
 				},
 			],
