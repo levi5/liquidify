@@ -10,7 +10,7 @@ export const Contact = () => {
       <div className="page-heading">
         <p className="eyebrow">{"'contact.eyebrow' | t"}</p>
         <h1>{page.title ? 'page.title | escape' : "'contact.title_fallback' | t"}</h1>
-        <div className="rich-text">{page.content}</div>
+        <div className="rich-text">{'{{ page.content }}'}</div>
       </div>
       <FormBlock name="contact" id="ContactForm" className="contact-form">
         {form['posted_successfully?'] ? (

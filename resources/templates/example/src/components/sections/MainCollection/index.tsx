@@ -23,7 +23,7 @@ export const MainCollection = () => {
         <h1>
           {current_tags.length > 0 ? "current_tags | join: ' + ' | escape" : 'collection.title | escape'}
         </h1>
-        {collection.description && <div className="rich-text">{collection.description}</div>}
+        {collection.description && <div className="rich-text">{'{{ collection.description }}'}</div>}
       </div>
       <div className="catalog-layout">
         <RenderSnippet

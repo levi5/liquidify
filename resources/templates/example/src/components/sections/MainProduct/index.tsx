@@ -56,7 +56,7 @@ export const MainProduct = () => {
           )}
           {product.media?.filter((media) => media.media_type !== 'image').map((media) => (
             <div key={media.id} className={classNames(styles['product-media'])}>
-              {media.media_tag}
+              {'{{ media.media_tag }}'}
             </div>
           ))}
         </div>
@@ -119,7 +119,7 @@ export const MainProduct = () => {
             <summary>
               {"'products.product.about' | t"} <span>+</span>
             </summary>
-            <div className="rich-text">{product.description}</div>
+            <div className="rich-text">{'{{ product.description }}'}</div>
           </details>
           <details className={classNames(styles['product-accordion'])}>
             <summary>

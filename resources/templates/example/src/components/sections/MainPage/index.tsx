@@ -7,7 +7,7 @@ export const MainPage = () => {
     <section className="content-page container section-space">
       <p className="eyebrow">{"'page.eyebrow' | t"}</p>
       <h1>{'page.title | escape'}</h1>
-      <div className="rich-text page-content">{page.content}</div>
+      <div className="rich-text page-content">{'{{ page.content }}'}</div>
     </section>
   )
 }
