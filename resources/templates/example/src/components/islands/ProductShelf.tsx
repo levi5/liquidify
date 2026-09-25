@@ -16,11 +16,11 @@ export const ProductShelf = ({ children }: { children?: ComponentChildren; eager
     <div className="product-shelf">
       <Swiper
         modules={[Navigation, Pagination, A11y]}
-        slidesPerView={4}
-        spaceBetween={22}
+        slidesPerView={2}
+        spaceBetween={14}
         navigation
         pagination={{ clickable: true }}
-        breakpoints={{ 900: { slidesPerView: 2, spaceBetween: 14 } }}
+        breakpoints={{ 900: { slidesPerView: 4, spaceBetween: 22 } }}
         watchOverflow
         grabCursor
         loop={false}

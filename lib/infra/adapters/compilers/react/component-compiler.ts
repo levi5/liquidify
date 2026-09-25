@@ -139,7 +139,7 @@ export class ReactComponentCompiler {
       outdir: 'out',
       format: 'iife',
       platform: 'browser',
-      loader: { '.css': 'local-css' },
+      loader: { '.css': 'css' },
       jsxFactory: 'window.React.createElement',
       jsxFragment: 'window.React.Fragment',
       target: ['es2020'],
