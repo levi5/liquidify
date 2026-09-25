@@ -1,9 +1,78 @@
 {
   "sections": {
-    "main": {
+    "main-collection_1": {
       "type": "main-collection",
-      "settings": { "filter_heading": "Filtros", "products_per_page": 12 }
+      "blocks": {
+        "filter_item_QmR37c": {
+          "type": "filter_item",
+          "settings": {
+            "title": "Disponibilidade",
+            "option_name": "availability",
+            "source": "option",
+            "layout": "list",
+            "price_layout": "range",
+            "collapsed": true
+          }
+        },
+        "filter_item_QmR37g": {
+          "type": "filter_item",
+          "settings": {
+            "title": "Cor",
+            "option_name": "color",
+            "source": "option",
+            "layout": "list",
+            "price_layout": "range",
+            "collapsed": true
+          }
+        },
+        "filter_item_QmR37b": {
+          "type": "filter_item",
+          "settings": {
+            "title": "Tamanho",
+            "option_name": "size",
+            "source": "option",
+            "layout": "list",
+            "price_layout": "range",
+            "collapsed": true
+          }
+        },
+        "filter_item_QmR37d": {
+          "type": "filter_item",
+          "settings": {
+            "title": "Material",
+            "option_name": "material",
+            "source": "option",
+            "layout": "list",
+            "price_layout": "range",
+            "collapsed": true
+          }
+        },
+        "filter_item_NjkLiX": {
+          "type": "filter_item",
+          "settings": {
+            "title": "Preço",
+            "option_name": "price",
+            "source": "price",
+            "layout": "list",
+            "price_layout": "range",
+            "collapsed": false
+          }
+        }
+      },
+      "block_order": [
+        "filter_item_QmR37c",
+        "filter_item_QmR37g",
+        "filter_item_QmR37b",
+        "filter_item_QmR37d",
+        "filter_item_NjkLiX"
+      ],
+      "settings": {
+        "filter_heading": "Filtros",
+        "products_per_page": 12
+      }
     }
   },
-  "order": ["main"]
+  "order": [
+    "main-collection_1"
+  ]
 }
