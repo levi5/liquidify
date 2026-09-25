@@ -1,6 +1,5 @@
 'use dom:global'
 
-
 const translate = (key: string, fallback: string): string => {
   const i18n = (window as any).LiquidifyTheme?.i18n
   return i18n?.[key] || fallback

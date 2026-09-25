@@ -63,4 +63,3 @@ export const ToastHost = ({ position = 'bottom-right' }: ToastHostProps) => {
 		</div>
 	)
 }
-

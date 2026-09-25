@@ -58,6 +58,10 @@
             "image": {
               "label": "Imagem"
             },
+            "image_asset": {
+              "label": "Imagem do tema",
+              "info": "Nome do arquivo de um asset em assets/, usado quando nenhuma imagem e escolhida."
+            },
             "label": {
               "label": "Label (opcional)"
             },

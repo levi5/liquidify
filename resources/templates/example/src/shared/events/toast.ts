@@ -15,4 +15,3 @@ export const showToast = (detail: ToastEventDetail) => {
 	if (typeof window === 'undefined') return
 	window.dispatchEvent(new CustomEvent<ToastEventDetail>(TOAST_EVENT, { detail }))
 }
-

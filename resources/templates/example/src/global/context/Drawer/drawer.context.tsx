@@ -23,7 +23,6 @@ export const DrawerProvider: FC<{ name: string }> = ({ children, name }) => {
 		setState({ open: true })
 	}, [])
 
-
 	useEffect(() => {
 		if (state.open) return
 

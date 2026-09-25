@@ -835,11 +835,6 @@ export class ExpressionParser {
       .exec() as string
   }
 
-  /**
-   * `children` of a snippet is markup captured by `{% capture snippet_content %}`
-   * and forwarded through `{% render 'slot', children: snippet_content %}`. It is
-   * already-rendered HTML, so escaping it would show the tags as visible text.
-   */
   private isSnippetChildren(code: string): boolean {
     return /^\s*children\s*$/.test(code)
   }

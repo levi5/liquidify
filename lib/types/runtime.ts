@@ -24,7 +24,6 @@ declare global {
 	}
 }
 
-
 export function registerLiquidifyAction(name: string, handler: (this: EventTarget, event: Event) => void): () => void {
   return window.registerLiquidifyAction(name, handler)
 }

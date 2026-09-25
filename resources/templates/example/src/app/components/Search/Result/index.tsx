@@ -14,8 +14,6 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 	const [products, setProducts] = useState<any[]>([])
 	const ref = useRef<HTMLDivElement | null>(null)
 
-
-
 	useClickOutside(ref, () => setOpen(false), [id])
 	useEffect(() => {
 		const input = document.getElementById(id) as HTMLInputElement | null
@@ -36,7 +34,6 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 			input.removeEventListener('click', handleClick)
 		}
 	}, [id])
-
 
 	const getSuggestions = async (term: string) => {
 		if (!term) {

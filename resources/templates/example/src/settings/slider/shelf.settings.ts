@@ -1,4 +1,3 @@
-
 export const SHELF_SLIDER_SETTINGS = {
 	slidesPerView: 4,
 	loop: false,

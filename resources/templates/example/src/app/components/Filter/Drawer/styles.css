@@ -2,7 +2,6 @@
   display: none;
 }
 
-
 @media (max-width: 1024px) {
   .button.mobile-filter-trigger {
     min-height: 4.6rem;

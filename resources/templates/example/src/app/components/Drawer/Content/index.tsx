@@ -12,7 +12,6 @@ import { useEventListener } from '../../../../hooks/useCustomEvent'
 
 import './styles.css'
 
-
 export const DrawerContent: FC<{
 	width?: number | string
 	orientation: 'left' | 'right'
@@ -33,11 +32,9 @@ export const DrawerContent: FC<{
 		data ? handleOpen() : handleClose()
 	})
 
-
 	useEffect(() => {
 		if (open) onOpen?.()
 	}, [open, onOpen])
-
 
 	useEffect(() => {
 		const body = document.body

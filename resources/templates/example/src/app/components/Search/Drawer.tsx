@@ -8,7 +8,6 @@ import { translate } from '../../i18n/translate'
 
 import './Drawer.css'
 
-
 export const SearchDrawer = () => {
 	const inputRef = useRef<HTMLInputElement>(null)
 	const focusInput = useCallback(() => inputRef.current?.focus(), [])

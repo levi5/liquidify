@@ -35,6 +35,12 @@ export const HomeCategories = () => {
 								alt={block.settings.image.alt ? 'block.settings.image.alt | escape' : 'block.settings.title | escape'}
 								loading='lazy'
 							/>
+						) : block.settings.image_asset ? (
+							<img
+								src={'{{ block.settings.image_asset | asset_url }}'}
+								alt={block.settings.title ? 'block.settings.title | escape' : "'categories.heading' | t"}
+								loading='lazy'
+							/>
 						) : (
 							<img src={"{{ 'liquidify-women.jpg' | asset_url }}"} alt={"'categories.heading' | t"} loading='lazy' />
 						)}

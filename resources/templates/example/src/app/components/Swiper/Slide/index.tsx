@@ -50,7 +50,6 @@ export const SwiperCarousel: FC<{ elementId: string; children: ReactNode; variat
 	const mobile = isFade ? 1 : toCount(slidesPerViewMobile, Number(base.slidesPerView) || tablet)
 	const delay = toCount(autoplayDelay, 4000)
 
-
 	const breakpoint = (key: 680 | 1024, columns: number) => {
 		const current = { ...base.breakpoints?.[key], slidesPerView: columns }
 
@@ -68,7 +67,6 @@ export const SwiperCarousel: FC<{ elementId: string; children: ReactNode; variat
 			1024: breakpoint(1024, desktop),
 		},
 	}
-
 
 	const autoplayParams: Record<string, unknown> =
 		autoplay === undefined

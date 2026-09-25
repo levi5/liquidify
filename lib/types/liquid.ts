@@ -1,4 +1,3 @@
-
 export interface JSXResult {
 	html: string
 	blocksSchema: { type: string }[]

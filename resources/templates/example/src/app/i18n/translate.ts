@@ -1,6 +1,5 @@
 type MessageParams = Record<string, string | number>
 
-/** `cart.subtotal` -> `cart_subtotal` (formato do mapa i18n exposto em LiquidifyTheme) */
 const toI18nKey = (key: string) => key.replaceAll('.', '_')
 
 const interpolate = (template: string, params: MessageParams = {}) =>

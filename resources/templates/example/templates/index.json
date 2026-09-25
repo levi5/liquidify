@@ -35,7 +35,7 @@
         "card_2": {
           "type": "card",
           "settings": {
-            "image": "shopify://shop_images/liquidify-men.jpg",
+            "image_asset": "liquidify-accessories.jpg",
             "label": "ESSENTIALS FOR YOUR PACE",
             "title": "Men",
             "url": "/collections/all/men"
@@ -44,7 +44,7 @@
         "card_3": {
           "type": "card",
           "settings": {
-            "image": "shopify://shop_images/liquidify-accessories.jpg",
+            "image_asset": "liquidify-editorial.jpg",
             "label": "THE DETAILS MAKE THE LOOK",
             "title": "Accessories",
             "url": "/collections/all/accessories"

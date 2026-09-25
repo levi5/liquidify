@@ -176,13 +176,6 @@ export class ReactComponentCompiler {
     return [readReactTemplate('context-bridge.js').trimEnd(), ';'].join('')
   }
 
-  /**
-   * esbuild only keeps a stylesheet whose import survives tree shaking, and it
-   * drops `import styles from './x.css'` whenever that binding goes unused. A
-   * React component that imports its stylesheet the Liquid way would silently
-   * ship without it, so every relative stylesheet is also imported for its side
-   * effect. esbuild deduplicates by resolved path, so the CSS is emitted once.
-   */
   private keepStylesheetsImported(source: string, dir: string): string {
     const specifiers = new Set<string>()
     for (const match of source.matchAll(STYLESHEET_IMPORT_PATTERN)) {

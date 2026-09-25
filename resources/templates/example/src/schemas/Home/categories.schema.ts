@@ -13,6 +13,12 @@ export const HOME_CATEGORIES_SCHEMA = {
 			name: 't:sections.categories.blocks.card.name',
 			settings: [
 				{ type: 'image_picker', id: 'image', label: 't:sections.categories.blocks.card.settings.image.label' },
+				{
+					type: 'text',
+					id: 'image_asset',
+					label: 't:sections.categories.blocks.card.settings.image_asset.label',
+					info: 't:sections.categories.blocks.card.settings.image_asset.info',
+				},
 				{ type: 'text', id: 'label', label: 't:sections.categories.blocks.card.settings.label.label' },
 				{ type: 'text', id: 'title', label: 't:sections.categories.blocks.card.settings.title.label' },
 				{ type: 'url', id: 'url', label: 't:sections.categories.blocks.card.settings.url.label' },

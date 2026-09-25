@@ -364,4 +364,3 @@ declare global {
     markdownify(): string;
   }
 }
-
