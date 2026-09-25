@@ -24,7 +24,7 @@ export namespace SwiperComponentType {
 		className?: string
 		device?: string
 		direction?: 'vertical' | 'horizontal'
-		id: string
+		id?: string
 		renderWrapper?: boolean
 		settings?: SwiperOptions
 		slidesPerView?: string | number
@@ -32,5 +32,7 @@ export namespace SwiperComponentType {
 		slidesPerViewMobile?: string | number
 		autoplay?: boolean | string
 		autoplayDelay?: string | number
+		effect?: SwiperOptions['effect']
+		pagination?: boolean | SwiperOptions['pagination']
 	}
 }

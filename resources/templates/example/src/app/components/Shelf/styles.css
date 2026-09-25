@@ -17,7 +17,6 @@
 	gap: 0.5rem;
 }
 
-/* the flex gap already provides the rhythm the global utility adds on top */
 .shelf .header .headingGroup .section-subtitle {
 	margin-top: 0;
 }
@@ -47,6 +46,32 @@
 .carousel {
 	width: 100%;
 	min-width: 0;
+}
+
+.shelf .swiper-pagination {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+	margin-top: 1.75rem;
+}
+
+.shelf .swiper-pagination-bullet {
+	width: 6px;
+	height: 6px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: var(--ink);
+	opacity: 0.25;
+	transition:
+		opacity 300ms ease-in-out,
+		transform 300ms ease-in-out;
+}
+
+.shelf .swiper-pagination-bullet-active {
+	opacity: 1;
+	transform: scale(1.4);
 }
 
 .arrowLeft,
@@ -105,8 +130,7 @@
 	}
 }
 
-/* Sem hover nao existe :hover, entao as setas ficariam permanentemente
-   invisiveis no touch. `hover: none` cobre celular e tablet. */
+
 @media (hover: none) {
 	.arrowLeft,
 	.arrowRight {

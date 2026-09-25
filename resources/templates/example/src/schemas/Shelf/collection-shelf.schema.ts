@@ -80,6 +80,12 @@ export const COLLECTION_SHELF_SCHEMA = {
 		},
 		{
 			type: 'checkbox',
+			id: 'show_pagination',
+			label: 'Mostrar paginação',
+			default: true,
+		},
+		{
+			type: 'checkbox',
 			id: 'autoplay',
 			label: 'Avançar automaticamente',
 			default: false,

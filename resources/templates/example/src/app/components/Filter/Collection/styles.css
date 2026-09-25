@@ -204,9 +204,6 @@
 }
 
 
-/* Sidebar is desktop-only: above 102.4rem the drawer trigger is hidden, so the
-   inline filter panel is the filter UI. Breakpoint stays in px — rem inside
-   @media resolves against the initial root font-size (1.6rem), not html's 62.5%. */
 @media (max-width: 1024px) {
   .catalog-sidebar[data-drawer-ready] {
     display: none;

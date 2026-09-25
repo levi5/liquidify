@@ -146,7 +146,7 @@
   padding: 8px 14px;
 }
 
-/* icon + label stay grouped on the left, the "+" is pushed to the far edge */
+
 .card-buy-button > span[aria-hidden='true'] {
   margin-left: auto;
 }

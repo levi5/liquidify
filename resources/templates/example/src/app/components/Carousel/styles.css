@@ -2,9 +2,7 @@
 	position: relative;
 }
 
-/* The declared width/height on the <img> are only a hint: with `height: auto` the
-   browser uses the real file ratio, so a portrait-ish upload would blow the hero up
-   to near-square. Pin the slide to a banner shape and crop instead. */
+
 .slide {
 	position: relative;
 	aspect-ratio: 20 / 7;

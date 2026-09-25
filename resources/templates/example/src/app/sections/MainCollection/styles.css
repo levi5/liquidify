@@ -59,8 +59,7 @@
   color: var(--muted);
 }
 
-/* Breakpoints stay in px: rem inside @media resolves against the initial root
-   font-size (16px), never the 62.5% declared on html. */
+
 @media (max-width: 1024px) {
   .catalog-layout {
     grid-template-columns: minmax(0, 1fr);

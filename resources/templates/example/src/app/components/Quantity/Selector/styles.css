@@ -51,7 +51,6 @@
 	appearance: none;
 }
 
-/* Compact mode for MiniCart */
 .quantitySelector.compact,
 .miniCartProductActions .quantitySelector {
 	height: 36px;

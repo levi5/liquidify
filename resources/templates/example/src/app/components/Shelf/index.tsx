@@ -31,6 +31,7 @@ export const Shelf = () => {
 	const slideId = `${carouselId}-slide`
 
 	const showArrows = section.settings.show_arrows || false
+	const showPagination = section.settings.show_pagination ?? true
 	const autoplay = section.settings.autoplay || false
 
 	const autoplayDelay = section.settings.autoplay_delay || '4000'
@@ -70,7 +71,6 @@ export const Shelf = () => {
 
 						<SwiperCarousel
 							className={styles.carousel}
-							id={carouselId}
 							elementId={slideId}
 							settings={SHELF_SLIDER_SETTINGS}
 							slidesPerView={columns}
@@ -78,6 +78,7 @@ export const Shelf = () => {
 							slidesPerViewMobile={columnsMobile}
 							autoplay={autoplay}
 							autoplayDelay={autoplayDelay}
+							pagination={showPagination}
 						>
 							{products.map((item: any) => (
 								<RenderSnippet key={item.id} slot={Card} item={item} />

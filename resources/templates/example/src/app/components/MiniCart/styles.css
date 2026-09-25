@@ -20,10 +20,6 @@
 	color: var(--ink);
 }
 
-/* The trigger is a square hit area with the glyph centred inside it, so the badge
-   is anchored to the glyph rather than to the box corner: it stays glued to the
-   cart at every breakpoint, and a wider count (10, 100) grows leftwards instead of
-   pushing the badge away from the icon. */
 .miniCart .miniCartIcon .miniCartCount {
 	min-width: 18px;
 	height: 18px;

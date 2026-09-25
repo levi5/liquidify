@@ -76,10 +76,20 @@ export class ReactComponentParser {
   private applyProp(acc: CollectedProps, attr: JSXAttribute, context?: ParsingContext): CollectedProps {
     const propName = (attr.name as { name: string }).name
     return _match(propName)
-      .with('elementId', () => ({ ...acc, elementId: this.elementIdOf(attr) }))
+      .with('elementId', () => this.collectElementId(acc, attr, context))
       .with('eager', () => ({ ...acc, eager: true }))
       .with(propName, () => ({ ...acc, props: [...acc.props, `"${propName}": ${this.propValueOf(attr, context)}`] }))
       .exec() as CollectedProps
+  }
+
+  private collectElementId(acc: CollectedProps, attr: JSXAttribute, context?: ParsingContext): CollectedProps {
+    const elementId = this.elementIdOf(attr)
+
+    return {
+      ...acc,
+      elementId,
+      props: elementId ? [...acc.props, `"elementId": ${this.propValueOf(attr, context)}`] : acc.props,
+    }
   }
 
   private propValueOf(attr: JSXAttribute, context?: ParsingContext): string {

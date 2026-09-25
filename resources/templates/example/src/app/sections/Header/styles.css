@@ -1,15 +1,4 @@
-/* ---------------------------------------------------------------------------
-   Header — single source of truth for the header layout.
 
-   Breakpoints (aligned with assets/global.css and components/Responsive):
-     mobile   <= 680px
-     tablet   681px - 1023px
-     desktop  >= 1024px
---------------------------------------------------------------------------- */
-
-/* Sticky rather than fixed: the header keeps its place in the flow, so nothing
-   below it shifts, and anchor jumps have to clear it — hence the scroll-padding.
-   z-index stays under the drawers (50/51) so they still overlay the header. */
 .header-shell {
   position: sticky;
   top: 0;
@@ -51,8 +40,6 @@ html {
 .site-header .wordmark {
   flex-shrink: 0;
 }
-
-/* --- desktop navigation ---------------------------------------------- */
 
 .desktop-nav {
   display: flex;
@@ -164,11 +151,7 @@ html {
   color: var(--muted);
 }
 
-/* --- account / search / cart actions ----------------------------------
-   Every action shares one 40x40 box so the glyphs line up on the same
-   optical centre and every target is big enough to tap. `display: flex`
-   (not inline-flex) is deliberate: an inline-flex child sits on the text
-   baseline and the leftover descender space pushes the cart glyph upwards. */
+
 
 .icon-button-group {
   display: flex;
@@ -206,8 +189,7 @@ html {
   height: 20px;
 }
 
-/* --- tablet + mobile: 3-column grid so the wordmark stays optically centred
-   even though the burger and the action cluster have different widths ------- */
+
 
 @media (max-width: 1023px) {
   .site-header {
@@ -229,8 +211,6 @@ html {
   }
 }
 
-/* --- tablet: 681px - 1023px ------------------------------------------- */
-
 @media (min-width: 681px) and (max-width: 1023px) {
   .site-header {
     gap: 20px;
@@ -241,8 +221,6 @@ html {
     font-size: 30px;
   }
 }
-
-/* --- mobile: <= 680px -------------------------------------------------- */
 
 @media (max-width: 680px) {
   .site-header {
@@ -273,8 +251,6 @@ html {
     height: 19px;
   }
 }
-
-/* --- visibility swap: hamburger replaces the horizontal nav ------------ */
 
 @media (min-width: 1024px) {
   .header-leading {

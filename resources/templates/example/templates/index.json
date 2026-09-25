@@ -15,7 +15,7 @@
         "title": "On your radar.",
         "subtitle": "Your next wardrobe favorite is here.",
         "collection": "all",
-        "limite": 4,
+        "limite": 8,
         "view_all_label": "View all",
         "view_all_link": "/collections/all"
       }
