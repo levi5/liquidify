@@ -4,7 +4,6 @@ import { RenderSnippet } from 'liquidify'
 import classNames from 'classnames'
 import { ProductCard } from '../../snippets/ProductCard'
 import { ProductShelf } from '../../islands/ProductShelf'
-import { RecommendationLoader } from '../../islands/RecommendationLoader'
 
 import styles from './styles.css'
 
@@ -25,8 +24,6 @@ export const ProductRecommendations = () => {
         className={styles['product-shelf-host']}
         role="region"
         aria-label={"'recommendations.eyebrow' | t"}
-        data-related-grid
-        data-recommendations-state="{% if recommendations.performed and recommendations.products_count > 0 %}loaded{% else %}fallback{% endif %}"
       >
         <ProductShelf eager>
           {recommendations.performed && recommendations.products_count > 0 ? (
@@ -46,7 +43,6 @@ export const ProductRecommendations = () => {
           )}
         </ProductShelf>
       </div>
-      <RecommendationLoader productId={product.id} sectionId={section.id} eager />
     </section>
   )
 }
