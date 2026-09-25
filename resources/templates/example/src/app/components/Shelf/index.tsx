@@ -23,7 +23,10 @@ export const Shelf = () => {
 	// `slice` sem comprimento devolve 1 item em Liquid, entao um limite vazio
 	// encolheria a prateleira para um unico cartao em vez de usar o padrao.
 	const limit = section.settings.limite || 4
-	const candidates = selectedCollection ? selectedCollection.products : []
+	// Sem fallback literal: `[]` viraria `{% assign %}` de array, que nao e
+	// Liquid valido e derrubaria a section. `selectedCollection` ja tem fallback
+	// (catalogo completo) e no Liquid o acesso em nil devolve nil, sem erro.
+	const candidates = selectedCollection.products
 	// Drops sem id nao sao produtos: renderizados viram cartao sem imagem, titulo
 	// nem preco. Fora da pagina de produto vale um e a prateleira inteira.
 	const other = candidates.filter((item: any) => item.id !== product.id)
