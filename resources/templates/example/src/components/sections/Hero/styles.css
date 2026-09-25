@@ -149,7 +149,7 @@
 }
 
 @media (max-width: 990px) {
-  .fashion-hero {
+  .fashion-hero.container {
     grid-template-columns: 1fr;
     margin-top: 15px;
   }
@@ -157,17 +157,19 @@
     border-radius: 10px;
     padding: 45px 30px;
   }
-  .hero-men {
+  .fashion-hero.container .hero-men {
     display: none;
   }
-  .hero-women {
+  .fashion-hero.container .hero-women {
+    grid-column: 1 / -1;
+    width: 100%;
     border-radius: 10px;
     height: 380px;
   }
 }
 
 @media (max-width: 680px) {
-  .fashion-hero {
+  .fashion-hero.container {
     gap: 8px;
     margin-top: 10px;
   }
@@ -180,7 +182,7 @@
     letter-spacing: -2px;
     margin: 20px 0 16px;
   }
-  .fashion-hero-photo {
+  .fashion-hero.container .fashion-hero-photo {
     height: 320px;
     border-radius: 8px;
   }

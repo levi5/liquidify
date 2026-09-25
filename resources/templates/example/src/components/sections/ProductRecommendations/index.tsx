@@ -35,7 +35,7 @@ export const ProductRecommendations = () => {
           ) : (
             <>
               {related_collection.products
-                .slice(0, 4)
+                .slice(0, 8)
                 .map(
                   (item) =>
                     item.id !== product.id &&

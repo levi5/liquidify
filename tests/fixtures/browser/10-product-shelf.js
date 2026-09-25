@@ -13,7 +13,7 @@ window.scenarios.push({
 
     check(island?.hasAttribute('data-react-hydrated'), 'ProductShelf must hydrate')
     check(swiperElement?.classList.contains('swiper-initialized'), 'Swiper must initialize')
-    check(slides.length === 5, 'ProductShelf must render every child as a slide')
+    check(slides.length === 8, 'ProductShelf must render every child as a slide')
     check(island?.querySelectorAll(':scope > .product-card').length === 0, 'ProductShelf must replace server children')
     check(next && pagination && bullet, 'Swiper must render navigation and pagination')
     check(swiperElement?.swiper?.params.slidesPerView === expectedSlidesPerView, 'Swiper must use responsive slidesPerView')
