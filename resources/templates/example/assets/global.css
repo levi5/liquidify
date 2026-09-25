@@ -2577,3 +2577,96 @@ react-island {
     margin-bottom: 24px;
   }
 }
+
+.breadcrumbs,
+.breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	font-size: 10px;
+	color: var(--muted);
+	margin-bottom: 35px;
+	align-items: center;
+}
+
+.breadcrumbs a,
+.breadcrumb a {
+	color: var(--muted);
+	text-decoration: none;
+	transition: color 0.2s;
+}
+
+.breadcrumbs a:hover,
+.breadcrumb a:hover {
+	color: var(--ink);
+}
+
+.breadcrumbs .separator,
+.breadcrumb .separator {
+	color: var(--muted);
+	user-select: none;
+}
+
+.breadcrumbs .current,
+.breadcrumbs span:last-child,
+.breadcrumb .current,
+.breadcrumb span:last-child {
+	color: var(--ink);
+	font-weight: 500;
+}
+
+@media (max-width: 680px) {
+	.breadcrumbs,
+	.breadcrumb {
+		font-size: 9px;
+		gap: 8px;
+		margin-bottom: 24px;
+	}
+}
+/* liquidify:start */
+.breadcrumbs,
+.breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	font-size: 10px;
+	color: var(--muted);
+	margin-bottom: 35px;
+	align-items: center;
+}
+
+.breadcrumbs a,
+.breadcrumb a {
+	color: var(--muted);
+	text-decoration: none;
+	transition: color 0.2s;
+}
+
+.breadcrumbs a:hover,
+.breadcrumb a:hover {
+	color: var(--ink);
+}
+
+.breadcrumbs .separator,
+.breadcrumb .separator {
+	color: var(--muted);
+	user-select: none;
+}
+
+.breadcrumbs .current,
+.breadcrumbs span:last-child,
+.breadcrumb .current,
+.breadcrumb span:last-child {
+	color: var(--ink);
+	font-weight: 500;
+}
+
+@media (max-width: 680px) {
+	.breadcrumbs,
+	.breadcrumb {
+		font-size: 9px;
+		gap: 8px;
+		margin-bottom: 24px;
+	}
+}
+/* liquidify:end */

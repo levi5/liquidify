@@ -26,7 +26,7 @@
         "card_1": {
           "type": "card",
           "settings": {
-            "image": "shopify://shop_images/liquidify-women.jpg",
+            "image_asset": "liquidify-women.jpg",
             "label": "YOUR STYLE IN EVERY MOMENT",
             "title": "Women",
             "url": "/collections/all/women"

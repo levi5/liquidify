@@ -107,7 +107,7 @@ export const FilterDrawer = ({ sectionId }: { sectionId: string }) => {
 				className='collection-filter-dialog'
 				aria-labelledby={`FilterTitle-${sectionId}`}
 				onClick={(event) => {
-					if (event.target !== dialog.current) return
+					if (!dialog.current || event.target !== dialog.current) return
 
 					const rect = dialog.current.getBoundingClientRect()
 					const outside =

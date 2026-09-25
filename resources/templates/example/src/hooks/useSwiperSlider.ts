@@ -3,6 +3,7 @@ import { RefObject, createRef } from 'preact'
 import { ReactNode } from 'preact/compat'
 import { useCallback, useRef } from 'preact/hooks'
 import type { SwiperRef } from 'swiper/react'
+import type { Swiper } from 'swiper/types'
 import type { SwiperContextType } from '../app/components/Swiper/Root'
 
 export namespace SwiperSlider {
@@ -34,50 +35,32 @@ export const useSwiperSlider = () => {
 	}
 
 	const getSliderDetails = useCallback((sliderRef: SwiperContextType | null) => {
-		const swiper = _Maybe
-			.of(sliderRef)
-			.map((sliderRef) => sliderRef.swiper)
-			.map((swiper) => swiper)
+		const swiper: Swiper | null = _Maybe.of(sliderRef)
+			.map((sliderRef) => sliderRef?.swiper ?? null)
 			.getOrElse(null)
 
-		const size: number = _Maybe
-			.of(swiper)
-			.map((swiper) => swiper.slides)
-			.map((slides) => slides.length)
+		const size: number = _Maybe.of(swiper)
+			.map((swiper) => swiper?.slides.length ?? 0)
 			.getOrElse(0)
 
-		const isEnd: boolean = _Maybe
-			.of(swiper)
-			.map((swiper) => swiper.isEnd)
+		const isEnd: boolean = _Maybe.of(swiper)
+			.map((swiper) => swiper?.isEnd ?? false)
 			.getOrElse(false)
 
-		const isStart: boolean = _Maybe
-			.of(swiper)
-			.map((swiper) => swiper.activeIndex === 0)
+		const isStart: boolean = _Maybe.of(swiper)
+			.map((swiper) => swiper?.activeIndex === 0)
 			.getOrElse(false)
 
-		const isInfinite: boolean = _Maybe
-			.of(swiper)
-			.map((swiper) => swiper.loopedSlides)
-			.map((loopedSlides) => loopedSlides)
+		const isInfinite: boolean = _Maybe.of(swiper)
+			.map((swiper) => (swiper?.loopedSlides ?? 0) > 0)
 			.getOrElse(false)
 
-		const slidesPerGroup: number = _Maybe
-			.of(swiper)
-			.map((swiper) => swiper.params)
-			.map((params) => params.slidesPerView)
-			.map((slidesPerView) => slidesPerView)
-			.getOrElse(0)
-
-		const slidesPerView: number = _Maybe
-			.of(swiper)
-			.map((swiper) => swiper.params)
-			.map((params) => params.slidesPerView)
-			.map((slidesPerView) => slidesPerView)
+		const slidesPerView: number = _Maybe.of(swiper)
+			.map((swiper) => Number(swiper?.params.slidesPerView) || 0)
 			.getOrElse(0)
 
 		return {
-			slidesPerGroup,
+			slidesPerGroup: slidesPerView,
 			slidesPerView,
 			isStart,
 			isEnd,

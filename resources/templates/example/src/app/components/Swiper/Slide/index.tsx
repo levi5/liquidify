@@ -72,7 +72,8 @@ export const SwiperCarousel: FC<{ elementId: string; children: ReactNode; variat
 		autoplay === undefined
 			? {}
 			: {
-					autoplay: autoplay === false ? false : { delay: toCount(autoplay, delay), disableOnInteraction: false },
+					autoplay:
+						autoplay === false ? false : { delay: toCount(autoplay === true ? undefined : autoplay, delay), disableOnInteraction: false },
 					speed: base.speed ?? 420,
 				}
 

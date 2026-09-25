@@ -3,6 +3,7 @@
 import { _Maybe, _match } from 'funcio'
 import { useCallback, useContext, useEffect, useState } from 'preact/hooks'
 import { memo } from 'preact/compat'
+import type { Swiper } from 'swiper/types'
 import classNames from 'classnames'
 
 import { SwiperContext } from '../Root'
@@ -23,16 +24,12 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 		slidesPerView: 0,
 	})
 
-	const swiperRef = _Maybe
-		.of(sliderRef)
+	const swiperRef: Swiper | null = _Maybe.of(sliderRef)
 		.map((sliderRef) => sliderRef.swiper)
-		.map((swiper) => swiper)
 		.getOrElse(null)
 
-	const size = _Maybe
-		.of(swiperRef)
-		.map((swiperRef) => swiperRef.slides)
-		.map((slides) => slides.length)
+	const size: number | null = _Maybe.of(swiperRef)
+		.map((swiper) => swiper?.slides.length ?? null)
 		.getOrElse(null)
 
 	useEffect(() => {
@@ -60,7 +57,7 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 		[sliderRef],
 	)
 
-	if (!enable || size <= 1) return null
+	if (!enable || !size || size <= 1) return null
 
 	const isSizeWithinLimit = size !== null && state.slidesPerView > 0 && size <= state.slidesPerView
 	const disabled = (type === 'right' && state.isEnd) || (type === 'left' && state.isStart) || isSizeWithinLimit
