@@ -1,8 +1,8 @@
-# Eventos React, Liquid e editor Shopify
+# React events, Liquid and the Shopify editor
 
-## Configuração
+## Configuration
 
-Em `liquidify.config.json`:
+In `liquidify.config.json`:
 
 ```json
 {
@@ -12,9 +12,9 @@ Em `liquidify.config.json`:
 }
 ```
 
-`strictCsp` já é `true` por padrão. O runtime não transforma código escrito em atributos HTML em funções com `new Function`. Funções JSX, `addEventListener` e ações registradas continuam funcionando. Essa opção não instala a política CSP da loja: os arquivos JS ainda precisam ser permitidos por origem ou nonce.
+`strictCsp` is already `true` by default. The runtime does not turn code written in HTML attributes into functions with `new Function`. JSX functions, `addEventListener` and registered actions keep working. This option does not install the store's CSP policy: JS files still need to be allowed by origin or nonce.
 
-## 1. Eventos no componente React
+## 1. Events in the React component
 
 ```tsx
 'use react'
@@ -26,19 +26,19 @@ export function Counter() {
 
   return (
     <button type="button" onClick={() => setQuantity(quantity + 1)}>
-      Quantidade: {quantity}
+      Quantity: {quantity}
     </button>
   )
 }
 ```
 
-O clique recebe uma função compilada no bundle. Nenhum código é interpretado a partir de texto. `onInput`, `onChange` e `onSubmit` seguem o mesmo padrão.
+The click receives a function compiled into the bundle. No code is interpreted from text. `onInput`, `onChange` and `onSubmit` follow the same pattern.
 
-## 2. Ações em HTML Liquid convertido para React
+## 2. Actions in HTML Liquid converted to React
 
-Registre a ação no componente que recebe o conteúdo Liquid. Use um nome diferente por instância para evitar que seções sobrescrevam os registros umas das outras.
+Register the action in the component receiving the Liquid content. Use a distinct name per instance so sections don't overwrite each other's registrations.
 
-Arquivo `src/components/ActionBox.tsx`:
+File `src/components/ActionBox.tsx`:
 
 ```tsx
 'use react'
@@ -55,7 +55,7 @@ export function ActionBox({ actionName, children }: {
     return registerLiquidifyAction(actionName, function (event) {
       event.preventDefault()
       const button = this as HTMLButtonElement
-      console.log('Produto selecionado:', button.dataset.productId)
+      console.log('Selected product:', button.dataset.productId)
     })
   }, [actionName])
 
@@ -63,10 +63,10 @@ export function ActionBox({ actionName, children }: {
 }
 ```
 
-No HTML Liquid da seção:
+In the section's Liquid HTML:
 
 ```liquid
-{% assign buy_action = 'comprar-' | append: section.id %}
+{% assign buy_action = 'buy-' | append: section.id %}
 <react-island component="ActionBox" data-hydrate="eager">
   <script type="application/json" data-react-props>
     {"actionName": {{ buy_action | json }}}
@@ -76,46 +76,46 @@ No HTML Liquid da seção:
     data-liquidify-on-click="{{ buy_action | escape }}"
     data-product-id="{{ product.id }}"
   >
-    Comprar
+    Buy
   </button>
 </react-island>
 ```
 
-Carregue os assets uma vez no layout, na ordem abaixo, caso o tema ainda não os inclua:
+Load the assets once in the layout, in the order below, if the theme doesn't include them yet:
 
 ```liquid
 <script src="{{ 'react-runtime.js' | asset_url }}" defer></script>
 <script src="{{ 'action-box.js' | asset_url }}" defer></script>
 ```
 
-O atributo contém o nome da ação, não código JavaScript. A função retornada por `registerLiquidifyAction` remove o registro; o retorno de `useLayoutEffect` executa essa limpeza ao desmontar a seção. Se você usar o mesmo componente mais de uma vez na seção, acrescente um identificador de instância ao nome da ação.
+The attribute holds the action name, not JavaScript code. The function returned by `registerLiquidifyAction` removes the registration; the `useLayoutEffect` return runs that cleanup when the section unmounts. If you use the same component more than once in the section, append an instance identifier to the action name.
 
-Eventos suportados na ponte: `click`, `change`, `input`, `submit`, `keydown`, `keyup`, `focus`, `blur`, `dblclick`, `pointerdown` e `pointerup`.
+Supported bridge events: `click`, `change`, `input`, `submit`, `keydown`, `keyup`, `focus`, `blur`, `dblclick`, `pointerdown` and `pointerup`.
 
-Essa ponte atua nos nós convertidos pelo runtime para React. Não instala listeners em todo o HTML da página.
+This bridge acts on nodes converted by the runtime to React. It does not install listeners across the whole page HTML.
 
-## 3. Eventos em HTML Liquid fora das ilhas
+## 3. Events in Liquid HTML outside islands
 
-No Liquid:
+In Liquid:
 
 ```liquid
-<button type="button" data-product-buy="{{ product.id }}">Comprar</button>
+<button type="button" data-product-buy="{{ product.id }}">Buy</button>
 ```
 
-No JS global do tema, carregado uma vez:
+In the theme's global JS, loaded once:
 
 ```js
 document.addEventListener('click', (event) => {
   if (!(event.target instanceof Element)) return
   const button = event.target.closest('button[data-product-buy]')
   if (!(button instanceof HTMLButtonElement) || button.disabled) return
-  console.log('Produto selecionado:', button.dataset.productBuy)
+  console.log('Selected product:', button.dataset.productBuy)
 })
 ```
 
-O listener no documento também recebe cliques dos botões inseridos pelo editor depois da carga inicial. Não é necessário reinstalá-lo a cada troca de seção.
+The document listener also receives clicks from buttons inserted by the editor after the initial load. No need to reinstall it on every section change.
 
-## 4. Comunicação entre componentes
+## 4. Communication between components
 
 ```tsx
 'use react'
@@ -132,28 +132,28 @@ export function CartNotice() {
   return (
     <button
       type="button"
-      onClick={() => emitLiquidifyEvent('cart:notice', { message: 'Carrinho atualizado' })}
+      onClick={() => emitLiquidifyEvent('cart:notice', { message: 'Cart updated' })}
     >
-      {message || 'Notificar'}
+      {message || 'Notify'}
     </button>
   )
 }
 ```
 
-O hook cancela sua inscrição quando o componente desmonta. Para inscrições manuais com `LiquidifyEvents.on`, guarde e chame a função de cancelamento. Eventos do barramento são globais; inclua o identificador da seção no nome ou nos dados quando precisar restringir os destinatários.
+The hook cancels its subscription when the component unmounts. For manual subscriptions with `LiquidifyEvents.on`, keep and call the cancel function. Bus events are global; include the section identifier in the name or payload when you need to restrict recipients.
 
-## Ciclo de vida no editor Shopify
+## Lifecycle in the Shopify editor
 
-O runtime escuta os eventos no documento e usa a seção indicada por `event.target`, conforme o [contrato de eventos da Shopify](https://shopify.dev/docs/storefronts/themes/best-practices/editor/integrate-sections-and-blocks).
+The runtime listens to document events and uses the section indicated by `event.target`, following the [Shopify event contract](https://shopify.dev/docs/storefronts/themes/best-practices/editor/integrate-sections-and-blocks).
 
-- `shopify:section:unload`: desmonta imediatamente as raízes da seção, cancela observadores, timers internos de desmontagem e listeners de prontidão. As funções de cleanup dos efeitos React são executadas. O runtime descarta os dados antigos e impede remontagens automáticas dessa seção até receber `load`.
-- `shopify:section:load`: monta as ilhas e raízes por ID presentes na seção, respeitando a estratégia de hidratação. Se o bundle do componente ainda não chegou, aguarda seu evento de prontidão. Eventos repetidos não duplicam as raízes.
+- `shopify:section:unload`: immediately unmounts the section's roots, cancels observers, internal unmount timers and readiness listeners. React effect cleanup functions run. The runtime discards old data and blocks automatic remounts of that section until it receives `load`.
+- `shopify:section:load`: mounts islands and roots by ID present in the section, honoring the hydration strategy. If the component bundle hasn't arrived yet, it waits for its readiness event. Repeated events don't duplicate roots.
 
-As outras seções permanecem montadas. Movimentos comuns no DOM, fora desse ciclo explícito, continuam usando a tolerância de 100 ms antes da desmontagem.
+Other sections stay mounted. Common DOM moves outside this explicit cycle keep using the 100 ms tolerance before unmounting.
 
-Listeners, timers e ações criados pelos seus componentes precisam retornar cleanup em `useEffect` ou `useLayoutEffect`. O runtime executa esses cleanups, mas não consegue remover recursos globais que não foram associados a eles. A integração não baixa bundles ausentes nem trata seleção de blocos como carga de seção.
+Listeners, timers and actions created by your components must return cleanup in `useEffect` or `useLayoutEffect`. The runtime runs those cleanups but cannot remove global resources not tied to them. The integration doesn't download missing bundles nor treat block selection as section load.
 
-## Validação
+## Validation
 
 ```sh
 npm test
@@ -162,23 +162,23 @@ npm run build:example
 npm run typecheck:example
 ```
 
-A suíte de navegador usa os componentes de `example` e simula eventos Shopify em Chrome com CSP estrita e modo legado. Cobre troca dos dados da seção, montagem por ID, eventos JSX após remontagem, limpeza de efeitos e inscrições, cancelamento de hidratação pendente, componentes atrasados e isolamento entre seções. As respostas do carrinho são simuladas; não é uma execução dentro de uma loja Shopify real.
+The browser suite uses the `example` components and simulates Shopify events in Chrome with strict CSP and legacy mode. It covers section data swaps, mounting by ID, JSX events after remount, effect and subscription cleanup, pending hydration cancellation, late components and isolation between sections. Cart responses are mocked; it doesn't run inside a real Shopify store.
 
-## Tipos em `data-liquid-*`
+## Types in `data-liquid-*`
 
-Os valores JSON mantêm seu tipo nos props, incluindo valores vazios e `false`:
+JSON values keep their type in props, including empty values and `false`:
 
 ```html
 <react-island
   component="ProductDetails"
-  data-liquid-title='"Camiseta"'
+  data-liquid-title='"T-shirt"'
   data-liquid-available="false"
   data-liquid-count="0"
-  data-liquid-tags='["novo", "algodão"]'
+  data-liquid-tags='["new", "cotton"]'
   data-liquid-discount="null"
 ></react-island>
 ```
 
-O componente recebe `title` como string, `available` como booleano, `count` como número, `tags` como array e `discount` como `null`. `ProductDetails` representa um componente do seu tema. No Liquid, serialize dados dinâmicos com `{{ valor | json | escape }}` dentro de atributos entre aspas.
+The component receives `title` as a string, `available` as a boolean, `count` as a number, `tags` as an array and `discount` as `null`. `ProductDetails` stands for a component from your theme. In Liquid, serialize dynamic data with `{{ value | json | escape }}` inside quoted attributes.
 
-Valores locais substituem valores herdados quando são primitivos, arrays ou `null`. Objetos são mesclados superficialmente apenas com outros objetos; arrays não são concatenados nem convertidos em objetos. Texto simples sem aspas JSON continua sendo aceito como string; um atributo vazio preserva a string vazia. `data-liquid` e `data-liquid-store` seguem as mesmas regras e alimentam a prop `store`.
+Local values replace inherited values when they are primitives, arrays or `null`. Objects merge shallowly only with other objects; arrays are neither concatenated nor converted to objects. Plain text without JSON quotes is still accepted as a string; an empty attribute preserves the empty string. `data-liquid` and `data-liquid-store` follow the same rules and feed the `store` prop.
