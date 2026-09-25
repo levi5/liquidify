@@ -4,14 +4,32 @@
   "sections": {
     "header": {
       "type": "header",
-      "blocks": {},
-      "block_order": [],
-      "settings": {
-        "menu": "",
-        "women_link": "/collections/all/feminino",
-        "men_link": "/collections/all/masculino",
-        "accessories_link": "/collections/all/acessorios"
-      }
+      "blocks": {
+        "message_1": {
+          "type": "message",
+          "settings": {
+            "text": "Escolha seus favoritos. Compre com segurança."
+          }
+        },
+        "message_2": {
+          "type": "message",
+          "settings": {
+            "text": "Frete grátis para todo o Brasil."
+          }
+        },
+        "message_3": {
+          "type": "message",
+          "settings": {
+            "text": "Parcele em até 12x sem juros."
+          }
+        }
+      },
+      "block_order": [
+        "message_1",
+        "message_2",
+        "message_3"
+      ],
+      "settings": {}
     }
   },
   "order": [

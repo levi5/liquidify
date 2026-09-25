@@ -1,0 +1,67 @@
+.carousel {
+	position: relative;
+}
+
+/* The declared width/height on the <img> are only a hint: with `height: auto` the
+   browser uses the real file ratio, so a portrait-ish upload would blow the hero up
+   to near-square. Pin the slide to a banner shape and crop instead. */
+.slide {
+	position: relative;
+	aspect-ratio: 20 / 7;
+	overflow: hidden;
+}
+
+.slide img {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+@media (max-width: 1023px) {
+	.slide {
+		aspect-ratio: 16 / 9;
+	}
+}
+
+@media (max-width: 680px) {
+	.slide {
+		aspect-ratio: 4 / 3;
+	}
+}
+
+.carousel .arrowLeft,
+.carousel .arrowRight {
+	height: fit-content;
+	margin: auto 0;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	z-index: 2;
+	color: white;
+	opacity: 0;
+	transition: all 300ms ease-in-out;
+}
+
+.carousel:hover .arrowLeft,
+.carousel:hover .arrowRight {
+	opacity: 1;
+	transition: all 400ms ease-in-out;
+}
+
+.carousel .arrowLeft {
+	left: 1rem;
+
+	svg {
+		margin-right: 0.2rem;
+	}
+}
+
+.carousel .arrowRight {
+	right: 1rem;
+
+	svg {
+		margin-left: 0.2rem;
+	}
+}

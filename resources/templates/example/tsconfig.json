@@ -11,7 +11,8 @@
     "jsxFactory": "React.createElement",
     "jsxFragmentFactory": "React.Fragment",
     "paths": {
-      "liquidify": ["../../../dist/index.d.ts"]
+      "liquidify": ["../../../dist/index.d.ts"],
+      "liquidex": ["../../../dist/index.d.ts"]
     }
   },
   "include": [

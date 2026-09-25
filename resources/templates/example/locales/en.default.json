@@ -73,6 +73,10 @@
     "empty_title": "New pieces are coming.",
     "empty_text": "Follow Liquidify's upcoming drops."
   },
+  "shelf": {
+    "empty_title": "No products in this shelf yet.",
+    "empty_text": "Pick a collection in the section settings to fill this shelf."
+  },
   "collections": {
     "eyebrow": "A UNIVERSE OF POSSIBILITIES",
     "heading": "Our collections."
@@ -85,7 +89,7 @@
   },
   "brand": {
     "eyebrow": "LIQUIDIFY / EVERYDAY CULTURE",
-    "heading": "Wear what makes sense to you.",
+    "heading": "Wear what feels right for you.",
     "description": "Style happens when you feel good. Mix your favorites, discover new possibilities and make every day an expression of who you are.",
     "editorial_alt": "Liquidify editorial",
     "card_alt": "Urban style and everyday pieces",

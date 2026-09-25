@@ -2,13 +2,26 @@
   "type": "footer",
   "name": "Footer",
   "sections": {
+    "newsletter": {
+      "type": "newsletter",
+      "settings": {
+        "eyebrow": "VAMOS FICAR MAIS PERTO?",
+        "title_1": "Entre para a nossa lista.",
+        "title_2": "Fique por dentro do próximo drop.",
+        "label": "Seu melhor e-mail",
+        "note": "Novidades, lançamentos e inspiração. Cancele quando quiser.",
+        "background": "#f4f4f4"
+      }
+    },
     "footer": {
       "type": "footer",
-      "blocks": {},
-      "block_order": []
+      "settings": {
+        "background": "#ffffff"
+      }
     }
   },
   "order": [
+    "newsletter",
     "footer"
   ]
 }

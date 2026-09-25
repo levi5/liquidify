@@ -138,6 +138,17 @@
         "default": "Produtos relacionados"
       }
     },
+    "shelf": {
+      "name": "Prateleira de produtos",
+      "settings": {
+        "heading": { "label": "Título" },
+        "collection": { "label": "Coleção" },
+        "limit": { "label": "Produtos por prateleira" }
+      },
+      "presets": {
+        "default": "Prateleira de produtos"
+      }
+    },
     "values": {
       "name": "Benefícios da loja",
       "presets": {

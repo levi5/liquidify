@@ -1,0 +1,141 @@
+.shelf {
+	width: 100%;
+	padding-block: 3rem 84px;
+}
+
+.shelf .header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	padding: 2rem 0;
+	margin-bottom: 1.5rem;
+}
+
+.shelf .header .headingGroup {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+/* the flex gap already provides the rhythm the global utility adds on top */
+.shelf .header .headingGroup .section-subtitle {
+	margin-top: 0;
+}
+
+.shelf .header h2 {
+	font-size: 2.8rem;
+	line-height: 1.2;
+	text-align: left;
+	font-weight: 500;
+	letter-spacing: -0.5px;
+}
+
+.shelf .cards {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	gap: 2rem;
+	overflow: hidden;
+}
+
+.shelf .cards > react-island {
+	display: flex !important;
+	width: 100%;
+	min-width: 0;
+}
+
+.shelf .cards > react-island > react-island[id$='-slide'] {
+	flex: 1 1 auto;
+	width: 100%;
+	min-width: 0;
+}
+
+.shelf .cards > react-island > react-island:not([id$='-slide']) {
+	position: absolute;
+	inset-block: 0;
+	width: auto;
+}
+
+.shelf .cards react-island[id$='-slide'] {
+	display: flex !important;
+	width: 100%;
+	min-width: 0;
+	gap: 2rem;
+	overflow: hidden;
+}
+
+.shelf .cards react-island[id$='-slide'] > * {
+	flex-shrink: 0;
+}
+
+.carousel {
+	width: 100%;
+	min-width: 0;
+}
+
+.arrowLeft,
+.arrowRight {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	z-index: 2;
+	height: fit-content;
+	margin: auto 0;
+	color: white;
+	opacity: 0;
+	transition: all 300ms ease-in-out;
+}
+
+.shelf .cards:hover .arrowLeft,
+.shelf .cards:hover .arrowRight,
+.shelf .cards:focus-within .arrowLeft,
+.shelf .cards:focus-within .arrowRight {
+	opacity: 1;
+	transition: all 400ms ease-in-out;
+}
+
+.arrowLeft {
+	left: 1rem;
+}
+
+.arrowRight {
+	right: 1rem;
+}
+
+@media screen and (max-width: 680px) {
+	.shelf {
+		padding-block: 2rem 44px;
+	}
+
+	.shelf .header {
+		padding: 1.5rem 0;
+	}
+
+	.shelf .header h2 {
+		font-size: 2rem;
+		line-height: 2.6rem;
+	}
+
+	.shelf .cards {
+		gap: 1rem;
+	}
+
+	.shelf .cards react-island[id$='-slide'] {
+		gap: 1rem;
+	}
+
+	.arrowLeft {
+		left: 0.5rem;
+	}
+
+	.arrowRight {
+		right: 0.5rem;
+	}
+}
+
+.empty {
+	padding: 2rem 1rem;
+	text-align: center;
+	font-size: 13px;
+	color: var(--muted);
+}

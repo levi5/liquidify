@@ -1,0 +1,44 @@
+:global(.swiper-vertical:has(.swiper-wrapper > .swiper-slide[data-swiper-slide-index="1"]:first-child)) > .swiper-wrapper {
+	flex-direction: column-reverse;
+}
+
+.arrows {
+	position: absolute;
+}
+
+.arrow {
+	all: unset;
+	min-width: 24px;
+	min-height: 24px;
+	height: fit-content;
+	width: fit-content;
+	margin: auto;
+	padding: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	border: 0px;
+	border-radius: 50%;
+	opacity: 1;
+	background-color: #000;
+	transition: opacity 400ms ease-in-out;
+}
+
+.arrow.active {
+	opacity: 1;
+}
+
+.arrow:hover {
+	filter: brightness(80%);
+}
+
+.arrow.disabled {
+	opacity: 0;
+	transition: opacity 400ms ease-in-out;
+}
+
+.disabled {
+	opacity: 0;
+	transition: opacity 400ms ease-in-out;
+}

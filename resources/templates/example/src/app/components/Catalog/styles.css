@@ -1,0 +1,76 @@
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 36px 22px;
+}
+
+@media (max-width: 900px) {
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px 12px;
+  }
+}
+.pagination-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-top: 36px;
+  padding-top: 26px;
+  border-top: 1px solid var(--line);
+}
+
+.pagination-caption {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.pagination-footer .pagination {
+  margin: 0;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pagination-footer .pagination > a,
+.pagination-footer .pagination > span {
+  min-width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.pagination-footer .pagination > a:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.pagination-footer .pagination > .pagination-ellipsis {
+  border: 0;
+  min-width: 20px;
+}
+
+.pagination-footer .pagination > .pagination-direction {
+  padding: 0 12px;
+  gap: 7px;
+}
+
+.pagination-footer .pagination > [aria-disabled='true'] {
+  color: var(--muted);
+  opacity: 0.5;
+}
+
+@media (max-width: 680px) {
+  .pagination-footer {
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 28px;
+  }
+  .pagination-footer .pagination > .pagination-direction {
+    padding: 0;
+    min-width: 40px;
+  }
+  .pagination-direction > span {
+    display: none;
+  }
+}

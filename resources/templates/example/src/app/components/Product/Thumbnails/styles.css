@@ -1,0 +1,54 @@
+.thumbnails {
+	position: relative;
+	max-height: 50rem;
+}
+
+.thumbnails :global(.swiper-slide) {
+	max-height: 8rem;
+	width: 8rem !important;
+}
+
+.thumbnails :global(.swiper-wrapper:has(> .swiper-slide-active[data-swiper-slide-index="1"])) {
+	flex-direction: row;
+}
+
+
+.thumbnails .thumbnail,
+.thumbnails .thumbnail.active,
+.thumbnails .thumbnail img,
+.thumbnails .thumbnail.active img {
+	transition: all 400ms ease-in-out;
+}
+
+.thumbnails .thumbnail {
+	display: flex;
+	border: 1px solid white;
+	overflow: hidden;
+}
+
+.thumbnails .thumbnail,
+.thumbnails .thumbnail img {
+	border-radius: 0.8rem;
+}
+
+.thumbnails .thumbnail img {
+	max-width: unset;
+	width: fit-content;
+	height: fit-content;
+	object-fit: fill;
+}
+
+.thumbnails .thumbnail.active {
+	border: 1px solid black;
+}
+
+.thumbnails .thumbnail.active img {
+	scale: 1.1;
+}
+
+
+@media screen and (min-width: 64em) {
+	.thumbnails :global(.swiper-wrapper:has(> .swiper-slide-active[data-swiper-slide-index="1"])) {
+		flex-direction: column-reverse;
+	}
+}

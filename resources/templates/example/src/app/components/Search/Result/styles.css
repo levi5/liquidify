@@ -1,0 +1,85 @@
+.searchResult {
+	width: 100%;
+	padding: 2rem 1rem;
+	top: 7.4rem;
+	left: 0;
+	position: absolute;
+	box-shadow: 0 5px 7px rgba(0, 0, 0, 0.2);
+	background-color: white;
+	opacity: 1;
+	z-index: 4;
+	visibility: visible;
+}
+
+.searchResult.empty {
+	padding: 0;
+	opacity: 0;
+	visibility: none;
+	z-index: -1;
+}
+
+.searchResult .painel {
+	max-width: 88rem;
+	margin: 0 auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.searchResult .painel .header {
+	width: 100%;
+	display: flex;
+	justify-content: space-between;
+}
+
+.searchResult .painel .header span {
+	font-size: 1.6rem;
+	line-height: 2.4rem;
+	font-weight: 500;
+}
+
+.searchResult ul {
+	margin-top: 2rem;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.6rem;
+}
+
+.searchResult ul a {
+	text-decoration: none;
+}
+
+.searchResult li {
+	display: flex;
+	flex-direction: column;
+	color: black;
+}
+
+.items {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin: 10px 0 0;
+	padding: 0;
+	list-style: none;
+}
+
+.item a {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	color: var(--ink);
+	text-decoration: none;
+}
+
+.item img {
+	width: 60px;
+	height: 75px;
+	object-fit: cover;
+	border-radius: 4px;
+	flex-shrink: 0;
+}
+
+.item .itemTitle {
+	font-size: 12px;
+	line-height: 1.4;
+}

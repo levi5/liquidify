@@ -1,0 +1,289 @@
+/* ---------------------------------------------------------------------------
+   Header — single source of truth for the header layout.
+
+   Breakpoints (aligned with assets/global.css and components/Responsive):
+     mobile   <= 680px
+     tablet   681px - 1023px
+     desktop  >= 1024px
+--------------------------------------------------------------------------- */
+
+/* Sticky rather than fixed: the header keeps its place in the flow, so nothing
+   below it shifts, and anchor jumps have to clear it — hence the scroll-padding.
+   z-index stays under the drawers (50/51) so they still overlay the header. */
+.header-shell {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--paper);
+}
+
+html {
+  scroll-padding-top: 130px;
+}
+
+@media (min-width: 681px) and (max-width: 1023px) {
+  html {
+    scroll-padding-top: 118px;
+  }
+}
+
+@media (max-width: 680px) {
+  html {
+    scroll-padding-top: 100px;
+  }
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+  height: 88px;
+  border-bottom: 1px solid var(--line);
+}
+
+.header-leading {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.site-header .wordmark {
+  flex-shrink: 0;
+}
+
+/* --- desktop navigation ---------------------------------------------- */
+
+.desktop-nav {
+  display: flex;
+  align-items: center;
+  gap: 29px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.desktop-nav > a,
+.desktop-nav .nav-dropdown > summary {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.desktop-nav > a::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0);
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.desktop-nav > a:hover::after,
+.desktop-nav > a:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown > summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.nav-dropdown > summary::-webkit-details-marker {
+  display: none;
+}
+
+.nav-chevron {
+  width: 6px;
+  height: 6px;
+  margin: 0 2px 2px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  display: inline-block;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  pointer-events: none;
+}
+
+.nav-dropdown[open] > summary .nav-chevron {
+  transform: rotate(225deg);
+}
+
+.nav-submenu {
+  position: absolute;
+  top: 100%;
+  left: -20px;
+  min-width: 230px;
+  padding: 12px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 12px 32px #0000000f;
+  z-index: 40;
+}
+
+.desktop-nav .nav-submenu a {
+  display: block;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.desktop-nav .nav-submenu a:hover,
+.desktop-nav .nav-submenu a:focus-visible {
+  background: var(--surface, #f5f5f3);
+}
+
+.desktop-nav .nav-submenu a:hover::after {
+  content: none;
+}
+
+.nav-submenu .nav-overview {
+  font-weight: 600;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 5px;
+}
+
+.nav-submenu .nav-grandchild {
+  padding-left: 25px;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* --- account / search / cart actions ----------------------------------
+   Every action shares one 40x40 box so the glyphs line up on the same
+   optical centre and every target is big enough to tap. `display: flex`
+   (not inline-flex) is deliberate: an inline-flex child sits on the text
+   baseline and the leftover descender space pushes the cart glyph upwards. */
+
+.icon-button-group {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.icon-button-group .icon-button,
+.icon-button-group .searchTrigger,
+.icon-button-group .miniCartIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.icon-button-group .icon-button:hover,
+.icon-button-group .searchTrigger:hover {
+  opacity: 0.6;
+}
+
+.icon-button-group .icon-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* --- tablet + mobile: 3-column grid so the wordmark stays optically centred
+   even though the burger and the action cluster have different widths ------- */
+
+@media (max-width: 1023px) {
+  .site-header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+  }
+
+  .header-leading {
+    justify-self: start;
+  }
+
+  .site-header .wordmark {
+    justify-self: center;
+  }
+
+  .icon-button-group {
+    justify-self: end;
+  }
+}
+
+/* --- tablet: 681px - 1023px ------------------------------------------- */
+
+@media (min-width: 681px) and (max-width: 1023px) {
+  .site-header {
+    gap: 20px;
+    height: 78px;
+  }
+
+  .site-header .wordmark {
+    font-size: 30px;
+  }
+}
+
+/* --- mobile: <= 680px -------------------------------------------------- */
+
+@media (max-width: 680px) {
+  .site-header {
+    gap: 12px;
+    height: 64px;
+  }
+
+  .site-header .wordmark {
+    font-size: 24px;
+    letter-spacing: -1.2px;
+  }
+
+  .icon-button-group {
+    gap: 0;
+  }
+
+  .icon-button-group .icon-button,
+  .icon-button-group .searchTrigger,
+  .icon-button-group .miniCartIcon {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    min-height: 38px;
+  }
+
+  .icon-button-group .icon-button svg {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+/* --- visibility swap: hamburger replaces the horizontal nav ------------ */
+
+@media (min-width: 1024px) {
+  .header-leading {
+    display: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .desktop-nav {
+    display: none;
+  }
+}

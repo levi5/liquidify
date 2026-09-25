@@ -73,6 +73,10 @@
     "empty_title": "Novidades a caminho.",
     "empty_text": "Acompanhe os próximos lançamentos da Liquidify."
   },
+  "shelf": {
+    "empty_title": "Nenhum produto nesta prateleira ainda.",
+    "empty_text": "Escolha uma coleção nas configurações da seção para preencher a prateleira."
+  },
   "collections": {
     "eyebrow": "UM UNIVERSO DE POSSIBILIDADES",
     "heading": "Nossas coleções."
@@ -85,7 +89,7 @@
   },
   "brand": {
     "eyebrow": "LIQUIDIFY / EVERYDAY CULTURE",
-    "heading": "Vista o que faz sentido para você.",
+    "heading": "Vista o que faz você se sentir bem.",
     "description": "O estilo acontece quando você se sente bem. Combine seus favoritos, descubra novas possibilidades e faça de cada dia uma expressão de quem você é.",
     "editorial_alt": "Editorial Liquidify",
     "card_alt": "Estilo urbano e peças para todos os dias",

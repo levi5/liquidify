@@ -1,0 +1,277 @@
+.fashion-hero {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr 0.85fr;
+  gap: 10px;
+  margin-top: 24px;
+  min-height: 560px;
+}
+
+.fashion-hero-copy {
+  background: #eeeeeb;
+  border-radius: 10px 0 0 10px;
+  padding: 54px 36px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+.new-season-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  background: var(--ink);
+  border-radius: 50%;
+  margin-right: 7px;
+}
+
+.fashion-hero h1 {
+  font-size: clamp(48px, 5vw, 75px);
+  font-weight: 650;
+  letter-spacing: -4.2px;
+  line-height: 1.04;
+  margin: 55px 0 25px;
+}
+
+.fashion-hero h1 > span {
+  color: #787878;
+}
+
+.hero-description {
+  max-width: 260px;
+  font-size: 12px;
+  line-height: 1.9;
+  color: #656565;
+  margin-bottom: 30px;
+}
+
+.fashion-hero .button {
+  gap: 32px;
+  min-width: 210px;
+}
+
+.hero-bottom-note {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 45px;
+  font-size: 8px;
+  font-weight: 500;
+  letter-spacing: 1px;
+}
+
+.fashion-hero-photo {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  background: #eee;
+}
+
+.hero-men {
+  border-radius: 0 10px 10px 0;
+}
+
+.fashion-hero-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  inset: 0;
+  transition: transform 0.8s;
+}
+
+.fashion-hero-photo:hover img {
+  transform: scale(1.035);
+}
+
+.hero-women img {
+  object-position: 45% center;
+}
+
+.hero-men img {
+  object-position: 48% center;
+}
+
+.fashion-hero-photo::after {
+  content: '';
+  position: absolute;
+  inset: 65% 0 0;
+  background: linear-gradient(transparent, #0009);
+}
+
+.hero-photo-label {
+  position: absolute;
+  bottom: 27px;
+  left: 25px;
+  right: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 1;
+  color: white;
+}
+
+.hero-photo-label strong {
+  font-size: 23px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+}
+
+.hero-photo-label > span {
+  font-size: 25px;
+}
+
+.hero-photo-tag {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: white;
+  border: 1px solid #ffffff85;
+  padding: 7px 10px;
+  font-size: 8px;
+  letter-spacing: 1.2px;
+}
+
+.values-strip {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding-block: 2.8rem;
+  border-bottom: 0.1rem solid var(--line);
+}
+
+.value-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.2rem;
+  padding-inline: 2.4rem;
+  border-right: 0.1rem solid var(--line);
+}
+
+.value-item:first-child {
+  padding-inline-start: 0;
+}
+
+.value-item:last-child {
+  padding-inline-end: 0;
+  border-right: 0;
+}
+
+.value-item > svg {
+  width: 2rem;
+  height: 2rem;
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+}
+
+.value-item h3 {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin: 0 0 0.4rem;
+}
+
+.value-item p {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (max-width: 1200px) {
+  .fashion-hero {
+    grid-template-columns: 1.2fr 1fr;
+    min-height: 480px;
+  }
+  .fashion-hero h1 {
+    font-size: 55px;
+    margin: 30px 0 20px;
+  }
+  .fashion-hero-copy {
+    padding: 35px 25px 20px;
+  }
+}
+
+@media (max-width: 990px) {
+  .fashion-hero.container {
+    grid-template-columns: 1fr;
+    margin-top: 15px;
+  }
+  .fashion-hero-copy {
+    border-radius: 10px;
+    padding: 45px 30px;
+  }
+  .fashion-hero.container .hero-men {
+    display: none;
+  }
+  .fashion-hero.container .hero-women {
+    grid-column: 1 / -1;
+    width: 100%;
+    border-radius: 10px;
+    height: 380px;
+  }
+}
+
+@media (max-width: 900px) {
+  .values-strip {
+    padding-block: 2.4rem;
+  }
+  .value-item {
+    gap: 1rem;
+    padding-inline: 1.4rem;
+  }
+  .value-item h3 {
+    font-size: 1.1rem;
+  }
+  .value-item p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .values-strip {
+    grid-template-columns: 1fr;
+    padding-block: 2rem;
+  }
+  .value-item,
+  .value-item:first-child,
+  .value-item:last-child {
+    padding-inline: 0;
+    padding-block: 1.2rem;
+    border-right: 0;
+    border-bottom: 0.1rem solid var(--line);
+  }
+  .value-item:first-child {
+    padding-top: 0;
+  }
+  .value-item:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+  }
+  .value-item h3 {
+    font-size: 1.2rem;
+  }
+  .value-item p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 680px) {
+  .fashion-hero.container {
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .fashion-hero-copy {
+    padding: 32px 20px 24px;
+    border-radius: 8px;
+  }
+  .fashion-hero h1 {
+    font-size: 44px;
+    letter-spacing: -2px;
+    margin: 20px 0 16px;
+  }
+  .fashion-hero.container .fashion-hero-photo {
+    height: 320px;
+    border-radius: 8px;
+  }
+}

@@ -1,0 +1,116 @@
+.menuMobile {
+	display: flex;
+	align-items: center;
+}
+
+.menuMobile button {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 40px;
+	height: 40px;
+	margin-left: -10px;
+	padding: 0;
+	background: transparent;
+	border: 0;
+	color: var(--ink);
+	cursor: pointer;
+}
+
+.menuMobile button:hover {
+	opacity: 0.6;
+}
+
+.menuMobile button svg {
+	width: 22px;
+	height: 22px;
+}
+
+.menuMobileDrawer {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+}
+
+.menuMobileNav {
+	display: flex;
+	flex-direction: column;
+	padding: 4px 24px 40px;
+}
+
+.menuMobileTopLink,
+.menuMobileGroup > summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	min-height: 56px;
+	font-size: 19px;
+	letter-spacing: -0.4px;
+	color: var(--ink);
+	cursor: pointer;
+}
+
+.menuMobileGroup {
+	border-bottom: 1px solid var(--line);
+}
+
+.mobileChevron {
+	width: 7px;
+	height: 7px;
+	margin: 0 2px 3px 0;
+	border-right: 1.5px solid currentColor;
+	border-bottom: 1.5px solid currentColor;
+	transform: rotate(45deg);
+	flex-shrink: 0;
+	transition: transform 0.2s ease;
+}
+
+.menuMobileGroup[open] > summary .mobileChevron {
+	transform: rotate(225deg);
+}
+
+.menuMobileSubmenu {
+	padding-bottom: 16px;
+}
+
+.menuMobileOverview {
+	display: block;
+	padding: 10px 0 12px;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--ink);
+}
+
+.menuMobileOverview:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.menuMobileSubLink {
+	display: block;
+	padding: 11px 0;
+	font-size: 15px;
+	color: var(--ink);
+}
+
+.menuMobileGrandchild {
+	display: block;
+	padding: 8px 0 8px 16px;
+	font-size: 13px;
+	color: var(--muted);
+}
+
+@media (min-width: 681px) {
+	.menuMobileNav {
+		padding: 4px 32px 48px;
+	}
+
+	.menuMobileTopLink,
+	.menuMobileGroup > summary {
+		min-height: 62px;
+		font-size: 21px;
+	}
+}

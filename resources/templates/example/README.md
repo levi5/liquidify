@@ -85,7 +85,8 @@ To add a language, copy the default locale files, translate the values, and publ
 | `src/ui/` | Shared UI components for islands |
 | `src/lib/shopify.ts` | Cart integration and currency formatting |
 | `src/scripts/theme.ts` | Rotating notices, quick add, and product gallery |
-| `src/styles/theme.css` | Styles and responsive layouts |
+| `src/app/` | TSX sections, components, and their stylesheets |
+| `assets/global.css` | Base theme styles (reset, tokens, typography, buttons, utilities), hand-maintained above the `liquidify:start`/`liquidify:end` markers |
 | `templates/` | Shopify page composition templates |
 | `config/` | Brand name and color settings |
 | `locales/` | English and Brazilian Portuguese storefront and schema translations |

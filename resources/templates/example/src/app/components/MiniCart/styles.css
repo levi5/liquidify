@@ -1,0 +1,218 @@
+.miniCart {
+	color: var(--ink);
+}
+
+.miniCartIcon,
+.miniCartRemove {
+	cursor: pointer;
+}
+
+.miniCart .miniCartIcon {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.miniCart .miniCartIcon svg {
+	width: 22px;
+	height: 22px;
+	color: var(--ink);
+}
+
+/* The trigger is a square hit area with the glyph centred inside it, so the badge
+   is anchored to the glyph rather than to the box corner: it stays glued to the
+   cart at every breakpoint, and a wider count (10, 100) grows leftwards instead of
+   pushing the badge away from the icon. */
+.miniCart .miniCartIcon .miniCartCount {
+	min-width: 18px;
+	height: 18px;
+	padding: 0 4px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	position: absolute;
+	top: 50%;
+	right: 50%;
+	transform: translate(19px, -17px);
+	border-radius: 50%;
+	background: var(--ink);
+	color: var(--paper);
+	font-size: 10px;
+	font-weight: 600;
+	line-height: 1;
+}
+
+.miniCartDrawer {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	background: var(--paper);
+	color: var(--ink);
+}
+
+.miniCartList {
+	flex: 1;
+	overflow-y: auto;
+	padding: 0 32px;
+}
+
+.miniCartProduct {
+	display: flex;
+	gap: 20px;
+	padding: 28px 0;
+	border-bottom: 1px solid var(--line);
+}
+
+.miniCartProduct:last-child {
+	border-bottom: 0;
+}
+
+.miniCartProductLink {
+	flex-shrink: 0;
+	display: block;
+	border-radius: 6px;
+	overflow: hidden;
+	background: var(--surface, #f4f4f2);
+}
+
+.miniCartProductLink img {
+	display: block;
+	width: 96px;
+	height: 120px;
+	object-fit: cover;
+}
+
+.miniCartProductInfo {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.miniCartProductName {
+	font-size: 14px;
+	line-height: 1.4;
+	color: var(--ink);
+	text-decoration: none;
+}
+
+.miniCartProductName:hover {
+	text-decoration: underline;
+}
+
+.miniCartProductVariant {
+	font-size: 12px;
+	color: var(--muted);
+}
+
+.miniCartProductPrice {
+	font-size: 13px;
+	color: var(--ink);
+}
+
+.miniCartProductActions {
+	margin-top: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	flex-wrap: wrap;
+}
+
+.miniCartRemove {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	font-size: 11px;
+	color: var(--ink);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+	white-space: nowrap;
+}
+
+.miniCartRemove:hover {
+	opacity: 0.6;
+}
+
+.miniCartEmpty {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	justify-content: center;
+	gap: 14px;
+	padding: 40px 32px;
+}
+
+.miniCartEmpty h3 {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 500;
+	letter-spacing: -0.5px;
+}
+
+.miniCartEmpty p {
+	margin: 0;
+	font-size: 13px;
+	color: var(--muted);
+	max-width: 40ch;
+}
+
+.miniCartFooter {
+	flex-shrink: 0;
+	padding: 24px 32px 34px;
+	display: flex;
+	flex-direction: column;
+	gap: 14px;
+	border-top: 1px solid var(--line);
+}
+
+.miniCartSubtotal {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	gap: 16px;
+	font-size: 14px;
+}
+
+.miniCartSubtotal strong {
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.miniCartNote {
+	margin: 0;
+	font-size: 11px;
+	color: var(--muted);
+}
+
+.miniCartFooter .button {
+	width: 100%;
+	justify-content: center;
+}
+
+.miniCartPageLink {
+	align-self: center;
+	font-size: 11px;
+	color: var(--ink);
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.miniCartSecure {
+	margin: 0;
+	align-self: center;
+	font-size: 10px;
+	color: var(--muted);
+}
+
+@media (max-width: 680px) {
+	.miniCartList,
+	.miniCartFooter,
+	.miniCartEmpty {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+}

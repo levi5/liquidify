@@ -1,0 +1,97 @@
+.selectorGrid {
+	padding: 1rem 0rem;
+	display: flex;
+	flex-direction: column;
+}
+
+.selectorGrid .selectorTitle {
+	font-size: 1.6rem;
+	font-weight: 500;
+}
+
+.selectorGrid .selectorTitle strong {
+	margin-left: 0.4rem;
+}
+
+.selectorGrid .options {
+	margin: 1.6rem 0 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.6rem;
+}
+
+.selectorGrid .options li button {
+	all: unset;
+	padding: 0.8rem;
+	min-width: 4rem;
+	width: fit-content;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-size: 1.4rem;
+	font-weight: 500;
+	border-radius: 0.4rem;
+	background-color: var(--surface);
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.selectorGrid .options li.selected button {
+	color: var(--paper);
+	background-color: var(--ink);
+	box-shadow:
+		0 0 0 2px var(--paper),
+		0 0 0 4px var(--ink);
+}
+
+.selectorGrid .options li.disabled button {
+	opacity: 0.45;
+	cursor: not-allowed;
+}
+
+.selectorSkeleton {
+	min-height: 8.6rem;
+	padding: 1rem 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1.6rem;
+}
+
+.selectorSkeletonTitle,
+.selectorSkeletonOptions span,
+.skeletonFallback {
+	display: block;
+	border-radius: 0.4rem;
+	background-color: #f0f0f0;
+	background: linear-gradient(90deg, #f0f0f0, #e0e0e0, #f0f0f0);
+	background-size: 200% 100%;
+	animation: selectorSkeletonLoading 1.2s ease-in-out infinite;
+}
+
+.selectorSkeletonTitle {
+	width: 9.6rem;
+	height: 1.9rem;
+}
+
+.selectorSkeletonOptions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.6rem;
+}
+
+.selectorSkeletonOptions span {
+	width: 4rem;
+	height: 3.5rem;
+}
+
+@keyframes selectorSkeletonLoading {
+	from {
+		background-position: 200% 0;
+	}
+
+	to {
+		background-position: -200% 0;
+	}
+}

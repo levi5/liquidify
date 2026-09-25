@@ -138,6 +138,17 @@
         "default": "Related products"
       }
     },
+    "shelf": {
+      "name": "Product shelf",
+      "settings": {
+        "heading": { "label": "Heading" },
+        "collection": { "label": "Collection" },
+        "limit": { "label": "Products per shelf" }
+      },
+      "presets": {
+        "default": "Product shelf"
+      }
+    },
     "values": {
       "name": "Store benefits",
       "presets": {

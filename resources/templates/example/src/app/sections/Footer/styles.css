@@ -1,0 +1,58 @@
+.site-footer {
+  background: #fff;
+  border-top: 1px solid var(--line);
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: 1.7fr 1fr 1fr 1fr;
+  gap: 35px;
+  padding-block: 45px;
+}
+
+.footer-brand .wordmark {
+  font-size: 44px;
+}
+
+.footer-brand p {
+  font-size: 11px;
+  color: #666;
+  margin-top: 20px;
+  line-height: 1.8;
+}
+
+.footer-main h3 {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.footer-main > div:not(.footer-brand) > a {
+  display: block;
+  font-size: 11px;
+  color: #666;
+  margin-block: 9px;
+}
+
+.footer-main a:hover {
+  color: #111;
+}
+
+.footer-bottom {
+  padding-block: 20px;
+  border-top: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  color: #777;
+  font-size: 8px;
+}
+
+.footer-bottom > span:nth-child(2) {
+  font-size: 7px;
+  letter-spacing: 1px;
+}
+
+.footer-bottom > span:nth-child(2) > span {
+  margin-left: 5px;
+}

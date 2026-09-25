@@ -1,0 +1,56 @@
+.drawerOverlay {
+	width: 100vw;
+	height: 100vh;
+	position: fixed;
+	inset: 0;
+	display: none;
+	opacity: 0;
+	background: rgba(0, 0, 0, 0.45);
+	backdrop-filter: blur(2px);
+	z-index: 50;
+	transition: opacity 0.3s ease;
+}
+
+.drawerOverlay.active {
+	opacity: 1;
+	display: block;
+}
+
+.drawerContent {
+	width: min(560px, 100vw);
+	max-width: 100vw;
+	height: 100%;
+	margin: 0;
+	padding: 0;
+	position: fixed;
+	top: 0;
+	border: 0;
+	display: flex;
+	flex-direction: column;
+	opacity: 0;
+	overflow: hidden;
+	transition:
+		transform ease 0.35s,
+		opacity 0.2s ease;
+	z-index: 51;
+	background-color: var(--paper, #ffffff);
+	color: var(--ink, #171717);
+	box-shadow: -10px 0 40px rgba(0, 0, 0, 0.12);
+}
+
+.drawerContent.left {
+	left: 0;
+	right: auto;
+	transform: translateX(-100%);
+}
+
+.drawerContent.right {
+	left: auto;
+	right: 0;
+	transform: translateX(100%);
+}
+
+.drawerContent.open {
+	opacity: 1;
+	transform: translateX(0%);
+}
