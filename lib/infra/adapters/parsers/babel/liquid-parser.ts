@@ -4,6 +4,7 @@ import { LiquidConditionalParser } from './liquid/conditional-parser'
 import { LiquidLoopParser } from './liquid/loop-parser'
 import { LiquidSnippetParser } from './liquid/snippet-parser'
 import { LiquidPaginateParser } from './liquid/paginate-parser'
+import { LiquidFallbackParser } from './liquid/fallback-component-parser'
 import { LiquidSvgParser } from './liquid/svg-parser'
 import { LiquidBlockParser } from './liquid/block-parser'
 import { LiquidFormParser } from './liquid/form-parser'
@@ -60,6 +61,7 @@ export class LiquidParser implements ILiquidExpressionParser {
   private loopParser: LiquidLoopParser
   private snippetParser: LiquidSnippetParser
   private paginateParser: LiquidPaginateParser
+  private fallbackParser: LiquidFallbackParser
   private svgParser: LiquidSvgParser
   private formParser: LiquidFormParser
   private statementParser: LiquidStatementParser
@@ -120,6 +122,11 @@ export class LiquidParser implements ILiquidExpressionParser {
     )
 
     this.paginateParser = new LiquidPaginateParser(
+      (children, renames, context) => this.renderChildren(children, renames, context),
+      (node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
+    )
+
+    this.fallbackParser = new LiquidFallbackParser(
       (children, renames, context) => this.renderChildren(children, renames, context),
       (node, inCondition, renames, context) => this.expressionParser.generateLiquidCode(node, inCondition, renames, context),
     )
@@ -248,6 +255,7 @@ export class LiquidParser implements ILiquidExpressionParser {
       [this.renderSnippetTag]: () => this.snippetParser.transformRenderSnippet(node, context),
       [this.renderSvgTag]: () => this.svgParser.transformRenderSvg(node),
       PaginateByLiquid: () => this.paginateParser.transformPaginate(node, context),
+      Fallback: () => this.fallbackParser.transformFallback(node, context),
       FormBlock: () => this.formParser.transformForm(node, context),
     }
     const handler = specialTagHandlers[tagName]

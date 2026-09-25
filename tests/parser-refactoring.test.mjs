@@ -155,6 +155,23 @@ test('LiquidVariableParser parses if statement assignments and map calls', () =>
   ])
 })
 
+test('page title default escape stays as liquid output', () => {
+  const parser = expressions()
+  assert.equal(
+    parser.parseExpression(parseExpression('\'page.title | default: "Vamos conversar." | escape\'')),
+    '{{ page.title | default: "Vamos conversar." | escape }}',
+  )
+  assert.equal(
+    parser.parseExpression(parseExpression('`page.title | default: "Vamos conversar." | escape`')),
+    '{{ page.title | default: "Vamos conversar." | escape }}',
+  )
+  assert.equal(
+    parser.parseExpression(parseExpression('"{{ page.title | default: \\"Vamos conversar.\\" | escape }}"')),
+    '{{ page.title | default: "Vamos conversar." | escape }}',
+  )
+  assert.equal(parser.parseExpression(parseExpression('"Plain Text"')), 'Plain Text')
+})
+
 test('expression parser rewrites dynamic classNames calls to append filters', () => {
   const parser = expressions()
   const result = parser.generateLiquidCode(parseExpression('classNames(styles.base, dynamicClass)'), false)

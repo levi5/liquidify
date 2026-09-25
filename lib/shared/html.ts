@@ -2,7 +2,7 @@ import { _match, _pipe } from 'funcio'
 
 export function escapeHtml(value: string): string {
   return _pipe(
-    value,
+    String(value ?? ''),
     (current) => current.replace(/&/g, '&amp;'),
     (current) => current.replace(/</g, '&lt;'),
     (current) => current.replace(/>/g, '&gt;'),
@@ -36,7 +36,7 @@ function escapeTemplatePart(part: string): string {
 
 export function jsonForHtml(value: unknown): string {
   return _pipe(
-    JSON.stringify(value),
+    JSON.stringify(value) ?? 'null',
     (current) => current.replace(/</g, '\\u003c'),
     (current) => current.replace(/\u2028/g, '\\u2028'),
     (current) => current.replace(/\u2029/g, '\\u2029'),

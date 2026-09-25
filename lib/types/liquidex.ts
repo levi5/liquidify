@@ -33,6 +33,16 @@ export interface FormBlockProps {
 }
 export const FormBlock: FC<FormBlockProps> = (() => null) as any
 
+export interface FallbackProps {
+  of: unknown
+  fallback?: unknown
+  children?: ReactNode
+  only?: 'default' | 'nil' | 'blank'
+  allowFalse?: boolean
+  allow_false?: boolean
+}
+export const Fallback: FC<FallbackProps> = (() => null) as any
+
 declare global {
   namespace JSX {
     interface IntrinsicElements {

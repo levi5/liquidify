@@ -40,20 +40,22 @@ export class ParsingContext {
 
   public static derive(context: ParsingContext | undefined, patch: ParsingContextData): ParsingContext {
     return new ParsingContext({
-      blocksSchema: orDefault(context?.blocksSchema, []),
-      scriptAssets: orDefault(context?.scriptAssets, new Set()),
-      renames: orDefault(context?.renames, {}),
-      pendingAssigns: orDefault(context?.pendingAssigns, new Set()),
-      currentFilePath: orDefault(context?.currentFilePath ?? patch.currentFilePath, undefined),
-      componentName: orDefault(context?.componentName ?? patch.componentName, undefined),
+      blocksSchema: [...orDefault(context?.blocksSchema, [])],
+      scriptAssets: new Set(orDefault(context?.scriptAssets, new Set())),
+      renames: { ...orDefault(context?.renames, {}) },
+      pendingAssigns: new Set(orDefault(context?.pendingAssigns, new Set())),
+      currentFilePath: orDefault(patch.currentFilePath ?? context?.currentFilePath, undefined),
+      componentName: orDefault(patch.componentName ?? context?.componentName, undefined),
       mode: orDefault(patch.mode ?? context?.mode, undefined),
-      inlineComponents: orDefault(context?.inlineComponents ?? patch.inlineComponents, undefined),
+      inlineComponents:
+        (patch.inlineComponents ?? context?.inlineComponents) ? new Map(patch.inlineComponents ?? context?.inlineComponents) : undefined,
       outputContext: orDefault(patch.outputContext ?? context?.outputContext, 'text'),
     })
   }
 
   public allocateName(prefix: string): string {
-    const allocated = `__liquidify_${prefix}_${this.sequence}`
+    const safePrefix = String(prefix ?? '').replace(/[^a-zA-Z0-9_]/g, '_') || 'slot'
+    const allocated = `__liquidify_${safePrefix}_${this.sequence}`
     this.sequence += 1
     return allocated
   }

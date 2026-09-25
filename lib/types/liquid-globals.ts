@@ -235,6 +235,48 @@ export type ShopifyForm<TFields extends string = string> = {
   [key: string]: unknown
 }
 
+export interface ShopifyRequest {
+  path: string
+  host: string
+  origin: string
+  locale: { iso_code: string; primary: boolean; root_url: string }
+  page_type: string
+}
+
+export interface Customer {
+  id: number
+  first_name: string
+  last_name: string
+  name: string
+  email: string
+  phone: string | null
+  accepts_marketing: boolean
+  orders_count: number
+  total_spent: number
+  tags: string[]
+}
+
+export interface Localization {
+  country: { iso_code: string; name: string; currency: { iso_code: string; symbol: string } }
+  language: { iso_code: string; name: string; primary: boolean; root_url: string }
+}
+
+export interface PredictiveSearch {
+  performed: boolean
+  terms: string
+  results: unknown[]
+  resources: { products: Product[]; pages: Page[]; articles: Article[]; collections: Collection[] }
+}
+
+export interface GiftCard {
+  code: string
+  balance: number
+  enabled: boolean
+  expired: boolean
+  expires_on: string | null
+  properties: Record<string, unknown>
+}
+
 declare global {
   const collection: Collection;
   const collections: Record<string, Collection> & Collection[];
@@ -294,6 +336,20 @@ declare global {
   const content_for_header: string;
   const content_for_layout: string;
   const linklists: Record<string, Menu>;
+  const request: ShopifyRequest;
+  const customer: Customer;
+  const localization: Localization;
+  const predictive_search: PredictiveSearch;
+  const gift_card: GiftCard;
+  const canonical_url: string;
+  const page_title: string;
+  const page_description: string;
+  const section_id: string;
+  const block: {
+    id: string;
+    type: string;
+    settings: Record<string, any>;
+  };
 
   const handleize: any;
   const downcase: any;

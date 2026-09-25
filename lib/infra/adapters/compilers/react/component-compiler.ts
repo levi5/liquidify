@@ -240,7 +240,7 @@ export class ReactComponentCompiler {
     build.onResolve({ filter: /^liquidex$/ }, (args) => ({ path: args.path, namespace: 'liquidex-stub' }))
     build.onLoad({ filter: /.*/, namespace: 'liquidex-stub' }, () => ({
       contents:
-        'module.exports = { RenderSnippet: function(props) { var Slot = props.slot; if (!Slot) return null; var rest = Object.assign({}, props); delete rest.slot; return window.React.createElement(Slot, rest); }, RenderSvg: function() { return null; }, DynamicBlock: function() { return null; } };',
+        'module.exports = { RenderSnippet: function(props) { var Slot = props.slot; if (!Slot) return null; var rest = Object.assign({}, props); delete rest.slot; return window.React.createElement(Slot, rest); }, RenderSvg: function() { return null; }, DynamicBlock: function() { return null; }, Fallback: function() { return null; } };',
       loader: 'js',
     }))
     build.onResolve({ filter: /^(liquidify|liquidx)(\/.*)?$/ }, (args) =>
