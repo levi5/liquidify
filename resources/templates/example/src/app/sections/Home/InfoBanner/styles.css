@@ -1,0 +1,134 @@
+/* Info Banner */
+
+.brand-campaign {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	border-radius: 10px;
+	overflow: hidden;
+	margin-bottom: 70px;
+	background: #ededed;
+	min-height: 450px;
+}
+
+.campaign-copy {
+	padding: 60px;
+	position: relative;
+	overflow: hidden;
+}
+
+.campaign-copy h2 {
+	font-size: 44px;
+	letter-spacing: -2px;
+	max-width: 380px;
+	margin: 23px 0;
+	position: relative;
+	z-index: 1;
+}
+
+.campaign-copy > p:not(.eyebrow) {
+	max-width: 350px;
+	color: #6d6d6d;
+	font-size: 12px;
+	line-height: 1.9;
+	margin-bottom: 28px;
+	position: relative;
+	z-index: 1;
+}
+
+.campaign-copy .button {
+	position: relative;
+	z-index: 1;
+}
+
+.campaign-image {
+	position: relative;
+	overflow: hidden;
+}
+
+.campaign-image img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	position: absolute;
+	inset: 0;
+	object-position: center 40%;
+}
+
+.campaign-image > span {
+	position: absolute;
+	bottom: 20px;
+	left: 20px;
+	font-size: 8px;
+	letter-spacing: 1.2px;
+	color: #fff;
+	background: #0005;
+	padding: 7px 10px;
+}
+
+.campaign-watermark {
+	position: absolute;
+	bottom: -42px;
+	right: 15px;
+	font-size: 190px;
+	font-weight: 800;
+	letter-spacing: -15px;
+	color: #e3e3e3;
+	line-height: 1;
+}
+
+@media (max-width: 1200px) {
+	.campaign-copy {
+		padding: 42px;
+	}
+
+	.campaign-copy h2 {
+		font-size: 39px;
+	}
+}
+
+@media (max-width: 900px) {
+	.campaign-copy {
+		padding: 35px;
+	}
+
+	.campaign-copy h2 {
+		font-size: 34px;
+	}
+
+	.campaign-copy > p:not(.eyebrow) {
+		font-size: 11px;
+	}
+
+	.brand-campaign {
+		min-height: 400px;
+	}
+}
+
+@media (max-width: 680px) {
+	.brand-campaign {
+		grid-template-columns: 1fr;
+		min-height: 0;
+		margin-bottom: 44px;
+	}
+
+	.campaign-copy {
+		padding: 34px 27px;
+	}
+
+	.campaign-copy h2 {
+		font-size: 36px;
+		max-width: 320px;
+	}
+
+	.campaign-copy > p:not(.eyebrow) {
+		font-size: 12px;
+	}
+
+	.campaign-image {
+		height: 320px;
+	}
+
+	.campaign-watermark {
+		font-size: 150px;
+	}
+}
