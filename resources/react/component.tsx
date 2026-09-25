@@ -95,6 +95,10 @@ function LazyIsland({ componentName, node, ...props }) {
     }
     document.addEventListener('liquidify:ready:' + componentName, onReady)
     document.addEventListener('liquidx:ready:' + componentName, onReady)
+    // The bundle that defines this component may already have run: when the parent
+    // island mounts eagerly, React renders in a later task, so a nested island's
+    // `ready` event fires before this effect subscribes and would be missed.
+    onReady()
     return () => {
       document.removeEventListener('liquidify:ready:' + componentName, onReady)
       document.removeEventListener('liquidx:ready:' + componentName, onReady)
@@ -197,6 +201,15 @@ if (__liquidifyRegistration.isLeft())
 
 if (!window.LiquidifyHydrate) window.LiquidifyHydrate = window.LiquidxHydrate || {}
 window.LiquidxHydrate = window.LiquidifyHydrate
+
+/**
+ * A container laid out as `display: contents` generates no box of its own, so an
+ * IntersectionObserver watching it never reports it as visible and the island would
+ * silently never hydrate. Themes commonly do this so islands do not disturb the
+ * surrounding flex/grid layout, so treat a boxless container as eager.
+ */
+const hasLayoutBox = (container: Element) => getComputedStyle(container).display !== 'contents'
+
 window.LiquidifyHydrate['__LIQUIDIFY_COMPONENT__'] = (container) => {
   if (!window.LiquidifyCanMount(container)) return
   if (container._liquidifyObserver) return
@@ -223,7 +236,7 @@ window.LiquidifyHydrate['__LIQUIDIFY_COMPONENT__'] = (container) => {
     root.render(window.React.createElement(__LIQUIDIFY_COMPONENT__, props))
   }
   if (container.getAttribute('data-hydrate') === 'eager') hydrate()
-  else if ('IntersectionObserver' in window) {
+  else if ('IntersectionObserver' in window && hasLayoutBox(container)) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {

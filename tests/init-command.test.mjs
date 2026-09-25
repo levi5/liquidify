@@ -50,7 +50,7 @@ test('copyTemplate copies template and updates package.json', (t) => {
 
   assert.ok(result.isRight(), 'copyTemplate should succeed')
   assert.ok(fs.existsSync(path.join(targetDir, 'package.json')))
-  assert.ok(fs.existsSync(path.join(targetDir, 'src/components')))
+  assert.ok(fs.existsSync(path.join(targetDir, 'src/app')))
   assert.ok(fs.existsSync(path.join(targetDir, 'locales/en.default.json')))
   assert.ok(fs.existsSync(path.join(targetDir, 'locales/pt-BR.json')))
   assert.ok(fs.existsSync(path.join(targetDir, 'locales/en.default.schema.json')))

@@ -22,6 +22,7 @@ export interface ReactBuildResult {
 }
 
 const COMPONENT_NAME_PATTERN = /^[A-Za-z_$][\w$]*$/
+const STYLESHEET_IMPORT_PATTERN = /^[ \t]*import[ \t]+(?:[^'";]*?[ \t]from[ \t]+)?['"]([^'"]+\.(?:css|scss))['"]/gm
 
 export class ReactComponentCompiler {
   constructor(
@@ -127,11 +128,11 @@ export class ReactComponentCompiler {
       .with(true, () => source)
       .with(false, () => this.processContextBridge(source, filePath as string))
       .exec() as string
-    const entry = this.getClientRuntimeScript(componentName, bridged, injector, rootId)
     const dir = _match(filePath === undefined)
       .with(true, () => this.projectRoot)
       .with(false, () => path.dirname(filePath as string))
       .exec() as string
+    const entry = this.getClientRuntimeScript(componentName, this.keepStylesheetsImported(bridged, dir), injector, rootId)
     const result = await this.compiler.build({
       stdin: { contents: entry, resolveDir: dir, loader: 'tsx' },
       bundle: true,
@@ -173,6 +174,24 @@ export class ReactComponentCompiler {
 
   private getContextBridgeScript(): string {
     return [readReactTemplate('context-bridge.js').trimEnd(), ';'].join('')
+  }
+
+  /**
+   * esbuild only keeps a stylesheet whose import survives tree shaking, and it
+   * drops `import styles from './x.css'` whenever that binding goes unused. A
+   * React component that imports its stylesheet the Liquid way would silently
+   * ship without it, so every relative stylesheet is also imported for its side
+   * effect. esbuild deduplicates by resolved path, so the CSS is emitted once.
+   */
+  private keepStylesheetsImported(source: string, dir: string): string {
+    const specifiers = new Set<string>()
+    for (const match of source.matchAll(STYLESHEET_IMPORT_PATTERN)) {
+      const specifier = match[1]
+      const relative = specifier.startsWith('.') || path.isAbsolute(specifier)
+      if (relative) specifiers.add(path.resolve(dir, specifier))
+    }
+    if (specifiers.size === 0) return source
+    return `${[...specifiers].map((resolved) => `import ${JSON.stringify(resolved)};`).join('\n')}\n${source}`
   }
 
   private getClientRuntimeScript(componentName: string, source: string, injector: string, rootId: string): string {

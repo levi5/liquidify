@@ -198,10 +198,30 @@ export default function Hero() {
     </section>
   )
 }`,
-      path.resolve(import.meta.dirname, '../resources/templates/example/src/components/sections/Hero/index.tsx'),
+      path.resolve(import.meta.dirname, '../resources/templates/example/src/app/sections/Home/Hero/index.tsx'),
     )
     assert.ok(component.html.includes('<section class="fashion-hero container">'))
     assert.ok(component.html.includes('<h1 class="title">Title</h1>'))
     assert.ok(component.html.includes('<button class="button button-dark">Button</button>'))
+  })
+
+  it('emits snippet children as raw markup while still escaping text props', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Panel({ title }) {
+  return (
+    <div className="panel">
+      <span>{title}</span>
+      {children}
+    </div>
+  )
+}`,
+      '/theme/src/app/components/Panel.tsx',
+    )
+
+    assert.ok(component.html.includes('{{ children }}'), component.html)
+    assert.ok(!component.html.includes('children | escape'), component.html)
+    assert.ok(component.html.includes('{{ title | escape }}'), component.html)
   })
 })

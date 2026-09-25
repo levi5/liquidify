@@ -21,6 +21,27 @@
   <article class="product-card">Shelf card 7</article>
   <article class="product-card">Shelf card 8</article>
 </react-island>
+<div class="cards" id="shelf-cards-test">
+  <react-island id="shelf-test" component="SwiperSliderRoot" data-hydrate="eager" style="display: flex;">
+    <react-island id="shelf-arrow-test-left" component="SwiperSliderArrow" data-hydrate="eager" style="display: flex;">
+      <script type="application/json" data-react-props>{"className":"arrow-left","type":"left","enable":true}</script>
+    </react-island>
+    <react-island id="shelf-test-slide" component="SwiperCarousel" data-hydrate="eager" style="display: flex;">
+      <script type="application/json" data-react-props>{"settings":{"slidesPerView":2,"spaceBetween":16,"loop":false,"watchOverflow":true,"observer":true,"observeParents":true,"breakpoints":{"680":{"slidesPerView":3},"1024":{"slidesPerView":4}}}}</script>
+      <article class="product-card">Prateleira 1</article>
+      <article class="product-card">Prateleira 2</article>
+      <article class="product-card">Prateleira 3</article>
+      <article class="product-card">Prateleira 4</article>
+      <article class="product-card">Prateleira 5</article>
+      <article class="product-card">Prateleira 6</article>
+      <article class="product-card">Prateleira 7</article>
+      <article class="product-card">Prateleira 8</article>
+    </react-island>
+    <react-island id="shelf-arrow-test-right" component="SwiperSliderArrow" data-hydrate="eager" style="display: flex;">
+      <script type="application/json" data-react-props>{"className":"arrow-right","type":"right","enable":true}</script>
+    </react-island>
+  </react-island>
+</div>
 <section id="RelatedProducts-recommendation-test">
   <div data-related-grid data-recommendations-state="fallback">
     <react-island component="ProductShelf" data-hydrate="eager"></react-island>
@@ -34,6 +55,9 @@
 <div id="actions"></div>
 <script nonce="liquidify-test" src="assets/product-purchase.js"></script>
 <script nonce="liquidify-test" src="assets/product-shelf.js"></script>
+<script nonce="liquidify-test" src="assets/swiper-slider-root.js"></script>
+<script nonce="liquidify-test" src="assets/swiper-carousel.js"></script>
+<script nonce="liquidify-test" src="assets/swiper-slider-arrow.js"></script>
 <script nonce="liquidify-test" src="assets/filter-drawer.js"></script>
 <script nonce="liquidify-test" src="assets/cart-page.js"></script>
 <script nonce="liquidify-test" src="assets/recommendation-loader.js"></script>
@@ -54,6 +78,7 @@
 <script nonce="liquidify-test" src="09-hydration.js"></script>
 <script nonce="liquidify-test" src="10-product-shelf.js"></script>
 <script nonce="liquidify-test" src="11-recommendations.js"></script>
+<script nonce="liquidify-test" src="12-shelf-swiper.js"></script>
 <script nonce="liquidify-test" src="99-runner.js"></script>
 </body>
 </html>

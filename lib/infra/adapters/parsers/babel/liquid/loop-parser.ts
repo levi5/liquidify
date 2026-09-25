@@ -113,7 +113,7 @@ export class LiquidLoopParser {
     const itemName = this.paramNameOf(callback.params, 0, 'item')
     const localRenames = { ...renames, ...this.indexRenames(callback) }
     const filterCondition = this.filterCondition(callee, itemName, renames, context)
-    const slice = this.sliceSuffix(callee)
+    const slice = this.sliceSuffix(callee, renames, context)
     const arrayTarget = this.mapArrayTarget(callee)
     const assignments = this.mapAssignments(callback, context)
     const body = this.mapBody(callback, localRenames, context)
@@ -227,27 +227,34 @@ export class LiquidLoopParser {
       .exec() as Record<string, string>
   }
 
-  private sliceSuffix(callee: MemberExpression): string {
+  private sliceSuffix(callee: MemberExpression, renames?: Record<string, string>, context?: ParsingContext): string {
     const object = (callee as { object?: unknown }).object
     return _match(this.isSliceCall(object))
-      .with(true, () => this.sliceRange(object as { arguments?: unknown[] }))
+      .with(true, () => this.sliceRange(object as { arguments?: unknown[] }, renames, context))
       .with(false, () => '')
       .exec() as string
   }
 
-  private sliceRange(object: { arguments?: unknown[] }): string {
+  private sliceRange(object: { arguments?: unknown[] }, renames?: Record<string, string>, context?: ParsingContext): string {
     const args = object.arguments ?? []
     const start = this.readNumeric(args[0]) ?? 0
     const end = this.readNumeric(args[1])
-    const limit = _match(end === null)
-      .with(true, () => '')
-      .with(false, () => ` limit: ${Number(end) - start}`)
+    const limit = _match(end !== null)
+      .with(true, () => ` limit: ${(end as number) - start}`)
+      .with(false, () => this.dynamicLimit(args[1], start, renames, context))
       .exec() as string
     const offset = _match(start > 0)
       .with(true, () => ` offset: ${start}`)
       .with(false, () => '')
       .exec() as string
     return `${limit}${offset}`
+  }
+
+  private dynamicLimit(arg: unknown, start: number, renames?: Record<string, string>, context?: ParsingContext): string {
+    return _match(start > 0 || arg === null || arg === undefined)
+      .with(true, () => '')
+      .with(false, () => ` limit: ${this.liquidVariableParser.generateLiquidCode(arg as Node, true, renames, context)}`)
+      .exec() as string
   }
 
   private readNumeric(arg: unknown): number | null {

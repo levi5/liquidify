@@ -57,13 +57,31 @@ export class LiquidFileSystemGenerator implements IGenerator {
     await this.ensureDirectories()
     const fileName = toSafeFileName(component.name)
     assertSafeFileName(fileName)
-    await _match(component.mode === 'react')
-      .with(true, () => undefined)
-      .with(false, () => this.generateLiquidFile(component, fileName, effectiveSource))
+    await _match(this.emitsLiquidFile(component))
+      .with(true, () => this.generateLiquidFile(component, fileName, effectiveSource))
+      .with(false, () => undefined)
       .exec()
     const scriptGenerated = await this.handleScripts(component, fileName, effectiveSource)
     await this.recordContributions(component, fileName, scriptGenerated, effectiveSource)
     await this.touchDirectory(this.options.outputDir)
+  }
+
+  /**
+   * `use react` components ship as a script bundle only. So do plain script
+   * components (`use dom`, `use dom:global`, `use script`) that never declared a
+   * type: they have no Liquid markup, and emitting a companion file would leave
+   * an empty `{% schema %}{}` shell inside `sections/`, which Shopify rejects.
+   * A component that *did* declare a type (e.g. `use blocks` with an inline
+   * `use dom`) still gets its Liquid file.
+   */
+  private emitsLiquidFile(component: ParsedComponent): boolean {
+    const isScriptOnly = component.mode === 'dom' || component.mode === 'dom:global' || component.mode === 'react'
+    const untypedScript = isScriptOnly && component.type === undefined
+
+    return _match(component.mode === 'react' || untypedScript)
+      .with(true, () => false)
+      .with(false, () => true)
+      .exec() as boolean
   }
 
   private async recordContributions(

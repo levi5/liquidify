@@ -11,7 +11,7 @@ const { CssInjector } = require('../dist/infra/adapters/compilers/react/runtime/
 const { SilentLogger } = require('../dist/shared/logger')
 
 const REQUIRED_FOLDERS = ['assets', 'snippets', 'sections', 'blocks']
-const STRICT_BUNDLES = ['product-purchase', 'product-shelf', 'filter-drawer', 'cart-page', 'recommendation-loader', 'storefront', 'probe', 'shopify-probe', 'react-runtime']
+const STRICT_BUNDLES = ['product-info', 'product-provider', 'filter-provider', 'mini-cart', 'quantity-selector', 'search-result', 'selector-grid', 'swiper-carousel', 'swiper-slider-arrow', 'swiper-slider-root', 'thumbnails', 'drawer', 'drawer-content', 'portal', 'toast-host', 'theme', 'accordion', 'probe', 'shopify-probe', 'react-runtime']
 const ROOT_PROBE_SOURCE =
   "function RootProbe({ children }) { window.React.useEffect(() => { window.rootMounts = (window.rootMounts || 0) + 1; return () => { window.rootCleanups = (window.rootCleanups || 0) + 1 } }, []); return window.React.createElement('article', { className: 'root-probe' }, children) }"
 const CHILD_PROBE_SOURCE = "function ChildProbe({ children }) { return window.React.createElement('em', {}, children) }"
@@ -54,7 +54,7 @@ async function buildMode(example, fixtures, output, strictCsp) {
 
 async function compileExampleTheme(example, directory, strictCsp) {
   const builder = makeLiquidifyBuilder({
-    componentsDir: path.join(example, 'src/components'),
+    componentsDir: path.join(example, 'src/app'),
     output: directory,
     react: strictCsp ? {} : { strictCsp: false },
   })

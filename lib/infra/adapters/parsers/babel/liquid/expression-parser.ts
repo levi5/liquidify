@@ -822,12 +822,26 @@ export class ExpressionParser {
   }
 
   private renderOutput(code: string, context?: ParsingContext): string {
-    return _match(this.outputContextOf(context))
-      .with('json', () => liquidJsonOutput(code))
-      .with('raw', () => `{{ ${code} }}`)
-      .with('text', () => escapedOutput(code))
-      .with(this.outputContextOf(context), () => escapedOutput(code))
+    return _match(this.isSnippetChildren(code) && this.outputContextOf(context) !== 'json')
+      .with(true, () => `{{ ${code} }}`)
+      .with(false, () =>
+        _match(this.outputContextOf(context))
+          .with('json', () => liquidJsonOutput(code))
+          .with('raw', () => `{{ ${code} }}`)
+          .with('text', () => escapedOutput(code))
+          .with(this.outputContextOf(context), () => escapedOutput(code))
+          .exec(),
+      )
       .exec() as string
+  }
+
+  /**
+   * `children` of a snippet is markup captured by `{% capture snippet_content %}`
+   * and forwarded through `{% render 'slot', children: snippet_content %}`. It is
+   * already-rendered HTML, so escaping it would show the tags as visible text.
+   */
+  private isSnippetChildren(code: string): boolean {
+    return /^\s*children\s*$/.test(code)
   }
 
   private outputContextOf(context?: ParsingContext): string {
