@@ -34,6 +34,8 @@ type Cart = {
 	items: CartItem[]
 }
 
+const UNLIMITED_QUANTITY = 999
+
 const openMiniCart = () => {
 	window.dispatchEvent(new CustomEvent('message::mini-cart', { detail: true }))
 }
@@ -52,18 +54,22 @@ const variantLabel = (item: CartItem) => {
 export const MiniCart = (_props: { elementId: string }) => {
 	const [state, setState] = useState<Cart | null>(null)
 	const [quantitySyncKeys, setQuantitySyncKeys] = useState<Record<string, number>>({})
-	const [quantityMaxByItem, setQuantityMaxByItem] = useState<Record<string, number>>({})
+	const [quantityMaxByItem, setQuantityMaxByItem] = useState<Record<string, number | null>>({})
+
+	const resolveItemLimit = async (item: CartItem) => {
+		if (!item.variant_id) return null
+
+		try {
+			const limit = getVariantStockLimit(await CartService.getVariant(item.variant_id))
+			if (limit === null || limit < item.quantity) return null
+			return limit
+		} catch {
+			return null
+		}
+	}
 
 	const resolveCartQuantityLimits = useCallback(async (items: CartItem[]) => {
-		const entries = await Promise.all(
-			items.map(async (item) => {
-				if (!item.variant_id) return [item.key, item.quantity] as const
-
-				const variant = await CartService.getVariant(item.variant_id)
-
-				return [item.key, getVariantStockLimit(variant) ?? item.quantity] as const
-			}),
-		)
+		const entries = await Promise.all(items.map(async (item) => [item.key, await resolveItemLimit(item)] as const))
 
 		setQuantityMaxByItem(Object.fromEntries(entries))
 	}, [])
@@ -198,9 +204,10 @@ export const MiniCart = (_props: { elementId: string }) => {
 
 												<div className={'miniCartProductActions'}>
 													<QuantitySelector
+														compact
 														syncKey={quantitySyncKeys[item.key] ?? 0}
 														initialValue={item.quantity}
-														max={quantityMaxByItem[item.key] ?? item.quantity}
+														max={quantityMaxByItem[item.key] ?? UNLIMITED_QUANTITY}
 														ariaLabel={translate('cart.quantity', 'Quantidade')}
 														onChange={(nextQuantity) => updateProductQuantity(item.key, nextQuantity)}
 													/>
