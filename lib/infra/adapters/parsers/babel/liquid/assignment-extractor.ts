@@ -160,9 +160,13 @@ export class AssignmentExtractor {
   }
 
   private assignText(name: string, code: string, operator: string): string {
-    return _match(operator === '+=')
-      .with(true, () => `{% assign ${name} = ${name} | append: ${code} %}`)
-      .with(false, () => `{% assign ${name} = ${code} %}`)
+    return _match(operator)
+      .with('+=', () => `{% assign ${name} = ${name} | append: ${code} %}`)
+      .with('-=', () => `{% assign ${name} = ${name} | minus: ${code} %}`)
+      .with('*=', () => `{% assign ${name} = ${name} | times: ${code} %}`)
+      .with('/=', () => `{% assign ${name} = ${name} | divided_by: ${code} %}`)
+      .with('%=', () => `{% assign ${name} = ${name} | modulo: ${code} %}`)
+      .with(operator, () => `{% assign ${name} = ${code} %}`)
       .exec() as string
   }
 }

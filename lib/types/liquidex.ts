@@ -43,6 +43,35 @@ export interface FallbackProps {
 }
 export const Fallback: FC<FallbackProps> = (() => null) as any
 
+export interface UnlessBlockProps {
+  condition: unknown
+  children?: ReactNode
+}
+export const UnlessBlock: FC<UnlessBlockProps> = (() => null) as any
+
+export interface CaptureBlockProps {
+  as: string
+  children?: ReactNode
+}
+export const CaptureBlock: FC<CaptureBlockProps> = (() => null) as any
+
+export interface TablerowByLiquidProps {
+  collection: unknown
+  cols?: number | string
+  children?: ReactNode
+}
+export const TablerowByLiquid: FC<TablerowByLiquidProps> = (() => null) as any
+
+export interface StylesheetBlockProps {
+  children?: ReactNode
+}
+export const StylesheetBlock: FC<StylesheetBlockProps> = (() => null) as any
+
+export interface JavascriptBlockProps {
+  children?: ReactNode
+}
+export const JavascriptBlock: FC<JavascriptBlockProps> = (() => null) as any
+
 declare global {
   namespace JSX {
     interface IntrinsicElements {

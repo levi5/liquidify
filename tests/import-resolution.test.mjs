@@ -37,6 +37,15 @@ test('Liquid imports share schema resolution and preserve objects with a type ke
   })
 })
 
+test('tsconfig comment stripping preserves wildcard characters inside strings', () => {
+  const files = new Map([
+    ['/theme/tsconfig.json', '{ // aliases\n "compilerOptions": { "paths": { "@src/*": ["src/*"] } } }'],
+    ['/theme/src/data.ts', 'export const value = "resolved"'],
+  ])
+  const fs = { existsSync: (file) => files.has(file), readFileSync: (file) => files.get(file) }
+  assert.equal(new ModuleResolver(fs).resolve('@src/data', '/theme/Card.tsx'), '/theme/src/data.ts')
+})
+
 test('circular reexports fail clearly instead of exhausting the call stack', () => {
   const { files, fs } = fixture()
   files.set('/theme/a.ts', 'export { x } from "./b"')

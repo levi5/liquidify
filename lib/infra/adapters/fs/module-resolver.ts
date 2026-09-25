@@ -1,6 +1,6 @@
 import path from 'node:path'
 import { parseExpression } from '@babel/parser'
-import { _match, _pipe, _try } from 'funcio'
+import { _match, _try } from 'funcio'
 import type { IFileSystem } from '../../../core/protocols/file-system'
 import { ValidationError } from '../../../core/errors/validation-error'
 import { SOURCE_EXTENSIONS as extensions } from '../../../shared/liquid-constants'
@@ -11,14 +11,17 @@ interface ResolvedConfig {
   paths: Record<string, string[]>
 }
 
+const JSON_TOKEN_PATTERN = /("(?:\\.|[^"\\])*"|\/\/[^\r\n]*|\/\*[\s\S]*?\*\/)/g
+const JSON_TRAILING_COMMA_PATTERN = /("(?:\\.|[^"\\])*")|,(\s*[}\]])/g
+
 function stripJsonComments(source: string): string {
-  return _pipe(
-    source,
-    (current) => current.replace(/^\uFEFF/, ''),
-    (current) => current.replace(/\/\/[^\n\r]*/g, ''),
-    (current) => current.replace(/\/\*[\s\S]*?\*\//g, ''),
-    (current) => current.replace(/,(\s*[}\]])/g, '$1'),
-  )
+  return source
+    .replace(/^\uFEFF/, '')
+    .replace(JSON_TOKEN_PATTERN, (token: string) => (token.startsWith('"') ? token : ''))
+    .replace(
+      JSON_TRAILING_COMMA_PATTERN,
+      (_match: string, stringToken: string | undefined, closing: string | undefined) => stringToken ?? closing ?? '',
+    )
 }
 
 interface ConfigNode {

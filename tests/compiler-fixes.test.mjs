@@ -32,7 +32,7 @@ test('arithmetic preserves the precedence of nested operands and renames', () =>
 })
 
 test('unsupported find predicates report location and a useful diagnostic', () => {
-  for (const source of ['items.find(predicate)', 'items.find()', 'items.find(item => { return item.available })']) {
+  for (const source of ['items.find(predicate)', 'items.find()', 'items.find(item => { const x = 1; return x; })']) {
     assert.throws(
       () =>
         expressions().generateLiquidCode(

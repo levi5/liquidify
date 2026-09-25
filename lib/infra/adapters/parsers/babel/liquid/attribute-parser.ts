@@ -29,6 +29,7 @@ import { HTMLAttributeConverter } from '../html/attribute-parser'
 import { _match } from 'funcio'
 import type { ILiquidExpressionParser } from '../../../../../types/liquid'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { ValidationError } from '../../../../../core/errors/validation-error'
 import { pascalToKebab } from '../../../../../shared/string'
 import { BOOLEAN_ATTRIBUTES as booleanAttributes } from '../../../../../shared/liquid-constants'
 import { escapeAttributeTemplate, escapedOutput } from '../../../../../shared/html'
@@ -65,9 +66,16 @@ export class LiquidAttributeConverter {
     context?: ParsingContext,
   ): string {
     return _match(!isJSXAttribute(attribute) || !isJSXIdentifier((attribute as JSXAttribute).name))
-      .with(true, () => '')
+      .with(true, () => this.handleSpreadAttribute(attribute, context))
       .with(false, () => this.convertNamedAttribute(attribute as JSXAttribute, renames, context))
       .exec() as string
+  }
+
+  private handleSpreadAttribute(_attribute: JSXAttribute | JSXSpreadAttribute, context?: ParsingContext): string {
+    throw new ValidationError(
+      'JSX spread attributes ({...props}) are not supported in Liquid output. List props explicitly (e.g. <div className={props.className} id={props.id}>).',
+      context?.currentFilePath,
+    )
   }
 
   private convertNamedAttribute(attribute: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {

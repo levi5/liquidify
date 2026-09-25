@@ -11,6 +11,7 @@ import {
   type Node,
 } from '@babel/types'
 import { _match } from 'funcio'
+import { ValidationError } from '../../../../../core/errors/validation-error'
 
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
@@ -31,12 +32,30 @@ export class LiquidFormParser {
 
   public transformForm(node: JSXElement, context?: ParsingContext): string {
     const openingElement = node.openingElement
-    const name = this.formName(
-      openingElement.attributes.find(
-        (attr): attr is JSXAttribute => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'name',
-      ),
-      context,
+    const nameAttr = openingElement.attributes.find(
+      (attr): attr is JSXAttribute => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name === 'name',
     )
+    _match(nameAttr === undefined)
+      .with(true, () => {
+        throw new ValidationError(
+          '<FormBlock> requires a "name" attribute (e.g. <FormBlock name="contact"> or <FormBlock name="product">).',
+          context?.currentFilePath,
+          this.locationOf(node),
+        )
+      })
+      .with(false, () => undefined)
+      .exec()
+    const name = this.formName(nameAttr, context)
+    _match(name === "''" || name.trim() === '')
+      .with(true, () => {
+        throw new ValidationError(
+          '<FormBlock> "name" could not be resolved to a Liquid form type.',
+          context?.currentFilePath,
+          this.locationOf(node),
+        )
+      })
+      .with(false, () => undefined)
+      .exec()
     const attributes = openingElement.attributes
       .filter((attr): attr is JSXAttribute => isJSXAttribute(attr) && isJSXIdentifier(attr.name) && attr.name.name !== 'name')
       .map((attr) => this.formatAttribute(attr, context))
@@ -86,5 +105,10 @@ export class LiquidFormParser {
 
   private expressionAttribute(container: JSXExpressionContainer, context?: ParsingContext): string {
     return this.generateLiquidCode(container.expression as Node, false, undefined, context).replace(/"/g, "'")
+  }
+
+  private locationOf(node: unknown): { line: number; column: number } | undefined {
+    const loc = (node as { loc?: { start: { line: number; column: number } } }).loc
+    return loc === undefined ? undefined : { line: loc.start.line, column: loc.start.column + 1 }
   }
 }

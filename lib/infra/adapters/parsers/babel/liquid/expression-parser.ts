@@ -38,6 +38,29 @@ import type { ParsingContext } from '../../../../../core/entities/parsing-contex
 
 const LIQUID_FILTERS = new Set(['markdownify', 'handleize', 'downcase', 'upcase', 'strip', 'strip_html', 'money', 'money_without_currency'])
 
+const SHOPIFY_GLOBAL_FILTERS = new Set([
+  'date',
+  't',
+  'translate',
+  'asset_url',
+  'stylesheet_tag',
+  'script_tag',
+  'image_url',
+  'image_tag',
+  'img_url',
+  'link_to',
+  'money_with_currency',
+  'money_without_trailing_zeros',
+  'weight_with_unit',
+  'at_least',
+  'at_most',
+  'sum',
+  'compact',
+  'uniq',
+  'default_errors',
+  'format_address',
+])
+
 const CLASSNAMES_FNS = new Set(['classNames', 'classnames', 'clsx'])
 
 const STRING_LIKE_METHODS = new Set([
@@ -146,6 +169,9 @@ export class ExpressionParser {
       .with(isIdentifier(n.callee) && LIQUID_FILTERS.has((n.callee as { name: string }).name), () =>
         this.rewriteGlobalFilter(n, (n.callee as { name: string }).name, inCondition, renames, context),
       )
+      .with(isIdentifier(n.callee) && SHOPIFY_GLOBAL_FILTERS.has((n.callee as { name: string }).name), () =>
+        this.rewriteShopifyGlobal(n, (n.callee as { name: string }).name, inCondition, renames, context),
+      )
       .with(isIdentifier(n.callee) && CLASSNAMES_FNS.has((n.callee as { name: string }).name), () =>
         this.rewriteClassNames(n, inCondition, renames, context),
       )
@@ -153,6 +179,30 @@ export class ExpressionParser {
         this.rewriteMethod(n, inCondition, renames, context),
       )
       .with(true, () => undefined)
+      .exec()
+  }
+
+  private rewriteShopifyGlobal(
+    n: CallExpression,
+    name: string,
+    inCondition: boolean,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): void {
+    const args = n.arguments
+      .filter((arg) => hasNodeType(arg))
+      .map((arg) => this.generateLiquidCode(arg as Expression, inCondition, renames, context))
+    _match(args.length === 0)
+      .with(true, () => undefined)
+      .with(false, () => {
+        const [first, ...rest] = args
+        const filter = _match(name)
+          .with('translate', () => 't')
+          .with(name, () => name)
+          .exec() as string
+        const suffix = rest.length > 0 ? `: ${rest.join(', ')}` : ''
+        Object.assign(n, identifier(`${first} | ${filter}${suffix}`))
+      })
       .exec()
   }
 
@@ -221,7 +271,182 @@ export class ExpressionParser {
       .with('trim', () => this.rewriteStringFilter(n, 'strip', inCondition, context))
       .with('find', () => this.rewriteFind(n, renames, context))
       .with('some', () => this.rewriteSome(n, renames, context))
+      .with('split', () => this.rewriteSplit(n, inCondition, renames, context))
+      .with('slice', () => this.rewriteSlice(n, inCondition, renames, context))
+      .with('concat', () => this.rewriteConcat(n, inCondition, renames, context))
+      .with('reverse', () => this.rewriteNoArgFilter(n, 'reverse', inCondition, renames, context))
+      .with('sort', () => this.rewriteNoArgFilter(n, 'sort', inCondition, renames, context))
+      .with('replace', () => this.rewriteReplace(n, inCondition, renames, context))
+      .with('replaceAll', () => this.rewriteReplace(n, inCondition, renames, context))
+      .with('substring', () => this.rewriteSlice(n, inCondition, renames, context))
+      .with('truncate', () => this.rewriteSingleArgFilter(n, 'truncate', '50', inCondition, renames, context))
+      .with('truncatewords', () => this.rewriteSingleArgFilter(n, 'truncatewords', '15', inCondition, renames, context))
+      .with('prepend', () => this.rewriteSingleArgFilter(n, 'prepend', '""', inCondition, renames, context))
+      .with('remove', () => this.rewriteSingleArgFilter(n, 'remove', '""', inCondition, renames, context))
+      .with('upcase', () => this.rewriteNoArgFilter(n, 'upcase', inCondition, renames, context))
+      .with('downcase', () => this.rewriteNoArgFilter(n, 'downcase', inCondition, renames, context))
+      .with('stripHtml', () => this.rewriteNoArgFilter(n, 'strip_html', inCondition, renames, context))
+      .with('urlEncode', () => this.rewriteNoArgFilter(n, 'url_encode', inCondition, renames, context))
+      .with('first', () => this.rewriteNoArgFilter(n, 'first', inCondition, renames, context))
+      .with('last', () => this.rewriteNoArgFilter(n, 'last', inCondition, renames, context))
+      .with('size', () => this.rewriteNoArgFilter(n, 'size', inCondition, renames, context))
+      .with('uniq', () => this.rewriteNoArgFilter(n, 'uniq', inCondition, renames, context))
+      .with('compact', () => this.rewriteNoArgFilter(n, 'compact', inCondition, renames, context))
+      .with('sum', () => this.rewriteNoArgFilter(n, 'sum', inCondition, renames, context))
+      .with('floor', () => this.rewriteMathFilter(n, 'floor', inCondition, renames, context))
+      .with('ceil', () => this.rewriteMathFilter(n, 'ceil', inCondition, renames, context))
+      .with('round', () => this.rewriteMathFilter(n, 'round', inCondition, renames, context))
+      .with('abs', () => this.rewriteMathFilter(n, 'abs', inCondition, renames, context))
+      .with('max', () => this.rewriteMathBinary(n, 'at_least', inCondition, renames, context))
+      .with('min', () => this.rewriteMathBinary(n, 'at_most', inCondition, renames, context))
+      .with('stringify', () => this.rewriteJson(n, inCondition, renames, context))
+      .with('keys', () => this.rewriteObjectKeys(n, context))
       .with(methodName, () => undefined)
+      .exec()
+  }
+
+  private rewriteSplit(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
+    const argCode = _match(n.arguments.length > 0)
+      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(false, () => '" "')
+      .exec() as string
+    Object.assign(n, identifier(`${objectCode} | split: ${argCode}`))
+  }
+
+  private rewriteSlice(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
+    const start = _match(n.arguments.length > 0)
+      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(false, () => '0')
+      .exec() as string
+    const len = _match(n.arguments.length > 1)
+      .with(true, () => `, ${this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context)}`)
+      .with(false, () => '')
+      .exec() as string
+    Object.assign(n, identifier(`${objectCode} | slice: ${start}${len}`))
+  }
+
+  private rewriteConcat(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
+    const argCode = _match(n.arguments.length > 0)
+      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(false, () => 'empty')
+      .exec() as string
+    Object.assign(n, identifier(`${objectCode} | concat: ${argCode}`))
+  }
+
+  private rewriteNoArgFilter(
+    n: CallExpression,
+    filter: string,
+    inCondition: boolean,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): void {
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
+    Object.assign(n, identifier(`${objectCode} | ${filter}`))
+  }
+
+  private rewriteReplace(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
+    const from = _match(n.arguments.length > 0)
+      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(false, () => '""')
+      .exec() as string
+    const to = _match(n.arguments.length > 1)
+      .with(true, () => `, ${this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context)}`)
+      .with(false, () => '')
+      .exec() as string
+    Object.assign(n, identifier(`${objectCode} | replace: ${from}${to}`))
+  }
+
+  private rewriteSingleArgFilter(
+    n: CallExpression,
+    filter: string,
+    fallback: string,
+    inCondition: boolean,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): void {
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
+    const argCode = _match(n.arguments.length > 0)
+      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(false, () => fallback)
+      .exec() as string
+    Object.assign(n, identifier(`${objectCode} | ${filter}: ${argCode}`))
+  }
+
+  private rewriteMathFilter(
+    n: CallExpression,
+    filter: string,
+    inCondition: boolean,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): void {
+    const target = _match(isMemberExpression(n.callee) && (n.callee as { object: unknown }).object !== undefined)
+      .with(true, () => this.mathTarget(n, inCondition, renames, context))
+      .with(false, () => '')
+      .exec() as string
+    _match(target === '')
+      .with(true, () => undefined)
+      .with(false, () => Object.assign(n, identifier(`${target} | ${filter}`)))
+      .exec()
+  }
+
+  private mathTarget(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): string {
+    const callee = n.callee as { object: Expression }
+    const obj = callee.object
+    return _match(isIdentifier(obj) && (obj as { name: string }).name === 'Math' && n.arguments.length > 0)
+      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(false, () => this.generateLiquidCode(obj, inCondition, renames, context))
+      .exec() as string
+  }
+
+  private rewriteMathBinary(
+    n: CallExpression,
+    filter: string,
+    inCondition: boolean,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): void {
+    const callee = n.callee as { object: Expression }
+    const obj = callee.object
+    const isMath = isIdentifier(obj) && (obj as { name: string }).name === 'Math'
+    _match(isMath && n.arguments.length >= 2)
+      .with(true, () => {
+        const first = this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context)
+        const second = this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context)
+        Object.assign(n, identifier(`${first} | ${filter}: ${second}`))
+      })
+      .with(false, () => undefined)
+      .exec()
+  }
+
+  private rewriteJson(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+    const callee = n.callee as { object: Expression }
+    const obj = callee.object
+    const isJson = isIdentifier(obj) && (obj as { name: string }).name === 'JSON'
+    _match(isJson && n.arguments.length > 0)
+      .with(true, () => {
+        const arg = this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context)
+        Object.assign(n, identifier(`${arg} | json`))
+      })
+      .with(false, () => undefined)
+      .exec()
+  }
+
+  private rewriteObjectKeys(n: CallExpression, context?: ParsingContext): void {
+    const callee = n.callee as { object: Expression }
+    const obj = callee.object
+    _match(isIdentifier(obj) && (obj as { name: string }).name === 'Object')
+      .with(true, () => {
+        throw new ValidationError(
+          'Object.keys() has no direct Liquid filter. Iterate with `for (const key of Object.keys(obj))` is not supported; use `{% for pair in obj %}{{ pair[0] }}{% endfor %}` pattern or pass keys as an array prop.',
+          this.filePathOf(context),
+          this.errorLocation(n),
+        )
+      })
+      .with(false, () => undefined)
       .exec()
   }
 
@@ -271,13 +496,43 @@ export class ExpressionParser {
 
   private isValidFindPredicate(callback: CallExpression['arguments'][number]): boolean {
     return _match(isArrowFunctionExpression(callback as Node))
-      .with(true, () => this.hasSingleIdentifierParam(callback as ArrowFunctionExpression))
+      .with(
+        true,
+        () =>
+          this.hasSingleIdentifierParam(callback as ArrowFunctionExpression) &&
+          this.hasReadablePredicate(callback as ArrowFunctionExpression),
+      )
       .with(false, () => false)
       .exec() as boolean
   }
 
+  private hasReadablePredicate(callback: ArrowFunctionExpression): boolean {
+    return _match(callback.body.type)
+      .with('BlockStatement', () => this.hasSingleReturn(callback))
+      .with(callback.body.type, () => true)
+      .exec() as boolean
+  }
+
+  private hasSingleReturn(callback: ArrowFunctionExpression): boolean {
+    const body = callback.body as { body?: Array<{ type?: string; argument?: unknown }> }
+    const statements = body.body ?? []
+    return (
+      statements.length === 1 &&
+      statements[0].type === 'ReturnStatement' &&
+      statements[0].argument !== null &&
+      statements[0].argument !== undefined
+    )
+  }
+
   private hasSingleIdentifierParam(callback: ArrowFunctionExpression): boolean {
-    return !callback.async && callback.params.length === 1 && isIdentifier(callback.params[0]) && callback.body.type !== 'BlockStatement'
+    return !callback.async && callback.params.length === 1 && isIdentifier(callback.params[0])
+  }
+
+  private findPredicateBody(callback: ArrowFunctionExpression): Expression {
+    return _match(callback.body.type === 'BlockStatement')
+      .with(true, () => (callback.body as { body: Array<{ argument: Expression }> }).body[0].argument as Expression)
+      .with(false, () => callback.body as Expression)
+      .exec() as Expression
   }
 
   private buildFindLoop(
@@ -304,7 +559,7 @@ export class ExpressionParser {
     const itemName = (callback.params[0] as { name: string }).name
     const varName = context.allocateName('found')
     const precedingAssigns = context.getPendingAssigns()
-    const condition = this.generateLiquidCode(callback.body as Expression, true, renames, context)
+    const condition = this.generateLiquidCode(this.findPredicateBody(callback), true, renames, context)
     const predicateAssigns = context.getPendingAssigns()
     _match(precedingAssigns !== '')
       .with(true, () => context.addPendingAssign(precedingAssigns.trimEnd()))

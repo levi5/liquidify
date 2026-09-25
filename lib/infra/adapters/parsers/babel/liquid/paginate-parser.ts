@@ -11,6 +11,7 @@ import {
   type JSXAttribute,
 } from '@babel/types'
 import { _match } from 'funcio'
+import { ValidationError } from '../../../../../core/errors/validation-error'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class LiquidPaginateParser {
@@ -42,8 +43,23 @@ export class LiquidPaginateParser {
       ),
       context,
     )
+    _match(collection.trim() === '' || by.trim() === '')
+      .with(true, () => {
+        throw new ValidationError(
+          '<PaginateByLiquid> requires "collection" and "by" (e.g. <PaginateByLiquid collection={products} by={12}>).',
+          context?.currentFilePath,
+          this.locationOf(node),
+        )
+      })
+      .with(false, () => undefined)
+      .exec()
     const children = this.renderChildren(node.children, undefined, context)
     return `{% paginate ${collection} by ${by} %}\n${children}\n{% endpaginate %}`
+  }
+
+  private locationOf(node: unknown): { line: number; column: number } | undefined {
+    const loc = (node as { loc?: { start: { line: number; column: number } } }).loc
+    return loc === undefined ? undefined : { line: loc.start.line, column: loc.start.column + 1 }
   }
 
   private readAttribute(attr: JSXAttribute | undefined, context?: ParsingContext): string {

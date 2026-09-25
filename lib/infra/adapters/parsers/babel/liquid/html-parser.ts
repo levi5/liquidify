@@ -43,11 +43,11 @@ export class LiquidHtmlParser {
     return _match(Boolean(node.closingElement || state.hasRawHtml || tagName === 'liquid-data'))
       .with(true, () => `<${tagName}${attributes}>${withBridge}</${tagName}>`)
       .with(
-        Boolean(node.closingElement || state.hasRawHtml || tagName === 'liquid-data'),
+        false,
         () =>
           _match(voidTags.has(tagName))
             .with(true, () => `<${tagName}${attributes} />`)
-            .with(voidTags.has(tagName), () => `<${tagName}${attributes}></${tagName}>`)
+            .with(false, () => `<${tagName}${attributes}></${tagName}>`)
             .exec() as string,
       )
       .exec() as string

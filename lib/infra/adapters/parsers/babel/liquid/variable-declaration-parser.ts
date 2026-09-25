@@ -1,10 +1,16 @@
 import {
   isIdentifier,
   isObjectPattern,
+  isArrayPattern,
   isTemplateLiteral,
   isConditionalExpression,
   isLogicalExpression,
+  isAssignmentPattern,
+  isRestElement,
   type VariableDeclarator,
+  type ArrayPattern,
+  type Identifier,
+  type Node,
 } from '@babel/types'
 import { _Object, _match } from 'funcio'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
@@ -30,33 +36,93 @@ export class VariableDeclarationParser {
   public parse(declaration: VariableDeclarator, renames?: Record<string, string>, context?: ParsingContext): string[] {
     const id = _Object.getPathValue(['id'], declaration)
     const init = _Object.getPathValue(['init'], declaration)
-    return _match(id === null || id === undefined || init === null || init === undefined)
-      .with(true, () => [] as string[])
-      .with(false, () => this.dispatchDeclaration(id, init, renames, context))
+    return _match(true)
+      .with(id === null || id === undefined, () => [] as string[])
+      .with(init === null || init === undefined, () => this.parseWithoutInit(id))
+      .with(true, () => this.dispatchDeclaration(id, init, renames, context))
+      .exec() as string[]
+  }
+
+  private parseWithoutInit(id: unknown): string[] {
+    return _match(isIdentifier(id as Node))
+      .with(true, () => [`{% assign ${(id as Identifier).name} = nil %}`])
+      .with(false, () => [] as string[])
       .exec() as string[]
   }
 
   private dispatchDeclaration(id: any, init: any, renames?: Record<string, string>, context?: ParsingContext): string[] {
+    const idNode = id as Node
     return _match(true)
-      .with(isIdentifier(id) && isTemplateLiteral(init) && init.expressions.length === 0, () => [
+      .with(isIdentifier(idNode) && isTemplateLiteral(init) && init.expressions.length === 0, () => [
         this.assignConstant(id.name, init.quasis[0].value.raw),
       ])
-      .with(isIdentifier(id) && isConditionalExpression(init), () =>
+      .with(isIdentifier(idNode) && isConditionalExpression(init), () =>
         this.conditionalParser.parseConditionalExpressionRecursive(id.name, init, renames, context),
       )
-      .with(isIdentifier(id) && isLogicalExpression(init) && init.operator === '||', () =>
+      .with(isIdentifier(idNode) && isLogicalExpression(init) && init.operator === '||', () =>
         this.fallbackParser.parseOrFallback(id.name, init, renames, context),
       )
-      .with(isIdentifier(id) && isLogicalExpression(init) && init.operator === '??', () =>
+      .with(isIdentifier(idNode) && isLogicalExpression(init) && init.operator === '??', () =>
         this.fallbackParser.parseNilFallback(id.name, init, renames, context),
       )
-      .with(isIdentifier(id) && this.filterCallParser.isFilterCall(init), () =>
+      .with(isIdentifier(idNode) && this.filterCallParser.isFilterCall(init), () =>
         this.filterCallParser.parseFilterAssign(id.name, init, renames, context),
       )
-      .with(isIdentifier(id), () => [`{% assign ${id.name} = ${this.generateLiquidCode(init, false, renames, context)} %}`])
-      .with(isObjectPattern(id), () => this.objectPatternParser.flatten(id, this.generateLiquidCode(init, false, renames, context)))
+      .with(isIdentifier(idNode), () => [`{% assign ${id.name} = ${this.generateLiquidCode(init, false, renames, context)} %}`])
+      .with(isObjectPattern(idNode), () => this.objectPatternParser.flatten(id, this.generateLiquidCode(init, false, renames, context)))
+      .with(isArrayPattern(idNode), () =>
+        this.flattenArrayPattern(id as ArrayPattern, this.generateLiquidCode(init, false, renames, context)),
+      )
       .with(true, () => [])
       .exec() as string[]
+  }
+
+  private flattenArrayPattern(pattern: ArrayPattern, basePath: string): string[] {
+    let index = 0
+    const lines: string[] = []
+    for (const element of pattern.elements) {
+      const el = element as Node | null
+      _match(true)
+        .with(el === null || el === undefined, () => {
+          index += 1
+        })
+        .with(isIdentifier(el), () => {
+          lines.push(`{% assign ${(el as Identifier).name} = ${basePath}[${index}] %}`)
+          index += 1
+        })
+        .with(isAssignmentPattern(el), () => {
+          const left = (el as { left: unknown }).left
+          const right = (el as { right: unknown }).right
+          _match(isIdentifier(left as Node))
+            .with(true, () =>
+              lines.push(`{% assign ${(left as Identifier).name} = ${basePath}[${index}] | default: ${this.literalOf(right)} %}`),
+            )
+            .with(false, () => undefined)
+            .exec()
+          index += 1
+        })
+        .with(isRestElement(el), () => {
+          const arg = (el as { argument: unknown }).argument
+          _match(isIdentifier(arg as Node))
+            .with(true, () => lines.push(`{% assign ${(arg as Identifier).name} = ${basePath} | slice: ${index}, ${basePath}.size %}`))
+            .with(false, () => undefined)
+            .exec()
+          index += 1
+        })
+        .with(true, () => {
+          index += 1
+        })
+        .exec()
+    }
+    return lines
+  }
+
+  private literalOf(node: unknown): string {
+    const value = (node as { value?: unknown; name?: string }).value
+    return _match(typeof value !== 'undefined')
+      .with(true, () => JSON.stringify(value))
+      .with(false, () => (node as { name?: string }).name ?? 'nil')
+      .exec() as string
   }
 
   private assignConstant(name: string, raw: string): string {
