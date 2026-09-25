@@ -21,7 +21,10 @@ export const ProductRecommendations = () => {
         </a>
       </div>
       <div
-        className={classNames(styles['product-grid'])}
+        className={classNames(styles['product-shelf'])}
+        role="region"
+        aria-label={"'recommendations.eyebrow' | t"}
+        tabIndex={0}
         data-related-grid
         data-recommendations-state="{% if recommendations.performed and recommendations.products_count > 0 %}loaded{% else %}fallback{% endif %}"
       >

@@ -21,7 +21,12 @@ export const FeaturedCollection = () => {
         </a>
       </div>
       {featured.products.length > 0 ? (
-        <div className={classNames(styles['product-grid'])}>
+        <div
+          className={classNames(styles['product-shelf'])}
+          role="region"
+          aria-label={"'featured.eyebrow' | t"}
+          tabIndex={0}
+        >
           {featured.products.slice(0, 8).map((item) => (
             <RenderSnippet slot={ProductCard} item={item} />
           ))}
