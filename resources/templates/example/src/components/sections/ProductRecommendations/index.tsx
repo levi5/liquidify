@@ -22,6 +22,7 @@ export const ProductRecommendations = () => {
         </a>
       </div>
       <div
+        className={styles['product-shelf-host']}
         role="region"
         aria-label={"'recommendations.eyebrow' | t"}
         data-related-grid

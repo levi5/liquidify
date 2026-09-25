@@ -1,3 +1,40 @@
 .related-products:not(:has(.product-card)) {
   display: none;
 }
+
+.product-shelf-host {
+  width: 100%;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.product-shelf-host::-webkit-scrollbar {
+  display: none;
+}
+
+.product-shelf-host > react-island {
+  display: flex !important;
+  width: 100%;
+  gap: 22px;
+  overflow: visible;
+}
+
+.product-shelf-host > react-island > .product-card {
+  flex: 0 0 calc((100% - 66px) / 4);
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.product-shelf-host > react-island > .product-shelf {
+  flex: 0 0 100%;
+}
+
+@media (max-width: 900px) {
+  .product-shelf-host > react-island {
+    gap: 14px;
+  }
+  .product-shelf-host > react-island > .product-card {
+    flex-basis: calc((100% - 14px) / 2);
+  }
+}

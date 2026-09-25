@@ -1,9 +1,14 @@
 .product-shelf {
+  display: flex;
   width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .product-shelf .swiper {
+  flex: 1 1 auto;
   width: 100%;
+  min-width: 0;
 }
 
 .product-shelf .swiper-wrapper {

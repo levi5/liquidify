@@ -22,7 +22,7 @@ export const FeaturedCollection = () => {
         </a>
       </div>
       {featured.products.length > 0 ? (
-        <div role="region" aria-label={"'featured.eyebrow' | t"}>
+        <div className={styles['product-shelf-host']} role="region" aria-label={"'featured.eyebrow' | t"}>
           <ProductShelf eager>
             {featured.products.slice(0, 8).map((item) => (
               <RenderSnippet slot={ProductCard} item={item} />

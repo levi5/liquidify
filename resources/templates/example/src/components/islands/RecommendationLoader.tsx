@@ -42,24 +42,8 @@ export const RecommendationLoader = ({
 
       }
     }
-    const observer =
-      'IntersectionObserver' in window
-        ? new IntersectionObserver(
-            (entries) => {
-              if (entries.some((entry) => entry.isIntersecting)) {
-                observer?.disconnect()
-                void load()
-              }
-            },
-            { rootMargin: '400px' },
-          )
-        : null
-    if (target.querySelector('.product-card') && observer) observer.observe(container)
-    else void load()
-    return () => {
-      observer?.disconnect()
-      controller.abort()
-    }
+    void load()
+    return () => controller.abort()
   }, [productId, sectionId])
   return null
 }
