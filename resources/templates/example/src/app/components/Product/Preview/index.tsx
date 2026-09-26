@@ -25,8 +25,14 @@ export const ProductPreview = ({ id, title, images }: ProductPreviewType) => {
 	return (
 		<>
 			{images && images.length > 0 ? (
-				<SwiperSliderRoot elementId={galleryId}>
-					<div className={classNames(styles['product-gallery'])}>
+			<SwiperSliderRoot elementId={galleryId}>
+					<div
+						className={
+							images.length > 1
+								? styles['product-gallery']
+								: classNames(styles['product-gallery'], styles['product-gallery-single'])
+						}
+					>
 						{images.length > 1 && (
 							<div className={classNames(styles['product-thumbs'])}>
 								<Thumbnails id={galleryId} images={images} title={title} />

@@ -1,6 +1,7 @@
 export const PRODUCT_PREVIEW_SLIDER_SETTINGS = {
 	slidesPerView: 1,
 	loop: true,
+	watchOverflow: true,
 }
 
 export const PRODUCT_THUMBNAILS_SLIDER_SETTINGS = {

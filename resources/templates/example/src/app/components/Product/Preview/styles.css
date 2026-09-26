@@ -129,6 +129,9 @@ react-island[component="SwiperSliderRoot"] {
     gap: 14px;
     align-items: start;
   }
+  .product-gallery-single {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .product-thumbs {
     order: 1;
     position: sticky;
