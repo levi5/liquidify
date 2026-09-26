@@ -8,40 +8,6 @@ import type { LinksType } from '../../../../types/components/menu'
 
 import './styles.css'
 
-const FALLBACK_LINKS: LinksType = [
-	{
-		url: '{{ routes.root_url }}collections/all?sort_by=created-descending',
-		title: translate('header.new', 'Novidades'),
-		links: [],
-	},
-	{
-		url: '/collections/feminino',
-		title: translate('header.women', 'Feminino'),
-		links: [
-			{ url: '/collections/all/feminino+blusas', title: translate('header.women_tops', 'Blusas e camisetas'), links: [] },
-			{ url: '/collections/all/feminino+jaquetas', title: translate('header.women_jackets', 'Jaquetas'), links: [] },
-			{ url: '/collections/all/feminino+saias', title: translate('header.women_skirts', 'Saias e conjuntos'), links: [] },
-		],
-	},
-	{
-		url: '/collections/masculino',
-		title: translate('header.men', 'Masculino'),
-		links: [
-			{ url: '/collections/all/masculino+camisas', title: translate('header.men_shirts', 'Camisas'), links: [] },
-			{ url: '/collections/all/masculino+jaquetas', title: translate('header.men_jackets', 'Jaquetas'), links: [] },
-			{ url: '/collections/all/masculino+alfaiataria', title: translate('header.men_tailoring', 'Alfaiataria'), links: [] },
-		],
-	},
-	{
-		url: '/collections/all',
-		title: translate('header.accessories', 'Acessórios'),
-		links: [
-			{ url: '/collections/all/bolsas', title: translate('header.bags', 'Bolsas'), links: [] },
-			{ url: '/collections/all/calcados', title: translate('header.shoes', 'Calçados'), links: [] },
-		],
-	},
-]
-
 const OVERVIEW_LABEL: Record<string, [string, string]> = {
 	'/collections/feminino': ['header.view_women', 'Ver coleção feminina ↗'],
 	'/collections/masculino': ['header.view_men', 'Ver coleção masculina ↗'],
@@ -55,8 +21,6 @@ const overviewFor = (url: string, title: string) => {
 }
 
 export const MenuMobileModal = ({ options }: { options: LinksType }) => {
-	const links = options && options.length > 3 ? options : FALLBACK_LINKS
-
 	return (
 		<Drawer.Root name='menu-mobile'>
 			<Drawer.Content eventName='menu-mobile' orientation='left' overlay={true} width='min(420px, 100vw)'>
@@ -64,9 +28,9 @@ export const MenuMobileModal = ({ options }: { options: LinksType }) => {
 					<DrawerHeader title={translate('cart.menu_title', 'Explore a Liquidify.')} />
 
 					<nav className={'menuMobileNav'} aria-label={translate('header.main_menu', 'Menu principal')}>
-						{links.map((link) =>
+					{options.map((link) =>
 							link.links && link.links.length > 0 ? (
-								<details className={'menuMobileGroup'} key={link.url}>
+								<details className={'menuMobileGroup'} key={link.url} name='menu-mobile-nav'>
 									<summary>
 										{link.title}
 										<span className={'mobileChevron'} aria-hidden='true'></span>

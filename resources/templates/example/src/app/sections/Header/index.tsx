@@ -11,13 +11,14 @@ import { MenuMobile } from '../../components/Menu/Mobile'
 import styles from './styles.css'
 
 export const Header = () => {
+	
 	return (
 		<div className={classNames(styles['header-shell'])}>
 			<RenderSnippet slot={TopBar} blocks={section.blocks} />
 
 			<header className={classNames(styles['site-header'], 'container')}>
 				<div className={classNames(styles['header-leading'])}>
-					<RenderSnippet slot={MenuMobile} options={linklists['main-menu'].links} />
+					<RenderSnippet slot={MenuMobile} options={linklists['menu'].links} />
 				</div>
 
 				<a className='wordmark' href={routes.root_url} aria-label={"'header.home_page' | t"}>
@@ -25,7 +26,7 @@ export const Header = () => {
 				</a>
 
 				<nav className={classNames(styles['desktop-nav'])} aria-label={"'header.main_menu' | t"}>
-					<RenderSnippet slot={MenuDesktop} options={linklists['main-menu'].links} />
+					<RenderSnippet slot={MenuDesktop} options={linklists['menu'].links} />
 				</nav>
 
 				<RenderSnippet slot={HeaderUserOptions} />
