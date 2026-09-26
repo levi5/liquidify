@@ -40,9 +40,18 @@ export const ProductPreview = ({ id, title, images }: ProductPreviewType) => {
 						)}
 
 						<div className={classNames(styles['product-main'])}>
-							<SwiperSliderArrow className={styles.galleryArrowLeft} type='left' id={arrowId} elementId={arrowLeftId} enable rewind>
-								<RenderSvg name='left-arrow.svg' />
-							</SwiperSliderArrow>
+							{images.length > 1 && (
+								<SwiperSliderArrow
+									className={styles.galleryArrowLeft}
+									type='left'
+									id={arrowId}
+									elementId={arrowLeftId}
+									enable
+									rewind
+								>
+									<RenderSvg name='left-arrow.svg' />
+								</SwiperSliderArrow>
+							)}
 
 							<SwiperCarousel elementId={slideId} settings={PRODUCT_PREVIEW_SLIDER_SETTINGS} loop={loopGallery} pagination={true}>
 								{images.map((photo, index) => (
@@ -60,9 +69,18 @@ export const ProductPreview = ({ id, title, images }: ProductPreviewType) => {
 								))}
 							</SwiperCarousel>
 
-							<SwiperSliderArrow className={styles.galleryArrowRight} type='right' id={arrowId} elementId={arrowRightId} enable rewind>
-								<RenderSvg name='right-arrow.svg' />
-							</SwiperSliderArrow>
+							{images.length > 1 && (
+								<SwiperSliderArrow
+									className={styles.galleryArrowRight}
+									type='right'
+									id={arrowId}
+									elementId={arrowRightId}
+									enable
+									rewind
+								>
+									<RenderSvg name='right-arrow.svg' />
+								</SwiperSliderArrow>
+							)}
 						</div>
 					</div>
 				</SwiperSliderRoot>
