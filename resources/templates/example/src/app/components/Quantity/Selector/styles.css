@@ -12,7 +12,7 @@
 	height: var(--quantitySelectorHeight);
 	padding: 0 4px;
 	border: 1px solid var(--line);
-	border-radius: 999px;
+	border-radius: 0.4rem;
 	background: var(--paper);
 	color: var(--ink);
 }

@@ -2626,13 +2626,27 @@ react-island {
 /* liquidify:start */
 .breadcrumbs,
 .breadcrumb {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 12px;
 	font-size: 10px;
 	color: var(--muted);
 	margin-bottom: 35px;
+}
+
+.breadcrumbs ol,
+.breadcrumb ol {
+	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
+	gap: 12px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.breadcrumbs li,
+.breadcrumb li {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
 }
 
 .breadcrumbs a,
@@ -2665,8 +2679,14 @@ react-island {
 	.breadcrumbs,
 	.breadcrumb {
 		font-size: 9px;
-		gap: 8px;
 		margin-bottom: 24px;
+	}
+
+	.breadcrumbs ol,
+	.breadcrumb ol,
+	.breadcrumbs li,
+	.breadcrumb li {
+		gap: 8px;
 	}
 }
 /* liquidify:end */

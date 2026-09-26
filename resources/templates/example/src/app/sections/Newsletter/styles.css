@@ -5,11 +5,11 @@
 }
 
 .newsletter-inner {
+	max-width:124rem;
 	display: grid;
 	grid-template-columns: 1.2fr 1fr;
 	gap: 80px;
 	align-items: center;
-	max-width: 900px;
 }
 
 .newsletter h2 {
