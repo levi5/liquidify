@@ -81,3 +81,27 @@ test('removing every subscription releases all listeners', async () => {
   assert.equal(listeners.get('cart').size, 0)
   assert.equal(listeners.get('product').size, 0)
 })
+
+test('emits fired before a listener attaches are replayed on demand', async () => {
+  const { window, CustomEvent } = createDomWindow()
+
+  vm.runInNewContext(await buildRuntimeScript(), { window, CustomEvent })
+
+  const bus = window.LiquidifyEvents
+  bus.emit('message::menu-mobile', true)
+  bus.emit('message::menu-mobile', true)
+
+  assert.deepEqual(Array.from(window.LiquidifyTakePendingEvents('message::menu-mobile')), [true, true])
+  assert.deepEqual(Array.from(window.LiquidifyTakePendingEvents('message::menu-mobile')), [])
+
+  const values = []
+  const unsubscribe = bus.on('message::menu-mobile', (value) => values.push(value))
+  bus.emit('message::menu-mobile', false)
+
+  assert.deepEqual(values, [false])
+  assert.deepEqual(Array.from(window.LiquidifyTakePendingEvents('message::menu-mobile')), [])
+
+  unsubscribe()
+  bus.emit('message::search-drawer', true)
+  assert.deepEqual(Array.from(window.LiquidifyTakePendingEvents('message::search-drawer')), [true])
+})

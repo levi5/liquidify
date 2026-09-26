@@ -36,6 +36,8 @@ window.registerLiquidifyAction = (name, handler) => {
 }
 
 const eventSubscriptions = new WeakMap()
+const subscriberCounts = new Map()
+const pendingEmits = new Map()
 window.LiquidifyEvents = {
   on(event, callback) {
     let events = eventSubscriptions.get(callback)
@@ -50,12 +52,16 @@ window.LiquidifyEvents = {
     }
     const handler = (e) => callback(e.detail)
     handlers.add(handler)
+    subscriberCounts.set(event, (subscriberCounts.get(event) || 0) + 1)
     window.addEventListener(event, handler)
     return () => {
       window.removeEventListener(event, handler)
       handlers.delete(handler)
       if (!handlers.size && events.get(event) === handlers) events.delete(event)
       if (!events.size && eventSubscriptions.get(callback) === events) eventSubscriptions.delete(callback)
+      const left = (subscriberCounts.get(event) || 1) - 1
+      if (left > 0) subscriberCounts.set(event, left)
+      else subscriberCounts.delete(event)
     }
   },
   off(event, callback) {
@@ -66,8 +72,14 @@ window.LiquidifyEvents = {
     handlers.clear()
     events.delete(event)
     if (!events.size) eventSubscriptions.delete(callback)
+    subscriberCounts.delete(event)
   },
   emit(event, data) {
+    if (!subscriberCounts.get(event)) {
+      const queued = pendingEmits.get(event)
+      if (queued) queued.push(data)
+      else pendingEmits.set(event, [data])
+    }
     const ev = new CustomEvent(event, {
       detail: data,
       bubbles: true,
@@ -77,6 +89,13 @@ window.LiquidifyEvents = {
   },
 }
 window.LiquidxEvents = window.LiquidifyEvents
+
+window.LiquidifyTakePendingEvents = (event) => {
+  const queued = pendingEmits.get(event)
+  pendingEmits.delete(event)
+  return queued || []
+}
+;(window as any).LiquidxTakePendingEvents = window.LiquidifyTakePendingEvents
 
 window.LiquidifyUseEvent = (event, callback) => {
   const savedCallback = React.useRef(callback)

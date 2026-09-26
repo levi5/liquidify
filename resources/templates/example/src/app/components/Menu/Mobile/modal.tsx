@@ -20,7 +20,11 @@ const overviewFor = (url: string, title: string) => {
 	return translate(key, fallback, { title })
 }
 
+const toMenuLinks = (value: unknown): LinksType => (Array.isArray(value) ? (value as LinksType) : [])
+
 export const MenuMobileModal = ({ options }: { options: LinksType }) => {
+	const links = toMenuLinks(options)
+
 	return (
 		<Drawer.Root name='menu-mobile'>
 			<Drawer.Content eventName='menu-mobile' orientation='left' overlay={true} width='min(420px, 100vw)'>
@@ -28,7 +32,7 @@ export const MenuMobileModal = ({ options }: { options: LinksType }) => {
 					<DrawerHeader title={translate('cart.menu_title', 'Explore a Liquidify.')} />
 
 					<nav className={'menuMobileNav'} aria-label={translate('header.main_menu', 'Menu principal')}>
-					{options.map((link) =>
+					{links.map((link) =>
 							link.links && link.links.length > 0 ? (
 								<details className={'menuMobileGroup'} key={link.url} name='menu-mobile-nav'>
 									<summary>

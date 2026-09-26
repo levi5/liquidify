@@ -21,6 +21,7 @@ declare global {
     LiquidifyEvents: LiquidifyEventBus
     LiquidifyUseEvent: <T = any>(event: string, callback: (data: T) => void) => void
     LiquidifyEmitEvent: <T = any>(event: string, data?: T) => void
+    LiquidifyTakePendingEvents: <T = any>(event: string) => T[]
   }
 }
 

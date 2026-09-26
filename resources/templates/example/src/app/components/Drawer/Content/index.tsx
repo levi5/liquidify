@@ -25,8 +25,12 @@ export const DrawerContent: FC<{
 	const { open, handleClose, handleOpen } = useDrawerContext()
 	const dialogRef = useRef<HTMLDialogElement | null>(null)
 	const triggerRef = useRef<HTMLElement | null>(null)
+	const receivedRef = useRef(false)
+	const eventKey = `message::${eventName}`
 
-	useEventListener(`message::${eventName}`, (event: any) => {
+	useEventListener(eventKey, (event: any) => {
+		receivedRef.current = true
+
 		const data = _Maybe
 			.of(event)
 			.map((event) => event.detail)
@@ -35,6 +39,19 @@ export const DrawerContent: FC<{
 
 		data ? handleOpen() : handleClose()
 	})
+
+	// The trigger can fire before this island hydrates; replay what was lost.
+	// Always drains, so a remount (theme editor) never replays a stale open.
+	useEffect(() => {
+		if (!eventName) return
+
+		const pending = window.LiquidifyTakePendingEvents?.(eventKey) ?? []
+		if (receivedRef.current) return
+
+		for (const data of pending) {
+			data ? handleOpen() : handleClose()
+		}
+	}, [eventKey, eventName, handleOpen, handleClose])
 
 	useEffect(() => {
 		if (open) onOpen?.()
