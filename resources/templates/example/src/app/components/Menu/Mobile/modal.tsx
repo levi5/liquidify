@@ -20,7 +20,22 @@ const overviewFor = (url: string, title: string) => {
 	return translate(key, fallback, { title })
 }
 
-const toMenuLinks = (value: unknown): LinksType => (Array.isArray(value) ? (value as LinksType) : [])
+type MenuLink = { title?: string; handle?: string; url?: string; links?: MenuLink[] }
+
+// Merchant data is not guaranteed: a missing/renamed link list arrives as
+// null, and link drops may omit `links` or `title`. Normalizing here keeps a
+// single odd entry from rendering an empty anchor or killing the island.
+const toMenuLinks = (value: unknown): MenuLink[] => {
+	if (Array.isArray(value)) return value as MenuLink[]
+
+	const nested = (value as { links?: unknown } | null | undefined)?.links
+
+	return Array.isArray(nested) ? (nested as MenuLink[]) : []
+}
+
+const childrenOf = (link: MenuLink): MenuLink[] => (Array.isArray(link.links) ? link.links : [])
+
+const labelOf = (link: MenuLink): string => link.title || link.handle || link.url || ''
 
 export const MenuMobileModal = ({ options }: { options: LinksType }) => {
 	const links = toMenuLinks(options)
@@ -32,25 +47,28 @@ export const MenuMobileModal = ({ options }: { options: LinksType }) => {
 					<DrawerHeader title={translate('cart.menu_title', 'Explore a Liquidify.')} />
 
 					<nav className={'menuMobileNav'} aria-label={translate('header.main_menu', 'Menu principal')}>
-					{links.map((link) =>
-							link.links && link.links.length > 0 ? (
+					{links.map((link) => {
+							const children = childrenOf(link)
+							const label = labelOf(link)
+
+							return children.length > 0 ? (
 								<details className={'menuMobileGroup'} key={link.url} name='menu-mobile-nav'>
 									<summary>
-										{link.title}
+										{label}
 										<span className={'mobileChevron'} aria-hidden='true'></span>
 									</summary>
 									<div className={'menuMobileSubmenu'}>
 										<a className={'menuMobileOverview'} data-menu-overview href={link.url}>
-											{overviewFor(link.url, link.title)}
+											{overviewFor(link.url ?? '', label)}
 										</a>
-										{link.links.map((child) => (
+										{children.map((child) => (
 											<div className={'menuMobileChildGroup'} key={child.url}>
 												<a className={'menuMobileSubLink'} data-menu-child href={child.url}>
-													{child.title}
+													{labelOf(child)}
 												</a>
-												{(child.links ?? []).map((grandchild) => (
+												{childrenOf(child).map((grandchild) => (
 													<a className={'menuMobileGrandchild'} data-menu-grandchild href={grandchild.url}>
-														{grandchild.title}
+														{labelOf(grandchild)}
 													</a>
 												))}
 											</div>
@@ -59,10 +77,10 @@ export const MenuMobileModal = ({ options }: { options: LinksType }) => {
 								</details>
 							) : (
 								<a className={'menuMobileTopLink'} data-menu-item key={link.url} href={link.url}>
-									{link.title}
+									{label}
 								</a>
-							),
-						)}
+							)
+						})}
 					</nav>
 				</div>
 			</Drawer.Content>
