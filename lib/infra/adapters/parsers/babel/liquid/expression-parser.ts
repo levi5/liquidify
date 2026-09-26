@@ -1096,39 +1096,50 @@ function _pipeReplacements(protectedCode: string, literals: string[]): string {
     .trim()
 }
 
+const INCLUDES_NEEDLE = '.includes'
+
 function replaceIncludesBalanced(code: string): string {
-  const needle = '.includes'
-  let out = ''
-  let i = 0
-  while (true) {
-    const idx = code.indexOf(needle, i)
-    if (idx === -1) {
-      out += code.slice(i)
-      break
-    }
-    let j = idx + needle.length
-    while (j < code.length && /\s/.test(code[j] ?? '')) j++
-    if (code[j] !== '(') {
-      out += code.slice(i, j)
-      i = j
-      continue
-    }
-    let depth = 0
-    let k = j
-    for (; k < code.length; k++) {
-      if (code[k] === '(') depth++
-      else if (code[k] === ')') {
-        depth--
-        if (depth === 0) break
-      }
-    }
-    if (depth !== 0) {
-      out += code.slice(i)
-      break
-    }
-    const arg = code.slice(j + 1, k).trim()
-    out = `${out}${code.slice(i, idx)} contains ${arg}`
-    i = k + 1
-  }
-  return out
+  return replaceNextIncludes(code, 0, '')
+}
+
+function replaceNextIncludes(code: string, from: number, out: string): string {
+  const idx = code.indexOf(INCLUDES_NEEDLE, from)
+  return _match(idx === -1)
+    .with(true, () => `${out}${code.slice(from)}`)
+    .with(false, () => replaceIncludesAt(code, from, idx, out))
+    .exec() as string
+}
+
+function replaceIncludesAt(code: string, from: number, idx: number, out: string): string {
+  const open = skipIncludesWhitespace(code, idx + INCLUDES_NEEDLE.length)
+  return _match(code[open] !== '(')
+    .with(true, () => replaceNextIncludes(code, open, `${out}${code.slice(from, open)}`))
+    .with(false, () => closeIncludesCall(code, from, idx, open, out))
+    .exec() as string
+}
+
+function skipIncludesWhitespace(code: string, at: number): number {
+  return _match(at < code.length && /\s/.test(code[at] ?? ''))
+    .with(true, () => skipIncludesWhitespace(code, at + 1))
+    .with(false, () => at)
+    .exec() as number
+}
+
+function closeIncludesCall(code: string, from: number, idx: number, open: number, out: string): string {
+  const close = findClosingParen(code, open + 1, 1)
+  return _match(close === -1)
+    .with(true, () => `${out}${code.slice(from)}`)
+    .with(false, () =>
+      replaceNextIncludes(code, close + 1, `${out}${code.slice(from, idx)} contains ${code.slice(open + 1, close).trim()}`),
+    )
+    .exec() as string
+}
+
+function findClosingParen(code: string, at: number, depth: number): number {
+  return _match(true)
+    .with(at >= code.length, () => -1)
+    .with(code[at] === '(', () => findClosingParen(code, at + 1, depth + 1))
+    .with(code[at] === ')', () => (depth === 1 ? at : findClosingParen(code, at + 1, depth - 1)))
+    .with(true, () => findClosingParen(code, at + 1, depth))
+    .exec() as number
 }

@@ -8,6 +8,7 @@ import type { CssInjector } from './runtime/css-injector'
 import type { Logger } from '../../../../shared/logger'
 import { escapeHtml } from '../../../../shared/html'
 import { ValidationError } from '../../../../core/errors/validation-error'
+import { COMPONENT_NAME_PATTERN, RAW_LIQUID_GLOBALS_PATTERN, STYLESHEET_IMPORT_PATTERN } from './constants'
 import { parse } from '@babel/parser'
 import traverse, { type NodePath } from '@babel/traverse'
 import generate from '@babel/generator'
@@ -21,14 +22,6 @@ export interface ReactBuildResult {
   script: string
   css?: string
 }
-
-const COMPONENT_NAME_PATTERN = /^[A-Za-z_$][\w$]*$/
-const STYLESHEET_IMPORT_PATTERN = /^[ \t]*import[ \t]+(?:[^'";]*?[ \t]from[ \t]+)?['"]([^'"]+\.(?:css|scss))['"]/gm
-// Raw Liquid output tags referencing storefront globals never render inside
-// React islands (client-side JS): they reach the browser literally and break
-// links/forms (e.g. action="{{ routes.search_url }}" -> 404).
-const RAW_LIQUID_GLOBALS_PATTERN =
-  /\{\{\s*(routes|shop|store|section|sections|settings|linklists|collections|collection|product|products|all_products|page|pages|article|articles|blog|blogs|cart|search|paginate|template|predictive_search|customer|order|gift_card|content_for_header|content_for_layout)\b/
 
 export class ReactComponentCompiler {
   constructor(

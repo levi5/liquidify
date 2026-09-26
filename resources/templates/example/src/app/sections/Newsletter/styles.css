@@ -5,7 +5,7 @@
 }
 
 .newsletter-inner {
-	max-width:124rem;
+	max-width:145rem;
 	display: grid;
 	grid-template-columns: 1.2fr 1fr;
 	gap: 80px;
