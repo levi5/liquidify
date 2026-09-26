@@ -31,9 +31,9 @@ export const Carousel = ({ blocks, elementId = 'home-banner-hero' }: { blocks: a
 					{blocks.map((block: any) => (
 						<div className={styles.slide}>
 							{block.settings.image ? (
-								<img width='2000' height='700' src={'{{ block.settings.image | image_url: width: 2000 }}'} alt={'{{ block.settings.heading | default: "Banner" | escape }}'} />
+								<img width='2000' height='700' loading='lazy' decoding='async' src={'{{ block.settings.image | image_url: width: 2000 }}'} alt={'{{ block.settings.heading | default: "Banner" | escape }}'} />
 							) : (
-								<img width='2000' height='700' src={"{{ 'liquidify-editorial.jpg' | asset_url }}"} alt='Liquidify Collection' />
+								<img width='2000' height='700' loading='lazy' decoding='async' src={"{{ 'liquidify-editorial.jpg' | asset_url }}"} alt={'{{ block.settings.heading | default: "Banner" | escape }}'} />
 							)}
 						</div>
 					))}

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 
 import type { ToastEventDetail, ToastPosition } from '../../../shared/events/toast'
 import { TOAST_EVENT } from '../../../shared/events/toast'
+import { translate } from '../../i18n/translate'
 
 import styles from './styles.css'
 
@@ -56,7 +57,7 @@ export const ToastHost = ({ position = 'bottom-right' }: ToastHostProps) => {
 					{toast.title && <strong className='toastTitle'>{toast.title}</strong>}
 					<div className='toastMessage'>{toast.message}</div>
 				</div>
-				<button type='button' className='toastClose' aria-label='Fechar' onClick={close}>
+				<button type='button' className='toastClose' aria-label={translate('general.close', 'Fechar')} onClick={close}>
 					×
 				</button>
 			</div>

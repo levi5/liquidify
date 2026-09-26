@@ -38,11 +38,11 @@
       "type": "shelf",
       "settings": {
         "eyebrow": "KEEP DISCOVERING",
-        "title": "Complete o look.",
+        "title": "Complete the look.",
         "view_all_label": "View collection",
         "view_all_link": "/collections/all",
-        "collection": "complemente-o-look",
-        "limite": 8
+        "collection": "all",
+        "limit": 8
       }
     }
   },

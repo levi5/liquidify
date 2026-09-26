@@ -36,6 +36,10 @@ export const Header = () => {
 
 export default (Header.schema = {
 	name: 't:sections.header.name',
+	tag: 'header',
+	class: 'header-section',
+	limit: 1,
+	max_blocks: 3,
 	blocks: [
 		{
 			type: 'message',

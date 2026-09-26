@@ -92,8 +92,8 @@
   </head>
   <body>
     <div class="gift-card">
-      <h1 class="gift-card__shop">{{ shop.name }}</h1>
-      <p class="gift-card__subtitle">Here's your gift card!</p>
+      <h1 class="gift-card__shop">{{ shop.name | escape }}</h1>
+      <p class="gift-card__subtitle">{{ 'gift_card.issued.subtext' | t }}</p>
 
       <div class="gift-card__card">
         <div class="gift-card__balance">
@@ -104,11 +104,11 @@
           {% endif %}
         </div>
         {% if gift_card.enabled == false or gift_card.expired %}
-          <span class="gift-card__expired">Expired</span>
+          <span class="gift-card__expired">{{ 'gift_card.issued.expired' | t }}</span>
         {% endif %}
         {% if gift_card.expires_on %}
           <p style="font-size: 0.85rem; opacity: 0.8; margin-top: 0.5rem;">
-            Expires on {{ gift_card.expires_on | date: '%B %e, %Y' }}
+            {{ 'gift_card.issued.expires_on' | t: expires_on: gift_card.expires_on }}
           </p>
         {% endif %}
       </div>
@@ -120,8 +120,8 @@
       <div class="gift-card__qr" data-identifier="{{ gift_card.qr_identifier }}"></div>
 
       <div class="gift-card__actions">
-        <button type="button" class="button button--primary" id="copy-code-button">Copy code</button>
-        <a href="{{ shop.url }}" class="button button--secondary" target="_blank" rel="noopener">Continue shopping</a>
+        <button type="button" class="button button--primary" id="copy-code-button" aria-live="polite">{{ 'gift_card.issued.copy_code' | t }}</button>
+        <a href="{{ shop.url | escape }}" class="button button--secondary">{{ 'general.continue_shopping' | t }}</a>
       </div>
     </div>
 

@@ -15,7 +15,7 @@
         "title": "On your radar.",
         "subtitle": "Your next wardrobe favorite is here.",
         "collection": "all",
-        "limite": 8,
+        "limit": 8,
         "view_all_label": "View all",
         "view_all_link": "/collections/all"
       }
@@ -53,10 +53,10 @@
       },
       "block_order": ["card_1", "card_2", "card_3"],
       "settings": {
-        "eyebrow": "ENCONTRE O SEU PRÓXIMO LOOK",
+        "eyebrow": "FIND YOUR NEXT LOOK",
         "heading": "What's your vibe?",
-        "intro_1": "Do básico ao inesperado.",
-        "intro_2": "Sempre do seu jeito."
+        "intro_1": "From basics to the unexpected.",
+        "intro_2": "Always your way."
       }
     },
     "info-banner": {
@@ -65,7 +65,7 @@
         "eyebrow": "LIQUIDIFY / EVERYDAY CULTURE",
         "heading": "Wear what feels right for you.",
         "description": "Style happens when you feel good. Mix your favorites, discover new possibilities, and make every day an expression of who you are.",
-        "button": "Encontre seu essencial",
+        "button": "Find your essential",
         "mark": "LQ.",
         "caption": "NOT JUST CLOTHES. YOUR EXPRESSION."
       }

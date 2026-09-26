@@ -14,13 +14,16 @@ export const Card = ({ item }: { item: any }) => {
 
 	return (
 		<article className={classNames(styles['product-card'])}>
-			<a className={classNames(styles['product-image-link'])} href={item.url} aria-label="{{ item.title | escape }}">
+			<a className={classNames(styles['product-image-link'])} href={item.url}>
 				{item.featured_image ? (
 					<img
 						className={classNames(styles['product-primary-image'])}
 						src='{{ item.featured_image | image_url: width: 700 }}'
+						srcSet='{{ item.featured_image | image_url: width: 350 }} 350w, {{ item.featured_image | image_url: width: 550 }} 550w, {{ item.featured_image | image_url: width: 700 }} 700w'
+						sizes='(max-width: 740px) 50vw, 25vw'
 						alt='{{ item.featured_image.alt | default: item.title | escape }}'
 						loading='lazy'
+						decoding='async'
 						width='700'
 						height='880'
 					/>
@@ -30,14 +33,18 @@ export const Card = ({ item }: { item: any }) => {
 					</div>
 				)}
 
-				{item.images && item.images.length > 1 && (
+				{item.images && item.images.size > 1 && (
 					<img
 						className={classNames(styles['product-secondary-image'])}
 						src='{{ item.images[1] | image_url: width: 700 }}'
-						alt='{{ item.title | escape }}'
+						srcSet='{{ item.images[1] | image_url: width: 350 }} 350w, {{ item.images[1] | image_url: width: 550 }} 550w, {{ item.images[1] | image_url: width: 700 }} 700w'
+						sizes='(max-width: 740px) 50vw, 25vw'
+						alt=''
+						aria-hidden='true'
 						width='700'
 						height='880'
 						loading='lazy'
+						decoding='async'
 					/>
 				)}
 
@@ -75,7 +82,7 @@ export const Card = ({ item }: { item: any }) => {
 				</div>
 
 				{item.available ? (
-					item.variants.length === 1 && item.requires_selling_plan !== true ? (
+					item.variants.size === 1 && item.requires_selling_plan !== true ? (
 						<form action={routes.cart_add_url} method='post' data-quick-add>
 							<input type='hidden' name='id' value='{{ item.variants.first.id }}' />
 							<input type='hidden' name='quantity' value='1' />

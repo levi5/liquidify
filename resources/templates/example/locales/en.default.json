@@ -196,6 +196,7 @@
       "quantity": "Quantity",
       "decrease_quantity": "Decrease quantity",
       "increase_quantity": "Increase quantity",
+      "max_quantity": "Maximum available quantity: {{ max }}.",
       "combination_unavailable": "Combination unavailable",
       "unavailable_suffix": " — unavailable in this combination",
       "added_to_bag": "Added to your bag.",

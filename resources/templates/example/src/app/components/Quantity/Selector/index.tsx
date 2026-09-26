@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 
 import { clampQuantity } from '../../../context/Product/product.helpers'
 import { showToast } from '../../../../shared/events/toast'
+import { translate } from '../../../i18n/translate'
 
 import './styles.css'
 
@@ -26,6 +27,8 @@ type QuantitySelectorProps = {
 	compact?: boolean
 	disabled?: boolean
 	elementId?: string
+	id?: string
+	name?: string
 	initialValue?: number
 	syncKey?: number
 	max?: number
@@ -33,7 +36,7 @@ type QuantitySelectorProps = {
 	onChange?: (quantity: number) => void
 }
 
-export const QuantitySelector = ({ ariaLabel = 'Quantidade', className = '', compact = false, disabled = false, initialValue = 1, syncKey, max = 999, min = 1, onChange }: QuantitySelectorProps) => {
+export const QuantitySelector = ({ ariaLabel, className = '', compact = false, disabled = false, id = 'Quantity', name = 'quantity', initialValue = 1, syncKey, max = 999, min = 1, onChange, elementId }: QuantitySelectorProps) => {
 	const rootRef = useRef<HTMLDivElement>(null)
 	const lastInvalidToastAtRef = useRef<number | null>(null)
 	const [quantity, setQuantityState] = useState(() => clampQuantity(initialValue, min, max))
@@ -72,7 +75,11 @@ export const QuantitySelector = ({ ariaLabel = 'Quantidade', className = '', com
 			const lastToastAt = lastInvalidToastAtRef.current
 			if (!lastToastAt || now - lastToastAt > 1200) {
 				lastInvalidToastAtRef.current = now
-				showToast({ variant: 'warning', title: 'Quantidade indisponível', message: `Quantidade máxima disponível: ${max}.` })
+				showToast({
+					variant: 'warning',
+					title: translate('products.product.combination_unavailable', 'Quantidade indisponível'),
+					message: translate('products.product.max_quantity', 'Quantidade máxima disponível: {{ max }}.', { max }),
+				})
 			}
 		}
 
@@ -97,12 +104,23 @@ export const QuantitySelector = ({ ariaLabel = 'Quantidade', className = '', com
 	}
 
 	return (
-		<div ref={rootRef} className={classNames('quantitySelector', { compact }, className)} data-product-quantity aria-disabled={disabled}>
-			<button type='button' aria-label='Diminuir quantidade' disabled={disabled || quantity <= min} onClick={() => stepQuantity(-1)}>
+		<div ref={rootRef} id={elementId} className={classNames('quantitySelector', { compact }, className)} data-product-quantity aria-disabled={disabled}>
+			<button type='button' aria-label={translate('products.product.decrease_quantity', 'Diminuir quantidade')} disabled={disabled || quantity <= min} onClick={() => stepQuantity(-1)}>
 				<MinusIcon />
 			</button>
-			<input aria-label={ariaLabel} disabled={disabled} inputMode='numeric' min={min} max={max} type='number' value={quantity} onInput={handleInput} />
-			<button type='button' aria-label='Aumentar quantidade' disabled={disabled || quantity >= max} onClick={() => stepQuantity(1)}>
+			<input
+				id={id}
+				name={name}
+				aria-label={ariaLabel ?? translate('products.product.quantity', 'Quantidade')}
+				disabled={disabled}
+				inputMode='numeric'
+				min={min}
+				max={max}
+				type='number'
+				value={quantity}
+				onInput={handleInput}
+			/>
+			<button type='button' aria-label={translate('products.product.increase_quantity', 'Aumentar quantidade')} disabled={disabled || quantity >= max} onClick={() => stepQuantity(1)}>
 				<PlusIcon />
 			</button>
 		</div>

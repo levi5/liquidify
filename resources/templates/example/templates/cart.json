@@ -12,9 +12,9 @@
     "shelf_1": {
       "type": "shelf",
       "settings": {
-        "title": "Produtos Similares",
-        "collection": "novidades",
-        "limite": 8
+        "title": "Complete the look.",
+        "collection": "all",
+        "limit": 8
       }
     }
   },

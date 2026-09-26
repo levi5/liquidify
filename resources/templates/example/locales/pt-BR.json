@@ -196,6 +196,7 @@
       "quantity": "Quantidade",
       "decrease_quantity": "Diminuir quantidade",
       "increase_quantity": "Aumentar quantidade",
+      "max_quantity": "Quantidade máxima disponível: {{ max }}.",
       "combination_unavailable": "Combinação indisponível",
       "unavailable_suffix": " — indisponível nesta combinação",
       "added_to_bag": "Adicionado à sua sacola.",

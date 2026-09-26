@@ -33,6 +33,12 @@
         "id": "background_color",
         "label": "t:settings_schema.background_color.label",
         "default": "#ffffff"
+      },
+      {
+        "type": "checkbox",
+        "id": "currency_code_enabled",
+        "label": "t:settings_schema.currency_code_enabled.label",
+        "default": true
       }
     ]
   }

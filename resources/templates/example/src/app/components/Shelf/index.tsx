@@ -17,7 +17,7 @@ export const Shelf = () => {
 	const picked = collections[section.settings.collection]
 	const selectedCollection = picked || collections['all']
 
-	const limit = section.settings.limite || 8
+	const limit = section.settings.limit ?? section.settings.limite ?? 8
 	const candidates = selectedCollection.products
 	const other = candidates.filter((item: any) => item.id !== product.id)
 	const valid = other.filter((item: any) => item.id)
@@ -61,7 +61,7 @@ export const Shelf = () => {
 			</div>
 
 			{products.length === 0 ? (
-				<p className={styles.empty}>Nenhum produto nesta prateleira por enquanto.</p>
+				<p className={styles.empty}>{"'shelf.empty_title' | t"}</p>
 			) : (
 				<div className={classNames(styles.cards, 'container')}>
 					<SwiperSliderRoot elementId={carouselId}>

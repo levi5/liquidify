@@ -10,7 +10,7 @@ export const InfoCard = () => {
 	return (
 		<section className={styles.infoCard}>
 			{!blocks || blocks.length === 0 ? (
-				<p className={styles.infoCardEmpty}>Adicione um bloco de cartao no editor da secao.</p>
+				<p className={styles.infoCardEmpty}>{"'featured.empty_title' | t"}</p>
 			) : (
 				blocks.map((block) => {
 					const orientation = block.settings.layout === 'right' ? styles.infoCardWRight : styles.infoCardWLeft
@@ -21,11 +21,27 @@ export const InfoCard = () => {
 						<div style={{ backgroundColor: block.settings.background_color }} className={`${styles.infoCardWrapper} ${orientation} ${variant}`}>
 							{block.settings.image ? (
 								<div className={styles.infoCardImage}>
-									<img width='768' height='auto' src={'{{ block.settings.image | image_url: width: 768 }}'} alt={block.settings.title} />
+									<img
+										width='768'
+										height='768'
+										src={'{{ block.settings.image | image_url: width: 768 }}'}
+										srcSet="{{ block.settings.image | image_url: width: 375 }} 375w, {{ block.settings.image | image_url: width: 768 }} 768w"
+										sizes='(max-width: 740px) 100vw, 50vw'
+										alt={'{{ block.settings.title | escape }}'}
+										loading='lazy'
+										decoding='async'
+									/>
 								</div>
 							) : (
 								<div className={styles.infoCardImage}>
-									<img width='768' height='auto' src={"{{ 'liquidify-women.jpg' | asset_url }}"} alt={block.settings.title} />
+									<img
+										width='768'
+										height='768'
+										src={"{{ 'liquidify-women.jpg' | asset_url }}"}
+										alt={'{{ block.settings.title | escape }}'}
+										loading='lazy'
+										decoding='async'
+									/>
 								</div>
 							)}
 

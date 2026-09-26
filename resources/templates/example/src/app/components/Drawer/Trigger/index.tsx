@@ -9,12 +9,16 @@ export const DrawerTrigger: FC<{ children: ReactElement }> = ({ children }) => {
 
 	if (Array.isArray(children)) return null
 
-	const { props = {} } = children
-	const newChildren = cloneElement(children, { ...props, onClick: handleOpen })
+	const { props = {}, type } = children as { props?: Record<string, unknown>; type?: unknown }
+	const originalOnClick = (props as { onClick?: (e: Event) => void }).onClick
+	const newChildren = cloneElement(children, {
+		...props,
+		onClick: (e: Event) => {
+			originalOnClick?.(e)
+			if (!e.defaultPrevented) handleOpen()
+		},
+	} as Partial<typeof props>)
 
-	return (
-		<div onClick={handleOpen} style={{ width: '100%', height: 'inherit' }}>
-			{newChildren}
-		</div>
-	)
+	void type
+	return <>{newChildren}</>
 }

@@ -34,8 +34,8 @@ export const COLLECTION_SHELF_SCHEMA = {
 		},
 		{
 			type: 'range',
-			id: 'limite',
-			label: 't:sections.shelf.settings.limite.label',
+			id: 'limit',
+			label: 't:sections.shelf.settings.limit.label',
 			min: 2,
 			max: 12,
 			step: 1,
@@ -97,9 +97,12 @@ export const COLLECTION_SHELF_SCHEMA = {
 			min: 2000,
 			max: 10000,
 			step: 500,
+			unit: 'ms',
 			default: 4000,
 		},
 	],
+	tag: 'section',
+	class: 'shelf-section',
 	presets: [
 		{
 			name: 't:sections.shelf.presets.default',

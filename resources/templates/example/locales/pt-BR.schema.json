@@ -287,7 +287,7 @@
         "view_all_link": {
           "label": "Link do botão"
         },
-        "limite": {
+        "limit": {
           "label": "Quantidade de produtos"
         },
         "columns": {

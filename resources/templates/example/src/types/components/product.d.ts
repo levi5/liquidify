@@ -1,11 +1,19 @@
 import type { ReactNode } from 'preact/compat'
 import type { ProductOptionValue } from 'liquidx/dist/types/liquid-globals'
 
+export type ShopifyImage = {
+	src?: string | null
+	url?: string | null
+	alt?: string | null
+	width?: number | null
+	height?: number | null
+}
+
 export type ProductPreviewType = {
 	id: string
 	title: string
-	image: any
-	images: any[]
+	image: ShopifyImage | null
+	images: ShopifyImage[]
 }
 
 export type ProductOption = {

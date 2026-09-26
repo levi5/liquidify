@@ -1,6 +1,6 @@
 'use sections'
 
-import { RenderSnippet } from 'liquidex'
+import { RenderSnippet, Raw } from 'liquidex'
 import classNames from 'classnames'
 
 import { ProductPreview } from './Preview'
@@ -37,7 +37,12 @@ export const ProductInfo = () => {
 
 					<liquid-data data-liquid-store='{{ product | json }}'>
 						<ProductProvider elementId='product-provider' selectFirstVariant={false} store={product}>
-							<p className={classNames(styles['detail-price'])}>{'product.price | money'}</p>
+							<p className={classNames(styles['detail-price'])} data-product-price>
+								{'product.selected_or_first_available_variant.price | money'}
+							</p>
+							<p className={classNames(styles['detail-compare-price'])} data-product-compare-price hidden>
+								{'product.selected_or_first_available_variant.compare_at_price | money'}
+							</p>
 
 							{blocks?.map((block) => {
 								const { variation, mode } = block.settings
@@ -52,7 +57,7 @@ export const ProductInfo = () => {
 							<div className={classNames(styles['purchase-actions'])}>
 								<div className={classNames(styles['quantity-field'])}>
 									<label htmlFor='Quantity'>{"'products.product.quantity' | t"}</label>
-									<QuantitySelector />
+									<QuantitySelector id='Quantity' name='quantity' />
 								</div>
 
 								<button type='button' className={classNames('button', 'button-dark', styles['product-add-button'])} data-product-add-to-cart='true'>
@@ -95,7 +100,9 @@ export const ProductInfo = () => {
 						<summary>
 							{"'products.product.about' | t"} <span>+</span>
 						</summary>
-						<div className='rich-text'>{'{{ product.description }}'}</div>
+						<div className='rich-text'>
+							<Raw html={product.description} />
+						</div>
 					</details>
 
 					<details className={classNames(styles['product-accordion'])}>
