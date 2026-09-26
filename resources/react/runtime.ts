@@ -39,7 +39,7 @@ const eventSubscriptions = new WeakMap()
 const subscriberCounts = new Map()
 const pendingEmits = new Map()
 window.LiquidifyEvents = {
-  on(event, callback) {
+  on(event: string, callback: (data: any) => void) {
     let events = eventSubscriptions.get(callback)
     if (!events) {
       events = new Map()
@@ -50,7 +50,7 @@ window.LiquidifyEvents = {
       handlers = new Set()
       events.set(event, handlers)
     }
-    const handler = (e) => callback(e.detail)
+    const handler = (e: Event) => callback((e as CustomEvent).detail)
     handlers.add(handler)
     subscriberCounts.set(event, (subscriberCounts.get(event) || 0) + 1)
     window.addEventListener(event, handler)
@@ -64,7 +64,7 @@ window.LiquidifyEvents = {
       else subscriberCounts.delete(event)
     }
   },
-  off(event, callback) {
+  off(event: string, callback: (data: any) => void) {
     const events = eventSubscriptions.get(callback)
     const handlers = events?.get(event)
     if (!handlers) return
@@ -74,7 +74,7 @@ window.LiquidifyEvents = {
     if (!events.size) eventSubscriptions.delete(callback)
     subscriberCounts.delete(event)
   },
-  emit(event, data) {
+  emit(event: string, data: any) {
     if (!subscriberCounts.get(event)) {
       const queued = pendingEmits.get(event)
       if (queued) queued.push(data)
@@ -97,14 +97,14 @@ window.LiquidifyTakePendingEvents = (event) => {
 }
 ;(window as any).LiquidxTakePendingEvents = window.LiquidifyTakePendingEvents
 
-window.LiquidifyUseEvent = (event, callback) => {
+window.LiquidifyUseEvent = (event: string, callback: (data: any) => void) => {
   const savedCallback = React.useRef(callback)
   React.useEffect(() => {
     savedCallback.current = callback
   }, [callback])
 
   React.useEffect(() => {
-    const listener = (data) => {
+    const listener = (data: any) => {
       if (savedCallback.current) savedCallback.current(data)
     }
     return window.LiquidifyEvents.on(event, listener)
@@ -112,20 +112,20 @@ window.LiquidifyUseEvent = (event, callback) => {
 }
 window.LiquidxUseEvent = window.LiquidifyUseEvent
 
-window.LiquidifyEmitEvent = (event, data) => {
+window.LiquidifyEmitEvent = (event: string, data: any) => {
   window.LiquidifyEvents.emit(event, data)
 }
 window.LiquidxEmitEvent = window.LiquidifyEmitEvent
 
 const suspendedSections = new WeakSet()
-window.LiquidifyCanMount = (container) => {
+window.LiquidifyCanMount = (container: Element) => {
   if (!container.isConnected) return false
   for (let node = container; node; node = node.parentElement as Element) {
     if (suspendedSections.has(node)) return false
   }
   return true
 }
-window.LiquidifyMount = (container, name = container.getAttribute('component')) => {
+window.LiquidifyMount = (container: Element, name = container.getAttribute('component')) => {
   clearTimeout(container._unmountTimeout as ReturnType<typeof setTimeout>)
   container._unmountTimeout = null
   container._liquidifyReadyCleanup?.()
@@ -146,7 +146,7 @@ window.LiquidifyMount = (container, name = container.getAttribute('component')) 
     document.addEventListener('liquidx:ready:' + name, mount)
   }
 }
-window.LiquidifyUnmount = (container) => {
+window.LiquidifyUnmount = (container: Element) => {
   clearTimeout(container._unmountTimeout as ReturnType<typeof setTimeout>)
   container._unmountTimeout = null
   container._liquidifyReadyCleanup?.()
@@ -188,7 +188,7 @@ const updateRoots = () => {
     window.LiquidifyMount(container, componentName)
   }
 }
-window.LiquidifyRegisterRoot = (id, componentName) => {
+window.LiquidifyRegisterRoot = (id: string, componentName: string) => {
   registeredRoots.set(id, componentName)
   if (!rootObserver) {
     rootObserver = new MutationObserver(updateRoots)

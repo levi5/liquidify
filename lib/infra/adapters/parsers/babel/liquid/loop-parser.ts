@@ -248,22 +248,47 @@ export class LiquidLoopParser {
 
   private sliceRange(object: { arguments?: unknown[] }, renames?: Record<string, string>, context?: ParsingContext): string {
     const args = object.arguments ?? []
-    const start = this.readNumeric(args[0]) ?? 0
-    const end = this.readNumeric(args[1])
-    if (end !== null && end <= start) return ' limit: 0'
-    const limit = end !== null ? ` limit: ${end - start}` : this.dynamicLimit(args[1], start, renames, context)
-    const offset = start > 0 ? ` offset: ${start}` : ''
+    const startNum = this.readNumeric(args[0])
+    const endNum = this.readNumeric(args[1])
+    const startArg = args[0]
+    const endArg = args[1]
+    if (endNum !== null && startNum !== null && endNum <= startNum) return ' limit: 0'
+    const limit = endNum !== null && startNum !== null
+      ? ` limit: ${endNum - startNum}`
+      : this.dynamicLimit(endArg, startNum, startArg, renames, context)
+    const offset = startNum !== null && startNum > 0 ? ` offset: ${startNum}` : (startArg && startNum !== 0 ? ` offset: ${this.liquidVariableParser.generateLiquidCode(startArg as Node, true, undefined, context)}` : '')
     return `${limit}${offset}`
   }
 
-  private dynamicLimit(arg: unknown, start: number, renames?: Record<string, string>, context?: ParsingContext): string {
+  private dynamicLimit(endArg: unknown, startNum: number | null, startArg: unknown, renames?: Record<string, string>, context?: ParsingContext): string {
     return _match(true)
-      .with(arg === null || arg === undefined, () => (start > 0 ? ` limit: 9999` : ''))
-      .with(start > 0, () => {
-        const endCode = this.liquidVariableParser.generateLiquidCode(arg as Node, true, renames, context)
-        return ` limit: ${endCode} | minus: ${start}`
+      .with(endArg === null || endArg === undefined, () => (startNum !== null && startNum > 0 ? ` limit: 9999` : ''))
+      .with(startNum !== null && startNum > 0, () => {
+        const endCode = this.liquidVariableParser.generateLiquidCode(endArg as Node, true, renames, context)
+        return _match(context === undefined)
+          .with(true, () => ` limit: ${endCode} | minus: ${startNum}`)
+          .with(false, () => {
+            const parsed = context as ParsingContext
+            const temp = parsed.allocateName('limit')
+            parsed.addPendingAssign(`{% assign ${temp} = ${endCode} | minus: ${startNum} %}`)
+            return ` limit: ${temp}`
+          })
+          .exec() as string
       })
-      .with(true, () => ` limit: ${this.liquidVariableParser.generateLiquidCode(arg as Node, true, renames, context)}`)
+      .with(startArg !== null && startArg !== undefined, () => {
+        const endCode = this.liquidVariableParser.generateLiquidCode(endArg as Node, true, renames, context)
+        const startCode = this.liquidVariableParser.generateLiquidCode(startArg as Node, true, renames, context)
+        return _match(context === undefined)
+          .with(true, () => ` limit: ${endCode} | minus: ${startCode}`)
+          .with(false, () => {
+            const parsed = context as ParsingContext
+            const temp = parsed.allocateName('limit')
+            parsed.addPendingAssign(`{% assign ${temp} = ${endCode} | minus: ${startCode} %}`)
+            return ` limit: ${temp}`
+          })
+          .exec() as string
+      })
+      .with(true, () => ` limit: ${this.liquidVariableParser.generateLiquidCode(endArg as Node, true, renames, context)}`)
       .exec() as string
   }
 

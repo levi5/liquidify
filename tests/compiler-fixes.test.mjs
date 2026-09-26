@@ -92,14 +92,14 @@ test('mixed conditions produce nested Liquid conditions instead of boolean assig
   const result = expressions().generateLiquidCode(parseExpression('a && (b || c)'), true, undefined, context)
   assert.equal(result, '__liquidify_condition_0')
   const markup = context.getPendingAssigns()
-  assert.match(markup, /{% if a %}{% if b %}/)
-  assert.match(markup, /{% if c %}/)
+  assert.match(markup, /{% if a != nil and a != false and a != 0 and a != "" %}{% if b != nil and b != false and b != 0 and b != "" %}/)
+  assert.match(markup, /{% if c != nil and c != false and c != 0 and c != "" %}/)
   assert.doesNotMatch(markup, /assign [^%]*(?: and | or )/)
 })
 
 test('negated conditions never emit parentheses rejected by Shopify', () => {
   const single = expressions().generateLiquidCode(parseExpression('!current_tags'), true, undefined, new ParsingContext())
-  assert.equal(single, 'current_tags == blank or current_tags == false')
+  assert.equal(single, 'current_tags == nil or current_tags == false or current_tags == 0 or current_tags == ""')
 
   const orChain = expressions().generateLiquidCode(
     parseExpression('!blocks || blocks.size == 0'),
@@ -107,7 +107,7 @@ test('negated conditions never emit parentheses rejected by Shopify', () => {
     undefined,
     new ParsingContext(),
   )
-  assert.equal(orChain, 'blocks == blank or blocks == false or blocks.size == 0')
+  assert.equal(orChain, 'blocks == nil or blocks == false or blocks == 0 or blocks == "" or blocks.size == 0')
   assert.doesNotMatch(orChain, /[()]/)
 })
 

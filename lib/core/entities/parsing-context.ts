@@ -8,6 +8,7 @@ export interface ParsingContextData {
   scriptAssets?: Set<string>
   renames?: Record<string, string>
   pendingAssigns?: Set<string>
+  processedNodes?: Set<string>
   currentFilePath?: string
   componentName?: string
   mode?: string
@@ -20,6 +21,7 @@ export class ParsingContext {
   public scriptAssets: Set<string> = new Set()
   public renames: Record<string, string> = {}
   public pendingAssigns: Set<string> = new Set()
+  public processedNodes: Set<string> = new Set()
   public currentFilePath?: string
   public componentName?: string
   public mode?: string
@@ -32,6 +34,7 @@ export class ParsingContext {
     this.scriptAssets = orDefault(data.scriptAssets, new Set())
     this.renames = orDefault(data.renames, {})
     this.pendingAssigns = orDefault(data.pendingAssigns, new Set())
+    this.processedNodes = orDefault(data.processedNodes, new Set())
     this.currentFilePath = orDefault(data.currentFilePath, undefined)
     this.componentName = orDefault(data.componentName, undefined)
     this.mode = orDefault(data.mode, undefined)
@@ -45,6 +48,7 @@ export class ParsingContext {
       scriptAssets: new Set(orDefault(context?.scriptAssets, new Set())),
       renames: { ...orDefault(context?.renames, {}) },
       pendingAssigns: new Set(orDefault(context?.pendingAssigns, new Set())),
+      processedNodes: new Set(orDefault(context?.processedNodes, new Set())),
       currentFilePath: orDefault(patch.currentFilePath ?? context?.currentFilePath, undefined),
       componentName: orDefault(patch.componentName ?? context?.componentName, undefined),
       mode: orDefault(patch.mode ?? context?.mode, undefined),

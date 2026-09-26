@@ -1,4 +1,5 @@
 import { _match } from 'funcio'
+import { hoistPipedArg, needsHoist } from './pipe-guard'
 import type { Node, TemplateLiteral } from '@babel/types'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
@@ -46,10 +47,11 @@ export class TemplateLiteralParser {
     renames?: Record<string, string>,
   ): string {
     const base = this.generateCode(expression, renames, context)
+    const safeBase = needsHoist(base) ? hoistPipedArg(base, 'template', context) : base
     const filters = this.extractFilters(quasi, pattern)
     const suffixed = _match(filters.text === '')
-      .with(true, () => base)
-      .with(false, () => `${base} | ${filters.text}`)
+      .with(true, () => safeBase)
+      .with(false, () => `${safeBase} | ${filters.text}`)
       .exec() as string
     const appended = _match(acc === '')
       .with(true, () => suffixed)

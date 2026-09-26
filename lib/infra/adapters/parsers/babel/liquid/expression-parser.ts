@@ -1,4 +1,5 @@
 import { renderCondition } from './condition'
+import { hoistPipedArg, hoistLogicalOperators } from './pipe-guard'
 import { ValidationError } from '../../../../../core/errors/validation-error'
 import { TemplateLiteralParser } from './template-literal-parser'
 import generate from '@babel/generator'
@@ -156,6 +157,7 @@ export class ExpressionParser {
     this.foldOptional(n)
     this.stripConditionParens(n, inCondition)
     this.normalizeCall(n, inCondition, renames, context)
+    this.normalizeLogical(n, inCondition, renames, context)
     this.normalizeUnary(n, renames, context)
     this.normalizeBinary(n, renames, context)
     this.normalizeMember(n)
@@ -196,6 +198,73 @@ export class ExpressionParser {
       })
       .with(false, () => undefined)
       .exec()
+  }
+
+private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+    const nn = n as any
+    const key = `${nn.start}:${nn.end}:${nn.operator}`
+    const processed = context?.processedNodes
+    if (processed?.has(key)) return
+    if ((n as any).type === 'Identifier') return
+    _match(isLogicalExpression(n) && ((n as LogicalExpression).operator === '??' || ((n as LogicalExpression).operator === '&&' && !inCondition)))
+      .with(true, () => {
+        processed?.add(key)
+        this.rewriteLogicValue(n as LogicalExpression, renames, context)
+      })
+      .with(false, () => undefined)
+      .exec()
+  }
+
+  private rewriteLogicValue(n: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): void {
+    _match(context === undefined)
+      .with(true, () => {
+        throw new ValidationError(
+          `Logical operator "${n.operator}" in output position requires a parsing context to hoist the fallback. Hoist it into a variable with an explicit {% if %} guard instead.`,
+          this.filePathOf(context),
+        )
+      })
+      .with(false, () => undefined)
+      .exec()
+    const parsed = context as ParsingContext
+    const parts = this.logicParts(n).map((part) => this.generateLiquidCode(part as Expression, false, renames, context))
+    const temp = parsed.allocateName('logic')
+    console.error(`[MUTATE] BEFORE n.type=${(n as any).type}`)
+    const [head, ...tail] = parts
+    parsed.addPendingAssign(`{% assign ${temp} = ${head} %}`)
+    console.error(`[MUTATE] AFTER HEAD n.type=${(n as any).type}`)
+    tail.forEach((code) => {
+      const guard = this.logicGuard(n.operator, temp, code)
+      console.error(`[MUTATE] ADDING GUARD for op=${n.operator} code=${code}`)
+      parsed.addPendingAssign(guard)
+    })
+    console.error(`[MUTATE] AFTER TAIL n.type=${(n as any).type}`)
+    Object.assign(n, identifier(temp))
+    console.error(`[MUTATE] AFTER ASSIGN n.type=${(n as any).type}`)
+  }
+
+  private logicParts(n: LogicalExpression): Expression[] {
+    const parts: Expression[] = []
+    let current: Expression = n as unknown as Expression
+    while (isLogicalExpression(current) && (current as LogicalExpression).operator === n.operator) {
+      parts.unshift((current as LogicalExpression).right as Expression)
+      current = (current as LogicalExpression).left as Expression
+    }
+    parts.unshift(current)
+    return parts
+  }
+
+  private logicGuard(operator: string, temp: string, code: string): string {
+    return _match(operator)
+      .with('??', () => `{% if ${temp} == nil %}{% assign ${temp} = ${code} %}{% endif %}`)
+      .with(
+        '&&',
+        () => `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% else %}{% assign ${temp} = ${code} %}{% endif %}`,
+      )
+      .with(
+        true,
+        () => `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% assign ${temp} = ${code} %}{% endif %}`,
+      )
+      .exec() as string
   }
 
   private normalizeCall(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -455,7 +524,7 @@ export class ExpressionParser {
   private rewriteConcat(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const argCode = _match(n.arguments.length > 0)
-      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(true, () => hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'concat', context))
       .with(false, () => 'empty')
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | concat: ${argCode}`))
@@ -475,11 +544,11 @@ export class ExpressionParser {
   private rewriteReplace(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const from = _match(n.arguments.length > 0)
-      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(true, () => hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'replace', context))
       .with(false, () => '""')
       .exec() as string
     const to = _match(n.arguments.length > 1)
-      .with(true, () => `, ${this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context)}`)
+      .with(true, () => `, ${hoistPipedArg(this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context), 'replace', context)}`)
       .with(false, () => '')
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | replace: ${from}${to}`))
@@ -495,7 +564,7 @@ export class ExpressionParser {
   ): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const argCode = _match(n.arguments.length > 0)
-      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(true, () => hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), filter, context))
       .with(false, () => fallback)
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | ${filter}: ${argCode}`))
@@ -559,7 +628,7 @@ export class ExpressionParser {
       })
       .with(true, () => {
         const first = this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context)
-        const second = this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context)
+        const second = hoistPipedArg(this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context), 'math', context)
         Object.assign(n, identifier(`${first} | ${filter}: ${second}`))
       })
       .exec()
@@ -605,7 +674,7 @@ export class ExpressionParser {
   private rewriteJoin(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const argCode = _match(n.arguments.length > 0)
-      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
+      .with(true, () => hoistLogicalOperators(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'join', context))
       .with(false, () => '""')
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | join: ${argCode}`))
@@ -785,9 +854,9 @@ export class ExpressionParser {
       .with(true, () => {
         const temp = (context as ParsingContext).allocateName('not')
         ;(context as ParsingContext).addPendingAssign(`{% assign ${temp} = ${code} %}`)
-        Object.assign(n, identifier(`${temp} == blank or ${temp} == false`))
+        Object.assign(n, identifier(`${temp} == nil or ${temp} == false or ${temp} == 0 or ${temp} == ""`))
       })
-      .with(false, () => Object.assign(n, identifier(`${code} == blank or ${code} == false`)))
+      .with(false, () => Object.assign(n, identifier(`${code} == nil or ${code} == false or ${code} == 0 or ${code} == ""`)))
       .exec()
   }
 
@@ -818,10 +887,34 @@ export class ExpressionParser {
   private rewritePlus(n: BinaryExpression, renames?: Record<string, string>, context?: ParsingContext): void {
     const leftCode = this.generateLiquidCode(n.left, false, renames, context)
     const rightCode = this.generateLiquidCode(n.right, false, renames, context)
-    _match(isStringLiteral(n.left) || this.isLikelyString(n.left) || isStringLiteral(n.right) || this.isLikelyString(n.right))
-      .with(true, () => Object.assign(n, identifier(`${leftCode} | append: ${rightCode}`)))
+    _match(this.isStringConcat(n.left, n.right, leftCode))
+      .with(true, () => {
+        const right = hoistPipedArg(rightCode, 'append', context)
+        Object.assign(n, identifier(`${leftCode} | append: ${right}`))
+      })
       .with(false, () => this.rewriteArithmetic(n, 'plus', renames, context))
       .exec()
+  }
+
+  private isStringConcat(left: BinaryExpression['left'], right: BinaryExpression['left'], leftCode: string): boolean {
+    return _match(true)
+      .with(isStringLiteral(left) || isStringLiteral(right), () => true)
+      .with(this.isLikelyString(left) || this.isLikelyString(right), () => true)
+      .with(this.hasTopLevelAppend(leftCode), () => true)
+      .with(true, () => false)
+      .exec() as boolean
+  }
+
+  private hasTopLevelAppend(code: string): boolean {
+    let single = false
+    let dbl = false
+    for (let i = 0; i < code.length - 12; i++) {
+      const c = code[i]
+      if (c === "'" && !dbl) single = !single
+      else if (c === '"' && !single) dbl = !dbl
+      else if (!single && !dbl && code.startsWith(' | append: ', i)) return true
+    }
+    return false
   }
 
   private isLikelyString(node: BinaryExpression['left']): boolean {
@@ -1002,7 +1095,7 @@ export class ExpressionParser {
 
   private renderNegation(expr: UnaryExpression, renames?: Record<string, string>, context?: ParsingContext): string {
     const argCode = this.generateLiquidCode(expr.argument as Expression, false, renames, context)
-    return `{% if ${argCode} == blank or ${argCode} == false %}true{% else %}false{% endif %}`
+    return `{% if ${argCode} == nil or ${argCode} == false or ${argCode} == 0 or ${argCode} == "" %}true{% else %}false{% endif %}`
   }
 
   private parseStringLiteral(expr: { value: string }, context?: ParsingContext): string {

@@ -13,6 +13,7 @@ import {
   type Node,
 } from '@babel/types'
 import { _Object, _match } from 'funcio'
+import { hoistPipedArg } from './pipe-guard'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 import type { FilterCallParser } from './filter-call-parser'
 import type { FallbackParser } from './fallback-parser'
@@ -71,15 +72,16 @@ export class VariableDeclarationParser {
       .with(isIdentifier(idNode), () => [`{% assign ${id.name} = ${this.generateLiquidCode(init, false, renames, context)} %}`])
       .with(isObjectPattern(idNode), () => this.objectPatternParser.flatten(id, this.generateLiquidCode(init, false, renames, context)))
       .with(isArrayPattern(idNode), () =>
-        this.flattenArrayPattern(id as ArrayPattern, this.generateLiquidCode(init, false, renames, context)),
+        this.flattenArrayPattern(id as ArrayPattern, this.generateLiquidCode(init, false, renames, context), context),
       )
       .with(true, () => [])
       .exec() as string[]
   }
 
-  private flattenArrayPattern(pattern: ArrayPattern, basePath: string): string[] {
+  private flattenArrayPattern(pattern: ArrayPattern, basePath: string, context?: ParsingContext): string[] {
     let index = 0
     const lines: string[] = []
+    const base = hoistPipedArg(basePath, 'array', context)
     for (const element of pattern.elements) {
       const el = element as Node | null
       _match(true)
@@ -87,7 +89,7 @@ export class VariableDeclarationParser {
           index += 1
         })
         .with(isIdentifier(el), () => {
-          lines.push(`{% assign ${(el as Identifier).name} = ${basePath}[${index}] %}`)
+          lines.push(`{% assign ${(el as Identifier).name} = ${base}[${index}] %}`)
           index += 1
         })
         .with(isAssignmentPattern(el), () => {
@@ -95,7 +97,7 @@ export class VariableDeclarationParser {
           const right = (el as { right: unknown }).right
           _match(isIdentifier(left as Node))
             .with(true, () =>
-              lines.push(`{% assign ${(left as Identifier).name} = ${basePath}[${index}] | default: ${this.literalOf(right)} %}`),
+              lines.push(`{% assign ${(left as Identifier).name} = ${base}[${index}] | default: ${this.literalOf(right)} %}`),
             )
             .with(false, () => undefined)
             .exec()
@@ -104,7 +106,7 @@ export class VariableDeclarationParser {
         .with(isRestElement(el), () => {
           const arg = (el as { argument: unknown }).argument
           _match(isIdentifier(arg as Node))
-            .with(true, () => lines.push(`{% assign ${(arg as Identifier).name} = ${basePath} | slice: ${index}, ${basePath}.size %}`))
+            .with(true, () => lines.push(`{% assign ${(arg as Identifier).name} = ${base} | slice: ${index}, ${base}.size %}`))
             .with(false, () => undefined)
             .exec()
           index += 1

@@ -1,4 +1,4 @@
-import { isLogicalExpression, isUnaryExpression, type LogicalExpression, type Node, type UnaryExpression } from '@babel/types'
+import { isIdentifier, isLogicalExpression, isMemberExpression, isOptionalMemberExpression, isUnaryExpression, type LogicalExpression, type Node, type UnaryExpression } from '@babel/types'
 import { _match } from 'funcio'
 
 export function renderCondition(node: Node, yes: string, no: string, generate: (node: Node) => string): string {
@@ -31,5 +31,12 @@ function renderBranch(node: Node, yes: string, no: string, generate: (node: Node
     .with(true, () => '')
     .with(false, () => `{% else %}${no}`)
     .exec() as string
-  return `{% if ${generate(node)} %}${yes}${otherwise}{% endif %}`
+  return `{% if ${truthyTest(node, generate(node))} %}${yes}${otherwise}{% endif %}`
+}
+
+export function truthyTest(node: Node, code: string): string {
+  return _match(isIdentifier(node) || isMemberExpression(node) || isOptionalMemberExpression(node))
+    .with(true, () => `${code} != nil and ${code} != false and ${code} != 0 and ${code} != ""`)
+    .with(false, () => code)
+    .exec() as string
 }

@@ -2,6 +2,7 @@ import type { ConditionalExpression, LogicalExpression, Node } from '@babel/type
 import { _match } from 'funcio'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 import { escapedOutput, liquidJsonOutput } from '../../../../../shared/html'
+import { truthyTest } from './condition'
 
 export class LiquidConditionalParser {
   constructor(
@@ -25,12 +26,12 @@ export class LiquidConditionalParser {
   }
 
   private renderAnd(node: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
-    const condition = this.generateLiquidCode(node.left, true, renames, context)
+    const condition = truthyTest(node.left, this.generateLiquidCode(node.left, true, renames, context))
     return `${this.getAssigns(context)}{% if ${condition} %}\n${this.jsxToHtml(node.right, renames, context)}\n{% endif %}`
   }
 
   private renderOr(node: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
-    const condition = this.generateLiquidCode(node.left, true, renames, context)
+    const condition = truthyTest(node.left, this.generateLiquidCode(node.left, true, renames, context))
     return `${this.getAssigns(context)}{% if ${condition} %}\n${this.jsxToHtml(node.left, renames, context)}\n{% else %}\n${this.jsxToHtml(node.right, renames, context)}\n{% endif %}`
   }
 
@@ -59,7 +60,7 @@ export class LiquidConditionalParser {
   }
 
   public parseConditionalExpression(node: ConditionalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
-    const condition = this.generateLiquidCode(node.test, true, renames, context)
+    const condition = truthyTest(node.test, this.generateLiquidCode(node.test, true, renames, context))
     return `${this.getAssigns(context)}{% if ${condition} %}\n${this.jsxToHtml(node.consequent, renames, context)}\n{% else %}\n${this.jsxToHtml(node.alternate, renames, context)}\n{% endif %}`
   }
 }

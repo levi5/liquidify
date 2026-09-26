@@ -12,6 +12,7 @@ import {
 } from '@babel/types'
 import { HELPER_TO_FILTER, JSON_HELPERS, RAW_HELPERS, TRANSLATE_HELPERS } from '../../../../../shared/tsx-helper-filters'
 import { liquidJsonOutput } from '../../../../../shared/html'
+import { hoistLogicalOperators } from './pipe-guard'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 type GenerateFn = (node: unknown, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string
@@ -87,7 +88,9 @@ export class HelperCallParser {
       const pairs = this.objectPairs(args[0] as Parameters<HelperCallParser['objectPairs']>[0], inCondition, renames, context)
       return pairs === '' ? '' : `: ${pairs}`
     }
-    const rest = args.map((arg) => this.generate(arg as Expression, inCondition, renames, context)).join(', ')
+    const rest = args
+      .map((arg) => hoistLogicalOperators(this.generate(arg as Expression, inCondition, renames, context), 't', context))
+      .join(', ')
     return `: ${rest}`
   }
 
@@ -106,14 +109,15 @@ export class HelperCallParser {
       const pairs = this.objectPairs(arg as Parameters<HelperCallParser['objectPairs']>[0], inCondition, renames, context)
       return pairs === '' ? '' : `: ${pairs}`
     }
-    return `: width: ${this.generate(arg as Expression, inCondition, renames, context)}`
+    return `: width: ${hoistLogicalOperators(this.generate(arg as Expression, inCondition, renames, context), 'image_url', context)}`
   }
 
   private rewriteDefaultValue(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const args = n.arguments.filter(hasNodeType)
     if (args.length === 0) return
     const value = this.generate(args[0] as Expression, inCondition, renames, context)
-    const fallback = args.length > 1 ? this.generate(args[1] as Expression, inCondition, renames, context) : '""'
+    const fallback =
+      args.length > 1 ? hoistLogicalOperators(this.generate(args[1] as Expression, inCondition, renames, context), 'default', context) : '""'
     Object.assign(n, identifier(`${value} | default: ${fallback}`))
   }
 
@@ -127,7 +131,7 @@ export class HelperCallParser {
     const args = n.arguments.filter(hasNodeType)
     if (args.length === 0) return
     const input = this.generate(args[0] as Expression, inCondition, renames, context)
-    const rest = args.slice(1).map((arg) => this.generate(arg as Expression, inCondition, renames, context))
+    const rest = args.slice(1).map((arg) => hoistLogicalOperators(this.generate(arg as Expression, inCondition, renames, context), filter, context))
     const suffix = rest.length > 0 ? `: ${rest.join(', ')}` : ''
     Object.assign(n, identifier(`${input} | ${filter}${suffix}`))
   }
@@ -142,7 +146,11 @@ export class HelperCallParser {
       .filter((prop) => isObjectProperty(prop as Node))
       .map((prop) => {
         const key = this.objectKey((prop as { key: unknown }).key)
-        const value = this.generate((prop as { value: Expression }).value as Expression, inCondition, renames, context)
+        const value = hoistLogicalOperators(
+          this.generate((prop as { value: Expression }).value as Expression, inCondition, renames, context),
+          'param',
+          context,
+        )
         return key === '' ? '' : `${key}: ${value}`
       })
       .filter(Boolean)

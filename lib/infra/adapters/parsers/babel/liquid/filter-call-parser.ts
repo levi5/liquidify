@@ -1,7 +1,7 @@
 import { isCallExpression, isMemberExpression, isIdentifier, isArrowFunctionExpression, type Node } from '@babel/types'
 import { _match } from 'funcio'
 import { ValidationError } from '../../../../../core/errors/validation-error'
-import generate from '@babel/generator'
+import { hoistLogicalOperators } from './pipe-guard'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 export class FilterCallParser {
@@ -80,12 +80,15 @@ export class FilterCallParser {
       .with(this.isMemberAccess(body, itemName), () => `${arrayName} | where: "${this.memberName(body)}"`)
       .with(
         this.isEqualityCheck(body, itemName),
-        () => `${arrayName} | where: "${this.equalityProp(body)}", ${generate(this.equalityValue(body))}`,
+        () => {
+          const value = this.generateLiquidCode(this.equalityValue(body), false, renames, context)
+          return `${arrayName} | where: "${this.equalityProp(body)}", ${hoistLogicalOperators(value, 'where', context)}`
+        },
       )
       .with(
         this.isNegationOfMember(body, itemName),
         () =>
-          `${arrayName} | where_exp: "${itemName}", "${itemName}.${this.negatedMember(body, itemName)} == blank or ${itemName}.${this.negatedMember(body, itemName)} == false"`,
+          `${arrayName} | where_exp: "${itemName}", "${itemName}.${this.negatedMember(body, itemName)} == nil or ${itemName}.${this.negatedMember(body, itemName)} == false or ${itemName}.${this.negatedMember(body, itemName)} == 0 or ${itemName}.${this.negatedMember(body, itemName)} == """`,
       )
       .with(this.isComparison(body, itemName), () => this.comparisonFilter(arrayName, itemName, body, renames, context))
       .with(this.isSupportedWhereExp(body), () => this.whereExpFilter(arrayName, itemName, body, renames, context))

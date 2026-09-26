@@ -40,8 +40,6 @@ export const DrawerContent: FC<{
 		data ? handleOpen() : handleClose()
 	})
 
-	// The trigger can fire before this island hydrates; replay what was lost.
-	// Always drains, so a remount (theme editor) never replays a stale open.
 	useEffect(() => {
 		if (!eventName) return
 

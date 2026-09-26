@@ -178,11 +178,37 @@ export class LiquidAttributeConverter {
   }
 
   private renderLogicalFallback(expression: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
-    const left = this.expressionParser.generateLiquidCode(expression.left, false, renames, context)
-    const right = this.expressionParser.generateLiquidCode(expression.right, false, renames, context)
-    return expression.operator === '||'
-      ? `${this.pendingOf(context)}${escapedOutput(`${left} | default: ${right}`)}`
-      : `${this.pendingOf(context)}${escapedOutput(right)}`
+    const rawLeft = this.expressionParser.generateLiquidCode(expression.left, false, renames, context)
+    const left = this.guardTestValue(rawLeft, context)
+    const guard = `${left} == nil or ${left} == "" or ${left} == false or ${left} == 0`
+    return _match(expression.operator === '||')
+      .with(true, () => `${this.pendingOf(context)}{% if ${guard} %}${this.renderValue(expression.right as Expression, renames, context)}{% else %}${this.renderValue(expression.left as Expression, renames, context)}{% endif %}`)
+      .with(false, () => `${this.pendingOf(context)}{% if ${guard} %}{% else %}${this.renderValue(expression.right as Expression, renames, context)}{% endif %}`)
+      .exec() as string
+  }
+
+  private guardTestValue(rawLeft: string, context?: ParsingContext): string {
+    return _match(context !== undefined && this.hasTopLevelLogic(rawLeft))
+      .with(true, () => {
+        const parsed = context as ParsingContext
+        const temp = parsed.allocateName('cond')
+        parsed.addPendingAssign(`{% assign ${temp} = ${rawLeft} %}`)
+        return temp
+      })
+      .with(false, () => rawLeft)
+      .exec() as string
+  }
+
+  private hasTopLevelLogic(code: string): boolean {
+    let single = false
+    let dbl = false
+    for (let i = 0; i < code.length - 4; i++) {
+      const c = code[i]
+      if (c === "'" && !dbl) single = !single
+      else if (c === '"' && !single) dbl = !dbl
+      else if (!single && !dbl && (code.startsWith(' and ', i) || code.startsWith(' or ', i))) return true
+    }
+    return false
   }
 
   private renderStringValue(expression: { value: string }): string {

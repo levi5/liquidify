@@ -26,33 +26,16 @@ export class FallbackParser {
   public parseOrFallback(idName: string, init: unknown, renames?: Record<string, string>, context?: ParsingContext): string[] {
     const [baseNode, ...rest] = this.collectOrParts(init)
     const baseCode = this.generateLiquidCode(baseNode, false, renames, context)
-    return _match(rest.some((node) => isObjectExpression(node as Node)))
-      .with(true, () => this.objectFallbackLines(idName, baseCode, rest, renames, context))
-      .with(false, () => [`{% assign ${idName} = ${baseCode}${this.defaultChain(rest, renames, context)} %}`])
-      .exec() as string[]
+    return [`{% assign ${idName} = ${baseCode} %}`, ...rest.flatMap((node) => this.orGuard(idName, node, renames, context))]
   }
 
-  private objectFallbackLines(
-    idName: string,
-    baseCode: string,
-    rest: unknown[],
-    renames?: Record<string, string>,
-    context?: ParsingContext,
-  ): string[] {
-    return [`{% assign ${idName} = ${baseCode} %}`, ...rest.flatMap((node) => this.objectFallbackGuard(idName, node, renames, context))]
-  }
-
-  private objectFallbackGuard(idName: string, node: unknown, renames?: Record<string, string>, context?: ParsingContext): string[] {
-    const code = this.generateLiquidCode(node, false, renames, context)
-    const guard = `{% if ${idName} == nil or ${idName} == "" or ${idName} == false %}`
+  private orGuard(idName: string, node: unknown, renames?: Record<string, string>, context?: ParsingContext): string[] {
+    const code = this.generateLiquidCode(node as Node, false, renames, context)
+    const guard = `{% if ${idName} == nil or ${idName} == "" or ${idName} == false or ${idName} == 0 %}`
     return _match(isObjectExpression(node as Node))
       .with(true, () => [guard, '{% endif %}'])
       .with(false, () => [guard, `  {% assign ${idName} = ${code} %}`, '{% endif %}'])
       .exec() as string[]
-  }
-
-  private defaultChain(rest: unknown[], renames?: Record<string, string>, context?: ParsingContext): string {
-    return rest.map((node) => ` | default: ${this.generateLiquidCode(node, false, renames, context)}`).join('')
   }
 
   public parseNilFallback(idName: string, init: unknown, renames?: Record<string, string>, context?: ParsingContext): string[] {

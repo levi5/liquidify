@@ -58,7 +58,7 @@ export class StatementCollector {
 
   private negationCode(node: { argument: unknown }): string {
     const argCode = this.generateLiquidCodeFromNode(node.argument)
-    return `${argCode} == blank or ${argCode} == false`
+    return `${argCode} == nil or ${argCode} == false or ${argCode} == 0 or ${argCode} == ""`
   }
 
   private styleReference(node: { property: { name?: string; value?: string } }): string {
@@ -107,7 +107,7 @@ export class StatementCollector {
       (code) => code.replace(/\s*!==\s*/g, ' != '),
       (code) => code.replace(/\.toLowerCase\s*\(\)\s*/g, ' | downcase '),
       (code) => code.replace(/\.toUpperCase\s*\(\)\s*/g, ' | upcase '),
-      (code) => code.replace(/^!([a-zA-Z0-9_.]+)$/g, '$1 == blank or $1 == false'),
+      (code) => code.replace(/^!([a-zA-Z0-9_.]+)$/g, '$1 == nil or $1 == false or $1 == 0 or $1 == ""'),
       (code) => code.trim(),
     ),
   )
