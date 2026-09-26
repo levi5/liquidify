@@ -15,6 +15,7 @@ import type { Logger } from '../../../../shared/logger'
 export class LiquidFileSystemGenerator implements IGenerator {
   private readonly options: ResolvedGeneratorOptions
   private inBuild = false
+  private pendingTouch = false
 
   constructor(
     options: GeneratorOptions,
@@ -40,6 +41,10 @@ export class LiquidFileSystemGenerator implements IGenerator {
   public async finishBuild(): Promise<void> {
     await this.manifest.finish()
     this.inBuild = false
+    if (this.pendingTouch) {
+      this.pendingTouch = false
+      await this.touchDirectory(this.options.outputDir)
+    }
   }
 
   private async writeOutput(file: string, content: string, sourcePath?: string): Promise<void> {
@@ -63,6 +68,14 @@ export class LiquidFileSystemGenerator implements IGenerator {
       .exec()
     const scriptGenerated = await this.handleScripts(component, fileName, effectiveSource)
     await this.recordContributions(component, fileName, scriptGenerated, effectiveSource)
+    await this.markTouched()
+  }
+
+  private async markTouched(): Promise<void> {
+    if (this.inBuild) {
+      this.pendingTouch = true
+      return
+    }
     await this.touchDirectory(this.options.outputDir)
   }
 
@@ -233,7 +246,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
   }
 
   private async reportLiquidFile(liquidPath: string): Promise<void> {
-    await this.touchDirectory(this.options.sectionsDir)
+    await this.markTouched()
     this.logger.info(`New file created: ${liquidPath}`)
   }
 
@@ -263,7 +276,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
   }
 
   private async reportScriptFile(scriptPath: string): Promise<void> {
-    await this.touchDirectory(this.options.assetsDir)
+    await this.markTouched()
     this.logger.info(`New file created: ${scriptPath}`)
   }
 

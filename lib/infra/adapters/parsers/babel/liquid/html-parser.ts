@@ -7,8 +7,12 @@ import {
   isIdentifier,
   isStringLiteral,
   isExpression,
+  type JSXAttribute,
   type JSXElement,
-  type ObjectProperty,
+  type JSXExpressionContainer,
+  type JSXIdentifier,
+  type JSXSpreadAttribute,
+  type StringLiteral,
 } from '@babel/types'
 import { _Maybe, _match } from 'funcio'
 import type { LiquidAttributeConverter } from './attribute-parser'
@@ -21,11 +25,15 @@ export class LiquidHtmlParser {
   constructor(
     private readonly attributeConverter: LiquidAttributeConverter,
     private readonly expressionParser: ExpressionParser,
-    private readonly renderChildren: (children: any, renames?: Record<string, string>, context?: ParsingContext) => string,
+    private readonly renderChildren: (
+      children: JSXElement['children'],
+      renames?: Record<string, string>,
+      context?: ParsingContext,
+    ) => string,
   ) {}
 
   public renderHTMLElement(node: JSXElement, tagName: string, renames?: Record<string, string>, context?: ParsingContext): string {
-    const state = { hasRawHtml: false, rawHtml: '', bridge: [] as any[] }
+    const state = { hasRawHtml: false, rawHtml: '', bridge: [] as JSXAttribute[] }
     const filteredAttributes = node.openingElement.attributes.filter((attr) => this.keepAttribute(attr, tagName, state, renames, context))
     const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, context)
     const childContext = _match(tagName === 'style' || tagName === 'script')
@@ -54,20 +62,21 @@ export class LiquidHtmlParser {
   }
 
   private keepAttribute(
-    attr: any,
+    attr: JSXAttribute | JSXSpreadAttribute,
     tagName: string,
-    state: { hasRawHtml: boolean; rawHtml: string; bridge: any[] },
+    state: { hasRawHtml: boolean; rawHtml: string; bridge: JSXAttribute[] },
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): boolean {
     return _match(isJSXAttribute(attr) && isJSXIdentifier(attr.name))
       .with(false, () => true)
       .with(isJSXAttribute(attr) && isJSXIdentifier(attr.name), () => {
-        const name = attr.name.name
+        const name = ((attr as JSXAttribute).name as JSXIdentifier).name
+        const jsxAttr = attr as JSXAttribute
         return _match(name)
           .with('dangerouslySetInnerHTML', () => {
             state.hasRawHtml = true
-            state.rawHtml = this.extractDangerouslyContent(attr, renames, context)
+            state.rawHtml = this.extractDangerouslyContent(jsxAttr, renames, context)
             return false
           })
           .with(
@@ -75,7 +84,7 @@ export class LiquidHtmlParser {
             () =>
               _match(tagName === 'liquid-data' && (name.startsWith('data-liquid') || name === 'store'))
                 .with(true, () => {
-                  state.bridge.push(attr)
+                  state.bridge.push(jsxAttr)
                   return false
                 })
                 .with(tagName === 'liquid-data' && (name.startsWith('data-liquid') || name === 'store'), () => true)
@@ -86,11 +95,11 @@ export class LiquidHtmlParser {
       .exec() as boolean
   }
 
-  private bridgeScripts(attrs: any[], renames?: Record<string, string>, context?: ParsingContext): string {
+  private bridgeScripts(attrs: JSXAttribute[], renames?: Record<string, string>, context?: ParsingContext): string {
     return attrs
       .map((attr) => {
         const name = _match(isJSXIdentifier(attr.name))
-          .with(true, () => attr.name.name)
+          .with(true, () => (attr.name as JSXIdentifier).name)
           .with(false, () => '')
           .exec() as string
         const propName = _match(name)
@@ -109,15 +118,17 @@ export class LiquidHtmlParser {
       .join('\n')
   }
 
-  private bridgeValue(attr: any, renames?: Record<string, string>, context?: ParsingContext): string {
+  private bridgeValue(attr: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
     return _Maybe
       .of(attr.value)
       .map(
         (value) =>
           _match(true)
-            .with(isStringLiteral(value), () => (value as any).value)
+            .with(isStringLiteral(value), () => (value as StringLiteral).value)
             .with(isJSXExpressionContainer(value), () =>
-              liquidJsonOutput(this.expressionParser.generateLiquidCode((value as any).expression as any, false, renames, context)),
+              liquidJsonOutput(
+                this.expressionParser.generateLiquidCode((value as JSXExpressionContainer).expression, false, renames, context),
+              ),
             )
             .with(true, () => '')
             .exec() as string,
@@ -125,7 +136,7 @@ export class LiquidHtmlParser {
       .getOrElse('')
   }
 
-  private extractDangerouslyContent(attr: any, renames?: Record<string, string>, context?: ParsingContext): string {
+  private extractDangerouslyContent(attr: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
     return _Maybe
       .of(attr.value && isJSXExpressionContainer(attr.value) && isObjectExpression(attr.value.expression))
       .map(
@@ -138,17 +149,15 @@ export class LiquidHtmlParser {
       .getOrElse('')
   }
 
-  private dangerouslyHtml(attr: any, renames?: Record<string, string>, context?: ParsingContext): string {
-    const htmlProp = (attr.value.expression.properties || []).find(
-      (prop: any) =>
+  private dangerouslyHtml(attr: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
+    const container = attr.value
+    if (!isJSXExpressionContainer(container) || !isObjectExpression(container.expression)) return ''
+    const htmlProp = container.expression.properties.find(
+      (prop) =>
         isObjectProperty(prop) &&
         ((isIdentifier(prop.key) && prop.key.name === '__html') || (isStringLiteral(prop.key) && prop.key.value === '__html')),
-    ) as ObjectProperty | undefined
-    return _Maybe
-      .of(htmlProp && isExpression((htmlProp as any)?.value))
-      .map(() =>
-        this.expressionParser.parseExpression((htmlProp as any).value, renames, ParsingContext.derive(context, { outputContext: 'raw' })),
-      )
-      .getOrElse('')
+    )
+    if (htmlProp === undefined || !isObjectProperty(htmlProp) || !isExpression(htmlProp.value)) return ''
+    return this.expressionParser.parseExpression(htmlProp.value, renames, ParsingContext.derive(context, { outputContext: 'raw' }))
   }
 }

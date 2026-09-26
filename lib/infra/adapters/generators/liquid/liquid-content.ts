@@ -9,15 +9,12 @@ interface ScanState {
 }
 
 function htmlTokens(html: string): string[] {
-  const end = Array.from({ length: html.length }, (_, index) => index).reduce((state, index) => stepToken(html, index, state), {
-    tokens: [] as string[],
-    start: 0,
-    cursor: 0,
-  })
-  return _match(end.start < html.length)
-    .with(true, () => [...end.tokens, html.slice(end.start)])
-    .with(false, () => end.tokens)
-    .exec() as string[]
+  let state: ScanState = { tokens: [], start: 0, cursor: 0 }
+  for (let index = 0; index < html.length; index += 1) {
+    state = stepToken(html, index, state)
+  }
+  if (state.start < html.length) state.tokens.push(html.slice(state.start))
+  return state.tokens
 }
 
 function stepToken(html: string, index: number, state: ScanState): ScanState {
@@ -92,11 +89,9 @@ function skipTo(state: ScanState, cursor: number): ScanState {
 }
 
 function emitToken(html: string, state: ScanState, index: number, end: number): ScanState {
-  const tokens = _match(state.start < index)
-    .with(true, () => [...state.tokens, html.slice(state.start, index), html.slice(index, end + 1)])
-    .with(false, () => [...state.tokens, html.slice(index, end + 1)])
-    .exec() as string[]
-  return { tokens, start: end + 1, cursor: end + 1 }
+  if (state.start < index) state.tokens.push(html.slice(state.start, index))
+  state.tokens.push(html.slice(index, end + 1))
+  return { tokens: state.tokens, start: end + 1, cursor: end + 1 }
 }
 
 interface FormatState {

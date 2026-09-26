@@ -23,7 +23,7 @@ import {
 } from '@babel/types'
 import generate from '@babel/generator'
 import { _match, _pipe } from 'funcio'
-import type { ComponentMetadataType } from '../../../../../types/component'
+import type { ComponentMetadataType, InlineComponentNode } from '../../../../../types/component'
 import { LiquidVariableParser } from '../liquid/variable-parser'
 
 export class StatementCollector {
@@ -137,7 +137,7 @@ export class StatementCollector {
   private registerInline(declaration: VariableDeclarator, metadata: ComponentMetadataType): void {
     const jsx = this.isJsxReturningFunction(declaration.init)
     _match(isIdentifier(declaration.id) && jsx != null)
-      .with(true, () => metadata.inlineComponents?.set((declaration.id as { name: string }).name, jsx))
+      .with(true, () => metadata.inlineComponents?.set((declaration.id as { name: string }).name, jsx as InlineComponentNode))
       .with(false, () => undefined)
       .exec()
   }
@@ -300,7 +300,7 @@ export class StatementCollector {
   private collectInlineDeclaration(decl: VariableDeclarator, metadata: ComponentMetadataType): void {
     const jsx = this.isJsxReturningFunction(decl.init)
     _match(isIdentifier(decl.id) && jsx != null)
-      .with(true, () => metadata.inlineComponents?.set((decl.id as { name: string }).name, jsx))
+      .with(true, () => metadata.inlineComponents?.set((decl.id as { name: string }).name, jsx as InlineComponentNode))
       .with(false, () => undefined)
       .exec()
   }

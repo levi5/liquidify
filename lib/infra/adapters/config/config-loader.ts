@@ -8,12 +8,51 @@ const configFiles = ['liquidify.config.json', '.liquidifyrc.json', '.liquidifyrc
 
 const ALLOWED_KEYS = new Set(['componentsDir', 'output', 'react', 'force'])
 
-export function loadConfig(cwd: string = process.cwd()): LiquidifyConfig {
+export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): LiquidifyConfig {
+  if (explicitPath !== undefined && explicitPath.trim() !== '') {
+    return loadConfigFromFile(path.resolve(cwd, explicitPath))
+  }
   const fullPath = configFiles.map((file) => path.resolve(cwd, file)).find((file) => fs.existsSync(file))
   return _match(fullPath === undefined)
     .with(true, () => ({ ...DEFAULT_CONFIG, react: { ...DEFAULT_CONFIG.react } }))
     .with(false, () => readConfig(fullPath as string))
     .exec() as LiquidifyConfig
+}
+
+export function loadConfigFromFile(filePath: string): LiquidifyConfig {
+  const resolved = path.resolve(filePath)
+  if (!fs.existsSync(resolved)) {
+    throw new ValidationError(`Config file not found: ${resolved}.`, resolved)
+  }
+  return readConfig(resolved)
+}
+
+function levenshtein(a: string, b: string): number {
+  const rows = a.length + 1
+  const cols = b.length + 1
+  const grid: number[][] = Array.from({ length: rows }, (_, i) => [i, ...Array(cols - 1).fill(0)])
+  for (let j = 1; j < cols; j += 1) grid[0][j] = j
+  for (let i = 1; i < rows; i += 1) {
+    for (let j = 1; j < cols; j += 1) {
+      grid[i][j] = Math.min(grid[i - 1][j] + 1, grid[i][j - 1] + 1, grid[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
+    }
+  }
+  return grid[a.length][b.length]
+}
+
+function suggestKey(unknownKey: string, allowed: Set<string> | string[]): string {
+  const candidates = [...allowed]
+  let best: string | undefined
+  let bestScore = Number.POSITIVE_INFINITY
+  for (const candidate of candidates) {
+    const score = levenshtein(unknownKey, candidate)
+    if (score < bestScore) {
+      bestScore = score
+      best = candidate
+    }
+  }
+  if (best !== undefined && bestScore <= Math.max(2, Math.floor(unknownKey.length / 2))) return ` Did you mean "${best}"?`
+  return ''
 }
 
 function readConfig(fullPath: string): LiquidifyConfig {
@@ -42,7 +81,7 @@ function validateConfig(fullPath: string, value: unknown): LiquidifyConfig {
   _match(unknownKey === undefined)
     .with(true, () => undefined)
     .with(false, () => {
-      throw new ValidationError(`Unknown configuration key "${unknownKey}".`, fullPath)
+      throw new ValidationError(`Unknown configuration key "${unknownKey}".${suggestKey(unknownKey as string, ALLOWED_KEYS)}`, fullPath)
     })
     .exec()
   const merged = { ...DEFAULT_CONFIG, ...raw }
@@ -102,4 +141,4 @@ function checkReactShape(fullPath: string, react: Record<string, unknown>): Liqu
   return react as LiquidifyConfig['react']
 }
 
-export const ConfigLoader = { load: loadConfig }
+export const ConfigLoader = { load: loadConfig, loadFromFile: loadConfigFromFile }

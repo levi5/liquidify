@@ -1,37 +1,62 @@
 'use snippets'
 
+import { RenderSvg } from 'liquidex'
 import classNames from 'classnames'
 
 import type { ProductPreviewType } from '../../../../types/components/product'
 
+import { SwiperSliderRoot } from '../../../components/Swiper/Root'
+import { SwiperCarousel } from '../../../components/Swiper/Slide'
+import { SwiperSliderArrow } from '../../../components/Swiper/Arrow'
+import { Thumbnails } from '../../../components/Product/Thumbnails'
+
+import { PRODUCT_PREVIEW_SLIDER_SETTINGS } from '../../../../settings/slider/product.settings'
+
 import styles from './styles.css'
 
-export const ProductPreview = ({ title, images }: ProductPreviewType) => {
+export const ProductPreview = ({ id, title, images }: ProductPreviewType) => {
+	const galleryId = `product-gallery-${id}`
+	const slideId = `${galleryId}-slide`
+	const arrowId = `${galleryId}-arrow`
+	const arrowLeftId = `${arrowId}-left`
+	const arrowRightId = `${arrowId}-right`
+
 	return (
 		<>
 			{images && images.length > 0 ? (
-				<a className={classNames(styles['main-product-image'])} href={'{{ product.featured_image | image_url: width: 2000 }}'} target='_blank' rel='noopener'>
-					<img
-						id='ProductMainImage'
-						src={'{{ product.featured_image | image_url: width: 1200 }}'}
-						alt={'{{ product.featured_image.alt | default: product.title | escape }}'}
-						width='1000'
-						height='1200'
-						fetchpriority='high'
-					/>
-				</a>
+				<SwiperSliderRoot elementId={galleryId}>
+					<div className={classNames(styles['product-gallery'])}>
+						{images.length > 1 && <Thumbnails id={galleryId} images={images} title={title} />}
+
+						<div className={classNames(styles['product-main'])}>
+							<SwiperSliderArrow className={styles.galleryArrowLeft} type='left' id={arrowId} elementId={arrowLeftId} enable rewind>
+								<RenderSvg name='left-arrow.svg' />
+							</SwiperSliderArrow>
+
+							<SwiperCarousel elementId={slideId} settings={PRODUCT_PREVIEW_SLIDER_SETTINGS} pagination={true}>
+								{images.map((photo, index) => (
+									<img
+										src='{{ photo | image_url: width: 1200 }}'
+										srcSet='{{ photo | image_url: width: 600 }} 600w, {{ photo | image_url: width: 900 }} 900w, {{ photo | image_url: width: 1200 }} 1200w'
+										sizes='(max-width: 990px) 100vw, 50vw'
+										alt='{{ photo.alt | default: product.title | escape }}'
+										width='1000'
+										height='1200'
+										loading={index === 0 ? 'eager' : 'lazy'}
+										fetchpriority={index === 0 ? 'high' : 'auto'}
+										decoding='async'
+									/>
+								))}
+							</SwiperCarousel>
+
+							<SwiperSliderArrow className={styles.galleryArrowRight} type='right' id={arrowId} elementId={arrowRightId} enable rewind>
+								<RenderSvg name='right-arrow.svg' />
+							</SwiperSliderArrow>
+						</div>
+					</div>
+				</SwiperSliderRoot>
 			) : (
 				<div className='product-placeholder'>✳</div>
-			)}
-
-			{images && images.length > 1 && (
-				<div className={classNames(styles['product-thumbnails'])}>
-					{images.map((photo) => (
-						<a href={'{{ photo | image_url: width: 2000 }}'} data-product-thumbnail={'{{ photo | image_url: width: 1200 }}'}>
-							<img src={'{{ photo | image_url: width: 200 }}'} alt={'{{ photo.alt | default: product.title | escape }}'} width='120' height='144' loading='lazy' />
-						</a>
-					))}
-				</div>
 			)}
 		</>
 	)

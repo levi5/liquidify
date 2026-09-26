@@ -27,7 +27,7 @@ export const ProductInfo = () => {
 
 			<div className={classNames(styles['product-detail-grid'])}>
 				<div className='product-gallery'>
-					<RenderSnippet slot={ProductPreview} id={product.id} image={product.featured_image} title={product.title} images={product.images} />
+					<RenderSnippet slot={ProductPreview} id={product.id} title={product.title} images={product.images} />
 				</div>
 
 				<div className={classNames(styles['product-detail-copy'])}>

@@ -62,14 +62,18 @@ Create a `liquidify.config.json` at the root of your Shopify theme project:
 ```json
 {
   "componentsDir": "src/components",
-  "output": "."
+  "output": "liquidify"
 }
 ```
+
+> Use `"output": "."` when the config lives at your Shopify theme root and compiled files should be written in place.
 
 | Option          | Default          | Description                                  |
 |-----------------|------------------|----------------------------------------------|
 | `componentsDir` | `src/components` | Directory where your TSX/JSX components live |
 | `output`        | `liquidify`      | Output directory (your Shopify theme root)   |
+| `force`         | `false`          | Overwrite unmanaged output files             |
+| `react`         | `{strictCsp:true}` | React runtime options (`strictCsp`)        |
 
 ---
 
@@ -83,6 +87,11 @@ npx liquidify
 npx liquidify --watch
 # or alias:
 npx liquidx --watch
+
+# Use an explicit config file, skip the banner, or print the version
+npx liquidify --config ./liquidify.config.json
+npx liquidify --no-banner
+npx liquidify --version
 ```
 
 ---

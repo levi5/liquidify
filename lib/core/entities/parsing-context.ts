@@ -1,4 +1,5 @@
 import { _Maybe, _match } from 'funcio'
+import type { InlineComponentNode } from '../../types/component'
 
 const orDefault = <T>(value: T | undefined, fallback: T): T => _Maybe.of(value).getOrElse(fallback) as T
 
@@ -10,7 +11,7 @@ export interface ParsingContextData {
   currentFilePath?: string
   componentName?: string
   mode?: string
-  inlineComponents?: Map<string, any>
+  inlineComponents?: Map<string, InlineComponentNode>
   outputContext?: 'text' | 'raw' | 'json'
 }
 
@@ -22,7 +23,7 @@ export class ParsingContext {
   public currentFilePath?: string
   public componentName?: string
   public mode?: string
-  public inlineComponents?: Map<string, any>
+  public inlineComponents?: Map<string, InlineComponentNode>
   public outputContext: 'text' | 'raw' | 'json' = 'text'
   private sequence = 0
 

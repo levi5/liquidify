@@ -21,11 +21,14 @@ const toCount = (value: string | number | undefined, fallback: number) => {
 	return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
-export const SwiperCarousel: FC<{ elementId: string; children: ReactNode; variation?: string; activeIndex?: number } & SwiperComponentType.Wrapper> = ({
+export const SwiperCarousel: FC<
+	{ elementId: string; children: ReactNode; variation?: string; activeIndex?: number; register?: boolean } & SwiperComponentType.Wrapper
+> = ({
 	id,
 	direction = 'horizontal',
 	children,
 	activeIndex = undefined,
+	register = true,
 	settings,
 	className,
 	elementId,
@@ -49,6 +52,12 @@ export const SwiperCarousel: FC<{ elementId: string; children: ReactNode; variat
 	const tablet = isFade ? 1 : toCount(slidesPerViewTablet, Number(base.breakpoints?.[680]?.slidesPerView) || desktop)
 	const mobile = isFade ? 1 : toCount(slidesPerViewMobile, Number(base.slidesPerView) || tablet)
 	const delay = toCount(autoplayDelay, 4000)
+	const loop = Boolean((base as { loop?: unknown }).loop)
+
+	const goTo = (target: { slideTo: (index: number) => void; slideToLoop?: (index: number) => void }, index: number) => {
+		if (loop && target.slideToLoop) target.slideToLoop(index)
+		else target.slideTo(index)
+	}
 
 	const breakpoint = (key: 680 | 1024, columns: number) => {
 		const current = { ...base.breakpoints?.[key], slidesPerView: columns }
@@ -88,9 +97,9 @@ export const SwiperCarousel: FC<{ elementId: string; children: ReactNode; variat
 
 	useEffect(() => {
 		if (activeIndex !== undefined && swiper) {
-			;(swiper as typeof Swiper).slideTo(activeIndex)
+			goTo(swiper as unknown as Parameters<typeof goTo>[0], activeIndex)
 		}
-	}, [activeIndex, swiper])
+	}, [activeIndex, swiper, loop])
 
 	return (
 		<Swiper
@@ -103,7 +112,7 @@ export const SwiperCarousel: FC<{ elementId: string; children: ReactNode; variat
 			modules={[Autoplay, Pagination, EffectFade]}
 			direction={direction}
 			onSwiper={(swiperInstance: typeof Swiper | null) => {
-				if (setSwiper) {
+				if (register && setSwiper) {
 					setSwiper(swiperInstance)
 				}
 			}}

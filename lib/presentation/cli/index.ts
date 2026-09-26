@@ -1,12 +1,22 @@
 #!/usr/bin/env node
 import ora from 'ora'
 import kleur from 'kleur'
+import fs from 'node:fs'
+import path from 'node:path'
 import { _match, _try } from 'funcio'
 import { parseInitArgs, runInit } from './commands/init'
+import { formatHelp, parseCliArgs } from './args'
 import type { LiquidifyError } from '../../core/errors/liquidify-error'
 
-const printBanner = (): void => {
-  console.clear()
+const shouldSkipBanner = (options?: { noBanner?: boolean; quiet?: boolean }): boolean => {
+  if (options?.noBanner === true || options?.quiet === true) return true
+  if (process.env.CI === '1' || process.env.CI === 'true' || process.env.NO_COLOR === '1') return true
+  return false
+}
+
+const printBanner = (options?: { noBanner?: boolean; quiet?: boolean }): void => {
+  if (shouldSkipBanner(options)) return
+  if (process.stdout.isTTY === true) console.clear()
   console.log(
     kleur.cyan(`
   _      _             _     _ _  __
@@ -23,28 +33,30 @@ const printBanner = (): void => {
 }
 
 const showHelp = (): void => {
-  console.log(`
-  ${kleur.bold('Usage:')}
-    liquidify [options]
-    liquidify init [directory] [options]
-
-  ${kleur.bold('Commands:')}
-    init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
-
-  ${kleur.bold('Options:')}
-    --template, -t  Template to initialize (default: example, options: example)
-    --watch, -w     Watch for file changes and rebuild automatically
-    --force, -f     Force overwrite existing files during build or init
-    --help, -h      Show help
-`)
+  console.log(formatHelp())
   process.exit(0)
 }
 
-const runBuild = async (watch: boolean, force = false): Promise<void> => {
+const showVersion = (): void => {
+  console.log(`liquidify ${readPackageVersion()}`)
+}
+
+const readPackageVersion = (): string => {
+  try {
+    const pkgPath = path.join(__dirname, '../../../package.json')
+    const raw = fs.readFileSync(pkgPath, 'utf-8')
+    const pkg = JSON.parse(raw) as { version?: unknown }
+    return typeof pkg.version === 'string' ? pkg.version : 'unknown'
+  } catch {
+    return 'unknown'
+  }
+}
+
+const runBuild = async (watch: boolean, force = false, configPath?: string): Promise<void> => {
   const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' }).start()
   const { loadConfig } = await import('../../infra/adapters/config/config-loader')
   const { makeLiquidifyBuilder } = await import('../../main/factories/make-liquidify-builder')
-  const config = loadConfig()
+  const config = loadConfig(process.cwd(), configPath)
   _match(force)
     .with(true, () => {
       config.force = true
@@ -153,45 +165,31 @@ const failHard = async (builder: { dispose: () => Promise<void> }): Promise<void
   await builder.dispose()
 }
 
-const resolveCommand = (args: string[]): string => {
-  const isHelp = args.includes('--help') || args.includes('-h')
-  const isInit = args[0] === 'init'
-  return _match(isHelp)
-    .with(true, () => 'help')
-    .with(false, () => resolveBuildCommand(isInit))
-    .exec() as string
-}
-
-const resolveBuildCommand = (isInit: boolean): string =>
-  _match(isInit)
-    .with(true, () => 'init')
-    .with(false, () => 'build')
-    .exec() as string
-
 const resolveAction = (args: string[]) => {
-  const command = resolveCommand(args)
-  const watch = args.includes('--watch') || args.includes('-w')
-  const force = args.includes('--force') || args.includes('-f')
-  return _match(command)
+  const parsed = parseCliArgs(args)
+  return _match(parsed.command)
     .with('help', () => showHelp)
-    .with('init', () => initAction(args, force))
-    .with('build', () => () => runBuild(watch, force))
+    .with('version', () => showVersion)
+    .with('init', () => initAction(parsed.initArgs, parsed.force))
+    .with('build', () => () => runBuild(parsed.watch, parsed.force, parsed.configPath))
     .exec()
 }
 
 const initAction = (args: string[], force: boolean) => {
-  const { targetDir, template, force: initForce } = parseInitArgs(args.slice(1))
+  const { targetDir, template, force: initForce } = parseInitArgs(args)
   return () => runInit(targetDir, template, initForce || force)
 }
 
-export async function cli(): Promise<void> {
-  printBanner()
-  const args = process.argv.slice(2)
-  const action = resolveAction(args)
+export async function cli(argv: string[] = process.argv.slice(2)): Promise<void> {
+  const parsed = parseCliArgs(argv)
+  printBanner(parsed)
+  const action = resolveAction(argv)
   await action()
 }
 
-if (require.main === module) {
+const isMainModule = typeof require !== 'undefined' && require.main === module
+
+if (isMainModule) {
   cli().catch((error) => {
     console.error(error instanceof Error ? error.message : String(error))
     process.exitCode = 1

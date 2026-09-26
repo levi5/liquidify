@@ -115,9 +115,10 @@ export class ComponentRegistry {
   }
 
   private async scanFile(filePath: string): Promise<ScannedComponent | null> {
-    const directives = this.scanner.scan(this.fileSystem.readFileSync(filePath), filePath)
+    const source = this.fileSystem.readFileSync(filePath)
+    const directives = this.scanner.scan(source, filePath)
     return _match(this.isScannable(filePath, directives))
-      .with(true, () => this.parseComponent(filePath, directives))
+      .with(true, () => this.parseComponent(filePath, directives, source))
       .with(false, () => Promise.resolve(null))
       .exec() as Promise<ScannedComponent | null>
   }
@@ -137,8 +138,8 @@ export class ComponentRegistry {
       .exec() as boolean
   }
 
-  private async parseComponent(filePath: string, directives: ComponentDirectives): Promise<ScannedComponent> {
-    const parsed = await this.parser.parse(this.fileSystem.readFileSync(filePath), filePath)
+  private async parseComponent(filePath: string, directives: ComponentDirectives, source?: string): Promise<ScannedComponent> {
+    const parsed = await this.parser.parse(source ?? this.fileSystem.readFileSync(filePath), filePath)
     const componentName = _match(!parsed.name)
       .with(true, () => path.basename(filePath, path.extname(filePath)))
       .with(false, () => parsed.name as string)

@@ -111,11 +111,12 @@ export class LiquidifyBuilder extends EventEmitter {
   private async buildComponents(files: string[]) {
     await _Array.forEachAsync(files, async (file) => {
       const filePath = path.resolve(file)
-      const directives = this.scanner.scan(this.fileSystem.readFileSync(filePath), filePath)
+      const source = this.fileSystem.readFileSync(filePath)
+      const directives = this.scanner.scan(source, filePath)
       const skippable = (filePath.endsWith('.ts') || filePath.endsWith('.js')) && !directives.isDom && !directives.isSnippet
       await _match(skippable)
         .with(true, () => undefined)
-        .with(false, () => this.useCase.execute(this.fileSystem.readFileSync(filePath), filePath))
+        .with(false, () => this.useCase.execute(source, filePath))
         .exec()
     })
   }

@@ -42,7 +42,8 @@
     "liquidx": "tsx --tsconfig tsconfig.runtime.json lib/presentation/cli/index.ts",
     "liquidx:watch": "tsx lib/presentation/cli/index.ts --watch",
     "test:runtime": "npm run build && node --test \"tests/runtime/*.test.cjs\"",
-    "test:example:browser": "npm run build && node tests/react-example-browser.cjs"
+    "test:example:browser": "npm run build && node tests/react-example-browser.cjs",
+    "test:fast": "npm run build && node --test tests/cli-args.test.mjs tests/string-utils.test.mjs tests/liquid-content.test.mjs tests/expression-cache.test.mjs tests/config-loader.test.mjs"
   },
   "keywords": [
     "shopify",

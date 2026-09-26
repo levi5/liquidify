@@ -2,6 +2,12 @@ import * as types from '@babel/types'
 
 export type ComponentMode = 'liquid' | 'dom' | 'dom:global' | 'react'
 
+export type InlineComponentNode =
+  | types.JSXElement
+  | types.JSXFragment
+  | types.LogicalExpression
+  | types.ConditionalExpression
+
 export interface ComponentMetadataType {
   name: string
   jsxElement: types.JSXElement | types.JSXFragment | types.LogicalExpression | types.ConditionalExpression | null
@@ -13,5 +19,5 @@ export interface ComponentMetadataType {
   mode: ComponentMode
   reactRootId?: string
   hasUncoveredJs?: boolean
-  inlineComponents?: Map<string, any>
+  inlineComponents?: Map<string, InlineComponentNode>
 }
