@@ -40,7 +40,7 @@ export const MenuMobileModal = ({ options }: { options: LinksType }) => {
 											{overviewFor(link.url, link.title)}
 										</a>
 										{link.links.map((child) => (
-											<div key={child.url}>
+											<div className={'menuMobileChildGroup'} key={child.url}>
 												<a className={'menuMobileSubLink'} data-menu-child href={child.url}>
 													{child.title}
 												</a>

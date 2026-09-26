@@ -144,10 +144,35 @@ html {
   margin-bottom: 5px;
 }
 
-.nav-submenu .nav-grandchild {
-  padding-left: 25px;
+.desktop-nav .nav-submenu .nav-child-group {
+  padding: 2px 0;
+}
+
+.desktop-nav .nav-submenu .nav-child-group + .nav-child-group {
+  margin-top: 2px;
+}
+
+.desktop-nav .nav-submenu .nav-child {
+  font-weight: 600;
+}
+
+.desktop-nav .nav-submenu a.nav-grandchild {
+  position: relative;
+  padding-left: 26px;
   font-size: 11px;
   color: var(--muted);
+}
+
+.desktop-nav .nav-submenu a.nav-grandchild::before {
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  width: 6px;
+  height: 1.5px;
+  background: var(--muted);
+  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .icon-button-group {

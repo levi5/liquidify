@@ -56,6 +56,8 @@ const jsReserved = new Set([
   'dispatchEvent',
 ])
 
+const liquidKeywords = new Set(['or', 'and', 'not', 'contains', 'nil', 'empty', 'blank'])
+
 export class EventAttributeConverter {
   constructor(
     private readonly expressionParser: ILiquidExpressionParser,
@@ -72,8 +74,20 @@ export class EventAttributeConverter {
     return _match(true)
       .with(str !== undefined, () => match)
       .with(id !== undefined && jsReserved.has(id.split('.')[0]), () => match)
+      .with(id !== undefined && liquidKeywords.has(id), () => match)
       .with(true, () => `${prefix}{{ ${id} | json | escape }}`)
       .exec() as string
+  }
+
+
+  private restoreJsOperators(code: string): string {
+    const literals: string[] = []
+    const protectedCode = code.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, (literal) => {
+      literals.push(literal)
+      return `__LIQUIDIFY_JS_LITERAL_${literals.length - 1}__`
+    })
+    const restored = protectedCode.replace(/\bor\b/g, '||').replace(/\band\b/g, '&&')
+    return restored.replace(/__LIQUIDIFY_JS_LITERAL_(\d+)__/g, (_, index) => literals[Number(index)])
   }
 
   public convert(
@@ -98,9 +112,10 @@ export class EventAttributeConverter {
       .with(true, () => this.callHandler(arrowFunction.body as CallExpression, prefix, domMode, eventName, renames, context))
       .with(false, () => this.bodyHandler(arrowFunction, prefix, eventName, renames, context))
       .exec() as string
+    const jsCode = this.restoreJsOperators(code)
     const interpolated = _match(domMode)
-      .with(true, () => code)
-      .with(false, () => this.interpolateLiquidVariables(code))
+      .with(true, () => jsCode)
+      .with(false, () => this.interpolateLiquidVariables(jsCode))
       .exec() as string
     return ` ${attributeName}="${interpolated.replace(/"/g, '&quot;')}"`
   }

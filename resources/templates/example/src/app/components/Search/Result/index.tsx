@@ -6,6 +6,7 @@ import classNames from 'classnames'
 
 import { useClickOutside } from '../../../../hooks/useClickOutside'
 import { translate } from '../../../i18n/translate'
+import { ResultSkeleton } from './Skeleton'
 
 import styles from './styles.css'
 
@@ -28,6 +29,7 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 	const [open, setOpen] = useState(false)
 	const [term, setTerm] = useState('')
 	const [products, setProducts] = useState<PredictiveProduct[]>([])
+	const [loading, setLoading] = useState(false)
 	const ref = useRef<HTMLDivElement | null>(null)
 	const abortRef = useRef<AbortController | null>(null)
 	const debounceRef = useRef<number | null>(null)
@@ -57,9 +59,11 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 		if (!term) {
 			setOpen(false)
 			setProducts([])
+			setLoading(false)
 			return
 		}
 
+		setLoading(true)
 		try {
 			const response = await fetch(`/search/suggest?q=${encodeURIComponent(term)}&resources[type]=product&resources[limit]=4`, {
 				signal,
@@ -85,6 +89,8 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 			if ((error as Error)?.name === 'AbortError') return
 			setProducts([])
 			setOpen(false)
+		} finally {
+			if (!signal.aborted) setLoading(false)
 		}
 	}
 
@@ -95,6 +101,7 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 		if (!term.trim()) {
 			setOpen(false)
 			setProducts([])
+			setLoading(false)
 			return
 		}
 
@@ -125,7 +132,8 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 	}, [])
 
 	const hasProduct = products.length > 0
-	const isOpen = open && hasProduct
+	const isLoading = loading && !hasProduct
+	const isOpen = open && (hasProduct || loading)
 	const statusText =
 		term.trim() && isOpen
 			? translate('search.results.other', '{{ count }} resultados para “{{ terms }}”', {
@@ -139,6 +147,7 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 			key={elementId}
 			id={listId}
 			ref={ref}
+			aria-busy={loading}
 			className={classNames('searchResult', {
 				['empty']: !isOpen,
 			})}
@@ -155,19 +164,23 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 					{statusText}
 				</p>
 
-				<ul className={'items'} role='listbox' aria-label={translate('general.search', 'Buscar')}>
-					{products.slice(0, 3).map((product) => {
-						const imageUrl = resolveImageUrl(product)
-						return (
-							<li key={product.id} className={'item'} role='option' aria-selected='false'>
-								<a href={product.url}>
-									{imageUrl && <img src={imageUrl} alt='' width='60' height='75' loading='lazy' decoding='async' />}
-									<span className={'itemTitle'}>{product.title}</span>
-								</a>
-							</li>
-						)
-					})}
-				</ul>
+				{isLoading ? (
+					<ResultSkeleton />
+				) : (
+					<ul className={'items'} role='listbox' aria-label={translate('general.search', 'Buscar')}>
+						{products.slice(0, 3).map((product) => {
+							const imageUrl = resolveImageUrl(product)
+							return (
+								<li key={product.id} className={'item'} role='option' aria-selected='false'>
+									<a href={product.url}>
+										{imageUrl && <img src={imageUrl} alt='' width='60' height='75' loading='lazy' decoding='async' />}
+										<span className={'itemTitle'}>{product.title}</span>
+									</a>
+								</li>
+							)
+						})}
+					</ul>
+				)}
 			</div>
 		</div>
 	)

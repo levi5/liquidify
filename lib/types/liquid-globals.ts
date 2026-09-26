@@ -278,7 +278,7 @@ export interface GiftCard {
 declare global {
   const collection: Collection
   const collections: Record<string, Collection> & Collection[]
-  const search: { filters: Filter[]; results: any[]; results_count: number; terms: string }
+  const search: { filters: Filter[]; results: any[]; results_count: number; terms: string; performed: boolean }
   const filters: Filter[]
   const paginate: Paginate
   const product: Product

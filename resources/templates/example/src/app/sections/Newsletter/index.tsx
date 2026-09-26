@@ -27,7 +27,7 @@ export const Newsletter = () => {
 						<label htmlFor='NewsletterEmail'>{section.settings.label}</label>
 
 						<div className={classNames(styles['email-field'])}>
-							<input id='NewsletterEmail' type='email' name='contact[email]' placeholder='email@example.com' autoComplete='email' required />
+							<input id='NewsletterEmail' type='email' name='contact[email]' placeholder={"'footer.email_label' | t"} autoComplete='email' required />
 							<button type='submit' aria-label={"'footer.subscribe' | t"}>
 								↗
 							</button>

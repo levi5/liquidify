@@ -46,6 +46,17 @@ test('Liquid event attributes interpolate values and escape quotes', () => {
   )
 })
 
+test('Liquid event attributes keep JS logical operators executable', () => {
+  const converter = new LiquidAttributeConverter(expressions())
+  const element = parseExpression(
+    `<button onClick={() => (window.emit || window.fallback)?.('message::menu-mobile', true)} />`,
+    { plugins: ['jsx'] },
+  )
+  const result = converter.getAttributes(element.openingElement.attributes)
+  assert.doesNotMatch(result, /\{\{\s*or\s*\|/)
+  assert.match(result, /\|\|/)
+})
+
 test('expression output retains null coalescing and HTML escaping', () => {
   const output = expressions().parseExpression(parseExpression('title ?? "Fallback"'))
   assert.equal(output, '{% if title != nil %}{{ title | escape }}{% else %}{{ "Fallback" | escape }}{% endif %}')

@@ -15,7 +15,7 @@ export const MenuMobile = ({ options }: { options: LinksType }) => {
 				aria-haspopup='dialog'
 				aria-controls='menu-mobile-dialog'
 				aria-label={"'header.open_menu' | t"}
-				onClick={() => (window.LiquidifyEmitEvent || (window as any).LiquidxEmitEvent)?.('message::menu-mobile', true)}
+				onClick={() => window.LiquidifyEmitEvent('message::menu-mobile', true)}
 			>
 				<RenderSvg name='menu.svg' />
 			</button>

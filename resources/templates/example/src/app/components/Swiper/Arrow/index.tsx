@@ -10,6 +10,7 @@ import { SwiperContext } from '../Root'
 
 import type { SwiperComponentType } from '../../../../types/swiper'
 import { type SwiperSlider, useSwiperSlider } from '../../../../hooks/useSwiperSlider'
+import { translate } from '../../../i18n/translate'
 
 import styles from '../styles.css'
 
@@ -110,6 +111,7 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 	)
 
 	if (!enable) return null
+	const arrowLabel = type === 'left' ? translate('general.previous', 'Anterior') : translate('general.next', 'Próximo')
 	if (!swiperReady) {
 		return (
 			<div style={{ pointerEvents }} className={classNames('arrows', className, {})}>
@@ -122,7 +124,7 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 						'arrow-button',
 					)}
 					disabled
-					aria-label={type === 'left' ? 'Anterior' : 'Próximo'}
+					aria-label={arrowLabel}
 				>
 					{children}
 				</button>
@@ -148,7 +150,7 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 					'arrow-button',
 				)}
 				disabled={isDisabled}
-				aria-label={type === 'left' ? 'Anterior' : 'Próximo'}
+				aria-label={arrowLabel}
 				onClick={(event) => handleClick(event, type)}
 			>
 				{children}

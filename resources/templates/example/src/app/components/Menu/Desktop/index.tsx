@@ -30,12 +30,12 @@ export const MenuDesktop = ({ options }: { options: LinksType }) => {
                   {link.title} ↗
                 </a>
                 {link.links.map((child) => (
-                  <div>
-                    <a data-menu-child href={child.url}>
+                  <div className='nav-child-group'>
+                    <a className='nav-child' data-menu-child href={child.url}>
                       {child.title}
                     </a>
                     {child.links.map((grandchild) => (
-                      <a className='nav-grandchild' href={grandchild.url}>
+                      <a className='nav-grandchild' data-menu-grandchild href={grandchild.url}>
                         {grandchild.title}
                       </a>
                     ))}

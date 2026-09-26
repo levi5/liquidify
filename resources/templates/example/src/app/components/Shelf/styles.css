@@ -43,6 +43,36 @@
 	min-width: 0;
 }
 
+
+.shelf .cards react-island[component='SwiperCarousel']:not([data-react-hydrated]) {
+	display: flex;
+	gap: 1rem;
+	overflow: hidden;
+	width: 100%;
+	min-width: 0;
+}
+
+.shelf .cards react-island[component='SwiperCarousel']:not([data-react-hydrated]) > article {
+	flex: 0 0 calc((100% - 1rem) / 2);
+	min-width: 0;
+}
+
+@media screen and (min-width: 681px) {
+	.shelf .cards react-island[component='SwiperCarousel']:not([data-react-hydrated]) {
+		gap: 2rem;
+	}
+
+	.shelf .cards react-island[component='SwiperCarousel']:not([data-react-hydrated]) > article {
+		flex-basis: calc((100% - 4rem) / 3);
+	}
+}
+
+@media screen and (min-width: 1024px) {
+	.shelf .cards react-island[component='SwiperCarousel']:not([data-react-hydrated]) > article {
+		flex-basis: calc((100% - 6rem) / 4);
+	}
+}
+
 .carousel {
 	width: 100%;
 	min-width: 0;
