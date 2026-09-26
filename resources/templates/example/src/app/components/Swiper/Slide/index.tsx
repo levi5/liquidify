@@ -3,8 +3,9 @@
 import { _Maybe } from 'funcio'
 import { Autoplay, EffectFade, Pagination } from 'swiper/modules'
 import { Swiper, SwiperSlide } from 'swiper/react'
+import type { Swiper as SwiperInstance } from 'swiper/types'
 import { type FC, type ReactNode, Children } from 'preact/compat'
-import { useContext, useEffect } from 'preact/hooks'
+import { useContext, useEffect, useMemo, useState } from 'preact/hooks'
 
 import { SwiperContext } from '../Root'
 
@@ -21,14 +22,38 @@ const toCount = (value: string | number | undefined, fallback: number) => {
 	return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
+const toSlidesPerView = (value: string | number | undefined, fallback: number | 'auto'): number | 'auto' => {
+	if (value === 'auto') return 'auto'
+	const parsed = Number(value)
+
+	if (Number.isFinite(parsed) && parsed > 0) return parsed
+	return fallback
+}
+
+const baseSlidesPerView = (value: unknown, fallback: number | 'auto'): number | 'auto' => {
+	if (value === 'auto') return 'auto'
+	const parsed = Number(value)
+
+	if (Number.isFinite(parsed) && (parsed as number) > 0) return parsed as number
+	return fallback
+}
+
 export const SwiperCarousel: FC<
-	{ elementId: string; children: ReactNode; variation?: string; activeIndex?: number; register?: boolean } & SwiperComponentType.Wrapper
+	{
+		elementId: string
+		children: ReactNode
+		variation?: string
+		activeIndex?: number
+		register?: boolean
+		loop?: boolean
+	} & SwiperComponentType.Wrapper
 > = ({
 	id,
-	direction = 'horizontal',
+	direction,
 	children,
 	activeIndex = undefined,
 	register = true,
+	loop = undefined,
 	settings,
 	className,
 	elementId,
@@ -44,62 +69,75 @@ export const SwiperCarousel: FC<
 	const slides = (Children.toArray(children) as unknown[]).filter(
 		(child) => typeof child !== 'string' || child.trim() !== '',
 	) as ReactNode[]
-	const { setSwiper, swiper, setSwiperIndex } = useContext(SwiperContext) || {}
+	const { setSwiper } = useContext(SwiperContext) || {}
+	const [localSwiper, setLocalSwiper] = useState<SwiperInstance | null>(null)
 
-	const base = settings || {}
 	const isFade = effect === 'fade'
-	const desktop = isFade ? 1 : toCount(slidesPerView, Number(base.breakpoints?.[1024]?.slidesPerView) || Number(base.slidesPerView) || 1)
-	const tablet = isFade ? 1 : toCount(slidesPerViewTablet, Number(base.breakpoints?.[680]?.slidesPerView) || desktop)
-	const mobile = isFade ? 1 : toCount(slidesPerViewMobile, Number(base.slidesPerView) || tablet)
 	const delay = toCount(autoplayDelay, 4000)
-	const loop = Boolean((base as { loop?: unknown }).loop)
+	const loopMode = loop ?? Boolean((settings as { loop?: unknown })?.loop)
 
-	const goTo = (target: { slideTo: (index: number) => void; slideToLoop?: (index: number) => void }, index: number) => {
-		if (loop && target.slideToLoop) target.slideToLoop(index)
-		else target.slideTo(index)
-	}
+	const params = useMemo(() => {
+		const base = (settings || {}) as Record<string, any>
+		const baseBreakpoints = (base.breakpoints || {}) as Record<number, Record<string, any>>
+		const fallbackDesktop = baseSlidesPerView(baseBreakpoints?.[1024]?.slidesPerView ?? base.slidesPerView, 1)
+		const desktop = isFade ? 1 : toSlidesPerView(slidesPerView, fallbackDesktop)
+		const tablet = isFade ? 1 : toSlidesPerView(slidesPerViewTablet, baseSlidesPerView(baseBreakpoints?.[680]?.slidesPerView, desktop))
+		const mobile = isFade ? 1 : toSlidesPerView(slidesPerViewMobile, baseSlidesPerView(base.slidesPerView, tablet))
 
-	const breakpoint = (key: 680 | 1024, columns: number) => {
-		const current = { ...base.breakpoints?.[key], slidesPerView: columns }
+		const breakpoint = (key: 680 | 1024, columns: number | 'auto') => {
+			const current = { ...baseBreakpoints?.[key] }
+			if (slidesPerView !== undefined || current.slidesPerView === undefined) {
+				current.slidesPerView = columns
+			}
+			if (key === 680 && slidesPerViewTablet !== undefined) current.slidesPerView = toSlidesPerView(slidesPerViewTablet, columns)
+			if (key === 1024 && slidesPerView !== undefined) current.slidesPerView = toSlidesPerView(slidesPerView, columns)
+			return isFade ? { ...current, spaceBetween: 0 } : current
+		}
 
-		return isFade ? { ...current, spaceBetween: 0 } : current
-	}
+		return {
+			...base,
+			...(effect ? { effect } : {}),
+			direction: direction ?? base.direction ?? 'horizontal',
+			slidesPerView: mobile,
+			spaceBetween: isFade ? 0 : base.spaceBetween,
+			breakpoints: {
+				...baseBreakpoints,
+				680: breakpoint(680, tablet),
+				1024: breakpoint(1024, desktop),
+			},
+		}
+	}, [settings, effect, direction, slidesPerView, slidesPerViewTablet, slidesPerViewMobile, isFade])
 
-	const params = {
-		...base,
-		...(effect ? { effect } : {}),
-		slidesPerView: mobile,
-		spaceBetween: isFade ? 0 : base.spaceBetween,
-		breakpoints: {
-			...base.breakpoints,
-			680: breakpoint(680, tablet),
-			1024: breakpoint(1024, desktop),
-		},
-	}
+	const autoplayParams: Record<string, unknown> = useMemo(() => {
+		const base = settings || {}
+		if (autoplay === undefined) return {}
+		return {
+			autoplay: autoplay === false ? false : { delay: toCount(autoplay === true ? undefined : autoplay, delay), disableOnInteraction: false },
+			speed: base.speed ?? 420,
+		}
+	}, [autoplay, autoplayDelay, delay, settings])
 
-	const autoplayParams: Record<string, unknown> =
-		autoplay === undefined
-			? {}
-			: {
-					autoplay:
-						autoplay === false ? false : { delay: toCount(autoplay === true ? undefined : autoplay, delay), disableOnInteraction: false },
-					speed: base.speed ?? 420,
-				}
-
-	const paginationParams: Record<string, unknown> =
-		pagination === undefined ? {} : { pagination: pagination === true ? { clickable: true } : pagination }
+	const paginationParams: Record<string, unknown> = useMemo(() => {
+		if (pagination === undefined) return {}
+		return { pagination: pagination === true ? { clickable: true } : pagination }
+	}, [pagination])
 
 	useEffect(() => {
-		if (swiper) {
-			swiper.update()
+		if (localSwiper) {
+			localSwiper.update()
 		}
-	}, [swiper, slides.length])
+		const handleResize = () => localSwiper?.update()
+		window.addEventListener('resize', handleResize)
+		return () => window.removeEventListener('resize', handleResize)
+	}, [localSwiper, slides.length])
 
 	useEffect(() => {
-		if (activeIndex !== undefined && swiper) {
-			goTo(swiper as unknown as Parameters<typeof goTo>[0], activeIndex)
-		}
-	}, [activeIndex, swiper, loop])
+		if (activeIndex === undefined || !localSwiper) return
+		const instance = localSwiper as unknown as { realIndex: number; animating: boolean; slideTo: (i: number) => void; slideToLoop?: (i: number) => void }
+		if (instance.realIndex === activeIndex || instance.animating) return
+		if (loopMode && instance.slideToLoop) instance.slideToLoop(activeIndex)
+		else instance.slideTo(activeIndex)
+	}, [activeIndex, localSwiper, loopMode])
 
 	return (
 		<Swiper
@@ -110,20 +148,13 @@ export const SwiperCarousel: FC<
 			id={elementId ?? id}
 			className={className}
 			modules={[Autoplay, Pagination, EffectFade]}
-			direction={direction}
+			direction={(params as { direction?: 'horizontal' | 'vertical' }).direction ?? 'horizontal'}
+			loop={loopMode}
 			onSwiper={(swiperInstance: typeof Swiper | null) => {
+				setLocalSwiper(swiperInstance)
 				if (register && setSwiper) {
 					setSwiper(swiperInstance)
 				}
-			}}
-			onSlideChange={(swiper: typeof Swiper | null) => {
-				const realIndex = _Maybe
-					.of(swiper)
-					.map((swiper) => swiper.realIndex)
-					.map((realIndex) => realIndex)
-					.getOrElse(0)
-
-				setSwiperIndex(realIndex)
 			}}
 		>
 			{slides.map((child: ReactNode, index: number) => (
