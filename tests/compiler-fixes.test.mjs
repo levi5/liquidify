@@ -95,3 +95,27 @@ test('mixed conditions produce nested Liquid conditions instead of boolean assig
   assert.match(markup, /{% if c %}/)
   assert.doesNotMatch(markup, /assign [^%]*(?: and | or )/)
 })
+
+test('negated conditions never emit parentheses rejected by Shopify', () => {
+  const single = expressions().generateLiquidCode(parseExpression('!current_tags'), true, undefined, new ParsingContext())
+  assert.equal(single, 'current_tags == blank or current_tags == false')
+
+  const orChain = expressions().generateLiquidCode(
+    parseExpression('!blocks || blocks.size == 0'),
+    true,
+    undefined,
+    new ParsingContext(),
+  )
+  assert.equal(orChain, 'blocks == blank or blocks == false or blocks.size == 0')
+  assert.doesNotMatch(orChain, /[()]/)
+})
+
+test('negation mixed with && stabilizes via nested conditions instead of parentheses', () => {
+  const context = new ParsingContext()
+  const result = expressions().generateLiquidCode(parseExpression('!a && b'), true, undefined, context)
+  assert.equal(result, '__liquidify_condition_0')
+  const markup = context.getPendingAssigns()
+  assert.doesNotMatch(markup, /[()]/)
+  assert.doesNotMatch(markup, /{% if [^%]* and [^%]* or [^%]*%}/)
+  assert.doesNotMatch(markup, /{% if [^%]* or [^%]* and [^%]*%}/)
+})

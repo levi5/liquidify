@@ -3,7 +3,7 @@
 import { RenderSnippet, Raw } from 'liquidex'
 import classNames from 'classnames'
 
-import { ProductPreview } from './Preview'
+import { ProductPreview } from '../../components/Product/Preview'
 import { BaseBox } from '../../components/Base/Box'
 import { QuantitySelector } from '../../components/Quantity/Selector'
 import { Selector } from '../../components/Selector'
@@ -26,7 +26,7 @@ export const ProductInfo = () => {
 			<RenderSnippet slot={Breadcrumb} className='' />
 
 			<div className={classNames(styles['product-detail-grid'])}>
-				<div className='product-gallery'>
+				<div className={classNames(styles['product-gallery-wrapper'])}>
 					<RenderSnippet slot={ProductPreview} id={product.id} title={product.title} images={product.images} />
 				</div>
 

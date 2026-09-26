@@ -22,9 +22,7 @@ export const SwiperContext = createContext<SwiperContextType>({
 
 export const SwiperSliderRoot: FC<{ children: ReactNode | ReactNode[]; elementId: string }> = ({ children }) => {
 	const [swiper, setSwiper] = useState<Swiper | null>(null)
-	const [data, setData] = useState({ index: 0 })
+	const setSwiperIndex = useCallback((_index: number) => {}, [])
 
-	const setSwiperIndex = useCallback((index: number) => setData((prev) => ({ ...prev, index })), [])
-
-	return <SwiperContext.Provider value={{ swiper, setSwiper, setSwiperIndex, ...data }}>{children}</SwiperContext.Provider>
+	return <SwiperContext.Provider value={{ swiper, setSwiper, setSwiperIndex, index: 0 }}>{children}</SwiperContext.Provider>
 }

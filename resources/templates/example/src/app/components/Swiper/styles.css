@@ -1,7 +1,3 @@
-:global(.swiper-vertical:has(.swiper-wrapper > .swiper-slide[data-swiper-slide-index="1"]:first-child)) > .swiper-wrapper {
-	flex-direction: column-reverse;
-}
-
 .arrows {
 	position: absolute;
 }

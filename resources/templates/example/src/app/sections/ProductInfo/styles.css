@@ -8,6 +8,11 @@
   gap: 85px;
 }
 
+.product-gallery-wrapper {
+  width: 100%;
+  min-width: 0;
+}
+
 .product-detail-copy {
   padding-top: 20px;
 }

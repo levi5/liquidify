@@ -95,7 +95,7 @@ export const COLLECTION_SHELF_SCHEMA = {
 			id: 'autoplay_delay',
 			label: 't:sections.shelf.settings.autoplay_delay.label',
 			min: 2000,
-			max: 10000,
+			max: 9000,
 			step: 500,
 			unit: 'ms',
 			default: 4000,

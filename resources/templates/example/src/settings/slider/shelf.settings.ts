@@ -1,6 +1,7 @@
 export const SHELF_SLIDER_SETTINGS = {
 	slidesPerView: 4,
-	loop: false,
+	loop: true,
+	rewind: false,
 	watchOverflow: true,
 	speed: 420,
 	observer: true,

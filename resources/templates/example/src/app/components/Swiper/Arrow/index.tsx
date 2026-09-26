@@ -18,7 +18,7 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 	const sliderRef = useContext(SwiperContext)
 	const [state, setState] = useState<SwiperSlider.Datais>({
 		size: 0,
-		isEnd: true,
+		isEnd: false,
 		isStart: true,
 		isInfinite: false,
 		slidesPerView: 0,
@@ -32,10 +32,57 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 		.map((swiper) => swiper?.slides.length ?? null)
 		.getOrElse(null)
 
-	useEffect(() => {
-		const data = getSliderDetails(sliderRef)
+	const swiperReady = swiperRef !== null && size !== null && size > 0
 
-		setState((prevState) => ({ ...prevState, ...data }))
+	useEffect(() => {
+		const refresh = () => {
+			const data = getSliderDetails(sliderRef)
+			setState((prevState) =>
+				prevState.size === data.size &&
+				prevState.isEnd === data.isEnd &&
+				prevState.isStart === data.isStart &&
+				prevState.isInfinite === data.isInfinite &&
+				prevState.slidesPerView === data.slidesPerView
+					? prevState
+					: { ...prevState, ...data },
+			)
+		}
+		refresh()
+
+		const instance = swiperRef as unknown as {
+			on?: (events: string, handler: () => void) => void
+			off?: (events: string, handler: () => void) => void
+			el?: HTMLElement
+		} | null
+		if (!instance?.on) return
+
+		const events = [
+			'slideChange',
+			'slideChangeTransitionEnd',
+			'transitionEnd',
+			'toEdge',
+			'fromEdge',
+			'reachBeginning',
+			'reachEnd',
+			'resize',
+			'breakpoint',
+			'update',
+		]
+		events.forEach((event) => instance.on?.(event, refresh))
+
+		const pollTimer = window.setInterval(() => {
+			refresh()
+			const data = getSliderDetails(sliderRef)
+			if (data.size > 0 && data.size > data.slidesPerView && !data.isEnd) {
+				window.clearInterval(pollTimer)
+			}
+		}, 100)
+		window.setTimeout(() => window.clearInterval(pollTimer), 3000)
+
+		return () => {
+			events.forEach((event) => instance.off?.(event, refresh))
+			window.clearInterval(pollTimer)
+		}
 	}, [sliderRef, swiperRef, size])
 
 	const handleClick = useCallback(
@@ -43,7 +90,7 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 			event.preventDefault()
 			event.stopPropagation()
 
-			if (!swiperRef) return
+			if (!swiperReady || !swiperRef) return
 
 			_match(type)
 				.with('left', () => swiperRef.slidePrev())
@@ -52,29 +99,55 @@ const SwiperSliderArrowComponent = ({ children, className = '', enable, type, po
 				.exec()
 
 			click?.()
-			setState(getSliderDetails(sliderRef))
+			requestAnimationFrame(() => {
+				setState(getSliderDetails(sliderRef))
+			})
+			window.setTimeout(() => {
+				setState(getSliderDetails(sliderRef))
+			}, 50)
 		},
-		[sliderRef],
+		[sliderRef, swiperReady, swiperRef],
 	)
 
-	if (!enable || !size || size <= 1) return null
+	if (!enable) return null
+	if (!swiperReady) {
+		return (
+			<div style={{ pointerEvents }} className={classNames('arrows', className, {})}>
+				<button
+					type='button'
+					style={{ pointerEvents }}
+					className={classNames(
+						'arrow',
+						{ ['disabled']: true },
+						'arrow-button',
+					)}
+					disabled
+					aria-label={type === 'left' ? 'Anterior' : 'Próximo'}
+				>
+					{children}
+				</button>
+			</div>
+		)
+	}
 
+	const hasMultipleSlides = size !== null && size > 1
 	const isSizeWithinLimit = size !== null && state.slidesPerView > 0 && size <= state.slidesPerView
-	const disabled = (type === 'right' && state.isEnd) || (type === 'left' && state.isStart) || isSizeWithinLimit
+	const disabled = !swiperReady || !hasMultipleSlides || (type === 'right' ? state.isEnd : state.isStart) || isSizeWithinLimit
+	const isDisabled = !rewind && !state.isInfinite && disabled
 
 	return (
-		<div style={{ pointerEvents }} className={classNames('arrows', className, {})} aria-hidden={disabled}>
+		<div style={{ pointerEvents }} className={classNames('arrows', className, {})}>
 			<button
 				type='button'
 				style={{ pointerEvents }}
 				className={classNames(
 					'arrow',
 					{
-						['disabled']: !rewind && disabled && !state.isInfinite,
+						['disabled']: isDisabled,
 					},
 					'arrow-button',
 				)}
-				disabled={!rewind && disabled && !state.isInfinite}
+				disabled={isDisabled}
 				aria-label={type === 'left' ? 'Anterior' : 'Próximo'}
 				onClick={(event) => handleClick(event, type)}
 			>

@@ -40,24 +40,38 @@ export const useSwiperSlider = () => {
 			.getOrElse(null)
 
 		const size: number = _Maybe.of(swiper)
-			.map((swiper) => swiper?.slides.length ?? 0)
+			.map((swiper) => swiper?.slides?.length ?? 0)
 			.getOrElse(0)
 
 		const isEnd: boolean = _Maybe.of(swiper)
-			.map((swiper) => swiper?.isEnd ?? false)
+			.map((swiper) => {
+				if (!swiper) return false
+				if (swiper.params?.loop) return false
+				if (swiper.activeIndex === 0 && (swiper.slides?.length ?? 0) > (Number(swiper.params?.slidesPerView) || 1)) {
+					return false
+				}
+				return Boolean(swiper.isEnd)
+			})
 			.getOrElse(false)
 
 		const isStart: boolean = _Maybe.of(swiper)
-			.map((swiper) => swiper?.activeIndex === 0)
-			.getOrElse(false)
+			.map((swiper) => {
+				if (!swiper) return true
+				if (swiper.params?.loop) return false
+				return Boolean(swiper.isBeginning) || swiper.activeIndex === 0
+			})
+			.getOrElse(true)
 
 		const isInfinite: boolean = _Maybe.of(swiper)
-			.map((swiper) => (swiper?.loopedSlides ?? 0) > 0)
+			.map((swiper) => Boolean(swiper?.params?.loop) || (swiper?.loopedSlides ?? 0) > 0)
 			.getOrElse(false)
 
 		const slidesPerView: number = _Maybe.of(swiper)
-			.map((swiper) => Number(swiper?.params.slidesPerView) || 0)
-			.getOrElse(0)
+			.map((swiper) => {
+				const param = Number(swiper?.params?.slidesPerView)
+				return Number.isFinite(param) && param > 0 ? param : 1
+			})
+			.getOrElse(1)
 
 		return {
 			slidesPerGroup: slidesPerView,

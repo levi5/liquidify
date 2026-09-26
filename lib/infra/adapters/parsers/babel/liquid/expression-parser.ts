@@ -154,10 +154,20 @@ export class ExpressionParser {
   private normalizeNode(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     this.applyRename(n, renames)
     this.foldOptional(n)
+    this.stripConditionParens(n, inCondition)
     this.normalizeCall(n, inCondition, renames, context)
     this.normalizeUnary(n, renames, context)
     this.normalizeBinary(n, renames, context)
     this.normalizeMember(n)
+  }
+
+  private stripConditionParens(n: Node, inCondition: boolean): void {
+    _match(inCondition && (n as { extra?: { parenthesized?: boolean } }).extra?.parenthesized === true)
+      .with(true, () => {
+        delete (n as { extra?: unknown }).extra
+      })
+      .with(false, () => undefined)
+      .exec()
   }
 
   private applyRename(n: Node, renames?: Record<string, string>): void {
@@ -777,7 +787,7 @@ export class ExpressionParser {
         ;(context as ParsingContext).addPendingAssign(`{% assign ${temp} = ${code} %}`)
         Object.assign(n, identifier(`${temp} == blank or ${temp} == false`))
       })
-      .with(false, () => Object.assign(n, identifier(`(${code} == blank or ${code} == false)`)))
+      .with(false, () => Object.assign(n, identifier(`${code} == blank or ${code} == false`)))
       .exec()
   }
 
@@ -923,13 +933,23 @@ export class ExpressionParser {
 
   private hasMixedOperators(node: Node): boolean {
     const operators = new Set<string>()
+    let hasNegation = false
     traverseFast(node, (child) => {
       _match(isLogicalExpression(child))
         .with(true, () => operators.add((child as LogicalExpression).operator))
         .with(false, () => undefined)
         .exec()
+      _match(isUnaryExpression(child) && (child as UnaryExpression).operator === '!')
+        .with(true, () => {
+          hasNegation = true
+        })
+        .with(false, () => undefined)
+        .exec()
     })
-    return operators.has('&&') && operators.has('||')
+    return (
+      (operators.has('&&') && operators.has('||')) ||
+      (hasNegation && operators.has('&&'))
+    )
   }
 
   private stabilizedCondition(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {

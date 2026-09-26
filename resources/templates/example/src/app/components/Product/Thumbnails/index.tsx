@@ -1,6 +1,6 @@
 'use react'
 
-import { useContext } from 'preact/hooks'
+import { useContext, useEffect, useState } from 'preact/hooks'
 import classNames from 'classnames'
 
 import { SwiperCarousel } from '../../../components/Swiper/Slide'
@@ -34,7 +34,7 @@ export const Thumbnails = ({
 	height = 144,
 	images,
 	title,
-	limit = 5,
+	limit = 20,
 	id = 'carousel-product',
 }: {
 	id?: string
@@ -44,10 +44,25 @@ export const Thumbnails = ({
 	title: string
 	limit?: number
 }) => {
-	const { index: activeIndex, swiper } = useContext(SwiperContext)
+	const { swiper } = useContext(SwiperContext)
+	const [activeIndex, setActiveIndex] = useState(0)
+
+	useEffect(() => {
+		if (!swiper) return
+		const onIndexChange = () => {
+			const real = swiper.realIndex ?? swiper.activeIndex ?? 0
+			setActiveIndex(real)
+		}
+		swiper.on('slideChange', onIndexChange)
+		swiper.on('realIndexChange', onIndexChange)
+		return () => {
+			swiper.off('slideChange', onIndexChange)
+			swiper.off('realIndexChange', onIndexChange)
+		}
+	}, [swiper])
 
 	const name = `${id}-thumbnails`
-	const visible = images.slice(0, limit)
+	const visible = (images ?? []).slice(0, limit)
 
 	const onSelect = (index: number) => {
 		const target = swiper as unknown as { slideTo: (index: number) => void; slideToLoop?: (index: number) => void } | null
