@@ -17,6 +17,11 @@ export interface RenderSvgProps {
 }
 export const RenderSvg: FC<RenderSvgProps> = (() => null) as any
 
+export interface RawProps {
+  html: unknown
+}
+export const Raw: FC<RawProps> = (() => null) as any
+
 export interface PaginateByLiquidProps {
   collection: any
   by: number | string

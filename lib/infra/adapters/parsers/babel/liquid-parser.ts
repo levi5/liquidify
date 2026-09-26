@@ -39,6 +39,7 @@ import {
   type Node,
   type ConditionalExpression,
   type LogicalExpression,
+  type JSXIdentifier,
   type JSXOpeningElement,
   type Statement,
 } from '@babel/types'
@@ -46,6 +47,7 @@ import { LiquidAttributeConverter } from './liquid/attribute-parser'
 import { _match } from 'funcio'
 import { pascalToKebab } from '../../../../shared/string'
 import { ValidationError } from '../../../../core/errors/validation-error'
+import type { InlineComponentNode } from '../../../../types/component'
 
 export class LiquidParser implements ILiquidExpressionParser {
   private readonly dynamicBlockTag: string
@@ -156,7 +158,7 @@ export class LiquidParser implements ILiquidExpressionParser {
     ast: File,
     currentFilePath?: string,
     componentName?: string,
-    inlineComponents?: Map<string, any>,
+    inlineComponents?: Map<string, InlineComponentNode>,
   ): JSXResult {
     const context = new ParsingContext({ currentFilePath, componentName, mode: 'liquid', inlineComponents })
     this.importResolver.resolveImports(ast)
@@ -170,7 +172,7 @@ export class LiquidParser implements ILiquidExpressionParser {
     currentFilePath?: string,
     componentName?: string,
     mode?: string,
-    inlineComponents?: Map<string, any>,
+    inlineComponents?: Map<string, InlineComponentNode>,
   ): JSXResult {
     const context = new ParsingContext({
       currentFilePath,
@@ -209,7 +211,7 @@ export class LiquidParser implements ILiquidExpressionParser {
       .with(isJSXElement(node), () => this.renderJSXElement(node as JSXElement, renames, context))
       .with(isJSXText(node), () => this.textOf(node as JSXText))
       .with(isJSXExpressionContainer(node), () => this.handleContainer(node as JSXExpressionContainer, renames, context))
-      .with(isExpression(node as any), () => this.handleExpression(node as Expression, renames, context))
+      .with(isExpression(node), () => this.handleExpression(node as Expression, renames, context))
       .with(true, () => '')
       .exec() as string
   }
@@ -245,9 +247,10 @@ export class LiquidParser implements ILiquidExpressionParser {
     const tagName = this.getTagName(node.openingElement)
     return _match(true)
       .with(this.reactRegistry.has(tagName), () => this.reactComponentParser.transformReactComponent(node, tagName, context))
-      .with(context?.inlineComponents?.has(tagName) === true, () =>
-        this.jsxToHtml((context as ParsingContext).inlineComponents?.get(tagName), renames, context),
-      )
+      .with(context?.inlineComponents?.has(tagName) === true, () => {
+        const inline = (context as ParsingContext).inlineComponents?.get(tagName)
+        return inline === undefined ? '' : this.jsxToHtml(inline, renames, context)
+      })
       .with(true, () => this.renderSpecial(node, renames, context))
       .exec() as string
   }
@@ -264,6 +267,7 @@ export class LiquidParser implements ILiquidExpressionParser {
       [this.renderSvgTag]: () => this.svgParser.transformRenderSvg(node, undefined, context),
       PaginateByLiquid: () => this.paginateParser.transformPaginate(node, context),
       Fallback: () => this.fallbackParser.transformFallback(node, context),
+      Raw: () => this.transformRaw(node, context),
       FormBlock: () => this.formParser.transformForm(node, context),
       UnlessBlock: () => this.transformUnless(node, context),
       CaptureBlock: () => this.transformCapture(node, context),
@@ -383,6 +387,19 @@ export class LiquidParser implements ILiquidExpressionParser {
     return `{% javascript %}\n${children}\n{% endjavascript %}`
   }
 
+  private transformRaw(node: JSXElement, context?: ParsingContext): string {
+    const attr = node.openingElement.attributes.find(
+      (entry): entry is import('@babel/types').JSXAttribute =>
+        entry.type === 'JSXAttribute' && (entry.name as { name?: string }).name === 'html',
+    )
+    const value = attr?.value
+    if (value !== undefined && isJSXExpressionContainer(value) && isExpression(value.expression)) {
+      const rawContext = ParsingContext.derive(context, { outputContext: 'raw' })
+      return this.expressionParser.parseExpression(value.expression as Expression, undefined, rawContext)
+    }
+    throw new ValidationError('<Raw> requires an "html" attribute (e.g. <Raw html={article.content} />).', context?.currentFilePath)
+  }
+
   private isCustomComponent(tagName: string): boolean {
     const base = tagName.split('.')[0].split(':')[0] ?? ''
     return base.length > 0 && base[0] === base[0].toUpperCase() && base[0] !== base[0].toLowerCase()
@@ -433,7 +450,9 @@ export class LiquidParser implements ILiquidExpressionParser {
   }
 
   private renderChildren(children: JSXElement['children'], renames?: Record<string, string>, context?: ParsingContext): string {
-    return children.map((child) => this.jsxToHtml(child as any, renames, context)).join('')
+    return children
+      .map((child) => this.jsxToHtml(child as JSXElement | JSXFragment | JSXText | JSXExpressionContainer | Expression, renames, context))
+      .join('')
   }
 
   public generateLiquidCode(node: Node, inCondition = false, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -446,7 +465,7 @@ export class LiquidParser implements ILiquidExpressionParser {
 
   private getTagName(element: JSXOpeningElement): string {
     return _match(true)
-      .with(isJSXIdentifier(element.name), () => (element.name as any).name)
+      .with(isJSXIdentifier(element.name), () => (element.name as JSXIdentifier).name)
       .with(isJSXMemberExpression(element.name), () => generate(element.name).code)
       .with(true, () => 'div')
       .exec() as string

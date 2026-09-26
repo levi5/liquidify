@@ -34,6 +34,7 @@ import {
 } from '@babel/types'
 import { _match, _try } from 'funcio'
 import { escapeHtml, escapedOutput, liquidJsonOutput } from '../../../../../shared/html'
+import { HelperCallParser } from './helper-call-parser'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
 const LIQUID_FILTERS = new Set(['markdownify', 'handleize', 'downcase', 'upcase', 'strip', 'strip_html', 'money', 'money_without_currency'])
@@ -77,16 +78,32 @@ const STRING_LIKE_METHODS = new Set([
   'money_without_currency',
 ])
 
+const TRANSPILE_CACHE_LIMIT = 1000
+
 export class ExpressionParser {
   private readonly templateParser = new TemplateLiteralParser((node, renames, context) =>
     this.generateLiquidCode(node, false, renames, context),
   )
+  private readonly transpileCache = new Map<string, string>()
+  private readonly helperCallParser: HelperCallParser
 
   constructor(
     private readonly compiler: Compiler,
     private readonly importResolver: ImportResolver,
     private readonly loopParser: LiquidLoopParser,
-  ) {}
+  ) {
+    this.helperCallParser = new HelperCallParser((node, inCondition, renames, context) =>
+      this.generateLiquidCode(node as Node, inCondition, renames, context),
+    )
+  }
+
+  public clearTranspileCache(): void {
+    this.transpileCache.clear()
+  }
+
+  public get transpileCacheSize(): number {
+    return this.transpileCache.size
+  }
 
   public getPendingAssigns(context?: ParsingContext): string {
     return _match(context === undefined)
@@ -113,13 +130,25 @@ export class ExpressionParser {
     const cloned = cloneNode(node, true)
     traverseFast(cloned, (child) => this.normalizeNode(child, inCondition, renames, context))
     const raw = generate(cloned).code
+    const transpiled = this.transpileWithCache(raw)
+    return this.postprocess(transpiled)
+  }
+
+  private transpileWithCache(raw: string): string {
+    const cached = this.transpileCache.get(raw)
+    if (cached !== undefined) return cached
     const transpiled = _try
       .sync(() => this.compiler.transpileSync(raw, { loader: 'ts', format: 'esm', minify: false }))
       .match({
         right: (result) => result.code.replace(/;\n$/, '').trim(),
         left: () => raw,
       })
-    return this.postprocess(transpiled)
+    if (this.transpileCache.size >= TRANSPILE_CACHE_LIMIT) {
+      const oldest = this.transpileCache.keys().next()
+      if (!oldest.done) this.transpileCache.delete(oldest.value)
+    }
+    this.transpileCache.set(raw, transpiled)
+    return transpiled
   }
 
   private normalizeNode(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -163,6 +192,7 @@ export class ExpressionParser {
   }
 
   private rewriteCall(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+    if (this.helperCallParser.rewriteHelperCall(n, inCondition, renames, context)) return
     _match(true)
       .with(isIdentifier(n.callee, { name: 'String' }), () => this.rewriteGlobalFilter(n, 'append: ""', inCondition, renames, context))
       .with(isIdentifier(n.callee, { name: 'Number' }), () => this.rewriteGlobalFilter(n, 'plus: 0', inCondition, renames, context))
@@ -771,6 +801,8 @@ export class ExpressionParser {
   }
 
   public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+    const helper = this.helperCallParser.parseHelperExpression(expr, renames, context)
+    if (helper !== null) return helper
     return _match(true)
       .with(isNullLiteral(expr) || isBooleanLiteral(expr), () => '')
       .with(isStringLiteral(expr), () => this.parseStringLiteral(expr as { value: string }, context))
