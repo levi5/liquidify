@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 import { parseExpression } from '@babel/parser'
 import { ExpressionParser } from '../dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
 import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
+import { ReactComponentCompiler } from '../dist/infra/adapters/compilers/react/component-compiler.js'
 import { ParsingContext } from '../dist/core/entities/parsing-context.js'
 import { ComponentRegistry, DirectiveScanner } from '../dist/application/services/component-registry.js'
 import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
@@ -118,4 +119,28 @@ test('negation mixed with && stabilizes via nested conditions instead of parenth
   assert.doesNotMatch(markup, /[()]/)
   assert.doesNotMatch(markup, /{% if [^%]* and [^%]* or [^%]*%}/)
   assert.doesNotMatch(markup, /{% if [^%]* or [^%]* and [^%]*%}/)
+})
+
+test('react components reject raw Liquid storefront tags', async () => {
+  const compiler = new ReactComponentCompiler(
+    { build: async () => ({ outputFiles: [{ path: 'out.js', text: '' }] }) },
+    { build: () => '', buildCall: () => '' },
+    {},
+    '/tmp',
+    { warn: () => {}, error: () => {} },
+  )
+  await assert.rejects(
+    compiler.compile(
+      { name: 'SearchDrawer' },
+      `export const SearchDrawer = () => <form action='{{ routes.search_url }}' />`,
+      '/theme/SearchDrawer.tsx',
+    ),
+    (error) => {
+      assert.equal(error.name, 'ValidationError')
+      assert.equal(error.filePath, '/theme/SearchDrawer.tsx')
+      assert.match(error.message, /rootUrl/)
+      return true
+    },
+  )
+  await compiler.compile({ name: 'SearchDrawer' }, `export const SearchDrawer = () => <form action='/search' />`)
 })

@@ -6,6 +6,7 @@ import classNames from 'classnames'
 
 import { useClickOutside } from '../../../../hooks/useClickOutside'
 import { translate } from '../../../i18n/translate'
+import { rootUrl } from '../../../../lib/shopify'
 import { ResultSkeleton } from './Skeleton'
 
 import styles from './styles.css'
@@ -155,7 +156,7 @@ export const SearchResult = ({ elementId, id, listId }: { id: string; elementId:
 			<div className={'painel'}>
 				<div className={'header'}>
 					<span>{translate('search.eyebrow', 'Produtos similares')}</span>
-					<a href={`/search?q=${encodeURIComponent(term.trim())}&type=product`}>
+						<a href={`${rootUrl()}search?q=${encodeURIComponent(term.trim())}&type=product`}>
 						{translate('collection.view_all', 'Ver todos os produtos ↗')}
 					</a>
 				</div>

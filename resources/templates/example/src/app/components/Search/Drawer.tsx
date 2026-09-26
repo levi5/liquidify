@@ -5,6 +5,7 @@ import { useCallback, useRef } from 'preact/hooks'
 import { Drawer } from '../Drawer'
 import { DrawerHeader } from '../Drawer/Header'
 import { translate } from '../../i18n/translate'
+import { rootUrl } from '../../../lib/shopify'
 
 import './Drawer.css'
 
@@ -27,7 +28,7 @@ export const SearchDrawer = () => {
 				<div className={'searchDrawer'}>
 					<DrawerHeader title={translate('cart.search_title', 'Encontre seu próximo look.')} />
 
-					<form className={'searchBody'} action='{{ routes.search_url }}' method='get'>
+					<form className={'searchBody'} action={`${rootUrl()}search`} method='get'>
 						<label className={'searchLabel'} htmlFor='SearchDrawerInput'>
 							{translate('cart.search_label', 'Busque por um produto, categoria ou estilo')}
 						</label>
@@ -49,7 +50,7 @@ export const SearchDrawer = () => {
 
 					<div className={'searchStart'}>
 						<p className={'searchStartLabel'}>{translate('cart.start_here', 'COMECE POR AQUI')}</p>
-						<a className='button button-outline' href='{{ routes.all_products_collection_url }}'>
+						<a className='button button-outline' href={`${rootUrl()}collections/all`}>
 							{translate('cart.explore_all', 'Explore todos os produtos ↗')}
 						</a>
 					</div>

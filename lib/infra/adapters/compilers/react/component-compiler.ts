@@ -7,6 +7,7 @@ import type { ComponentMetadataType } from '../../../../types/component'
 import type { CssInjector } from './runtime/css-injector'
 import type { Logger } from '../../../../shared/logger'
 import { escapeHtml } from '../../../../shared/html'
+import { ValidationError } from '../../../../core/errors/validation-error'
 import { parse } from '@babel/parser'
 import traverse, { type NodePath } from '@babel/traverse'
 import generate from '@babel/generator'
@@ -23,6 +24,11 @@ export interface ReactBuildResult {
 
 const COMPONENT_NAME_PATTERN = /^[A-Za-z_$][\w$]*$/
 const STYLESHEET_IMPORT_PATTERN = /^[ \t]*import[ \t]+(?:[^'";]*?[ \t]from[ \t]+)?['"]([^'"]+\.(?:css|scss))['"]/gm
+// Raw Liquid output tags referencing storefront globals never render inside
+// React islands (client-side JS): they reach the browser literally and break
+// links/forms (e.g. action="{{ routes.search_url }}" -> 404).
+const RAW_LIQUID_GLOBALS_PATTERN =
+  /\{\{\s*(routes|shop|store|section|sections|settings|linklists|collections|collection|product|products|all_products|page|pages|article|articles|blog|blogs|cart|search|paginate|template|predictive_search|customer|order|gift_card|content_for_header|content_for_layout)\b/
 
 export class ReactComponentCompiler {
   constructor(
@@ -112,6 +118,15 @@ export class ReactComponentCompiler {
       .with(false, () => {
         throw new Error(`Invalid React component name: ${componentName}`)
       })
+      .exec()
+    _match(RAW_LIQUID_GLOBALS_PATTERN.test(source))
+      .with(true, () => {
+        throw new ValidationError(
+          `Raw Liquid tags ({{ routes.* }}, {{ shop.* }}, ...) do not render inside React components — use runtime helpers (rootUrl(), translate()) instead.`,
+          filePath,
+        )
+      })
+      .with(false, () => undefined)
       .exec()
     const rootId = _match(!metadata.reactRootId)
       .with(true, () => '')
