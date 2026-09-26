@@ -15,6 +15,7 @@ declare global {
     products: import('liquidify').Product[]
     products_count: number
   }
+  const menu_json: string
 }
 
 export type { Article, Blog, Cart, Collection, FallbackProps, Page, Product, Shop }

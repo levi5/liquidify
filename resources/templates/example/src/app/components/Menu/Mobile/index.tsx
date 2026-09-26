@@ -1,6 +1,6 @@
 'use snippets'
 
-import { RenderSvg } from 'liquidex'
+import { Raw, RenderSvg } from 'liquidex'
 import type { LinksType } from '../../../../types/components/menu'
 
 import { MenuMobileModal } from './modal'
@@ -19,7 +19,12 @@ export const MenuMobile = ({ options }: { options: LinksType }) => {
 			>
 				<RenderSvg name='menu.svg' />
 			</button>
-			<MenuMobileModal options={options} />
+
+			{/* Shopify's `json` filter does not expose link titles/children consistently, so the
+			    nested payload is built here from the link list itself. */}
+			<Raw html={'{%- capture menu_json -%}[{%- for link in options -%}{"title":{{ link.title | json }},"url":{{ link.url | json }},"links":[{%- for child in link.links -%}{"title":{{ child.title | json }},"url":{{ child.url | json }},"links":[{%- for grandchild in child.links -%}{"title":{{ grandchild.title | json }},"url":{{ grandchild.url | json }},"links":[]}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]{%- endcapture -%}'} />
+
+			<MenuMobileModal options={menu_json} />
 		</div>
 	)
 }

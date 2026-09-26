@@ -1,5 +1,7 @@
 'use react'
 
+import { _match, _try } from 'funcio'
+
 import { Drawer } from '../../Drawer'
 import { DrawerHeader } from '../../Drawer/Header'
 import { translate } from '../../../i18n/translate'
@@ -22,22 +24,29 @@ const overviewFor = (url: string, title: string) => {
 
 type MenuLink = { title?: string; handle?: string; url?: string; links?: MenuLink[] }
 
-// Merchant data is not guaranteed: a missing/renamed link list arrives as
-// null, and link drops may omit `links` or `title`. Normalizing here keeps a
-// single odd entry from rendering an empty anchor or killing the island.
 const toMenuLinks = (value: unknown): MenuLink[] => {
-	if (Array.isArray(value)) return value as MenuLink[]
+	const source = typeof value === 'string' ? parseJson(value) : value
 
-	const nested = (value as { links?: unknown } | null | undefined)?.links
+	return _match(Array.isArray(source))
+		.with(true, () => source as MenuLink[])
+		.with(false, () => {
+			const nested = (source as { links?: unknown } | null | undefined)?.links
 
-	return Array.isArray(nested) ? (nested as MenuLink[]) : []
+			return Array.isArray(nested) ? (nested as MenuLink[]) : []
+		})
+		.exec() as MenuLink[]
 }
+
+const parseJson = (value: string): unknown =>
+	_try
+		.sync(() => JSON.parse(value) as unknown)
+		.match({ right: (parsed) => parsed, left: () => null })
 
 const childrenOf = (link: MenuLink): MenuLink[] => (Array.isArray(link.links) ? link.links : [])
 
 const labelOf = (link: MenuLink): string => link.title || link.handle || link.url || ''
 
-export const MenuMobileModal = ({ options }: { options: LinksType }) => {
+export const MenuMobileModal = ({ options }: { options: LinksType | string }) => {
 	const links = toMenuLinks(options)
 
 	return (
