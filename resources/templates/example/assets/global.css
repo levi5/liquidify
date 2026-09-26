@@ -52,7 +52,8 @@ a {
 }
 
 button {
-  cursor: pointer
+  cursor: pointer;
+  border: 0
 }
 
 button:disabled {
@@ -85,9 +86,6 @@ h3 {
   line-height: 1.1
 }
 
-button {
-  border: 0
-}
 
 a,
 button {
@@ -164,18 +162,18 @@ react-island {
 }
 
 .container {
-  width: min(1440px, calc(100% - 112px));
+  width: min(1440px, calc(100% - 96px));
   margin-inline: auto
 }
 
 .section-space {
-  padding-block: 84px
+  padding-block: 70px
 }
 
 .eyebrow {
   font-size: 10px;
   font-weight: 600;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   line-height: 1.5
 }
 
@@ -198,9 +196,10 @@ react-island {
   align-items: center;
   justify-content: space-between;
   gap: 35px;
-  min-height: 52px;
+  min-height: 50px;
   padding: 15px 24px;
   border: 1px solid var(--ink);
+  border-radius: 5px;
   font-size: 12px;
   font-weight: 500;
   line-height: 1.5
@@ -217,8 +216,8 @@ react-island {
 }
 
 .button-dark:hover {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: #444;
+  border-color: #444;
   color: #fff
 }
 
@@ -240,7 +239,8 @@ react-island {
 
 .text-link {
   display: inline-flex;
-  gap: 35px;
+  gap: 25px;
+  font-weight: 500;
   align-items: center;
   border-bottom: 1px solid currentColor;
   padding-bottom: 7px;
@@ -451,8 +451,8 @@ react-island {
 }
 
 .empty-spark {
-  font-size: 65px;
-  color: var(--accent);
+  font-size: 48px;
+  color: #444;
   line-height: 1
 }
 
@@ -514,7 +514,9 @@ react-island {
 .main-product-image {
   display: block;
   aspect-ratio: 5/6;
-  background: var(--surface)
+  background: var(--surface);
+  border-radius: 10px;
+  overflow: hidden
 }
 
 .main-product-image img {
@@ -537,6 +539,8 @@ react-island {
 }
 
 .product-thumbnails a {
+  border-radius: 5px;
+  overflow: hidden;
   width: 72px;
   max-width: 72px;
   aspect-ratio: 5/6;
@@ -600,7 +604,7 @@ react-island {
 }
 
 .detail-price strong {
-  font-weight: 400
+  font-weight: 550
 }
 
 .variant-group {
@@ -624,6 +628,7 @@ react-island {
 }
 
 .variant-options button {
+  border-radius: 4px;
   padding: 10px 15px;
   font-size: 11px;
   border: 1px solid var(--line);
@@ -653,6 +658,7 @@ react-island {
   align-items: center;
   justify-content: center;
   border: 1px solid var(--line);
+  border-radius: 4px;
   height: 44px;
   flex-shrink: 0
 }
@@ -763,16 +769,16 @@ react-island {
 }
 
 .form-error {
-  background: #f5e4dd;
-  color: #8e331c;
+  background: #fff0ed;
+  color: #a32b16;
   padding: 12px 15px;
   font-size: 12px;
   margin-block: 14px
 }
 
 .form-success {
-  background: #e3eadc;
-  color: #31422c;
+  background: #f1f4ef;
+  color: #32412b;
   padding: 12px 15px;
   font-size: 12px;
   margin-block: 14px
@@ -861,8 +867,8 @@ react-island {
 }
 
 .store-dialog::backdrop {
-  background: #17271fc0;
-  backdrop-filter: blur(3px)
+  background: #0008;
+  backdrop-filter: blur(2px)
 }
 
 .dialog-header {
@@ -907,6 +913,7 @@ react-island {
 }
 
 .cart-line img {
+  border-radius: 5px;
   height: 115px;
   width: 90px;
   object-fit: cover
@@ -1115,37 +1122,6 @@ react-island {
   margin-top: 15px
 }
 
-.container {
-  width: min(1440px, calc(100% - 96px));
-  margin-inline: auto
-}
-
-.section-space {
-  padding-block: 70px
-}
-
-.eyebrow {
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  font-weight: 600
-}
-
-.button {
-  border-radius: 5px;
-  min-height: 50px;
-  font-size: 12px
-}
-
-.button-dark:hover {
-  background: #444;
-  border-color: #444
-}
-
-.text-link {
-  font-weight: 500;
-  font-size: 12px;
-  gap: 25px
-}
 
 .wordmark {
   display: inline-flex;
@@ -1759,62 +1735,17 @@ react-island {
   margin-left: 5px
 }
 
-.detail-price strong {
-  font-weight: 550
-}
-
-.variant-options button {
-  border-radius: 4px
-}
-
-.product-thumbnails a {
-  border-radius: 5px;
-  overflow: hidden
-}
-
-.main-product-image {
-  border-radius: 10px;
-  overflow: hidden
-}
 
 .product-gallery>.product-placeholder {
   aspect-ratio: 5/6
-}
-
-.form-error {
-  background: #fff0ed;
-  color: #a32b16
-}
-
-.form-success {
-  background: #f1f4ef;
-  color: #32412b
-}
-
-.store-dialog::backdrop {
-  background: #0008;
-  backdrop-filter: blur(2px)
 }
 
 .store-dialog[open] {
   animation: drawer-in .25s ease-out
 }
 
-.empty-spark {
-  font-size: 48px;
-  color: #444
-}
-
-.cart-line img {
-  border-radius: 5px
-}
-
 .cart-contents .button {
   font-size: 12px
-}
-
-.quantity-control {
-  border-radius: 4px
 }
 
 .form-row input,
@@ -2560,6 +2491,24 @@ react-island {
   align-items: center;
 }
 
+.breadcrumbs ol,
+.breadcrumb ol {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.breadcrumbs li,
+.breadcrumb li {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .breadcrumbs a,
 .breadcrumb a {
   color: var(--muted);
@@ -2587,60 +2536,21 @@ react-island {
 }
 
 @media (max-width: 680px) {
-
   .breadcrumbs,
   .breadcrumb {
     font-size: 9px;
     gap: 8px;
     margin-bottom: 24px;
   }
-}
 
-.breadcrumbs,
-.breadcrumb {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 12px;
-	font-size: 10px;
-	color: var(--muted);
-	margin-bottom: 35px;
-	align-items: center;
+  .breadcrumbs ol,
+  .breadcrumb ol,
+  .breadcrumbs li,
+  .breadcrumb li {
+    gap: 8px;
+  }
 }
-
-.breadcrumbs a,
-.breadcrumb a {
-	color: var(--muted);
-	text-decoration: none;
-	transition: color 0.2s;
-}
-
-.breadcrumbs a:hover,
-.breadcrumb a:hover {
-	color: var(--ink);
-}
-
-.breadcrumbs .separator,
-.breadcrumb .separator {
-	color: var(--muted);
-	user-select: none;
-}
-
-.breadcrumbs .current,
-.breadcrumbs span:last-child,
-.breadcrumb .current,
-.breadcrumb span:last-child {
-	color: var(--ink);
-	font-weight: 500;
-}
-
-@media (max-width: 680px) {
-	.breadcrumbs,
-	.breadcrumb {
-		font-size: 9px;
-		gap: 8px;
-		margin-bottom: 24px;
-	}
-}
+/* liquidify:start */
 .breadcrumbs,
 .breadcrumb {
 	font-size: 10px;
@@ -2706,199 +2616,4 @@ react-island {
 		gap: 8px;
 	}
 }
-
-.breadcrumbs,
-.breadcrumb {
-	font-size: 10px;
-	color: var(--muted);
-	margin-bottom: 35px;
-}
-
-.breadcrumbs ol,
-.breadcrumb ol {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 12px;
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.breadcrumbs li,
-.breadcrumb li {
-	display: inline-flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.breadcrumbs a,
-.breadcrumb a {
-	color: var(--muted);
-	text-decoration: none;
-	transition: color 0.2s;
-}
-
-.breadcrumbs a:hover,
-.breadcrumb a:hover {
-	color: var(--ink);
-}
-
-.breadcrumbs .separator,
-.breadcrumb .separator {
-	color: var(--muted);
-	user-select: none;
-}
-
-.breadcrumbs .current,
-.breadcrumbs span:last-child,
-.breadcrumb .current,
-.breadcrumb span:last-child {
-	color: var(--ink);
-	font-weight: 500;
-}
-
-@media (max-width: 680px) {
-	.breadcrumbs,
-	.breadcrumb {
-		font-size: 9px;
-		margin-bottom: 24px;
-	}
-
-	.breadcrumbs ol,
-	.breadcrumb ol,
-	.breadcrumbs li,
-	.breadcrumb li {
-		gap: 8px;
-	}
-}
-.breadcrumbs,
-.breadcrumb {
-	font-size: 10px;
-	color: var(--muted);
-	margin-bottom: 35px;
-}
-
-.breadcrumbs ol,
-.breadcrumb ol {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 12px;
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.breadcrumbs li,
-.breadcrumb li {
-	display: inline-flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.breadcrumbs a,
-.breadcrumb a {
-	color: var(--muted);
-	text-decoration: none;
-	transition: color 0.2s;
-}
-
-.breadcrumbs a:hover,
-.breadcrumb a:hover {
-	color: var(--ink);
-}
-
-.breadcrumbs .separator,
-.breadcrumb .separator {
-	color: var(--muted);
-	user-select: none;
-}
-
-.breadcrumbs .current,
-.breadcrumbs span:last-child,
-.breadcrumb .current,
-.breadcrumb span:last-child {
-	color: var(--ink);
-	font-weight: 500;
-}
-
-@media (max-width: 680px) {
-	.breadcrumbs,
-	.breadcrumb {
-		font-size: 9px;
-		margin-bottom: 24px;
-	}
-
-	.breadcrumbs ol,
-	.breadcrumb ol,
-	.breadcrumbs li,
-	.breadcrumb li {
-		gap: 8px;
-	}
-}
-.breadcrumbs,
-.breadcrumb {
-	font-size: 10px;
-	color: var(--muted);
-	margin-bottom: 35px;
-}
-
-.breadcrumbs ol,
-.breadcrumb ol {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 12px;
-	list-style: none;
-	margin: 0;
-	padding: 0;
-}
-
-.breadcrumbs li,
-.breadcrumb li {
-	display: inline-flex;
-	align-items: center;
-	gap: 12px;
-}
-
-.breadcrumbs a,
-.breadcrumb a {
-	color: var(--muted);
-	text-decoration: none;
-	transition: color 0.2s;
-}
-
-.breadcrumbs a:hover,
-.breadcrumb a:hover {
-	color: var(--ink);
-}
-
-.breadcrumbs .separator,
-.breadcrumb .separator {
-	color: var(--muted);
-	user-select: none;
-}
-
-.breadcrumbs .current,
-.breadcrumbs span:last-child,
-.breadcrumb .current,
-.breadcrumb span:last-child {
-	color: var(--ink);
-	font-weight: 500;
-}
-
-@media (max-width: 680px) {
-	.breadcrumbs,
-	.breadcrumb {
-		font-size: 9px;
-		margin-bottom: 24px;
-	}
-
-	.breadcrumbs ol,
-	.breadcrumb ol,
-	.breadcrumbs li,
-	.breadcrumb li {
-		gap: 8px;
-	}
-}
+/* liquidify:end */
