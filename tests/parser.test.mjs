@@ -88,6 +88,34 @@ export default function List({ items }) {
     assert.equal(component.html, '<ul>{% for item in items limit: 8 %}<li>{{ item.title | escape }}</li>{% endfor %}</ul>')
   })
 
+  it('compiles .slice(0, variable) without chaining minus onto the sliced array', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function List({ items, limit }) {
+  const visible = items.slice(0, limit)
+  return <ul>{visible.map((item) => <li>{item.title}</li>)}</ul>
+}`,
+      '/theme/src/components/snippets/List.tsx',
+    )
+    assert.match(component.html, /{% assign visible = items \| slice: 0, limit %}/)
+    assert.doesNotMatch(component.html, /\| minus:/)
+  })
+
+  it('compiles .slice(dynamicStart, dynamicEnd) with a temp length assign', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function List({ items, start, end }) {
+  const visible = items.slice(start, end)
+  return <ul>{visible.map((item) => <li>{item.title}</li>)}</ul>
+}`,
+      '/theme/src/components/snippets/List.tsx',
+    )
+    assert.match(component.html, /{% assign __liquidify_slice_\d+ = end \| minus: start %}/)
+    assert.match(component.html, /{% assign visible = items \| slice: start, __liquidify_slice_\d+ %}/)
+  })
+
   it('detects dom mode and keeps plain html', async () => {
     const parser = makeParser()
     const component = await parser.parse(

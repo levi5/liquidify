@@ -410,8 +410,28 @@ export class ExpressionParser {
       .with(true, () => this.rewriteStaticSlice(n, objectCode, startNum as number, endNum as number))
       .with(false, () => {
         const end = this.generateLiquidCode(endNode, inCondition, renames, context)
-        Object.assign(n, identifier(`${objectCode} | slice: ${start}, ${end} | minus: ${start}`))
+        _match(startNum === 0)
+          .with(true, () => Object.assign(n, identifier(`${objectCode} | slice: 0, ${end}`)))
+          .with(false, () => this.rewriteDynamicSlice(n, objectCode, start, end, context))
+          .exec()
       })
+      .exec()
+  }
+
+  private rewriteDynamicSlice(
+    n: CallExpression,
+    objectCode: string,
+    start: string,
+    end: string,
+    context?: ParsingContext,
+  ): void {
+    _match(context !== undefined)
+      .with(true, () => {
+        const temp = (context as ParsingContext).allocateName('slice')
+        ;(context as ParsingContext).addPendingAssign(`{% assign ${temp} = ${end} | minus: ${start} %}`)
+        Object.assign(n, identifier(`${objectCode} | slice: ${start}, ${temp}`))
+      })
+      .with(false, () => Object.assign(n, identifier(`${objectCode} | slice: ${start}, ${end}`)))
       .exec()
   }
 
