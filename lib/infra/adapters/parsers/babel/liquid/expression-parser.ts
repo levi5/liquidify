@@ -20,7 +20,6 @@ import {
   type LogicalExpression,
   type TemplateLiteral,
   type Expression,
-  type MemberExpression,
   type BinaryExpression,
   type UnaryExpression,
   isParenthesizedExpression,
@@ -31,6 +30,7 @@ import {
   isNullLiteral,
   isLogicalExpression,
   isBooleanLiteral,
+  isBlockStatement,
 } from '@babel/types'
 import { _match, _try } from 'funcio'
 import { escapeHtml, escapedOutput, liquidJsonOutput } from '../../../../../shared/html'
@@ -179,7 +179,11 @@ export class ExpressionParser {
 
   private foldParenthesized(n: Node): void {
     _match(isParenthesizedExpression(n))
-      .with(true, () => Object.assign(n, (n as { expression: object }).expression))
+      .with(true, () => {
+        const inner = (n as { expression: Node }).expression
+        delete (n as { extra?: unknown }).extra
+        Object.assign(n, cloneNode(inner, true))
+      })
       .with(false, () => undefined)
       .exec()
   }
@@ -220,16 +224,19 @@ export class ExpressionParser {
     context?: ParsingContext,
   ): void {
     const args = n.arguments
-      .filter((arg) => hasNodeType(arg))
+      .filter((arg) => hasNodeType(arg) && (arg as { type?: string }).type !== 'SpreadElement')
       .map((arg) => this.generateLiquidCode(arg as Expression, inCondition, renames, context))
     _match(args.length === 0)
-      .with(true, () => undefined)
+      .with(true, () => {
+        throw new ValidationError(
+          `Liquid filter "${name}" requires at least one argument.`,
+          this.filePathOf(context),
+          this.errorLocation(n),
+        )
+      })
       .with(false, () => {
         const [first, ...rest] = args
-        const filter = _match(name)
-          .with('translate', () => 't')
-          .with(name, () => name)
-          .exec() as string
+        const filter = name === 'translate' ? 't' : name
         const suffix = rest.length > 0 ? `: ${rest.join(', ')}` : ''
         Object.assign(n, identifier(`${first} | ${filter}${suffix}`))
       })
@@ -244,11 +251,17 @@ export class ExpressionParser {
     context?: ParsingContext,
   ): void {
     const arg = n.arguments[0]
-    _match(hasNodeType(arg))
-      .with(true, () =>
+    _match(!hasNodeType(arg) || (arg as { type?: string }).type === 'SpreadElement')
+      .with(true, () => {
+        throw new ValidationError(
+          `Liquid filter "${filter}" requires a value argument (spread is not supported).`,
+          this.filePathOf(context),
+          this.errorLocation(n),
+        )
+      })
+      .with(false, () =>
         Object.assign(n, identifier(`${this.generateLiquidCode(arg as Expression, inCondition, renames, context)} | ${filter}`)),
       )
-      .with(false, () => undefined)
       .exec()
   }
 
@@ -280,14 +293,38 @@ export class ExpressionParser {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): void {
-    const joined = args
-      .map((arg) => this.generateLiquidCode(arg as Expression, inCondition, renames, context))
-      .join(' | append: " " | append: ')
-    Object.assign(n, identifier(joined))
+    const parts = args.filter((arg) => hasNodeType(arg) && (arg as { type?: string }).type !== 'SpreadElement')
+    _match(parts.length === 0)
+      .with(true, () => {
+        throw new ValidationError('clsx()/classNames() requires at least one argument.', this.filePathOf(context), this.errorLocation(n))
+      })
+      .with(false, () => {
+        const joined = parts
+          .map((arg) => {
+            const code = this.generateLiquidCode(arg as Expression, inCondition, renames, context)
+            return code.includes(' | ') ? `(${code})` : code
+          })
+          .join(' | append: " " | append: ')
+        Object.assign(n, identifier(joined))
+      })
+      .exec()
   }
 
   private rewriteMethod(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
-    const methodName = ((n.callee as { property: { name: string } }).property as { name: string }).name
+    const callee = n.callee as { property?: unknown }
+    _match(!isMemberExpression(n.callee) || !isIdentifier(callee.property as Node))
+      .with(true, () => undefined)
+      .with(false, () => this.rewriteKnownMethod(n, (callee.property as { name: string }).name, inCondition, renames, context))
+      .exec()
+  }
+
+  private rewriteKnownMethod(
+    n: CallExpression,
+    methodName: string,
+    inCondition: boolean,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): void {
     _match(methodName)
       .with('toString', () =>
         Object.assign(
@@ -346,15 +383,43 @@ export class ExpressionParser {
 
   private rewriteSlice(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
-    const start = _match(n.arguments.length > 0)
-      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
-      .with(false, () => '0')
-      .exec() as string
-    const len = _match(n.arguments.length > 1)
-      .with(true, () => `, ${this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context)}`)
-      .with(false, () => '')
-      .exec() as string
-    Object.assign(n, identifier(`${objectCode} | slice: ${start}${len}`))
+    const startNode = n.arguments[0] as Expression | undefined
+    const endNode = n.arguments[1] as Expression | undefined
+    const start = startNode ? this.generateLiquidCode(startNode, inCondition, renames, context) : '0'
+    _match(endNode === undefined)
+      .with(true, () => Object.assign(n, identifier(`${objectCode} | slice: ${start}`)))
+      .with(false, () =>
+        this.rewriteSliceRange(n, objectCode, start, startNode as Expression, endNode as Expression, inCondition, renames, context),
+      )
+      .exec()
+  }
+
+  private rewriteSliceRange(
+    n: CallExpression,
+    objectCode: string,
+    start: string,
+    startNode: Expression,
+    endNode: Expression,
+    inCondition: boolean,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): void {
+    const startNum = startNode.type === 'NumericLiteral' ? (startNode as { value: number }).value : null
+    const endNum = endNode.type === 'NumericLiteral' ? (endNode as { value: number }).value : null
+    _match(startNum !== null && endNum !== null)
+      .with(true, () => this.rewriteStaticSlice(n, objectCode, startNum as number, endNum as number))
+      .with(false, () => {
+        const end = this.generateLiquidCode(endNode, inCondition, renames, context)
+        Object.assign(n, identifier(`${objectCode} | slice: ${start}, ${end} | minus: ${start}`))
+      })
+      .exec()
+  }
+
+  private rewriteStaticSlice(n: CallExpression, objectCode: string, startNum: number, endNum: number): void {
+    _match(endNum <= startNum)
+      .with(true, () => Object.assign(n, identifier('empty')))
+      .with(false, () => Object.assign(n, identifier(`${objectCode} | slice: ${startNum}, ${endNum - startNum}`)))
+      .exec()
   }
 
   private rewriteConcat(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -426,9 +491,19 @@ export class ExpressionParser {
   private mathTarget(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): string {
     const callee = n.callee as { object: Expression }
     const obj = callee.object
-    return _match(isIdentifier(obj) && (obj as { name: string }).name === 'Math' && n.arguments.length > 0)
-      .with(true, () => this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context))
-      .with(false, () => this.generateLiquidCode(obj, inCondition, renames, context))
+    const isMathCall = isIdentifier(obj) && (obj as { name: string }).name === 'Math'
+    return _match(true)
+      .with(isMathCall && n.arguments.length === 0, () => {
+        throw new ValidationError(
+          'Math method requires an argument (e.g. Math.floor(price)).',
+          this.filePathOf(context),
+          this.errorLocation(n),
+        )
+      })
+      .with(isMathCall && n.arguments.length > 0, () =>
+        this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context),
+      )
+      .with(true, () => this.generateLiquidCode(obj, inCondition, renames, context))
       .exec() as string
   }
 
@@ -442,26 +517,43 @@ export class ExpressionParser {
     const callee = n.callee as { object: Expression }
     const obj = callee.object
     const isMath = isIdentifier(obj) && (obj as { name: string }).name === 'Math'
-    _match(isMath && n.arguments.length >= 2)
+    const hasSpread = n.arguments.some((a) => (a as { type?: string }).type === 'SpreadElement')
+    _match(true)
+      .with(!isMath, () => undefined)
+      .with(n.arguments.length < 2 || hasSpread, () => {
+        throw new ValidationError(
+          'Math.max/min require two plain arguments (e.g. Math.max(a, b)). Spread is not supported in Liquid.',
+          this.filePathOf(context),
+          this.errorLocation(n),
+        )
+      })
       .with(true, () => {
         const first = this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context)
         const second = this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context)
         Object.assign(n, identifier(`${first} | ${filter}: ${second}`))
       })
-      .with(false, () => undefined)
       .exec()
   }
 
   private rewriteJson(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const callee = n.callee as { object: Expression }
     const obj = callee.object
-    const isJson = isIdentifier(obj) && (obj as { name: string }).name === 'JSON'
-    _match(isJson && n.arguments.length > 0)
-      .with(true, () => {
+    const prop = (n.callee as { property?: { name?: string } }).property?.name
+    const isJsonParse = isIdentifier(obj) && (obj as { name: string }).name === 'JSON' && prop === 'parse'
+    const isJsonStringify = isIdentifier(obj) && (obj as { name: string }).name === 'JSON' && n.arguments.length > 0
+    _match(true)
+      .with(isJsonParse, () => {
+        throw new ValidationError(
+          'JSON.parse() has no Liquid equivalent. Pass parsed data as props instead.',
+          this.filePathOf(context),
+          this.errorLocation(n),
+        )
+      })
+      .with(isJsonStringify, () => {
         const arg = this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context)
         Object.assign(n, identifier(`${arg} | json`))
       })
-      .with(false, () => undefined)
+      .with(true, () => undefined)
       .exec()
   }
 
@@ -497,7 +589,7 @@ export class ExpressionParser {
   }
 
   private hoistStringFilter(n: CallExpression, filter: string, context?: ParsingContext): void {
-    const objectCode = generate((n.callee as { object: Node }).object).code
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, false, undefined, context)
     _match(context === undefined)
       .with(true, () => Object.assign(n, identifier(`${objectCode} | ${filter}`)))
       .with(false, () => this.assignStringFilter(n, objectCode, filter, context as ParsingContext))
@@ -505,7 +597,9 @@ export class ExpressionParser {
   }
 
   private assignStringFilter(n: CallExpression, objectCode: string, filter: string, context: ParsingContext): void {
-    const varName = `${objectCode.replace(/[^a-zA-Z0-9_]/g, '_')}_${filter}`
+    const sanitized = objectCode.replace(/[^a-zA-Z0-9_]/g, '_')
+    const safe = /^[0-9]/.test(sanitized) ? `v_${sanitized}` : sanitized || 'v'
+    const varName = `${safe}_${filter}`
     context.addPendingAssign(`{% assign ${varName} = ${objectCode} | ${filter} %}`)
     Object.assign(n, identifier(varName))
   }
@@ -603,9 +697,15 @@ export class ExpressionParser {
 
   private rewriteSome(n: CallExpression, renames?: Record<string, string>, context?: ParsingContext): void {
     const callback = n.arguments[0]
-    _match(isArrowFunctionExpression(callback as Node) && (callback as { params: unknown[] }).params.length > 0)
-      .with(true, () => this.emitSomeLoop(n, callback as ArrowFunctionExpression, renames, context))
-      .with(false, () => undefined)
+    _match(!isArrowFunctionExpression(callback as Node) || (callback as { params: unknown[] }).params.length === 0)
+      .with(true, () => {
+        throw new ValidationError(
+          'Liquid .some() requires an inline arrow predicate such as items.some(item => item.available).',
+          this.filePathOf(context),
+          this.errorLocation(n),
+        )
+      })
+      .with(false, () => this.emitSomeLoop(n, callback as ArrowFunctionExpression, renames, context))
       .exec()
   }
 
@@ -615,22 +715,31 @@ export class ExpressionParser {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): void {
-    const objectCode = generate((n.callee as { object: Node }).object).code
-    const itemName = _match(isIdentifier(callback.params[0]))
-      .with(true, () => (callback.params[0] as { name: string }).name)
-      .with(false, () => 'item')
-      .exec() as string
-    const varName = `${objectCode.replace(/[^a-zA-Z0-9_]/g, '_')}_some`
-    const condition = this.generateLiquidCode(callback.body as Expression, true, renames, context)
+    const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, false, renames, context)
+    const itemName = isIdentifier(callback.params[0]) ? (callback.params[0] as { name: string }).name : 'item'
+    const predicate = isBlockStatement(callback.body) ? this.blockPredicate(callback.body) : (callback.body as Expression)
+    const varName = context?.allocateName('some') ?? `${objectCode.replace(/[^a-zA-Z0-9_]/g, '_')}_some`
+    const condition = this.generateLiquidCode(predicate, true, renames, context)
     _match(context === undefined)
-      .with(true, () => undefined)
-      .with(false, () =>
-        (context as ParsingContext).addPendingAssign(
+      .with(true, () => Object.assign(n, identifier(varName)))
+      .with(false, () => {
+        ;(context as ParsingContext).addPendingAssign(
           `{% assign ${varName} = false %}\n{% for ${itemName} in ${objectCode} %}\n  {% if ${condition} %}\n    {% assign ${varName} = true %}\n    {% break %}\n  {% endif %}\n{% endfor %}`,
-        ),
-      )
+        )
+        Object.assign(n, identifier(varName))
+      })
       .exec()
-    Object.assign(n, identifier(varName))
+  }
+
+  private blockPredicate(body: import('@babel/types').BlockStatement): Expression {
+    const found = body.body.find((s) => s.type === 'ReturnStatement' && (s as { argument?: Expression }).argument)
+    const arg = (found as { argument?: Expression } | undefined)?.argument
+    return _match(arg === undefined)
+      .with(true, () => {
+        throw new ValidationError('Liquid .some() block body must have a single return with a condition.')
+      })
+      .with(false, () => arg as Expression)
+      .exec() as Expression
   }
 
   private normalizeUnary(n: Node, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -642,7 +751,14 @@ export class ExpressionParser {
 
   private negateNode(n: UnaryExpression, renames?: Record<string, string>, context?: ParsingContext): void {
     const code = this.generateLiquidCode(n.argument as Expression, true, renames, context).trim()
-    Object.assign(n, identifier(`${code} == blank or ${code} == false`))
+    _match(context !== undefined && !/^[a-zA-Z0-9_.[\]"']+$/.test(code))
+      .with(true, () => {
+        const temp = (context as ParsingContext).allocateName('not')
+        ;(context as ParsingContext).addPendingAssign(`{% assign ${temp} = ${code} %}`)
+        Object.assign(n, identifier(`${temp} == blank or ${temp} == false`))
+      })
+      .with(false, () => Object.assign(n, identifier(`(${code} == blank or ${code} == false)`)))
+      .exec()
   }
 
   private normalizeBinary(n: Node, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -682,10 +798,6 @@ export class ExpressionParser {
     return _match(true)
       .with(isTemplateLiteral(node), () => true)
       .with(isCallExpression(node), () => STRING_LIKE_METHODS.has(this.methodNameOf(node as CallExpression)))
-      .with(
-        isMemberExpression(node) && isIdentifier((node as MemberExpression).property),
-        () => !['length', 'size'].includes(((node as MemberExpression).property as { name: string }).name),
-      )
       .with(true, () => false)
       .exec() as boolean
   }
@@ -700,11 +812,23 @@ export class ExpressionParser {
   private rewriteArithmetic(n: BinaryExpression, filter: string, renames?: Record<string, string>, context?: ParsingContext): void {
     const left = this.generateLiquidCode(n.left, false, renames, context)
     const rightCode = this.generateLiquidCode(n.right, false, renames, context)
-    const right = _match(rightCode.includes(' | '))
+    const right = _match(this.hasTopLevelPipe(rightCode))
       .with(true, () => this.hoistArithmetic(rightCode, context))
       .with(false, () => rightCode)
       .exec() as string
     Object.assign(n, identifier(`${left} | ${filter}: ${right}`))
+  }
+
+  private hasTopLevelPipe(code: string): boolean {
+    let single = false
+    let dbl = false
+    for (let i = 0; i < code.length - 2; i++) {
+      const c = code[i]
+      if (c === "'" && !dbl) single = !single
+      else if (c === '"' && !single) dbl = !dbl
+      else if (!single && !dbl && c === ' ' && code[i + 1] === '|' && code[i + 2] === ' ') return true
+    }
+    return false
   }
 
   private hoistArithmetic(rightCode: string, context?: ParsingContext): string {
@@ -730,14 +854,17 @@ export class ExpressionParser {
   }
 
   private normalizeMemberExpression(n: Node): void {
+    const m = n as { property?: unknown; computed?: boolean }
+    const prop = m.property as Node | undefined
+    const isLength =
+      (isIdentifier(prop as Node, { name: 'length' }) && !m.computed) ||
+      (prop?.type === 'StringLiteral' && (prop as { value: string }).value === 'length')
     _match(true)
       .with(this.isCssModuleReference(n), () => Object.assign(n, stringLiteral(this.cssModuleName(n))))
-      .with(
-        isIdentifier((n as { property?: unknown }).property as Node, { name: 'length' }) && !(n as { computed: boolean }).computed,
-        () => {
-          ;(n as { property: { name: string } }).property.name = 'size'
-        },
-      )
+      .with(isMemberExpression(n) && isLength, () => {
+        ;(n as { property: { name: string } }).property = identifier('size') as unknown as { name: string }
+        ;(n as { computed: boolean }).computed = false
+      })
       .with(true, () => undefined)
       .exec()
   }
@@ -754,9 +881,12 @@ export class ExpressionParser {
 
   private cssModuleName(n: Node): string {
     const property = (n as { property: { name?: string; value?: string } }).property
-    return _match(isIdentifier(property as Node))
-      .with(true, () => (property as { name: string }).name)
-      .with(false, () => (property as { value: string }).value)
+    return _match(true)
+      .with(isIdentifier(property as Node), () => (property as { name: string }).name)
+      .with(isStringLiteral(property as Node), () => (property as { value: string }).value)
+      .with(true, () => {
+        throw new ValidationError('CSS module access requires a static key (e.g. styles.button).')
+      })
       .exec() as string
   }
 
@@ -802,9 +932,13 @@ export class ExpressionParser {
 
   public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
     const helper = this.helperCallParser.parseHelperExpression(expr, renames, context)
-    if (helper !== null) return helper
     return _match(true)
-      .with(isNullLiteral(expr) || isBooleanLiteral(expr), () => '')
+      .with(helper !== null, () => helper as string)
+      .with(isNullLiteral(expr), () => `${this.getPendingAssigns(context)}${this.renderOutput('nil', context)}`)
+      .with(isBooleanLiteral(expr), () => {
+        const lit = (expr as { value: boolean }).value ? 'true' : 'false'
+        return `${this.getPendingAssigns(context)}${this.renderOutput(lit, context)}`
+      })
       .with(isStringLiteral(expr), () => this.parseStringLiteral(expr as { value: string }, context))
       .with(this.loopParser.isMapCallExpression(expr), () => this.loopParser.transformMap(expr as CallExpression, renames, context))
       .with(this.isConsoleCall(expr), () => `<script>${this.generateLiquidCode(expr, false, renames, context)}</script>`)
@@ -832,9 +966,8 @@ export class ExpressionParser {
   }
 
   private parseStringLiteral(expr: { value: string }, context?: ParsingContext): string {
-    const hasLiquidTags = expr.value.includes('{{') || expr.value.includes('{%')
     return _match(true)
-      .with(hasLiquidTags, () => expr.value)
+      .with(expr.value.includes('{{') || expr.value.includes('{%'), () => expr.value)
       .with(expr.value.includes('|'), () => `{{ ${expr.value.trim()} }}`)
       .with(this.outputContextOf(context) === 'raw', () => expr.value)
       .with(true, () => escapeHtml(expr.value))
@@ -860,7 +993,6 @@ export class ExpressionParser {
         _match(this.outputContextOf(context))
           .with('json', () => liquidJsonOutput(code))
           .with('raw', () => `{{ ${code} }}`)
-          .with('text', () => escapedOutput(code))
           .with(this.outputContextOf(context), () => escapedOutput(code))
           .exec(),
       )
@@ -902,7 +1034,7 @@ function hasNodeType(arg: unknown): boolean {
 }
 
 function _pipeReplacements(protectedCode: string, literals: string[]): string {
-  return [
+  const replaced = [
     [/\s*===\s*/g, ' == '],
     [/\s*!==\s*/g, ' != '],
     [/\s*&&\s*/g, ' and '],
@@ -918,9 +1050,45 @@ function _pipeReplacements(protectedCode: string, literals: string[]): string {
     [/\.money\s*\(\)/g, ' | money'],
     [/\.moneyWithoutCurrency\s*\(\)/g, ' | money_without_currency'],
     [/\.money_without_currency\s*\(\)/g, ' | money_without_currency'],
-    [/\.includes\s*\(([^)]+)\)/g, ' contains $1'],
-  ]
-    .reduce((code, [pattern, replacement]) => code.replace(pattern as RegExp, replacement as string), protectedCode)
+  ].reduce((code, [pattern, replacement]) => code.replace(pattern as RegExp, replacement as string), protectedCode)
+  return replaceIncludesBalanced(replaced)
     .replace(/__LIQUIDIFY_LITERAL_(\d+)__/g, (_, index) => literals[Number(index)])
     .trim()
+}
+
+function replaceIncludesBalanced(code: string): string {
+  const needle = '.includes'
+  let out = ''
+  let i = 0
+  while (true) {
+    const idx = code.indexOf(needle, i)
+    if (idx === -1) {
+      out += code.slice(i)
+      break
+    }
+    let j = idx + needle.length
+    while (j < code.length && /\s/.test(code[j] ?? '')) j++
+    if (code[j] !== '(') {
+      out += code.slice(i, j)
+      i = j
+      continue
+    }
+    let depth = 0
+    let k = j
+    for (; k < code.length; k++) {
+      if (code[k] === '(') depth++
+      else if (code[k] === ')') {
+        depth--
+        if (depth === 0) break
+      }
+    }
+    if (depth !== 0) {
+      out += code.slice(i)
+      break
+    }
+    const arg = code.slice(j + 1, k).trim()
+    out = `${out}${code.slice(i, idx)} contains ${arg}`
+    i = k + 1
+  }
+  return out
 }

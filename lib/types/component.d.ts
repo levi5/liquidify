@@ -2,11 +2,7 @@ import * as types from '@babel/types'
 
 export type ComponentMode = 'liquid' | 'dom' | 'dom:global' | 'react'
 
-export type InlineComponentNode =
-  | types.JSXElement
-  | types.JSXFragment
-  | types.LogicalExpression
-  | types.ConditionalExpression
+export type InlineComponentNode = types.JSXElement | types.JSXFragment | types.LogicalExpression | types.ConditionalExpression
 
 export interface ComponentMetadataType {
   name: string

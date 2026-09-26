@@ -133,10 +133,7 @@ test('LiquidVariableParser parses variable declarations, destructuring, and fall
 })
 
 test('LiquidVariableParser parses if statement assignments and map calls', () => {
-  const ast = parse(
-    'if (available) { count = 1; items.map(i => i); } else { count += 2; }',
-    { plugins: ['jsx', 'typescript'] },
-  )
+  const ast = parse('if (available) { count = 1; items.map(i => i); } else { count += 2; }', { plugins: ['jsx', 'typescript'] })
   const variableParser = new LiquidVariableParser((node) => {
     if (node.type === 'Identifier') return node.name
     if (node.type === 'NumericLiteral') return String(node.value)
@@ -177,5 +174,3 @@ test('expression parser rewrites dynamic classNames calls to append filters', ()
   const result = parser.generateLiquidCode(parseExpression('classNames(styles.base, dynamicClass)'), false)
   assert.equal(result, 'styles.base | append: " " | append: dynamicClass')
 })
-
-

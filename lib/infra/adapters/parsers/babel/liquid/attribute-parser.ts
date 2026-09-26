@@ -5,7 +5,6 @@ import {
   isIdentifier,
   isJSXAttribute,
   isJSXExpressionContainer,
-  isJSXIdentifier,
   isObjectExpression,
   isObjectProperty,
   isStringLiteral,
@@ -65,10 +64,15 @@ export class LiquidAttributeConverter {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string {
-    return _match(!isJSXAttribute(attribute) || !isJSXIdentifier((attribute as JSXAttribute).name))
-      .with(true, () => this.handleSpreadAttribute(attribute, context))
-      .with(false, () => this.convertNamedAttribute(attribute as JSXAttribute, renames, context))
-      .exec() as string
+    if (!isJSXAttribute(attribute)) return this.handleSpreadAttribute(attribute, context)
+    const rawName = (attribute as JSXAttribute).name
+    if (rawName.type !== 'JSXIdentifier') {
+      throw new ValidationError(
+        `Namespaced JSX attribute "${rawName.type}" is not supported in Liquid output. Use data-* attributes instead.`,
+        context?.currentFilePath,
+      )
+    }
+    return this.convertNamedAttribute(attribute as JSXAttribute, renames, context)
   }
 
   private handleSpreadAttribute(_attribute: JSXAttribute | JSXSpreadAttribute, context?: ParsingContext): string {
@@ -109,9 +113,7 @@ export class LiquidAttributeConverter {
           context,
         ),
       )
-      .with(attributeName === 'style' && isObjectExpression(expression), () =>
-        this.handleStyleObject(expression as ObjectExpression, renames, context),
-      )
+      .with(attributeName === 'style', () => this.handleStyleValue(expression as Expression, renames, context))
       .with(booleanAttributes.has(attributeName), () =>
         this.renderBoolean(expression as Expression, ` ${attributeName}`, '', renames, context),
       )
@@ -169,18 +171,24 @@ export class LiquidAttributeConverter {
       .with(isLogicalExpression(expression) && (expression as LogicalExpression).operator === '??', () =>
         this.renderNilCoalescing(expression as LogicalExpression, renames, context),
       )
-      .with(this.isBooleanExpression(expression) || isLogicalExpression(expression), () =>
-        this.renderBoolean(expression, 'true', 'false', renames, context),
-      )
+      .with(isLogicalExpression(expression), () => this.renderLogicalFallback(expression as LogicalExpression, renames, context))
+      .with(this.isBooleanExpression(expression), () => this.renderBoolean(expression, 'true', 'false', renames, context))
       .with(true, () => this.renderCodeValue(expression, renames, context))
       .exec() as string
   }
 
+  private renderLogicalFallback(expression: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
+    const left = this.expressionParser.generateLiquidCode(expression.left, false, renames, context)
+    const right = this.expressionParser.generateLiquidCode(expression.right, false, renames, context)
+    return expression.operator === '||'
+      ? `${this.pendingOf(context)}${escapedOutput(`${left} | default: ${right}`)}`
+      : `${this.pendingOf(context)}${escapedOutput(right)}`
+  }
+
   private renderStringValue(expression: { value: string }): string {
-    return _match(expression.value.includes('|') && !expression.value.includes('{{') && !expression.value.includes('{%'))
-      .with(true, () => escapedOutput(expression.value.trim()))
-      .with(false, () => escapeAttributeTemplate(expression.value))
-      .exec() as string
+    const isLiquidFilter =
+      /[a-zA-Z0-9_.)\]"']\s*\|\s*[a-zA-Z_]/.test(expression.value) && !expression.value.includes('{{') && !expression.value.includes('{%')
+    return isLiquidFilter ? escapedOutput(expression.value.trim()) : escapeAttributeTemplate(expression.value)
   }
 
   private renderConditionalValue(expression: ConditionalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -196,6 +204,12 @@ export class LiquidAttributeConverter {
 
   private renderCodeValue(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
     const code = this.expressionParser.generateLiquidCode(expression, false, renames, context)
+    if (code.includes('{%')) {
+      throw new ValidationError(
+        `Liquid block tags ({% ... %}) cannot live inside an attribute value "${code.slice(0, 60)}". Hoist the condition outside the tag.`,
+        context?.currentFilePath,
+      )
+    }
     return `${this.pendingOf(context)}${escapedOutput(code)}`
   }
 
@@ -207,15 +221,28 @@ export class LiquidAttributeConverter {
     )
   }
 
+  private handleStyleValue(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+    return _match(isObjectExpression(expression))
+      .with(true, () => this.handleStyleObject(expression as ObjectExpression, renames, context))
+      .with(false, () => {
+        const code = this.expressionParser.generateLiquidCode(expression, false, renames, context)
+        if (code.includes('{%')) {
+          throw new ValidationError(
+            'Liquid block tags are not supported inside style="...". Hoist the condition outside the attribute.',
+            context?.currentFilePath,
+          )
+        }
+        return ` style="${this.pendingOf(context)}${escapedOutput(code)}"`
+      })
+      .exec() as string
+  }
+
   private handleStyleObject(expression: ObjectExpression, renames?: Record<string, string>, context?: ParsingContext): string {
     const styles = expression.properties
       .filter(isObjectProperty)
       .map((prop) => this.styleEntry(prop, renames, context))
       .filter(Boolean)
-    return _match(styles.length > 0)
-      .with(true, () => ` style="${styles.join(' ')} "`)
-      .with(false, () => '')
-      .exec() as string
+    return styles.length === 0 ? '' : ` style="${styles.join(' ')}"`
   }
 
   private styleEntry(prop: { key: unknown; value: unknown }, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -236,10 +263,9 @@ export class LiquidAttributeConverter {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string {
-    return _match(attributeName.startsWith('on') && isIdentifier(expression))
-      .with(true, () => this.referenceHandler(attributeName, (expression as { name: string }).name, renames, context))
-      .with(false, () => ` ${attributeName}="${this.renderValue(expression, renames, context)}"`)
-      .exec() as string
+    return isEventName(attributeName) && isIdentifier(expression)
+      ? this.referenceHandler(attributeName, (expression as { name: string }).name, renames, context)
+      : ` ${attributeName}="${this.renderValue(expression, renames, context)}"`
   }
 
   private referenceHandler(attributeName: string, handlerName: string, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -258,7 +284,7 @@ export class LiquidAttributeConverter {
     attribute: JSXAttribute,
   ): attribute is JSXAttribute & { value: JSXExpressionContainer & { expression: ArrowFunctionExpression } } {
     return (
-      attributeName.startsWith('on') &&
+      isEventName(attributeName) &&
       attribute.value !== null &&
       attribute.value !== undefined &&
       isJSXExpressionContainer(attribute.value) &&
@@ -276,9 +302,39 @@ export class LiquidAttributeConverter {
   }
 
   private pendingOf(context?: ParsingContext): string {
-    return _match(context === undefined)
-      .with(true, () => '')
-      .with(false, () => (context as ParsingContext).getPendingAssigns())
-      .exec() as string
+    return context === undefined ? '' : (context as ParsingContext).getPendingAssigns()
   }
+}
+
+const DOM_EVENTS = new Set([
+  'onclick',
+  'ondblclick',
+  'onchange',
+  'oninput',
+  'onsubmit',
+  'onfocus',
+  'onblur',
+  'onkeydown',
+  'onkeyup',
+  'onkeypress',
+  'onmousedown',
+  'onmouseup',
+  'onmousemove',
+  'onmouseover',
+  'onmouseout',
+  'onmouseenter',
+  'onmouseleave',
+  'ontouchstart',
+  'ontouchend',
+  'ontouchmove',
+  'onscroll',
+  'onload',
+  'onerror',
+  'onresize',
+  'onselect',
+  'oncheck',
+])
+
+function isEventName(name: string): boolean {
+  return DOM_EVENTS.has(name.toLowerCase())
 }

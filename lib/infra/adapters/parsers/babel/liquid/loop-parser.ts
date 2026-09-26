@@ -27,9 +27,10 @@ import {
   isLogicalExpression,
 } from '@babel/types'
 import { _match } from 'funcio'
+import { ValidationError } from '../../../../../core/errors/validation-error'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
-const cleanCode = (code: string): string => code.replace(/\?\.$/, '').replace(/\?/g, '')
+const cleanCode = (code: string): string => code.replace(/\?\.\s*/g, '.')
 
 export class LiquidLoopParser {
   public renderBody?: (body: unknown, renames?: Record<string, string>, context?: ParsingContext) => string
@@ -98,9 +99,11 @@ export class LiquidLoopParser {
     context?: ParsingContext,
   ): string {
     const callback = expr.arguments[0]
-    return _match(isArrowFunctionExpression(callback as Node) && (callback as { params: unknown[] }).params.length > 0)
-      .with(true, () => this.renderValidMap(callee, callback as ArrowFunctionExpression, renames, context))
-      .with(false, () => '')
+    return _match(!isArrowFunctionExpression(callback as Node) || (callback as { params: unknown[] }).params.length === 0)
+      .with(true, () => {
+        throw new ValidationError('Liquid .map() requires an inline arrow callback such as items.map(item => item.title).')
+      })
+      .with(false, () => this.renderValidMap(callee, callback as ArrowFunctionExpression, renames, context))
       .exec() as string
   }
 
@@ -115,13 +118,21 @@ export class LiquidLoopParser {
     const filterCondition = this.filterCondition(callee, itemName, renames, context)
     const slice = this.sliceSuffix(callee, renames, context)
     const arrayTarget = this.mapArrayTarget(callee)
-    const assignments = this.mapAssignments(callback, context)
-    const body = this.mapBody(callback, localRenames, context)
-    const guarded = _match(filterCondition === '')
-      .with(true, () => body)
-      .with(false, () => `{% if ${filterCondition} %}${body}{% endif %}`)
+    const arrayCode = this.arrayCodeOf(arrayTarget)
+    return _match(arrayCode === '')
+      .with(true, () => {
+        throw new ValidationError('Liquid .map() requires an array target (e.g. items.map(...)).')
+      })
+      .with(false, () => {
+        const assignments = this.mapAssignments(callback, context)
+        const body = this.mapBody(callback, localRenames, context)
+        const guarded = _match(filterCondition === '')
+          .with(true, () => body)
+          .with(false, () => `{% if ${filterCondition} %}${body}{% endif %}`)
+          .exec() as string
+        return `{% for ${itemName} in ${arrayCode}${slice} %}${assignments}${guarded}{% endfor %}`
+      })
       .exec() as string
-    return `{% for ${itemName} in ${this.arrayCodeOf(arrayTarget)}${slice} %}${assignments}${guarded}{% endfor %}`
   }
 
   private filterCondition(callee: MemberExpression, itemName: string, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -239,29 +250,29 @@ export class LiquidLoopParser {
     const args = object.arguments ?? []
     const start = this.readNumeric(args[0]) ?? 0
     const end = this.readNumeric(args[1])
-    const limit = _match(end !== null)
-      .with(true, () => ` limit: ${(end as number) - start}`)
-      .with(false, () => this.dynamicLimit(args[1], start, renames, context))
-      .exec() as string
-    const offset = _match(start > 0)
-      .with(true, () => ` offset: ${start}`)
-      .with(false, () => '')
-      .exec() as string
+    if (end !== null && end <= start) return ' limit: 0'
+    const limit = end !== null ? ` limit: ${end - start}` : this.dynamicLimit(args[1], start, renames, context)
+    const offset = start > 0 ? ` offset: ${start}` : ''
     return `${limit}${offset}`
   }
 
   private dynamicLimit(arg: unknown, start: number, renames?: Record<string, string>, context?: ParsingContext): string {
-    return _match(start > 0 || arg === null || arg === undefined)
-      .with(true, () => '')
-      .with(false, () => ` limit: ${this.liquidVariableParser.generateLiquidCode(arg as Node, true, renames, context)}`)
+    return _match(true)
+      .with(arg === null || arg === undefined, () => (start > 0 ? ` limit: 9999` : ''))
+      .with(start > 0, () => {
+        const endCode = this.liquidVariableParser.generateLiquidCode(arg as Node, true, renames, context)
+        return ` limit: ${endCode} | minus: ${start}`
+      })
+      .with(true, () => ` limit: ${this.liquidVariableParser.generateLiquidCode(arg as Node, true, renames, context)}`)
       .exec() as string
   }
 
   private readNumeric(arg: unknown): number | null {
-    return _match(arg !== null && arg !== undefined && typeof arg === 'object' && 'value' in (arg as Record<string, unknown>))
-      .with(true, () => Number((arg as { value: unknown }).value))
-      .with(false, () => null)
-      .exec() as number | null
+    const num =
+      arg !== null && arg !== undefined && typeof arg === 'object' && 'value' in (arg as Record<string, unknown>)
+        ? Number((arg as { value: unknown }).value)
+        : NaN
+    return Number.isFinite(num) && Number.isInteger(num) && num >= 0 ? num : null
   }
 
   private mapAssignments(callback: ArrowFunctionExpression, context?: ParsingContext): string {
@@ -295,14 +306,12 @@ export class LiquidLoopParser {
 
   private destructureAssign(callback: ArrowFunctionExpression, context?: ParsingContext): string {
     const param = callback.params[0]
-    return _match(param !== undefined && !isIdentifier(param))
-      .with(true, () => this.destructureLine(param as LVal, context))
-      .with(false, () => '')
-      .exec() as string
+    if (param === undefined || isIdentifier(param)) return ''
+    return this.destructureLine(param as LVal, this.paramNameOf(callback.params, 0, 'item'), context)
   }
 
-  private destructureLine(param: LVal, context?: ParsingContext): string {
-    const fakeDeclarator = variableDeclarator(param, identifier('item'))
+  private destructureLine(param: LVal, itemName: string, context?: ParsingContext): string {
+    const fakeDeclarator = variableDeclarator(param, identifier(itemName))
     return `${this.liquidVariableParser.parseVariableDeclaration(fakeDeclarator, undefined, context).join('\n')}\n`
   }
 
@@ -314,10 +323,11 @@ export class LiquidLoopParser {
   ): string {
     const callback = expr.arguments[0]
     const arrayName = this.arrayCodeOf((callee as { object: unknown }).object)
-    return _match(isArrowFunctionExpression(callback as Node) && (callback as { params: unknown[] }).params.length > 0)
-      .with(true, () => this.renderValidFilter(callback as ArrowFunctionExpression, arrayName, renames, context))
-      .with(false, () => '')
-      .exec() as string
+    if (!arrayName) throw new ValidationError('Liquid .filter() requires an array target.')
+    if (!isArrowFunctionExpression(callback as Node) || (callback as { params: unknown[] }).params.length === 0) {
+      throw new ValidationError('Liquid .filter() requires an inline arrow predicate.')
+    }
+    return this.renderValidFilter(callback as ArrowFunctionExpression, arrayName, renames, context)
   }
 
   private renderValidFilter(
@@ -327,16 +337,13 @@ export class LiquidLoopParser {
     context?: ParsingContext,
   ): string {
     const body = callback.body
-    const itemName = _match(isIdentifier(callback.params[0]))
-      .with(true, () => (callback.params[0] as { name: string }).name)
-      .with(false, () => 'item')
-      .exec() as string
+    const itemName = isIdentifier(callback.params[0]) ? (callback.params[0] as { name: string }).name : 'item'
     return _match(true)
-      .with(isBlockStatement(body), () => this.renderFilterBlock(arrayName, itemName, body as BlockStatement, context))
-      .with(
-        isConditionalExpression(body) || isLogicalExpression(body),
-        () => `{% for ${itemName} in ${arrayName} %}${this.jsxToHtml(body, renames, context)}{% endfor %}`,
-      )
+      .with(isBlockStatement(body), () => this.renderFilterBlock(arrayName, itemName, body as BlockStatement, renames, context))
+      .with(isConditionalExpression(body) || isLogicalExpression(body), () => {
+        const cond = this.liquidVariableParser.generateLiquidCode(body as Node, true, { ...renames, [itemName]: itemName }, context)
+        return `{% for ${itemName} in ${arrayName} %}{% if ${cond} %}{{ ${itemName} }}{% endif %}{% endfor %}`
+      })
       .with(true, () => this.renderFilterCondition(arrayName, itemName, body, renames, context))
       .exec() as string
   }
@@ -352,29 +359,42 @@ export class LiquidLoopParser {
     return `{% for ${itemName} in ${arrayName} %}{% if ${condition} %}{{ ${itemName} }}{% endif %}{% endfor %}`
   }
 
-  private renderFilterBlock(arrayName: string, itemName: string, body: BlockStatement, context?: ParsingContext): string {
+  private renderFilterBlock(
+    arrayName: string,
+    itemName: string,
+    body: BlockStatement,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
     const assignments = (body.body ?? [])
-      .map((stmt) => this.filterBlockLine(stmt, context))
+      .map((stmt) => this.filterBlockLine(stmt, itemName, renames, context))
       .filter(Boolean)
       .join('\n')
     return `{% for ${itemName} in ${arrayName} %}${assignments}{% endfor %}`
   }
 
-  private filterBlockLine(stmt: BlockStatement['body'][number], context?: ParsingContext): string {
-    return _match(true)
-      .with(isVariableDeclaration(stmt), () =>
-        (stmt as VariableDeclaration).declarations
-          .map((decl) => this.liquidVariableParser.parseVariableDeclaration(decl, undefined, context).join('\n'))
-          .join('\n'),
-      )
-      .with(isIfStatement(stmt), () =>
-        this.liquidVariableParser
-          .parseIfStatement(stmt, (node, ctx) => this.jsxToHtml(node, undefined, ctx), undefined, context)
-          .join('\n'),
-      )
-      .with(isReturnStatement(stmt), () => this.jsxToHtml((stmt as ReturnStatement).argument as Node, undefined, context))
-      .with(true, () => '')
-      .exec() as string
+  private filterBlockLine(
+    stmt: BlockStatement['body'][number],
+    itemName: string,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    if (isVariableDeclaration(stmt)) {
+      return (stmt as VariableDeclaration).declarations
+        .map((decl) => this.liquidVariableParser.parseVariableDeclaration(decl, renames, context).join('\n'))
+        .join('\n')
+    }
+    if (isIfStatement(stmt)) {
+      return this.liquidVariableParser
+        .parseIfStatement(stmt, (node, ctx) => this.jsxToHtml(node, renames, ctx), renames, context)
+        .join('\n')
+    }
+    if (isReturnStatement(stmt)) {
+      const arg = (stmt as ReturnStatement).argument as Node | null | undefined
+      return arg ? this.jsxToHtml(arg, renames, context) : ''
+    }
+    void itemName
+    return ''
   }
 
   private extractReturnNode(fn: ArrowFunctionExpression): Node | null {

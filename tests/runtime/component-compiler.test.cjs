@@ -59,9 +59,7 @@ test('a default stylesheet import is injected even when its binding goes unused'
 })
 
 test('a stylesheet imported both ways is injected once', async () => {
-  const result = await withStylesheet(
-    "import './styles.css'\nimport styles from './styles.css'\nfunction Badge() { return null }",
-  )
+  const result = await withStylesheet("import './styles.css'\nimport styles from './styles.css'\nfunction Badge() { return null }")
 
   assert.equal(result.script.match(/__react_css_inject__\(/g).length, 1)
   assert.equal(result.script.match(/\.badge\{color:red\}/g).length, 1)

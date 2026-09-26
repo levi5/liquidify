@@ -9,18 +9,12 @@ import { ValidationError } from '../dist/core/errors/validation-error.js'
 describe('ValidationService', () => {
   it('rejects react mode inside sections', () => {
     const service = serviceFor()
-    assert.throws(
-      () => service.validate({ mode: 'react', type: 'sections' }, '/theme/sections/Hero.tsx'),
-      ValidationError,
-    )
+    assert.throws(() => service.validate({ mode: 'react', type: 'sections' }, '/theme/sections/Hero.tsx'), ValidationError)
   })
 
   it('rejects js logic in liquid mode inside sections without a dom/script directive', () => {
     const service = serviceFor()
-    assert.throws(
-      () => service.validate({ mode: 'liquid', hasJsLogic: true }, '/theme/sections/Hero.tsx'),
-      ValidationError,
-    )
+    assert.throws(() => service.validate({ mode: 'liquid', hasJsLogic: true }, '/theme/sections/Hero.tsx'), ValidationError)
   })
 
   it('accepts dom mode inside sections', () => {

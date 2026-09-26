@@ -6,7 +6,8 @@ const { SilentLogger } = require('../../dist/shared/logger')
 
 const buildRuntimeScript = (compiler = esbuild) => new ReactRuntimeBuilder(compiler).build()
 
-const createComponentCompiler = (options = {}) => new ReactComponentCompiler(esbuild, new CssInjector(), options, process.cwd(), new SilentLogger())
+const createComponentCompiler = (options = {}) =>
+  new ReactComponentCompiler(esbuild, new CssInjector(), options, process.cwd(), new SilentLogger())
 
 const mockPreactCompiler = () => ({
   build: (options) =>

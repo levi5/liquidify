@@ -51,8 +51,29 @@
 	"files": {
 		"includes": [
 			"lib/**",
-			"!lib/types",
-			"!lib/ui"
+			"tests/**"
 		]
-	}
+	},
+	"overrides": [
+		{
+			"includes": [
+				"tests/**"
+			],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noTemplateCurlyInString": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"tests/fixtures/**"
+			],
+			"linter": {
+				"enabled": false
+			}
+		}
+	]
 }

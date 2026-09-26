@@ -14,7 +14,10 @@ window.scenarios.push({
     check(island?.getAttribute('data-react-hydrated') === 'true', 'Recommendation ProductShelf must hydrate after replacement')
     check(swiper?.classList.contains('swiper-initialized'), 'Recommendation ProductShelf must initialize Swiper')
     check(slides.length === 8, 'RecommendationLoader must request and render more than four products')
-    check(target?.querySelector('.swiper-button-next') && target?.querySelector('.swiper-pagination'), 'Recommendation slider must render controls')
+    check(
+      target?.querySelector('.swiper-button-next') && target?.querySelector('.swiper-pagination'),
+      'Recommendation slider must render controls',
+    )
     check(request?.url.includes('limit=8'), 'RecommendationLoader must request eight products')
   },
 })

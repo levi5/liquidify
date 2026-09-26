@@ -16,8 +16,15 @@ test('formatHtml does not treat comparisons inside Liquid tags as HTML', () => {
 
 test('buildLiquidContent preserves scripts, schema and stylesheet', () => {
   const component = {
-    name: 'Card', html: '<p>Card</p>', script: 'console.log(1)', liquidAssignments: [],
-    type: 'sections', hasScript: true, schema: { name: 'Card' }, blocksSchema: [], css: '.card { color: red; }',
+    name: 'Card',
+    html: '<p>Card</p>',
+    script: 'console.log(1)',
+    liquidAssignments: [],
+    type: 'sections',
+    hasScript: true,
+    schema: { name: 'Card' },
+    blocksSchema: [],
+    css: '.card { color: red; }',
   }
   const output = buildLiquidContent(component, 'card')
   assert.match(output, /card\.js' \| asset_url/)

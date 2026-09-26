@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { ConfigLoader, loadConfig, loadConfigFromFile } from '../dist/infra/adapters/config/config-loader.js'
+import { ConfigLoader, loadConfig } from '../dist/infra/adapters/config/config-loader.js'
 import { ValidationError } from '../dist/core/errors/validation-error.js'
 import { DEFAULT_CONFIG } from '../dist/core/entities/config.js'
 

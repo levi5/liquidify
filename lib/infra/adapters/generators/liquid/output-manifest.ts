@@ -20,6 +20,7 @@ const HASH_PATTERN = /^[a-f0-9]{64}$/
 export class OutputManifest {
   private previous: Entries = {}
   private next: Entries = {}
+  private backup: Entries = {}
   private writes = new Map<string, string>()
   private readonly root: string
   private readonly manifestPath: string
@@ -53,6 +54,12 @@ export class OutputManifest {
         .exec(),
     )
     this.next = Object.fromEntries(Object.entries(this.previous).filter(([file]) => active.has(file) && !changed.has(file)))
+    this.backup = structuredClone(this.next)
+  }
+
+  public async abort(): Promise<void> {
+    this.writes.clear()
+    this.next = structuredClone(this.backup)
   }
 
   private async loadPrevious(): Promise<void> {
@@ -249,10 +256,13 @@ export class OutputManifest {
 
   private async removeUnchanged(relative: string, hash: string, transaction: OutputTransaction): Promise<void> {
     const file = this.safePath(relative)
-    await _match((await this.fs.exists(file)) && digest(await this.fs.readFile(file)) === hash)
-      .with(true, () => transaction.remove(file))
-      .with(false, () => undefined)
-      .exec()
+    const exists = await this.fs.exists(file)
+    if (!exists) return
+    if (digest(await this.fs.readFile(file)) === hash) {
+      await transaction.remove(file)
+      return
+    }
+    this.logger.warn(`Preserving user-modified output (not managed by last build): ${relative}`)
   }
 
   private async writeAggregates(transaction: OutputTransaction): Promise<void> {

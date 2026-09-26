@@ -1,5 +1,5 @@
 import path from 'node:path'
-import { _match } from 'funcio'
+import { _match, _try } from 'funcio'
 import {
   traverseFast,
   isStringLiteral,
@@ -13,6 +13,7 @@ import {
 import type { ASTParser } from '../../infra/adapters/parsers/babel/ASTParser'
 import type { ModuleResolver } from '../../infra/adapters/fs/module-resolver'
 import type { IFileSystem } from '../../core/protocols/file-system'
+import { LiquidifyError } from '../../core/errors/liquidify-error'
 import { sha256Hex } from '../../shared/liquid-helpers'
 
 export interface ImportGraph {
@@ -84,12 +85,22 @@ export class ImportGraphBuilder {
   }
 
   private collectAstImports(file: string, source: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    traverseFast(this.astParser.parse(source, file), (node: Node) => {
+    const parsed = _try.sync(() => this.astParser.parse(source, file))
+    const ast = parsed.match({
+      right: (value) => value,
+      left: (error) =>
+        _match(error instanceof LiquidifyError)
+          .with(true, () => {
+            throw error
+          })
+          .with(false, () => {
+            throw new LiquidifyError(`Failed to parse imports in ${file}: ${error instanceof Error ? error.message : String(error)}`, file)
+          })
+          .exec(),
+    })
+    traverseFast(ast, (node: Node) => {
       const specifier = this.staticSourceOf(node)
-      _match(specifier === undefined)
-        .with(true, () => undefined)
-        .with(false, () => this.addImport(specifier as string, file, graph, dependencies, imports))
-        .exec()
+      if (specifier !== undefined) this.addImport(specifier, file, graph, dependencies, imports)
     })
   }
 
@@ -122,11 +133,9 @@ export class ImportGraphBuilder {
   }
 
   private isImportOrRequire(call: CallExpression): boolean {
-    return _match(call.callee.type)
-      .with('Import', () => true)
-      .with('Identifier', () => (call.callee as { name?: string }).name === 'require')
-      .with(call.callee.type, () => false)
-      .exec() as boolean
+    if (call.callee.type === 'Import') return true
+    if (call.callee.type === 'Identifier') return (call.callee as { name?: string }).name === 'require'
+    return false
   }
 
   private collectCssImports(file: string, source: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
@@ -155,16 +164,13 @@ export class ImportGraphBuilder {
   }
 
   private trackUnresolved(specifier: string, file: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    _match(specifier.startsWith('.') || this.resolver.candidates(specifier, file).length > 0)
-      .with(true, () =>
-        this.resolver.candidates(specifier, file).forEach((candidate) => {
-          imports.add(candidate)
-          dependencies.add(candidate)
-          graph.sources.set(candidate, MISSING_SOURCE)
-        }),
-      )
-      .with(false, () => undefined)
-      .exec()
+    const candidates = this.resolver.candidates(specifier, file)
+    if (!specifier.startsWith('.') && candidates.length === 0) return
+    for (const candidate of candidates) {
+      imports.add(candidate)
+      dependencies.add(candidate)
+      graph.sources.set(candidate, MISSING_SOURCE)
+    }
   }
 }
 

@@ -1,6 +1,6 @@
 import type { OutputManifest } from './output-manifest'
 import { buildLiquidContent } from './liquid-content'
-import { join, resolve } from 'node:path'
+import { join, resolve, relative, isAbsolute } from 'node:path'
 import { _match, _try, _Array } from 'funcio'
 
 import type { GeneratorOptions, ResolvedGeneratorOptions } from '../../../../core/entities/liquid'
@@ -45,6 +45,12 @@ export class LiquidFileSystemGenerator implements IGenerator {
       this.pendingTouch = false
       await this.touchDirectory(this.options.outputDir)
     }
+  }
+
+  public async abortBuild(): Promise<void> {
+    await this.manifest.abort()
+    this.inBuild = false
+    this.pendingTouch = false
   }
 
   private async writeOutput(file: string, content: string, sourcePath?: string): Promise<void> {
@@ -220,12 +226,10 @@ export class LiquidFileSystemGenerator implements IGenerator {
     const targetDir = this.liquidDir(component, sourcePath)
     const liquidPath = join(targetDir, `${fileName}.liquid`)
     const resolvedTarget = resolve(targetDir)
-    _match(resolve(liquidPath).startsWith(`${resolvedTarget}/`))
-      .with(true, () => undefined)
-      .with(false, () => {
-        throw new ValidationError(`Unsafe output path for component "${component.name}".`, sourcePath)
-      })
-      .exec()
+    const rel = relative(resolvedTarget, resolve(liquidPath))
+    if (rel.startsWith('..') || isAbsolute(rel)) {
+      throw new ValidationError(`Unsafe output path for component "${component.name}".`, sourcePath)
+    }
     const isNewFile = !(await this.fileSystem.exists(liquidPath))
     await this.writeOutput(liquidPath, buildLiquidContent(component, fileName), sourcePath)
     await _match(isNewFile)
@@ -253,12 +257,10 @@ export class LiquidFileSystemGenerator implements IGenerator {
   private async generateScriptFile(component: ParsedComponent, fileName: string, sourcePath?: string): Promise<void> {
     const scriptPath = join(this.options.assetsDir, `${fileName}.js`)
     const resolvedAssets = resolve(this.options.assetsDir)
-    _match(resolve(scriptPath).startsWith(`${resolvedAssets}/`))
-      .with(true, () => undefined)
-      .with(false, () => {
-        throw new ValidationError(`Unsafe script path for component "${component.name}".`, sourcePath)
-      })
-      .exec()
+    const rel = relative(resolvedAssets, resolve(scriptPath))
+    if (rel.startsWith('..') || isAbsolute(rel)) {
+      throw new ValidationError(`Unsafe script path for component "${component.name}".`, sourcePath)
+    }
     const isNewFile = !(await this.fileSystem.exists(scriptPath))
     const result = await _try.async(async () => {
       await this.writeOutput(scriptPath, component.script, sourcePath)

@@ -46,7 +46,7 @@ export class ReactComponentCompiler {
         sourceType: 'module',
         plugins: ['jsx', 'typescript'],
       })
-      const relativePath = filePath.replace(this.projectRoot, '')
+      const relativePath = path.relative(this.projectRoot, filePath) || path.basename(filePath)
       traverse(ast as any, {
         CallExpression: (pathNode: NodePath<CallExpression>) => this.bridgeCall(pathNode, relativePath),
       })
@@ -86,15 +86,9 @@ export class ReactComponentCompiler {
 
   private hasBridgeId(args: CallExpression['arguments']): boolean {
     const second = args[1] as Expression | undefined
-    return _match(second !== undefined && isStringLiteral(second))
-      .with(
-        true,
-        () =>
-          (second as { value: string }).value.includes('__LIQUIDIFY_CONTEXT_ID__') ||
-          (second as { value: string }).value.includes('__LIQUIDX_CONTEXT_ID__'),
-      )
-      .with(false, () => false)
-      .exec() as boolean
+    if (second === undefined || !isStringLiteral(second)) return false
+    const value = (second as { value: string }).value
+    return value.startsWith('__LIQUIDIFY_CONTEXT_ID__:') || value.startsWith('__LIQUIDX_CONTEXT_ID__:')
   }
 
   private appendBridgeId(pathNode: NodePath<CallExpression>, relativePath: string): void {

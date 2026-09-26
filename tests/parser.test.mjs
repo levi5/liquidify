@@ -156,10 +156,7 @@ export default function MobileMenu() {
 }`,
       '/theme/src/components/snippets/Card.tsx',
     )
-    assert.equal(
-      inAttr.html.trim(),
-      '<img alt="{{ settings.brand_name | default: shop.name | escape }}" />',
-    )
+    assert.equal(inAttr.html.trim(), '<img alt="{{ settings.brand_name | default: shop.name | escape }}" />')
   })
 
   it('correctly compiles ternary expressions containing liquid filter strings without turning them into raw JS', async () => {

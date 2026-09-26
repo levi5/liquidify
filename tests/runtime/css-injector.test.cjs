@@ -8,7 +8,11 @@ test('CSS values survive JavaScript serialization without executing embedded tex
   const css = 'a::before { content: "` ${window.bad = true} \\\\ </script>" }'
   const id = "css-'quoted"
   let received
-  const window = { __react_css_inject__: (...args) => { received = args } }
+  const window = {
+    __react_css_inject__: (...args) => {
+      received = args
+    },
+  }
 
   vm.runInNewContext(injector.buildCall(css, id), { window })
 

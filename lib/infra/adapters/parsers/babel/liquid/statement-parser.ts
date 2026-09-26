@@ -84,24 +84,16 @@ export class LiquidStatementParser {
   }
 
   private renderBranch(statement: IfStatement, rest: Statement[], renames?: Record<string, string>, context?: ParsingContext): string {
-    const yes = this.renderBody(this.branchBody(statement.consequent, rest), renames, context)
-    const no = this.renderBody(this.branchBody(statement.alternate, rest), renames, context)
+    const yes = this.renderBody(this.branchBlock(statement.consequent), renames, context)
+    const no = statement.alternate ? this.renderBody(this.branchBlock(statement.alternate as Statement), renames, context) : ''
+    const tail = rest.length > 0 ? this.renderBody(rest, renames, context) : ''
     const markup = renderCondition(statement.test, yes, no, (node: Node) => this.variables.generateLiquidCode(node, true, renames, context))
-    return `${this.pendingAssignsOf(context)}${markup}`
-  }
-
-  private branchBody(node: Statement | null | undefined, rest: Statement[]): Statement[] {
-    return _match(node === null || node === undefined)
-      .with(true, () => rest)
-      .with(false, () => [...this.branchBlock(node as Statement), ...rest])
-      .exec() as Statement[]
+    return `${this.pendingAssignsOf(context)}${markup}${tail}`
   }
 
   private branchBlock(node: Statement): Statement[] {
-    return _match(isBlockStatement(node))
-      .with(true, () => (node as BlockStatement).body)
-      .with(false, () => [node])
-      .exec() as Statement[]
+    if (isBlockStatement(node)) return (node as BlockStatement).body
+    return [node]
   }
 
   private renderDeclarations(
@@ -145,31 +137,18 @@ export class LiquidStatementParser {
     return isExpressionStatement(statement) && isUpdateExpression((statement as ExpressionStatement).expression)
   }
 
-  private renderUpdate(statement: Statement, next: () => string, renames?: Record<string, string>, context?: ParsingContext): string {
+  private renderUpdate(statement: Statement, next: () => string, _renames?: Record<string, string>, context?: ParsingContext): string {
     const expression = (statement as ExpressionStatement).expression as UpdateExpression
-    return _match(!isIdentifier(expression.argument))
-      .with(true, () => {
-        throw new ValidationError(
-          `Unsupported Liquid update target: ${expression.argument.type}. Use i++ or i-- on a variable.`,
-          this.filePathOf(context),
-          this.locationOf(statement),
-        )
-      })
-      .with(false, () => {
-        const name = (expression.argument as Identifier).name
-        const filter = expression.operator === '--' ? 'minus' : 'plus'
-        const assigns = this.variables
-          .parseVariableDeclaration(
-            variableDeclarator(expression.argument as Identifier, { type: 'NumericLiteral', value: 0 } as unknown as Expression),
-            renames,
-            context,
-          )
-          .join('\n')
-        void assigns
-        void renames
-        return `${this.pendingAssignsOf(context)}{% assign ${name} = ${name} | ${filter}: 1 %}\n${next()}`
-      })
-      .exec() as string
+    if (!isIdentifier(expression.argument)) {
+      throw new ValidationError(
+        `Unsupported Liquid update target: ${expression.argument.type}. Use i++ or i-- on a variable.`,
+        this.filePathOf(context),
+        this.locationOf(statement),
+      )
+    }
+    const name = (expression.argument as Identifier).name
+    const filter = expression.operator === '--' ? 'minus' : 'plus'
+    return `${this.pendingAssignsOf(context)}{% assign ${name} = ${name} | ${filter}: 1 %}\n${next()}`
   }
 
   private renderAssignment(statement: Statement, next: () => string, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -215,10 +194,14 @@ export class LiquidStatementParser {
     context?: ParsingContext,
   ): string[] {
     const right = expression.right
-    return _match(right.type === 'NumericLiteral')
-      .with(true, () => [`{% assign ${name} = ${name} | plus: ${this.codeOf(right, renames, context)} %}`])
-      .with(false, () => [appendLine])
-      .exec() as string[]
+    const isNumeric =
+      right.type === 'NumericLiteral' ||
+      (right.type === 'UnaryExpression' &&
+        ['+', '-'].includes((right as { operator: string }).operator) &&
+        (right as { argument: { type?: string } }).argument?.type === 'NumericLiteral') ||
+      (right.type === 'Identifier' && /^(count|total|index|quantity|price|amount|size|length)$/i.test((right as Identifier).name))
+    if (isNumeric) return [`{% assign ${name} = ${name} | plus: ${this.codeOf(right, renames, context)} %}`]
+    return [appendLine]
   }
 
   private codeOf(node: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -231,8 +214,15 @@ export class LiquidStatementParser {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string {
-    const left = (statement as ForOfStatement).left ?? (statement as ForInStatement).left
-    const right = (statement as ForOfStatement).right ?? (statement as ForInStatement).right
+    if (isForInStatement(statement)) {
+      throw new ValidationError(
+        'for...in iterates keys, not values. Use `for (const item of items)` or `for (const key of Object.keys(obj))` is not supported — pass entries as an array prop.',
+        this.filePathOf(context),
+        this.locationOf(statement),
+      )
+    }
+    const left = (statement as ForOfStatement).left
+    const right = (statement as ForOfStatement).right
     const loopVar = _match(isVariableDeclaration(left))
       .with(true, () => (left as VariableDeclaration).declarations[0])
       .with(false, () => undefined)
@@ -292,10 +282,13 @@ export class LiquidStatementParser {
     renames?: Record<string, string>,
     context?: ParsingContext,
   ): string {
-    const itemName = '__liquidify_item'
+    const itemName = context?.allocateName('item') ?? '__liquidify_item'
     const destructure = this.variables
       .parseVariableDeclaration(
-        variableDeclarator(pattern as Identifier, { type: 'Identifier', name: itemName } as unknown as Expression),
+        variableDeclarator(
+          pattern as unknown as import('@babel/types').LVal,
+          { type: 'Identifier', name: itemName } as unknown as Expression,
+        ),
         renames,
         context,
       )
@@ -322,6 +315,8 @@ export class LiquidStatementParser {
   }
 
   private switchClause(clause: SwitchStatement['cases'][number], renames?: Record<string, string>, context?: ParsingContext): string {
+    const hasFallthrough = (clause.consequent ?? []).length === 0
+    if (hasFallthrough) return ''
     const body = this.renderBody(
       (clause.consequent ?? []).filter((stmt) => stmt.type !== 'BreakStatement'),
       renames,

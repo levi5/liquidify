@@ -1,4 +1,4 @@
-import { FC, ReactNode } from 'preact/compat'
+import type { FC, ReactNode } from 'preact/compat'
 
 export interface DynamicBlockProps {
   slot: any[]
@@ -90,7 +90,7 @@ declare global {
       'react-island': any
     }
   }
-  
+
   namespace React.JSX {
     interface IntrinsicElements {
       'liquid-data': {
