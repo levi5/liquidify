@@ -1,0 +1,95 @@
+.site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+  padding: 1.6rem 0;
+  background: var(--card);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.footer-brand p {
+  margin: 0.3rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.brand-small {
+  font-size: 1.05rem;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.footer-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+}
+
+.footer-nav a:hover {
+  color: var(--accent-dark);
+  background: var(--bg2);
+}
+
+.footer-ext {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.ext-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.4rem 0.8rem 0.4rem 0.45rem;
+  color: var(--text);
+  background: var(--bg);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.ext-btn:hover {
+  border-color: var(--accent);
+}
+
+.ext-btn code {
+  font-size: 0.78rem;
+}
+
+.npm-badge {
+  display: inline-block;
+  background: #cb3837;
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  border-radius: 6px;
+  padding: 0.15rem 0.4rem;
+  line-height: 1.4;
+}
+
+.ext-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

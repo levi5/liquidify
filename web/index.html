@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Liquidify — Complete Shopify Store in TSX</title>
+    <meta
+      name="description"
+      content="Build a complete Shopify store in TSX and compile it to Liquid. Documentation, examples, and a working template."
+    />
+  </head>
+  <body>
+    <script>
+      // aplica o tema antes da primeira pintura (evita flash)
+      (function () {
+        try {
+          var saved = localStorage.getItem("liquidify-docs-theme");
+          var dark = saved
+            ? saved === "dark"
+            : window.matchMedia("(prefers-color-scheme: dark)").matches;
+           document.documentElement.dataset.theme = dark ? "dark" : "light";
+           document.documentElement.lang = localStorage.getItem("liquidify-docs-locale") === "pt-BR" ? "pt-BR" : "en";
+        } catch (e) {}
+      })();
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

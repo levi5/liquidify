@@ -1,0 +1,6 @@
+.snippet { overflow: hidden; min-width: 0; border: 1px solid var(--line); border-radius: 14px; background: var(--code-bg); box-shadow: var(--shadow); }
+.snippet-head { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; padding: 0.5rem 0.8rem; border-bottom: 1px solid #35394a; color: #9fa7c7; font-size: 0.72rem; font-weight: 700; }
+.snippet-head > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snippet-head button { flex-shrink: 0; border: 1px solid #4b5168; border-radius: 7px; padding: 0.35rem 0.55rem; color: #e5e8f5; background: transparent; font: 700 0.7rem/1 Inter, sans-serif; cursor: pointer; }
+.snippet-head button:hover { border-color: #7dc6ff; }
+.snippet pre { margin: 0; border: 0; border-radius: 0; box-shadow: none; padding: 0.7rem 0.8rem; tab-size: 2; min-height: 0; }
