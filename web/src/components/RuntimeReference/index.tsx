@@ -1,6 +1,5 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
 
 const RUNTIME_TS = `import {
   registerLiquidifyAction,
@@ -172,7 +171,7 @@ export default function RuntimeReference() {
       };
 
   return (
-    <section className="wrap section runtime-reference">
+    <section className={`'wrap' 'section' styles.runtimeReference`}>
       <h2>Runtime API</h2>
       <p className="section-sub">{copy.intro}</p>
 

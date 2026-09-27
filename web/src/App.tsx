@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactElement } from "react";
 import { useLocale } from "./i18n.tsx";
 import { API_CHAPTERS, CHAPTERS, DOCS_CHAPTERS, t as tr } from "./docs/manifest.ts";
 import SectionAnchors from "./docs/anchors.ts";
@@ -60,62 +60,50 @@ function PageIntro({ kicker, title, description }: { kicker: string; title: stri
   );
 }
 
+const DOCS_PAGES: Record<string, () => ReactElement> = {
+  start: () => <GettingStarted />,
+  "theme-model": () => <DocsGuide />,
+  authoring: () => (
+    <>
+      <AuthoringGuide />
+      <Directives />
+    </>
+  ),
+  shopify: () => (
+    <>
+      <ShopifyGuide />
+      <Builtins />
+    </>
+  ),
+  runtime: () => <RuntimeGuide />,
+  islands: () => <AdvancedIslands />,
+  schema: () => <SchemaReference />,
+};
+
 function DocsPage({ chapter }: { chapter: string }) {
-  switch (chapter) {
-    case "start":
-      return <GettingStarted />;
-    case "theme-model":
-      return <DocsGuide />;
-    case "authoring":
-      return (
-        <>
-          <AuthoringGuide />
-          <Directives />
-        </>
-      );
-    case "shopify":
-      return (
-        <>
-          <ShopifyGuide />
-          <Builtins />
-        </>
-      );
-    case "runtime":
-      return <RuntimeGuide />;
-    case "islands":
-      return <AdvancedIslands />;
-    case "schema":
-      return <SchemaReference />;
-    default:
-      return <GettingStarted />;
-  }
+  const Page = DOCS_PAGES[chapter] ?? DOCS_PAGES.start;
+  return <Page />;
 }
 
-function ApiPage({ chapter }: { chapter: string }) {
-  switch (chapter) {
-    case "config":
-      return <ConfigReference />;
-    case "builder":
-      return <ApiGuide />;
-    case "tsx":
-      return <Builtins islands />;
-    case "build":
-      return <BuildDeep />;
-    case "runtime":
-      return <RuntimeReference />;
-    case "filters":
-      return <FiltersReference />;
-    case "errors":
-      return <ErrorsReference />;
-    case "cli":
-    default:
-      return (
-        <>
-          <CliReference />
-          <CliApi />
-        </>
-      );
-  }
+const API_PAGES: Record<string, (props: { islands: boolean }) => ReactElement> = {
+  config: () => <ConfigReference />,
+  builder: () => <ApiGuide />,
+  tsx: ({ islands }) => <Builtins islands={islands} />,
+  build: () => <BuildDeep />,
+  runtime: () => <RuntimeReference />,
+  filters: () => <FiltersReference />,
+  errors: () => <ErrorsReference />,
+  cli: () => (
+    <>
+      <CliReference />
+      <CliApi />
+    </>
+  ),
+};
+
+function ApiPage({ chapter, islands }: { chapter: string; islands: boolean }) {
+  const Page = API_PAGES[chapter] ?? API_PAGES.cli;
+  return <Page islands={islands} />;
 }
 
 export default function App() {
@@ -156,6 +144,7 @@ export default function App() {
   const active = CHAPTERS.find((chapter) => chapter.href === `#/${route.area}/${route.chapter}`);
   const showShell = route.area === "docs" || route.area === "api";
   const withToc = Boolean(active && active.sections.length > 0);
+  const islands = route.area === "api" && route.chapter === "tsx";
 
   return (
     <div className="layout">
@@ -184,7 +173,7 @@ export default function App() {
                 ) : (
                   <>
                     <PageIntro kicker={copy.api[0]} title={copy.api[1]} description={copy.api[2]} />
-                    <ApiPage chapter={route.chapter} />
+                    <ApiPage chapter={route.chapter} islands={islands} />
                   </>
                 )}
                 {active && <PageNav chapter={active} />}

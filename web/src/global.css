@@ -192,7 +192,18 @@ main:focus {
 }
 
 .guide-shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 3.2rem; max-width: 1380px; margin: 0 auto; padding: 0 3.6rem; align-items: start; }.guide-shell > * { min-width: 0; }.guide-main { min-width: 0; max-width: 100%; }.guide-main .wrap { max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }.guide-main .page-intro { padding-top: 3.2rem; padding-left: 0; padding-right: 0; }.guide-main .section { padding-top: 3.52rem; }
+.docs-deep-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1.6rem;
+  margin-top: 1.6rem;
+}
+
 @media (min-width: 1241px) { .guide-shell-toc { grid-template-columns: 220px minmax(0, 1fr) 190px; } }
+.docs-deep-grid-bottom {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+}
+
 @media (max-width: 1150px) {
   .guide-shell { grid-template-columns: 200px minmax(0, 1fr); gap: 2rem; }
   .pipeline-grid,
@@ -476,3 +487,41 @@ pre {
     padding: 0 2rem;
   }
 }
+
+
+.docs-deep-grid > * {
+  min-width: 0;
+}
+
+.docs-deep-grid pre {
+  align-self: start;
+  min-width: 0;
+  margin: 0;
+}
+
+.docs-deep-card {
+  padding: 1.84rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+  box-shadow: var(--shadow);
+}
+
+.docs-deep-card h3 {
+  margin: 0 0 1.04rem;
+  font-size: 1.6rem;
+}
+
+.docs-deep-card p,
+.docs-deep-card ul {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.408rem;
+}
+
+.docs-deep-card ul {
+  display: grid;
+  gap: 0.72rem;
+  padding-left: 1.76rem;
+}
+

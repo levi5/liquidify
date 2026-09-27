@@ -1,5 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
-import "./style.css";
+import styles from "./style.module.css";
+import { cx } from "../../constants/cx.ts";
 
 export default function Footer() {
   const { locale } = useLocale();
@@ -17,12 +18,12 @@ export default function Footer() {
         };
 
   return (
-    <footer className="site-footer">
-      <div className="wrap footer-inner">
-        <div className="footer-brand">
-          <a className="brand brand-small" href="#/">
+    <footer className={styles.siteFooter}>
+      <div className={cx('wrap', styles.footerInner)}>
+        <div className={styles.footerBrand}>
+          <a className={cx(styles.brand, styles.brandSmall)} href="#/">
             <img
-              className="brand-logo brand-logo-small"
+              className={cx(styles.brandLogo, styles.brandLogoSmall)}
               src={`${import.meta.env.BASE_URL}assets/logo-mark.png`}
               alt="Liquidify"
               width="22"
@@ -35,34 +36,34 @@ export default function Footer() {
           </p>
         </div>
 
-        <nav className="footer-nav" aria-label={copy.navLabel}>
+        <nav className={styles.footerNav} aria-label={copy.navLabel}>
           <a href="#/docs/start">Docs</a>
           <a href="#/api/cli">API</a>
           <a href="#/example">Example</a>
         </nav>
 
-        <div className="footer-ext">
+        <div className={styles.footerExt}>
           <a
-            className="ext-btn"
+            className={styles.extBtn}
             href="https://www.npmjs.com/package/liquidify"
             target="_blank"
             rel="noopener"
             title={copy.install}
           >
-            <span className="npm-badge" aria-hidden="true">
+            <span className={styles.npmBadge} aria-hidden="true">
               npm
             </span>
             <code>liquidify</code>
           </a>
           <a
-            className="ext-btn"
+            className={styles.extBtn}
             href="https://github.com/levi5/liquidify"
             target="_blank"
             rel="noopener"
             title="GitHub"
           >
             <svg
-              className="ext-icon"
+              className={styles.extIcon}
               viewBox="0 0 24 24"
               width="16"
               height="16"

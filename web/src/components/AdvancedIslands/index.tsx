@@ -1,6 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
 
 const JSX_EVENT = `'use react'
 
@@ -135,33 +135,33 @@ export default function AdvancedIslands() {
         typesText: "JSON keeps types (false, 0, null, arrays). Objects shallow-merge only with objects; local primitives and null replace inherited ones. data-liquid and data-liquid-store follow the same rules and feed the store prop.",
       };
   return (
-    <section className="wrap section">
+    <section className={`'wrap' 'section'`}>
       <h2>{copy.title}</h2><p className="section-sub">{copy.intro}</p>
-      <div className="docs-deep-grid" style={{ marginTop: "2.56rem" }}>
-        <article className="docs-deep-card"><h3>{copy.jsx}</h3><p>{copy.jsxText}</p></article>
+      <div className={styles.docsDeepGrid} style={{ marginTop: "2.56rem" }}>
+        <article className={styles.docsDeepCard}><h3>{copy.jsx}</h3><p>{copy.jsxText}</p></article>
         <div><Snippet code={JSX_EVENT} language="tsx" /></div>
       </div>
-      <div className="docs-deep-grid">
-        <article className="docs-deep-card"><h3>{copy.action}</h3><p>{copy.actionText}</p><h3 style={{ marginTop: "1.6rem" }}>{copy.allowTitle}</h3><ul className="chip-list">{copy.allow.map((e) => <li key={e}><code>{e}</code></li>)}</ul><p>{copy.allowNote}</p></article>
+      <div className={styles.docsDeepGrid}>
+        <article className={styles.docsDeepCard}><h3>{copy.action}</h3><p>{copy.actionText}</p><h3 style={{ marginTop: "1.6rem" }}>{copy.allowTitle}</h3><ul className={styles.chipList}>{copy.allow.map((e) => <li key={e}><code>{e}</code></li>)}</ul><p>{copy.allowNote}</p></article>
         <div style={{ display: "grid", gap: "1.6rem", alignContent: "start" }}>
           <Snippet code={ACTION_TSX} language="tsx" />
           <Snippet code={ACTION_LIQUID} language="liquid" />
         </div>
       </div>
-      <div className="docs-deep-grid">
-        <article className="docs-deep-card"><h3>{copy.native}</h3><p>{copy.nativeText}</p><h3 style={{ marginTop: "1.6rem" }}>{copy.bus}</h3><p>{copy.busText}</p></article>
+      <div className={styles.docsDeepGrid}>
+        <article className={styles.docsDeepCard}><h3>{copy.native}</h3><p>{copy.nativeText}</p><h3 style={{ marginTop: "1.6rem" }}>{copy.bus}</h3><p>{copy.busText}</p></article>
         <div style={{ display: "grid", gap: "1.6rem", alignContent: "start" }}>
           <Snippet code={NATIVE_JS} language="tsx" />
           <Snippet code={BUS_TSX} language="tsx" />
         </div>
       </div>
-      <div className="docs-deep-grid">
-        <article className="docs-deep-card">
+      <div className={styles.docsDeepGrid}>
+        <article className={styles.docsDeepCard}>
           <h3>{copy.lifecycle}</h3>
           <div className="table-wrap"><table className="table"><thead><tr>{copy.lifecycleHeaders.map((h) => <th key={h}>{h}</th>)}</tr></thead><tbody>{copy.lifecycleRows.map((row) => <tr key={row[0]}><td><code>{row[0]}</code></td><td>{row[1]}</td></tr>)}</tbody></table></div>
-          <div className="reference-callout"><p>{copy.lifecycleNote}</p></div>
+          <div className={styles.referenceCallout}><p>{copy.lifecycleNote}</p></div>
         </article>
-        <article className="docs-deep-card">
+        <article className={styles.docsDeepCard}>
           <h3>{copy.types}</h3>
           <p className="muted">{copy.typesText}</p>
           <Snippet code={DATA_ATTRS} language="liquid" />

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useLocale } from "../../i18n.tsx";
 import Search from "../Search/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
+import { cx } from "../../constants/cx.ts";
 
 const STORAGE_KEY = "liquidify-docs-theme";
 
@@ -56,12 +57,12 @@ export default function Header({ route }: { route: string }) {
   }
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-inner">
+    <aside className={styles.sidebar}>
+      <div className={styles.sidebarInner}>
         <div>
-          <a className="brand" href="#/">
+          <a className={styles.brand} href="#/">
             <img
-              className="brand-logo"
+              className={styles.brandLogo}
               src={`${import.meta.env.BASE_URL}assets/logo-mark.png`}
               alt="Liquidify"
               width="26"
@@ -69,17 +70,17 @@ export default function Header({ route }: { route: string }) {
             />
             Liquidify
           </a>
-          <p className="brand-tag">{copy.tagline}</p>
+          <p className={styles.brandTag}>{copy.tagline}</p>
         </div>
 
         <Search />
 
-        <div className="sidebar-controls">
-          <button className="icon-btn theme-toggle" type="button" onClick={toggleTheme} aria-label={copy.theme} aria-pressed={theme === "dark"} title={copy.theme}>
+        <div className={styles.sidebarControls}>
+          <button className={cx('icon-btn', styles.themeToggle)} type="button" onClick={toggleTheme} aria-label={copy.theme} aria-pressed={theme === "dark"} title={copy.theme}>
             <span aria-hidden="true">{theme === "dark" ? "☀" : "☾"}</span>
           </button>
-          <label className="language-select">
-            <span className="sr-only">{copy.language}</span>
+          <label className={styles.languageSelect}>
+            <span className={styles.srOnly}>{copy.language}</span>
             <select value={locale} onChange={(event) => setLocale(event.target.value as "en" | "pt-BR")} aria-label={copy.language}>
               <option value="en">EN</option>
               <option value="pt-BR">PT-BR</option>
@@ -87,18 +88,18 @@ export default function Header({ route }: { route: string }) {
           </label>
         </div>
 
-        <nav className="side-nav" aria-label={copy.nav}>
+        <nav className={styles.sideNav} aria-label={copy.nav}>
           {links.map((link) => (
-            <a key={link.href} href={link.href} className={route === link.route ? "active" : undefined}>
+            <a key={link.href} href={link.href} className={route === link.route ? styles.active : undefined}>
               {link.label}
             </a>
           ))}
         </nav>
 
-        <div className="sidebar-foot">
-          <span className="version">v1.1.0-alpha.4</span>
+        <div className={styles.sidebarFoot}>
+          <span className={styles.version}>v1.1.0-alpha.4</span>
           <a
-            className="btn btn-small"
+            className={cx('btn', 'btn-small')}
             href="https://github.com/levi5/liquidify"
             target="_blank"
             rel="noopener"

@@ -1,8 +1,8 @@
 import { useLocale } from "../../i18n.tsx";
-import "./style.css";
+import styles from "./style.module.css";
 
 function FlowCaption({ text }: { text: string }) {
-  return <p className="figure-caption">{text}</p>;
+  return <p className={styles.figureCaption}>{text}</p>;
 }
 
 export function PipelineFigure() {
@@ -22,11 +22,11 @@ export function PipelineFigure() {
         { n: "4", title: "Shopify serves", files: ["Theme Editor", "product / cart", "checkout"], note: "preview + publish" },
       ];
   return (
-    <figure className="figure">
-      <div className="flow" role="img" aria-label={pt ? "Diagrama do pipeline de compilação" : "Compilation pipeline diagram"}>
+    <figure className={styles.figure}>
+      <div className={styles.flow} role="img" aria-label={pt ? "Diagrama do pipeline de compilação" : "Compilation pipeline diagram"}>
         {steps.map((step) => (
-          <div className="flow-node" key={step.n}>
-            <span className="flow-n" aria-hidden="true">{step.n}</span>
+          <div className={styles.flowNode} key={step.n}>
+            <span className={styles.flowN} aria-hidden="true">{step.n}</span>
             <strong>{step.title}</strong>
             <ul aria-hidden="true">
               {step.files.map((file) => (
@@ -46,23 +46,23 @@ export function IslandFigure() {
   const { locale } = useLocale();
   const pt = locale === "pt-BR";
   return (
-    <figure className="figure">
-      <div className="lanes" role="img" aria-label={pt ? "Diagrama do ciclo de uma ilha" : "Island lifecycle diagram"}>
-        <div className="lane">
-          <span className="lane-tag">{pt ? "Servidor (Liquid)" : "Server (Liquid)"}</span>
-          <div className="lane-cards">
-            <div className="lane-card"><strong>HTML</strong><span>{pt ? "preço, links e SEO indexável" : "price, links, indexable SEO"}</span></div>
-            <div className="lane-card accent"><strong>&lt;react-island&gt;</strong><span>MiniCart + props JSON</span></div>
-            <div className="lane-card"><strong>&lt;liquid-data&gt;</strong><span>{"{{ product | json }}"}</span></div>
+    <figure className={styles.figure}>
+      <div className={styles.lanes} role="img" aria-label={pt ? "Diagrama do ciclo de uma ilha" : "Island lifecycle diagram"}>
+        <div className={styles.lane}>
+          <span className={styles.laneTag}>{pt ? "Servidor (Liquid)" : "Server (Liquid)"}</span>
+          <div className={styles.laneCards}>
+            <div className={styles.laneCard}><strong>HTML</strong><span>{pt ? "preço, links e SEO indexável" : "price, links, indexable SEO"}</span></div>
+            <div className={`${styles.laneCard} ${styles.accent}`}><strong>&lt;react-island&gt;</strong><span>MiniCart + props JSON</span></div>
+            <div className={styles.laneCard}><strong>&lt;liquid-data&gt;</strong><span>{"{{ product | json }}"}</span></div>
           </div>
         </div>
-        <div className="lane-arrow" aria-hidden="true">↓ runtime defer</div>
-        <div className="lane">
-          <span className="lane-tag">{pt ? "Navegador (Preact)" : "Browser (Preact)"}</span>
-          <div className="lane-cards">
-            <div className="lane-card"><strong>{pt ? "Hidrata" : "Hydrates"}</strong><span>{pt ? "lê props, monta contador" : "reads props, mounts counter"}</span></div>
-            <div className="lane-card accent"><strong>{pt ? "Interativo" : "Interactive"}</strong><span>drawer · toast · Ajax</span></div>
-            <div className="lane-card"><strong>Events</strong><span>cart:updated</span></div>
+        <div className={styles.laneArrow} aria-hidden="true">↓ runtime defer</div>
+        <div className={styles.lane}>
+          <span className={styles.laneTag}>{pt ? "Navegador (Preact)" : "Browser (Preact)"}</span>
+          <div className={styles.laneCards}>
+            <div className={styles.laneCard}><strong>{pt ? "Hidrata" : "Hydrates"}</strong><span>{pt ? "lê props, monta contador" : "reads props, mounts counter"}</span></div>
+            <div className={`${styles.laneCard} ${styles.accent}`}><strong>{pt ? "Interativo" : "Interactive"}</strong><span>drawer · toast · Ajax</span></div>
+            <div className={styles.laneCard}><strong>Events</strong><span>cart:updated</span></div>
           </div>
         </div>
       </div>
@@ -76,21 +76,21 @@ export function EditorFigure() {
   const pt = locale === "pt-BR";
   const sections = pt ? ["Hero", "Shelf · Novidades", "Categorias", "Newsletter"] : ["Hero", "Shelf · New in", "Categories", "Newsletter"];
   return (
-    <figure className="figure">
-      <div className="editor-mock" role="img" aria-label={pt ? "Ilustração do Theme Editor" : "Theme Editor illustration"}>
-        <div className="editor-side" aria-hidden="true">
-          <span className="editor-title">{pt ? "Seções da home" : "Home sections"}</span>
+    <figure className={styles.figure}>
+      <div className={styles.editorMock} role="img" aria-label={pt ? "Ilustração do Theme Editor" : "Theme Editor illustration"}>
+        <div className={styles.editorSide} aria-hidden="true">
+          <span className={styles.editorTitle}>{pt ? "Seções da home" : "Home sections"}</span>
           {sections.map((section, i) => (
             <span className={`editor-row${i === 0 ? " active" : ""}`} key={section}>{section}</span>
           ))}
-          <span className="editor-title">{pt ? "Ajustes da Hero" : "Hero settings"}</span>
-          <span className="editor-field">{pt ? "Título…" : "Heading…"}</span>
-          <span className="editor-field short">{pt ? "Botão: Explorar" : "Button: Shop now"}</span>
+          <span className={styles.editorTitle}>{pt ? "Ajustes da Hero" : "Hero settings"}</span>
+          <span className={styles.editorField}>{pt ? "Título…" : "Heading…"}</span>
+          <span className={`${styles.editorField} ${styles.short}`}>{pt ? "Botão: Explorar" : "Button: Shop now"}</span>
         </div>
-        <div className="editor-view" aria-hidden="true">
-          <span className="editor-eyebrow">● {pt ? "Nova coleção" : "New season"}</span>
+        <div className={styles.editorView} aria-hidden="true">
+          <span className={styles.editorEyebrow}>● {pt ? "Nova coleção" : "New season"}</span>
           <strong>{pt ? "Vista o novo" : "Wear the new"}</strong>
-          <span className="editor-btn">{pt ? "Explorar ↗" : "Shop now ↗"}</span>
+          <span className={styles.editorBtn}>{pt ? "Explorar ↗" : "Shop now ↗"}</span>
         </div>
       </div>
       <FlowCaption text={pt ? "Figura 3 — O schema gerado vira painel editável: o lojista muda texto sem tocar em código." : "Figure 3 — The generated schema becomes an editable panel: merchants change copy without code."} />

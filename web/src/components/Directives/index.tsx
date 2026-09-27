@@ -1,6 +1,5 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
 
 const SECTIONS_TSX = `'use sections'
 

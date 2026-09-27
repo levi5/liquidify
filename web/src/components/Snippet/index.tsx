@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useLocale } from "../../i18n.tsx";
 import CodeBlock from "../CodeBlock/index.tsx";
 import type { Lang } from "../CodeBlock/highlight";
-import "./style.css";
+import styles from "./style.module.css";
 
 export default function Snippet({
   code,
@@ -32,8 +32,8 @@ export default function Snippet({
   }
 
   return (
-    <div className="snippet">
-      <div className="snippet-head">
+    <div className={styles.snippet}>
+      <div className={styles.snippetHead}>
         <span>{title ?? (locale === "pt-BR" ? "Código" : "Code")}</span>
         <button type="button" onClick={copy}>
           {copied

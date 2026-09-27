@@ -1,7 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import { PipelineFigure } from "../Figures/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
 
 const CONFIG = `{
   "componentsDir": "src/app",
@@ -40,35 +40,35 @@ export default function DocsGuide() {
       };
 
   return (
-    <section className="wrap section docs-guide">
+    <section className={`'wrap' 'section' styles.docsGuide`}>
       <h2>{copy.title}</h2>
       <p className="section-sub">{copy.intro}</p>
-      <div className="pipeline">
+      <div className={styles.pipeline}>
         <h3>{copy.pipeline}</h3>
-        <div className="pipeline-grid">
+        <div className={styles.pipelineGrid}>
           <article><span>01</span><h4>{copy.source}</h4><ul>{copy.sourceItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
           <article><span>02</span><h4>{copy.generated}</h4><ul>{copy.generatedItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
           <article><span>03</span><h4>{copy.shopify}</h4><ul>{copy.shopifyItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
         </div>
       </div>
       <PipelineFigure />
-      <div className="docs-deep-card walk-card">
+      <div className={`${styles.docsDeepCard} ${styles.walkCard}`}>
         <h3>{copy.walkTitle}</h3>
         <p>{copy.walk}</p>
       </div>
-      <div className="docs-guide-grid">
+      <div className={styles.docsGuideGrid}>
         <div>
           <h3>{copy.ownership}</h3>
           <div className="table-wrap"><table className="table"><thead><tr>{copy.headers.map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{copy.rows.map((row) => <tr key={row[0]}>{row.map((cell) => <td key={cell}>{cell}</td>)}</tr>)}</tbody></table></div>
         </div>
-        <div className="config-card">
+        <div className={styles.configCard}>
           <h3>{copy.config}</h3>
           <p>{copy.configText}</p>
           <Snippet code={CONFIG} language="json" />
         </div>
       </div>
-      <div className="docs-deep-grid">
-        <article className="docs-deep-card">
+      <div className={styles.docsDeepGrid}>
+        <article className={styles.docsDeepCard}>
           <h3>{copy.semantics}</h3>
           <ul>{copy.semanticsItems.map((item) => <li key={item}>{item}</li>)}</ul>
         </article>
@@ -76,9 +76,9 @@ export default function DocsGuide() {
           <Snippet title={copy.transformation} code={TRANSFORMATION} language="plain" />
         </div>
       </div>
-      <div className="docs-deep-grid docs-deep-grid-bottom">
-        <article className="docs-deep-card"><h3>{copy.islands}</h3><p>{copy.islandText}</p></article>
-        <article className="docs-deep-card"><h3>{copy.limits}</h3><ul>{copy.limitItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
+      <div className={`${styles.docsDeepGrid} ${styles.docsDeepGridBottom}`}>
+        <article className={styles.docsDeepCard}><h3>{copy.islands}</h3><p>{copy.islandText}</p></article>
+        <article className={styles.docsDeepCard}><h3>{copy.limits}</h3><ul>{copy.limitItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
       </div>
     </section>
   );

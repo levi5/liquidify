@@ -1,6 +1,5 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
 
 const ERROR_CLASSES = `export class LiquidifyError extends Error {
   constructor(
@@ -197,7 +196,7 @@ export default function ErrorsReference() {
   );
 
   return (
-    <section className="wrap section errors-reference">
+    <section className={`'wrap' 'section' styles.errorsReference`}>
       <h2>{pt ? "Erros e limites" : "Errors and limits"}</h2>
       <p className="section-sub">{copy.intro}</p>
       <Snippet code={ERROR_CLASSES} language="tsx" title={pt ? "Classes de erro" : "Error classes"} />

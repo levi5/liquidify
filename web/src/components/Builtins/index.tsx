@@ -1,6 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
 
 const IMPORT = `import {
   DynamicBlock,
@@ -259,22 +259,22 @@ export default function Builtins({ islands = false }: { islands?: boolean } = {}
   ];
 
   return (
-    <section id="componentes" className="wrap section builtins-page">
+    <section id="componentes" className={`'wrap' 'section' styles.builtinsPage`}>
       <p className="kicker">Native Liquid, typed TSX</p>
       <h2>{copy.title}</h2>
       <p className="section-sub">
         {copy.intro} <code>liquidify</code>.
       </p>
       <Snippet code={IMPORT} language="tsx" />
-      <h3 id="composition" className="builtin-section-title">{copy.compositionTitle}</h3>
-      <div className="builtin-list">
+      <h3 id="composition" className={styles.builtinSectionTitle}>{copy.compositionTitle}</h3>
+      <div className={styles.builtinList}>
         {copy.cards.map(([name, subtitle, text], i) => (
-          <article className="builtin-card" key={name} id={`primitivo-${name}`}>
-            <header className="builtin-head">
-              <code className="builtin-name">{name}</code>
-              <span className="builtin-sub">{subtitle}</span>
+          <article className={styles.builtinCard} key={name} id={`primitivo-${name}`}>
+            <header className={styles.builtinHead}>
+              <code className={styles.builtinName}>{name}</code>
+              <span className={styles.builtinSub}>{subtitle}</span>
             </header>
-            <p className="builtin-text">{text}</p>
+            <p className={styles.builtinText}>{text}</p>
             <div className="dir-cols">
               <Snippet title={`${name} (TSX)`} code={examples[i].tsx} language="tsx" />
               <Snippet title={`${name} (${pt ? "Liquid gerado" : "generated Liquid"})`} code={examples[i].liquid} language="liquid" />
@@ -283,17 +283,17 @@ export default function Builtins({ islands = false }: { islands?: boolean } = {}
         ))}
       </div>
 
-      <h2 className="builtin-section-title" id="logic">{copy.logicTitle}</h2>
+      <h2 className={styles.builtinSectionTitle} id="logic">{copy.logicTitle}</h2>
       <p className="section-sub">{copy.logicIntro}</p>
       <Snippet code={IMPORT_LOGIC} language="tsx" />
-      <div className="builtin-list">
+      <div className={styles.builtinList}>
         {copy.cards2.map(([name, subtitle, text], i) => (
-          <article className="builtin-card" key={name} id={`primitivo-${name}`}>
-            <header className="builtin-head">
-              <code className="builtin-name">{name}</code>
-              <span className="builtin-sub">{subtitle}</span>
+          <article className={styles.builtinCard} key={name} id={`primitivo-${name}`}>
+            <header className={styles.builtinHead}>
+              <code className={styles.builtinName}>{name}</code>
+              <span className={styles.builtinSub}>{subtitle}</span>
             </header>
-            <p className="builtin-text">{text}</p>
+            <p className={styles.builtinText}>{text}</p>
             <div className="dir-cols">
               <Snippet title={`${name} (TSX)`} code={examples2[i].tsx} language="tsx" />
               <Snippet title={`${name} (${pt ? "Liquid gerado" : "generated Liquid"})`} code={examples2[i].liquid} language="liquid" />
@@ -302,11 +302,11 @@ export default function Builtins({ islands = false }: { islands?: boolean } = {}
         ))}
       </div>
 
-      <h2 className="builtin-section-title">{copy.runtimeTitle}</h2>
+      <h2 className={styles.builtinSectionTitle}>{copy.runtimeTitle}</h2>
       <p className="section-sub">{copy.runtimeIntro}</p>
       <Snippet code={IMPORT_RUNTIME} language="tsx" />
-      <div className="builtin-list">
-        <article className="builtin-card">
+      <div className={styles.builtinList}>
+        <article className={styles.builtinCard}>
           <div className="dir-cols">
             <Snippet title="runtime (TS)" code={RUNTIME_TSX} language="tsx" />
             <Snippet title={pt ? "como se conecta" : "how it connects"} code={RUNTIME_OUT} language="plain" />
@@ -334,11 +334,11 @@ export default function Builtins({ islands = false }: { islands?: boolean } = {}
 
       {islands && (
         <>
-          <h2 className="builtin-section-title" id="intrinsics">{copy.intrinsicsTitle}</h2>
+          <h2 className={styles.builtinSectionTitle} id="intrinsics">{copy.intrinsicsTitle}</h2>
           <p className="section-sub">{copy.intrinsicsIntro}</p>
           <Snippet code={INTRINSICS} language="tsx" />
 
-          <h2 className="builtin-section-title" id="forbidden">{copy.forbiddenTitle}</h2>
+          <h2 className={styles.builtinSectionTitle} id="forbidden">{copy.forbiddenTitle}</h2>
           <p className="section-sub">{copy.forbiddenIntro}</p>
           <Snippet code={FORBIDDEN} language="tsx" />
         </>

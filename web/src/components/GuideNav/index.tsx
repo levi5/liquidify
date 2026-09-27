@@ -1,4 +1,4 @@
-import "./style.css";
+import styles from "./style.module.css";
 
 type Link = { href: string; label: string };
 
@@ -14,7 +14,7 @@ export default function GuideNav({
   ariaLabel?: string;
 }) {
   return (
-    <aside className="guide-nav">
+    <aside className={styles.guideNav}>
       <strong>{title}</strong>
       <nav aria-label={ariaLabel ?? title}>
         {links.map((link) => (

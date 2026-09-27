@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useLocale } from "../../i18n.tsx";
 import CodeBlock from "../CodeBlock/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
+import { cx } from "../../constants/cx.ts";
 
 const TSX_SAMPLE = `type Product = {
   url: string
@@ -98,37 +99,37 @@ export default function Hero() {
       };
 
   return (
-    <section className="doc-hero">
-      <div className="wrap hero-layout">
-        <div className="hero-copy">
-          <p className="crumb">
-            <span className="crumb-dot" aria-hidden="true" /> {copy.eyebrow}
+    <section className={styles.docHero}>
+      <div className={cx('wrap', styles.heroLayout)}>
+        <div className={styles.heroCopy}>
+          <p className={styles.crumb}>
+            <span className={styles.crumbDot} aria-hidden="true" /> {copy.eyebrow}
           </p>
           <h1>
             {copy.titleA}
             <br />
             <span>{copy.titleB}</span>
           </h1>
-          <p className="lede">{copy.description}</p>
-          <div className="hero-cta">
-            <a className="btn btn-primary" href="#/docs/start">
+          <p className={styles.lede}>{copy.description}</p>
+          <div className={styles.heroCta}>
+            <a className={cx('btn', 'btn-primary')} href="#/docs/start">
               {copy.action} →
             </a>
             <a className="btn" href="#/example">
               {copy.secondary} →
             </a>
           </div>
-          <code className="install">{copy.install}</code>
+          <code className={styles.install}>{copy.install}</code>
         </div>
 
-        <div className="hero-demo">
-          <div className="demo-window">
-            <div className="demo-bar">
-              <span className="demo-dots" aria-hidden="true">
+        <div className={styles.heroDemo}>
+          <div className={styles.demoWindow}>
+            <div className={styles.demoBar}>
+              <span className={styles.demoDots} aria-hidden="true">
                 <i /> <i /> <i />
               </span>
-              <span className="demo-label">{copy.demoLabel}</span>
-              <div className="demo-tabs" role="tablist">
+              <span className={styles.demoLabel}>{copy.demoLabel}</span>
+              <div className={styles.demoTabs} role="tablist">
                 <button
                   type="button"
                   role="tab"
@@ -153,17 +154,17 @@ export default function Hero() {
               code={tab === "tsx" ? TSX_SAMPLE : LIQUID_SAMPLE}
               path={tab === "tsx" ? "ProductCard.tsx" : "card.liquid"}
             />
-            <p className="demo-foot">TSX → Liquid · schema + stylesheet incluídos no build</p>
+            <p className={styles.demoFoot}>TSX → Liquid · schema + stylesheet incluídos no build</p>
           </div>
         </div>
       </div>
 
       <div className="wrap">
-        <ol className="hero-pipeline">
+        <ol className={styles.heroPipeline}>
           {copy.pipeline.map(([n, title, text, href]) => (
-            <li className="hero-pipeline-step" key={title}>
+            <li className={styles.heroPipelineStep} key={title}>
               <a href={href}>
-                <span className="hero-pipeline-n" aria-hidden="true">{n}</span>
+                <span className={styles.heroPipelineN} aria-hidden="true">{n}</span>
                 <div>
                   <strong>{title} →</strong>
                   <span>{text}</span>
@@ -172,9 +173,9 @@ export default function Hero() {
             </li>
           ))}
         </ol>
-        <div className="feature-grid">
+        <div className={styles.featureGrid}>
           {copy.features.map(([title, text, href]) => (
-            <a className="feature-card" key={title} href={href}>
+            <a className={styles.featureCard} key={title} href={href}>
               <strong>{title} →</strong>
               <span>{text}</span>
             </a>

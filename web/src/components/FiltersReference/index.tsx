@@ -1,6 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
 
 const HELPER_TABLE = `// lib/shared/tsx-helper-filters.ts
 escape                -> escape
@@ -241,7 +241,7 @@ export default function FiltersReference() {
   );
 
   return (
-    <section className="wrap section filters-reference">
+    <section className={`'wrap' 'section' styles.filtersReference`}>
       <h2>{pt ? "Filtros e helpers" : "Filters and helpers"}</h2>
       <p className="section-sub">
         {pt
@@ -262,7 +262,7 @@ export default function FiltersReference() {
       <div className="ref-block">
         <h3 id="helpers">{copy.helpers}</h3>
         <p className="ref-note">{copy.helpersText}</p>
-        <div className="ref-code-grid">
+        <div className={styles.refCodeGrid}>
           <Snippet code={HELPER_TABLE} language="tsx" title="HELPER_TO_FILTER" />
           <Snippet code={HELPER_USAGE} language="tsx" title={pt ? "Uso" : "Usage"} />
         </div>
@@ -277,7 +277,7 @@ export default function FiltersReference() {
       <div className="ref-block">
         <h3 id="classnames">{copy.classnames}</h3>
         <p className="ref-note">{copy.classnamesText}</p>
-        <div className="ref-code-grid">
+        <div className={styles.refCodeGrid}>
           <Snippet code={CLASSNAMES} language="tsx" title="CLASSNAMES_FNS" />
           <Snippet code={CLASSNAME_USAGE} language="tsx" title={pt ? "Formas aceitas" : "Accepted forms"} />
         </div>

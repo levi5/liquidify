@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocale } from "../../i18n.tsx";
 import { t as tr, type Chapter } from "../../docs/manifest.ts";
-import "./style.css";
+import styles from "./style.module.css";
 
 export default function PageToc({ chapter }: { chapter: Chapter }) {
   const { locale } = useLocale();
@@ -47,8 +47,8 @@ export default function PageToc({ chapter }: { chapter: Chapter }) {
   if (present.length === 0) return null;
 
   return (
-    <nav className="page-toc" aria-label={locale === "pt-BR" ? "Nesta página" : "On this page"}>
-      <p className="page-toc-label">{locale === "pt-BR" ? "Nesta página" : "On this page"}</p>
+    <nav className={styles.pageToc} aria-label={locale === "pt-BR" ? "Nesta página" : "On this page"}>
+      <p className={styles.pageTocLabel}>{locale === "pt-BR" ? "Nesta página" : "On this page"}</p>
       <ul>
         {present.map((id) => {
           const section = chapter.sections.find((item) => item.id === id);

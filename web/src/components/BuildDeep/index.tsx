@@ -1,6 +1,5 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
 
 const DISPOSE_TS = `// Para o watcher e espera os observers fecharem:
 await builder.dispose()
@@ -58,7 +57,7 @@ export default function BuildDeep() {
         diagItems: ["Strings keep punctuation; nested arithmetic uses temporaries to preserve order.", "&& with || becomes nested Liquid conditions.", ".find() only accepts inline single-param arrows with expression or single-return bodies.", "Syntax and .find() errors carry filePath:line:column (1-based); the CLI prints positions.", "Colliding component names and reserved files (assets/react-runtime.js, snippets/script-global.liquid) error instead of silently overwriting."],
       };
   return (
-    <section className="wrap section">
+    <section className={`'wrap' 'section'`}>
       <h2>{copy.title}</h2><p className="section-sub">{copy.intro}</p>
       <div className="docs-deep-grid" style={{ marginTop: "2.56rem" }}>
         <article className="docs-deep-card"><h3>{copy.incr}</h3><ul>{copy.incrItems.map((item) => <li key={item}>{item}</li>)}</ul></article>

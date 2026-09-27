@@ -8,7 +8,7 @@ import {
   type NameGroup,
   type SearchResult,
 } from "../../docs/search-index.ts";
-import "./style.css";
+import styles from "./style.module.css";
 
 type Copy = {
   open: string;
@@ -248,37 +248,37 @@ export default function Search() {
     <>
       <button
         ref={triggerRef}
-        className="search-trigger"
+        className={styles.searchTrigger}
         type="button"
         onClick={() => setOpen(true)}
         aria-label={copy.open}
         aria-haspopup="dialog"
         aria-expanded={open}
       >
-                <div className="search-trigger-wrapper">
-        <span className="search-trigger-icon" aria-hidden="true">
+                <div className={styles.searchTriggerWrapper}>
+        <span className={styles.searchTriggerIcon} aria-hidden="true">
           <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <circle cx="8.5" cy="8.5" r="5.5" />
             <path d="M12.8 12.8 17 17" />
           </svg>
         </span>
-        <span className="search-trigger-label">{copy.open}</span>
+        <span className={styles.searchTriggerLabel}>{copy.open}</span>
         </div>
-        <kbd className="search-trigger-kbd">{isMac ? "⌘" : "Ctrl"} K</kbd>
+        <kbd className={styles.searchTriggerKbd}>{isMac ? "⌘" : "Ctrl"} K</kbd>
       </button>
 
       {open &&
         createPortal(
-          <div className="search-backdrop" onClick={() => setOpen(false)}>
+          <div className={styles.searchBackdrop} onClick={() => setOpen(false)}>
             <div
-              className="search-dialog"
+              className={styles.searchDialog}
               role="dialog"
               aria-modal="true"
               aria-label={copy.open}
               onClick={(event) => event.stopPropagation()}
             >
-            <div className="search-field">
-              <span className="search-field-icon" aria-hidden="true">
+            <div className={styles.searchField}>
+              <span className={styles.searchFieldIcon} aria-hidden="true">
                 <svg viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                   <circle cx="8.5" cy="8.5" r="5.5" />
                   <path d="M12.8 12.8 17 17" />
@@ -286,7 +286,7 @@ export default function Search() {
               </span>
               <input
                 ref={inputRef}
-                className="search-input"
+                className={styles.searchInput}
                 type="text"
                 role="combobox"
                 aria-expanded="true"
@@ -301,7 +301,7 @@ export default function Search() {
               />
               <button
                 ref={clearRef}
-                className="search-clear"
+                className={styles.searchClear}
                 type="button"
                 onClick={() => { setQuery(""); inputRef.current?.focus(); }}
                 aria-label={copy.clear}
@@ -313,17 +313,17 @@ export default function Search() {
               </button>
             </div>
 
-            <div className="search-results" id="search-results" ref={listRef} role="listbox" aria-label={copy.open}>
+            <div className={styles.searchResults} id="search-results" ref={listRef} role="listbox" aria-label={copy.open}>
               {results.length === 0 && (
-                <div className="search-empty">
+                <div className={styles.searchEmpty}>
                   <p>{copy.noResults}</p>
-                  <p className="search-empty-hint">{copy.noResultsHint}</p>
+                  <p className={styles.searchEmptyHint}>{copy.noResultsHint}</p>
                 </div>
               )}
 
               {grouped.map((bucket) => (
-                <div className="search-group" key={bucket.label}>
-                  <p className="search-group-label">
+                <div className={styles.searchGroup} key={bucket.label}>
+                  <p className={styles.searchGroupLabel}>
                     {query ? bucket.label : bucket.label === copy.pages ? copy.jump : bucket.label}
                   </p>
                   {bucket.items.map((result) => {
@@ -337,7 +337,7 @@ export default function Search() {
                         role="option"
                         aria-selected={active}
                         data-active={active}
-                        className="search-hit"
+                        className={styles.searchHit}
                         href={result.href}
                         onMouseEnter={() => setCursor(index)}
                         onClick={(event) => {
@@ -345,10 +345,10 @@ export default function Search() {
                           go(result.href);
                         }}
                       >
-                        <span className="search-hit-title">
+                        <span className={styles.searchHitTitle}>
                           <Marked text={title} query={query} />
                         </span>
-                        {note && <span className="search-hit-note">{note}</span>}
+                        {note && <span className={styles.searchHitNote}>{note}</span>}
                       </a>
                     );
                   })}
@@ -356,11 +356,11 @@ export default function Search() {
               ))}
             </div>
 
-            <div className="search-foot">
-              <span className="search-count">
+            <div className={styles.searchFoot}>
+              <span className={styles.searchCount}>
                 {results.length} {copy.results}
               </span>
-              <span className="search-keys">
+              <span className={styles.searchKeys}>
                 <kbd>{copy.kbdUp}</kbd>
                 <kbd>{copy.kbdDown}</kbd>
                 <span>{copy.hint}</span>

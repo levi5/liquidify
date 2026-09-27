@@ -1,6 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
 
 const SCHEMA_TSX = `// src/components/sections/Hero.tsx
 "use sections";
@@ -130,14 +130,14 @@ export default function SchemaReference() {
       };
 
   return (
-    <section className="wrap section schema-reference">
+    <section className={`'wrap' 'section' styles.schemaReference`}>
       <h2>{pt ? "Referência de schema" : "Schema reference"}</h2>
       <p className="section-sub">{copy.intro}</p>
 
       <div className="ref-block">
         <h3 id="how">{copy.how}</h3>
         <p className="ref-note">{copy.howText}</p>
-        <div className="ref-code-grid">
+        <div className={styles.refCodeGrid}>
           <Snippet code={SCHEMA_TSX} language="tsx" title="schema.ts" />
           <Snippet code={SCHEMA_LIQUID} language="liquid" title="sections/hero.liquid" />
         </div>

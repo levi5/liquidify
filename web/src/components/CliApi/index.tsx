@@ -1,6 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
-import "./style.css";
+import styles from "./style.module.css";
 
 const CLI = `liquidify [options]          # compila (build é o padrão)
 liquidify init [dir] [options]
@@ -98,10 +98,10 @@ export default function CliApi() {
       };
 
   return (
-    <section className="wrap section cli-api">
+    <section className={`'wrap' 'section' styles.cliApi`}>
       <p className="kicker">{copy.kicker}</p>
       <h2>{copy.title}</h2>
-      <div className="cli-grid">
+      <div className={styles.cliGrid}>
         <div>
           <Snippet title="CLI" code={CLI} language="plain" />
         </div>
