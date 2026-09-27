@@ -5,10 +5,7 @@
   "description": "Site estático de documentação do Liquidify (Vite + React), publicado no GitHub Pages",
   "type": "module",
   "scripts": {
-    "catalog": "node scripts/generate-example-catalog.mjs",
-    "predev": "pnpm run catalog",
     "dev": "vite",
-    "prebuild": "pnpm run catalog",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },

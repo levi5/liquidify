@@ -1,249 +1,338 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocale } from "../../i18n.tsx";
 import CodeBlock from "../CodeBlock/index.tsx";
+import Snippet from "../Snippet/index.tsx";
+import {
+  HERO_TSX, HERO_LIQUID, HERO_CSS,
+  CARD_TSX, CARD_LIQUID, CARD_CSS,
+  MINICART_TSX, MINICART_LIQUID, MINICART_CSS,
+} from "./content.ts";
+import {
+  CATALOG_TSX, CATALOG_LIQUID, CATALOG_CSS,
+  NEWS_TSX, NEWS_LIQUID, NEWS_CSS,
+  PROD_TSX, PROD_LIQUID, PROD_CSS,
+} from "./content2.ts";
+import { CatalogPreview, ProductPreview, NewsletterPreview, CartPreview } from "./previews.tsx";
 import "./style.css";
 
-type Catalog = {
-  template: string;
-  version: string;
-  files: Array<{ path: string; text: boolean }>;
-  generatedBySource: Record<string, string[]>;
-};
+const SETUP = `npx liquidify init minha-loja --template example
+cd minha-loja
+npm install
+npm run dev
 
-const STAGES = [
-  ["package.json", "liquidify.config.json", "tsconfig.json", ".shopifyignore", ".theme-check.yml"],
-  ["layout/theme.liquid", "config/settings_schema.json", "config/settings_data.json", "assets/global.css", "snippets/css-variables.liquid", "snippets/script-global.liquid"],
-  ["locales/en.default.json", "locales/pt-BR.json", "locales/en.default.schema.json", "locales/pt-BR.schema.json", "assets/liquidify-women.jpg", "assets/liquidify-men.jpg", "assets/liquidify-bag.jpg", "assets/liquidify-editorial.jpg"],
-  ["src/app/sections/Header/index.tsx", "src/app/sections/Header/User/index.tsx", "src/app/components/Bar/Top/index.tsx", "src/app/components/Menu/Desktop/index.tsx", "src/app/components/Menu/Mobile/index.tsx", "src/app/sections/Newsletter/index.tsx", "src/app/sections/Footer/index.tsx", "sections/header-group.json", "sections/footer-group.json"],
-  ["src/app/components/Card/index.tsx", "src/app/components/Badges/index.tsx", "src/app/components/Button/Primary/index.tsx", "src/app/components/Icon/index.tsx", "src/app/components/Swiper/Root/index.tsx", "src/app/components/Swiper/Slide/index.tsx", "src/app/components/Swiper/Arrow/index.tsx"],
-  ["src/app/sections/Home/Hero/index.tsx", "src/app/sections/Home/Categories/index.tsx", "src/app/sections/Home/InfoBanner/index.tsx", "src/app/components/Shelf/index.tsx", "templates/index.json"],
-  ["src/app/sections/MainCollection/index.tsx", "src/app/sections/MainSearch/index.tsx", "src/app/components/Catalog/index.tsx", "src/app/components/Filter/Collection/index.tsx", "src/app/components/Filter/Drawer/index.tsx", "src/app/components/Search/Drawer.tsx", "templates/collection.json", "templates/search.json"],
-  ["src/app/sections/ProductInfo/index.tsx", "src/app/components/Product/Preview/index.tsx", "src/app/components/Product/Thumbnails/index.tsx", "src/app/components/Selector/index.tsx", "src/app/components/Selector/Grid/index.tsx", "src/app/components/Quantity/Selector/index.tsx", "src/app/context/Product/index.tsx", "templates/product.json"],
-  ["src/app/components/MiniCart/index.tsx", "src/app/components/Drawer/index.ts", "src/app/components/Portal/index.tsx", "src/app/components/Toast/index.tsx", "src/app/services/Cart/cart.service.ts", "src/app/scripts/theme.ts", "templates/cart.json", "templates/gift_card.liquid"],
-  ["package.json"],
-];
+# segundo terminal: prévia na development store
+npm run preview -- --store sua-loja.myshopify.com`;
 
-const STAGE_CHAPTERS = ["bootstrap", "foundation", "brand", "shell", "primitives", "home", "catalog", "product", "islands", "verify"];
+type Tab = "tsx" | "liquid" | "css";
 
-const VERIFY_COMMANDS = `npm run build
-npm run typecheck
-npm run check
-npm run preview -- --store your-store.myshopify.com`;
-
-function encodePath(path: string) {
-  return path.split("/").map(encodeURIComponent).join("/");
+function ShowcaseBlock({
+  index,
+  kicker,
+  title,
+  text,
+  source,
+  output,
+  tsx,
+  tsxFile,
+  liquid,
+  liquidFile,
+  css,
+  cssFile,
+  preview,
+}: {
+  index: string;
+  kicker: string;
+  title: string;
+  text: string;
+  source: string;
+  output: string;
+  tsx: string;
+  tsxFile: string;
+  liquid: string;
+  liquidFile: string;
+  css: string;
+  cssFile: string;
+  preview: React.ReactNode;
+}) {
+  const [tab, setTab] = useState<Tab>("tsx");
+  const files: Record<Tab, { label: string; code: string; path: string }> = {
+    tsx: { label: tsxFile, code: tsx, path: "example.tsx" },
+    liquid: { label: liquidFile, code: liquid, path: "output.liquid" },
+    css: { label: cssFile, code: css, path: "styles.css" },
+  };
+  return (
+    <article className="showcase-block">
+      <div className="showcase-info">
+        <p className="showcase-index">
+          <span>{index}</span> {kicker}
+        </p>
+        <h3>{title}</h3>
+        <p>{text}</p>
+        <p className="showcase-map">
+          <code>{source}</code>
+          <span aria-hidden="true"> → </span>
+          <code>{output}</code>
+        </p>
+        <div className="showcase-preview">{preview}</div>
+      </div>
+      <div className="showcase-code">
+        <div className="showcase-tabs" role="tablist">
+          {(Object.keys(files) as Tab[]).map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="tab"
+              aria-selected={tab === id}
+              className={tab === id ? "active" : ""}
+              onClick={() => setTab(id)}
+            >
+              {files[id].label}
+            </button>
+          ))}
+        </div>
+        <CodeBlock code={files[tab].code} path={files[tab].path} />
+      </div>
+    </article>
+  );
 }
 
-function sourceCandidates(path: string) {
-  const encoded = `example-source/${encodePath(path)}`;
-  const base = import.meta.env.BASE_URL || "/";
-  const normBase = base.endsWith("/") ? base : `${base}/`;
-  const urls = [`${normBase}${encoded}`];
-  // `vite dev` serves `public/` at the server root, while the production
-  // build lives under BASE_URL (GitHub Pages). Try both.
-  if (normBase !== "/") urls.push(`/${encoded}`);
-  return urls;
-}
-
-async function fetchFirstOk(
-  urls: string[],
-  signal: AbortSignal,
-  path: string,
-): Promise<{ response: Response; url: string }> {
-  const tried: string[] = [];
-  for (const url of urls) {
-    tried.push(url);
-    try {
-      const response = await fetch(url, { signal });
-      if (!response.ok) continue;
-      const contentType = response.headers.get("content-type") ?? "";
-      // Static hosts and vite dev/preview answer unknown paths with the SPA
-      // fallback page (index.html, HTTP 200, text/html). Never mistake that
-      // page for the requested file.
-      if (contentType.includes("text/html") && !path.endsWith(".html")) continue;
-      return { response, url };
-    } catch (error) {
-      if (error instanceof Error && error.name === "AbortError") throw error;
-    }
-  }
-  throw new Error(`File not found (tried: ${tried.join(", ")})`);
-}
-
-function isImagePath(path: string) {
-  return /\.(jpg|jpeg|png|webp|gif|svg|ico)$/i.test(path);
-}
-
-function looksLikeText(path: string) {
-  return !/\.(jpg|jpeg|png|webp|gif|ico|woff2?|ttf|eot|mp4|webm|zip)$/i.test(path);
-}
-
-export default function StoreDemo({ chapter }: { chapter: string }) {
+export default function StoreDemo() {
   const { locale } = useLocale();
-  const [catalog, setCatalog] = useState<Catalog | null>(null);
-  const [stage, setStage] = useState(() => Math.max(0, STAGE_CHAPTERS.indexOf(chapter)));
-  const [sourceFile, setSourceFile] = useState(STAGES[0][0]);
-  const [generatedFile, setGeneratedFile] = useState<string | null>(null);
-  const [content, setContent] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
-  const [copied, setCopied] = useState<"file" | "path" | "cmds" | null>(null);
-  const copy = locale === "pt-BR"
+  const pt = locale === "pt-BR";
+  const base = import.meta.env.BASE_URL || "/";
+  const womenImg = `${base}store/liquidify-women.jpg`;
+  const menImg = `${base}store/liquidify-men.jpg`;
+  const copy = pt
     ? {
-        title: "Construa o example, arquivo por arquivo", intro: "Cada arquivo exibido abaixo vem diretamente de resources/templates/example. Siga as fases na ordem, copie os arquivos de autoria e rode o build. No final, os JSONs, sections, snippets e ilhas formam o mesmo tema do template.",
-        descriptions: ["Crie um projeto que seja, ao mesmo tempo, a origem do Liquidify e um tema Shopify válido.", "Adicione os arquivos que o Liquidify não gera: layout, settings, CSS global e ponte de runtime.", "Copie imagens, ícones e locales antes de montar as sections. Eles são os dados que reproduzem a identidade visual e os dois idiomas.", "Monte header, newsletter e footer uma única vez; section groups os colocam em todas as páginas.", "Crie os componentes que definem a linguagem visual compartilhada antes de reutilizá-los em páginas.", "Copie as sections e o JSON na mesma ordem para obter hero, shelf, categorias e banner editorial.", "Use os componentes e JSONs reais para filtros, busca, paginação e fallback sem JavaScript.", "Construa a página que combina HTML Liquid indexável e ilhas pequenas para mídia, variantes e quantidade.", "Finalize os comportamentos de navegador: carrinho Ajax, drawer, toast, busca e scripts globais.", "Compile, valide e conecte os dados que o tema precisa na loja Shopify para chegar à mesma experiência."],
-        files: "Arquivos desta fase", source: "Fonte", generated: "Saída gerada", related: "Arquivos gerados por esta fonte", noGenerated: "Este arquivo não gera uma saída direta do Liquidify.", copyFile: "Copiar arquivo", copyPath: "Copiar caminho", download: "Baixar", openFile: "Abrir original", copiedFile: "Arquivo copiado", copiedPath: "Caminho copiado", inventory: "Inventário completo do template", search: "Filtre os 250 arquivos do template", noResults: "Nenhum arquivo encontrado.", binaryTitle: "Asset de mídia", binary: "Imagens, ícones e fontes não são texto — por isso o visualizador mostra uma prévia em vez do código. Baixe o arquivo para colocá-lo no seu tema com o mesmo caminho.", loadingFile: "Carregando arquivo…", loadFailed: "Não foi possível carregar este arquivo.", verifyTitle: "Rode nesta ordem", copyCommands: "Copiar comandos", copiedCommands: "Comandos copiados", finish: "Ao terminar esta fase", finishItems: ["Instale dependências e preserve os scripts do template.", "Configure a marca, cores e moeda no Theme Editor.", "Configure menus, políticas e traduções no Admin.", "Rode npm run build para gerar sections, snippets e bundles.", "Use o preview do Shopify CLI com produtos, coleção all e Search & Discovery configurados."],
+        title: "A loja example, peça por peça",
+        intro:
+          "O template example é uma fashion store completa — header, home, coleção, produto e carrinho Ajax. Abaixo, 6 peças reais com TSX, Liquid gerado e CSS: do snippet simples à página de produto com ilhas.",
+        setupTitle: "Rode a loja em 4 comandos",
+        blocks: [
+          {
+            kicker: "Section · Home",
+            title: "Hero que o lojista edita no Theme Editor",
+            text: "TSX com section.settings vira Liquid com {% if %} + {% schema %}. O CSS ao lado do componente vira {% stylesheet %}. O lojista troca título, links e imagens sem tocar em código.",
+          },
+          {
+            kicker: "Snippet · Catálogo",
+            title: "Card de produto 100% Liquid, sem JS",
+            text: "O componente mais reutilizado da loja: hover com segunda imagem, badges via {% render %}, preço com | money e quick-add com fallback. Tudo Liquid puro.",
+          },
+          {
+            kicker: "Island · Carrinho",
+            title: "MiniCart hidrata só onde precisa",
+            text: "'use react' gera só o bundle JS. O <react-island> com as props é emitido no snippet que consome a ilha. O HTML indexável vem do Liquid; o Preact assume contador, drawer e toasts.",
+          },
+          {
+            kicker: "Snippet complexo · Coleção",
+            title: "Catálogo com paginação real",
+            text: "PaginateByLiquid vira {% paginate %}, o .map vira {% for %} com {% render 'card' %}, e o estado vazio vira ilha. A paginação (anterior, páginas, elipse) é Liquid com rel=prev/next.",
+          },
+          {
+            kicker: "Section · Newsletter",
+            title: "Formulário Shopify com schema",
+            text: "FormBlock vira {% form 'customer' %} com sucesso e erros tratados. As settings (títulos, cor de fundo) viram painel do Theme Editor via schema traduzido.",
+          },
+          {
+            kicker: "Section complexa · Produto",
+            title: "A página que junta tudo",
+            text: "Liquid indexável + <liquid-data> com o produto serializado + ilhas (variantes, quantidade) + blocos do editor + SEO com structured_data. O exemplo mais completo do template.",
+          },
+        ],
+        checklistTitle: "Checkpoint antes do preview",
+        checklist: [
+          "npm run dev gerou sections/, snippets/ e assets/ na raiz do tema.",
+          "Produtos, coleção all e menus criados na development store.",
+          "Theme Editor abre Hero, Shelf e ProductInfo com settings em PT + EN.",
+          "shopify theme check passa sem erros de Liquid ou schema.",
+        ],
       }
     : {
-        title: "Build example, file by file", intro: "Every file shown below comes directly from resources/templates/example. Follow the phases in order, copy authored files, and run the build. At the end, JSON templates, sections, snippets, and islands form the same theme as the template.",
-        descriptions: ["Create a project that is both Liquidify source and a valid Shopify theme.", "Add files Liquidify does not generate: layout, settings, global CSS, and the runtime bridge.", "Copy images, icons, and locales before building sections. They provide the visual identity and both languages.", "Build header, newsletter, and footer once; section groups place them around every page.", "Create the components that establish the shared visual language before reusing them on pages.", "Copy sections and JSON in the same order to obtain the hero, shelf, categories, and editorial banner.", "Use the real components and JSON files for filters, search, pagination, and the no-JavaScript fallback.", "Build the page that combines indexable Liquid HTML with small islands for media, variants, and quantity.", "Finish browser behavior: Ajax cart, drawer, toast, search, and global scripts.", "Compile, validate, and connect the store data the theme needs to reach the same experience."],
-        files: "Files in this phase", source: "Source", generated: "Generated output", related: "Files generated by this source", noGenerated: "This file does not produce a direct Liquidify output.", copyFile: "Copy file", copyPath: "Copy path", download: "Download", openFile: "Open original", copiedFile: "File copied", copiedPath: "Path copied", inventory: "Complete template inventory", search: "Filter the template's 250 files", noResults: "No files found.", binaryTitle: "Media asset", binary: "Images, icons, and fonts are not text — so the viewer shows a preview instead of code. Download the file to place it in your theme under the same path.", loadingFile: "Loading file…", loadFailed: "Could not load this file.", verifyTitle: "Run in this order", copyCommands: "Copy commands", copiedCommands: "Commands copied", finish: "When you finish this phase", finishItems: ["Install dependencies and preserve the template scripts.", "Configure brand, colors, and currency in Theme Editor.", "Configure menus, policies, and translations in Admin.", "Run npm run build to generate sections, snippets, and bundles.", "Use Shopify CLI preview with products, the all collection, and Search & Discovery configured."],
+        title: "The example store, piece by piece",
+        intro:
+          "The example template is a complete fashion store — header, home, collection, product, and Ajax cart. Below, 6 real pieces with TSX, generated Liquid, and CSS: from simple snippet to island-powered product page.",
+        setupTitle: "Run the store in 4 commands",
+        blocks: [
+          {
+            kicker: "Section · Home",
+            title: "Hero the merchant edits in Theme Editor",
+            text: "TSX with section.settings becomes Liquid with {% if %} + {% schema %}. Colocated CSS becomes {% stylesheet %}. Merchants change copy, links, and images without code.",
+          },
+          {
+            kicker: "Snippet · Catalog",
+            title: "Product card in 100% Liquid, no JS",
+            text: "The store's most reused component: hover second image, badges via {% render %}, | money pricing, quick-add with fallback. Pure Liquid.",
+          },
+          {
+            kicker: "Island · Cart",
+            title: "MiniCart hydrates only where needed",
+            text: "'use react' outputs only the JS bundle. The <react-island> with props is emitted in the consuming snippet. Indexable HTML comes from Liquid; Preact takes over count, drawer, and toasts.",
+          },
+          {
+            kicker: "Complex snippet · Collection",
+            title: "Catalog with real pagination",
+            text: "PaginateByLiquid becomes {% paginate %}, .map becomes {% for %} with {% render 'card' %}, empty state becomes an island. Pagination (prev, pages, ellipsis) is Liquid with rel=prev/next.",
+          },
+          {
+            kicker: "Section · Newsletter",
+            title: "Shopify form with schema",
+            text: "FormBlock becomes {% form 'customer' %} with success and errors handled. Settings (copy, background color) become a Theme Editor panel via translated schema.",
+          },
+          {
+            kicker: "Complex section · Product",
+            title: "The page that combines everything",
+            text: "Indexable Liquid + <liquid-data> with serialized product + islands (variants, quantity) + editor blocks + structured_data SEO. The template's most complete example.",
+          },
+        ],
+        checklistTitle: "Checkpoint before preview",
+        checklist: [
+          "npm run dev generated sections/, snippets/, and assets/ at the theme root.",
+          "Products, the all collection, and menus exist in the dev store.",
+          "Theme Editor opens Hero, Shelf, and ProductInfo with PT + EN settings.",
+          "shopify theme check passes with no Liquid or schema errors.",
+        ],
       };
-  const outputs = catalog?.generatedBySource[sourceFile] ?? [];
-  const activeFile = generatedFile ?? sourceFile;
-  // Once one candidate base answers with a real file, reuse it for
-  // downloads and image previews instead of guessing again.
-  const [workingBase, setWorkingBase] = useState<string | null>(null);
-  const activeUrls = workingBase
-    ? [`${workingBase}${encodePath(activeFile)}`, ...sourceCandidates(activeFile)]
-    : sourceCandidates(activeFile);
-  const activeUrl = activeUrls[0];
-  const [imgFallbackIndex, setImgFallbackIndex] = useState(0);
-  const fileMeta = catalog?.files.find((file) => file.path === activeFile);
-  const isTextFile = fileMeta ? fileMeta.text : looksLikeText(activeFile);
-  const isImage = isImagePath(activeFile);
-  const filteredFiles = catalog?.files.filter((file) => file.path.toLowerCase().includes(search.trim().toLowerCase())).slice(0, 80) ?? [];
-
-  useEffect(() => {
-    const nextStage = STAGE_CHAPTERS.indexOf(chapter);
-    if (nextStage >= 0) {
-      setStage(nextStage);
-      setSourceFile(STAGES[nextStage][0]);
-      setGeneratedFile(null);
-    }
-  }, [chapter]);
-
-  useEffect(() => {
-    setImgFallbackIndex(0);
-  }, [activeFile]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    fetchFirstOk(sourceCandidates("catalog.json"), controller.signal, "catalog.json")
-      .then(({ response, url }) => {
-        setWorkingBase(url.slice(0, -"catalog.json".length));
-        return response.json() as Promise<Catalog>;
-      })
-      .then((data) => {
-        setCatalog(data);
-        setLoadError(null);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Error && error.name !== "AbortError") setLoadError(error.message);
-      });
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    // Clear stale content immediately so switching files always visibly updates.
-    setContent("");
-    setLoadError(null);
-    if (!isTextFile) {
-      setLoading(false);
-      return;
-    }
-    const controller = new AbortController();
-    setLoading(true);
-    fetchFirstOk(sourceCandidates(activeFile), controller.signal, activeFile)
-      .then(({ response }) => response.text())
-      .then((text) => {
-        setContent(text);
-      })
-      .catch((error: unknown) => {
-        if (error instanceof Error && error.name !== "AbortError") setLoadError(error.message);
-      })
-      .finally(() => {
-        if (!controller.signal.aborted) setLoading(false);
-      });
-    return () => controller.abort();
-  }, [activeFile, isTextFile]);
-
-  function openInventoryFile(path: string) {
-    const stageIndex = STAGES.findIndex((files) => files.includes(path));
-    setGeneratedFile(null);
-    if (stageIndex >= 0 && stageIndex !== stage) {
-      setSourceFile(path);
-      window.location.hash = `/example/${STAGE_CHAPTERS[stageIndex]}`;
-      return;
-    }
-    setSourceFile(path);
-  }
-
-  async function copyValue(value: string, type: "file" | "path" | "cmds") {
-    try {
-      await navigator.clipboard.writeText(value);
-    } catch {
-      const area = document.createElement("textarea");
-      area.value = value;
-      document.body.appendChild(area);
-      area.select();
-      document.execCommand("copy");
-      area.remove();
-    }
-    setCopied(type);
-    window.setTimeout(() => setCopied(null), 1500);
-  }
 
   return (
-    <section id="loja" className="wrap section example-guide">
+    <section id="loja" className="wrap section example-showcase">
+      <p className="kicker">Example · fashion store</p>
       <h2>{copy.title}</h2>
       <p className="section-sub">{copy.intro}</p>
-      <div className="example-stage-content">
-          <p className="example-stage-description">{copy.descriptions[stage]}</p>
-          {stage === STAGES.length - 1 && (
-            <div className="verify-commands">
-              <div className="verify-commands-head">
-                <span>$ {copy.verifyTitle}</span>
-                <button type="button" onClick={() => copyValue(VERIFY_COMMANDS, "cmds")}>
-                  {copied === "cmds" ? copy.copiedCommands : copy.copyCommands}
-                </button>
-              </div>
-              <pre>
-                <code>{VERIFY_COMMANDS}</code>
-              </pre>
-            </div>
-          )}
-          <div className="example-file-tabs" role="tablist" aria-label={copy.files}>
-            {STAGES[stage].map((file) => <button className={sourceFile === file && !generatedFile ? "active" : ""} key={file} type="button" onClick={() => { setSourceFile(file); setGeneratedFile(null); }}>{file}</button>)}
-          </div>
-          <div className="source-viewer">
-            <div className="source-viewer-head"><div><span>{generatedFile ? copy.generated : copy.source}</span><code>{activeFile}</code></div><div className="source-actions"><button type="button" onClick={() => copyValue(content, "file")} disabled={!isTextFile || loading || !content}>{copied === "file" ? copy.copiedFile : copy.copyFile}</button><button type="button" onClick={() => copyValue(activeFile, "path")}>{copied === "path" ? copy.copiedPath : copy.copyPath}</button><a href={activeUrl} download>{copy.download}</a><a href={activeUrl} target="_blank" rel="noopener">{copy.openFile}</a></div></div>
-            {loadError && <p className="source-error" role="alert">{copy.loadFailed} <code>{loadError}</code></p>}
-            {!isTextFile && (
-              <div className="binary-preview">
-                <div>
-                  <strong>{copy.binaryTitle}</strong>
-                  <p>{copy.binary}</p>
-                  <p className="binary-path"><code>{activeFile}</code></p>
-                </div>
-                {isImage && (
-                  <img
-                    src={activeUrls[Math.min(imgFallbackIndex, activeUrls.length - 1)]}
-                    alt={activeFile}
-                    loading="lazy"
-                    onError={() => setImgFallbackIndex((i) => Math.min(i + 1, activeUrls.length - 1))}
-                  />
-                )}
-              </div>
-            )}
-            {isTextFile && (
-              <CodeBlock code={content} path={activeFile} loading={loading} loadingLabel={copy.loadingFile} />
-            )}
-          </div>
-          <div className="generated-panel"><strong>{copy.related}</strong>{outputs.length > 0 ? <div>{outputs.map((file) => <button className={generatedFile === file ? "active" : ""} type="button" key={file} onClick={() => setGeneratedFile(file)}>{file}</button>)}<button type="button" onClick={() => setGeneratedFile(null)}>{copy.source}</button></div> : <p>{copy.noGenerated}</p>}</div>
+
+      <div className="setup-card">
+        <Snippet title={copy.setupTitle} code={SETUP} language="plain" />
       </div>
-      <section className="example-finish"><h3>{copy.finish}</h3><ul>{copy.finishItems.map((item) => <li key={item}>{item}</li>)}</ul></section>
-      <section className="example-inventory"><h3>{copy.inventory}</h3><input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={copy.search} aria-label={copy.search} />{catalog && <div>{filteredFiles.length > 0 ? filteredFiles.map((file) => <button key={file.path} type="button" onClick={() => openInventoryFile(file.path)}>{file.text ? "TXT" : "ASSET"} <code>{file.path}</code></button>) : <p>{copy.noResults}</p>}</div>}</section>
+
+      <div className="showcase-list">
+        <ShowcaseBlock
+          index="01"
+          kicker={copy.blocks[0].kicker}
+          title={copy.blocks[0].title}
+          text={copy.blocks[0].text}
+          source="src/app/sections/Home/Hero/index.tsx"
+          output="sections/hero.liquid"
+          tsx={HERO_TSX}
+          tsxFile="Hero/index.tsx"
+          liquid={HERO_LIQUID}
+          liquidFile="hero.liquid"
+          css={HERO_CSS}
+          cssFile="Hero/styles.css"
+          preview={
+            <div className="mock-hero" aria-hidden="true">
+              <div className="mock-hero-copy">
+                <span className="mock-eyebrow">● New season</span>
+                <strong>
+                  Vista
+                  <br />
+                  <em>o novo</em>
+                </strong>
+                <span className="mock-btn">Explorar ↗</span>
+              </div>
+              <div className="mock-photo">
+                <img src={womenImg} alt="" loading="lazy" />
+              </div>
+              <div className="mock-photo alt">
+                <img src={menImg} alt="" loading="lazy" />
+              </div>
+            </div>
+          }
+        />
+        <ShowcaseBlock
+          index="02"
+          kicker={copy.blocks[1].kicker}
+          title={copy.blocks[1].title}
+          text={copy.blocks[1].text}
+          source="src/app/components/Card/index.tsx"
+          output="snippets/card.liquid"
+          tsx={CARD_TSX}
+          tsxFile="Card/index.tsx"
+          liquid={CARD_LIQUID}
+          liquidFile="card.liquid"
+          css={CARD_CSS}
+          cssFile="Card/styles.css"
+          preview={
+            <div className="mock-shelf" aria-hidden="true">
+              {[[pt ? "Vestido Seda" : "Silk Dress", "R$ 459", womenImg], [pt ? "Casaco Linho" : "Linen Coat", "R$ 689", menImg], [pt ? "Bolsa Couro" : "Leather Bag", "R$ 389", null]].map(([name, price, img]) => (
+                <div className="mock-card" key={name as string}>
+                  <div className="mock-img">{img ? <img src={img as string} alt="" loading="lazy" /> : "LQ."}</div>
+                  <span>{name}</span>
+                  <strong>{price}</strong>
+                </div>
+              ))}
+            </div>
+          }
+        />
+        <ShowcaseBlock
+          index="03"
+          kicker={copy.blocks[2].kicker}
+          title={copy.blocks[2].title}
+          text={copy.blocks[2].text}
+          source="src/app/components/MiniCart/index.tsx"
+          output="assets/mini-cart.js"
+          tsx={MINICART_TSX}
+          tsxFile="MiniCart/index.tsx"
+          liquid={MINICART_LIQUID}
+          liquidFile="header-user-options.liquid"
+          css={MINICART_CSS}
+          cssFile="MiniCart/styles.css"
+          preview={<CartPreview />}
+        />
+        <ShowcaseBlock
+          index="04"
+          kicker={copy.blocks[3].kicker}
+          title={copy.blocks[3].title}
+          text={copy.blocks[3].text}
+          source="src/app/components/Catalog/index.tsx"
+          output="snippets/catalog.liquid"
+          tsx={CATALOG_TSX}
+          tsxFile="Catalog/index.tsx"
+          liquid={CATALOG_LIQUID}
+          liquidFile="catalog.liquid"
+          css={CATALOG_CSS}
+          cssFile="Catalog/styles.css"
+          preview={<CatalogPreview womenImg={womenImg} menImg={menImg} />}
+        />
+        <ShowcaseBlock
+          index="05"
+          kicker={copy.blocks[4].kicker}
+          title={copy.blocks[4].title}
+          text={copy.blocks[4].text}
+          source="src/app/sections/Newsletter/index.tsx"
+          output="sections/newsletter.liquid"
+          tsx={NEWS_TSX}
+          tsxFile="Newsletter/index.tsx"
+          liquid={NEWS_LIQUID}
+          liquidFile="newsletter.liquid"
+          css={NEWS_CSS}
+          cssFile="Newsletter/styles.css"
+          preview={<NewsletterPreview />}
+        />
+        <ShowcaseBlock
+          index="06"
+          kicker={copy.blocks[5].kicker}
+          title={copy.blocks[5].title}
+          text={copy.blocks[5].text}
+          source="src/app/sections/ProductInfo/index.tsx"
+          output="sections/product-info.liquid"
+          tsx={PROD_TSX}
+          tsxFile="ProductInfo/index.tsx"
+          liquid={PROD_LIQUID}
+          liquidFile="product-info.liquid"
+          css={PROD_CSS}
+          cssFile="ProductInfo/styles.css"
+          preview={<ProductPreview img={womenImg} />}
+        />
+      </div>
+
+      <aside className="example-finish">
+        <h3>{copy.checklistTitle}</h3>
+        <ul>
+          {copy.checklist.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </aside>
     </section>
   );
 }

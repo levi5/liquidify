@@ -1,0 +1,9 @@
+.schema-reference > h3 { margin-top: 2.2rem; font-size: 1.05rem; scroll-margin-top: 5.8rem; }
+.ref-code-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.ref-code-grid > * { min-width: 0; }
+.ref-code-grid pre { min-width: 0; margin: 0; }
+.ref-block .snippet { margin-top: 1rem; }
+.ref-block .snippet pre { min-width: 0; margin: 0; }
+.schema-reference .table td:first-child { white-space: nowrap; }
+@media (max-width: 900px) { .ref-code-grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 760px) { .schema-reference .table td:first-child { white-space: normal; } }

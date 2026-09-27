@@ -1,5 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
+import { PipelineFigure } from "../Figures/index.tsx";
 import "./style.css";
 
 const CONFIG = `{
@@ -21,7 +22,7 @@ export default function DocsGuide() {
   const copy = locale === "pt-BR"
     ? {
         title: "Como pensar em um tema Liquidify", intro: "Liquidify não substitui o Shopify. Ele cria uma camada de autoria em TSX para sections, snippets e interações, enquanto o tema continua sendo uma estrutura Shopify convencional.",
-        pipeline: "Pipeline de compilação", source: "Você edita", generated: "Liquidify gera", shopify: "Shopify mantém", sourceItems: ["sections e componentes em src/app", "schemas, settings e serviços", "CSS que pertence ao componente"], generatedItems: ["sections/*.liquid", "snippets/*.liquid", "assets/*.js para ilhas"], shopifyItems: ["layout, templates e config", "locales e assets de marca", "dados: product, collection, cart"],
+        pipeline: "Pipeline de compilação", source: "Você edita", generated: "Liquidify gera", shopify: "Shopify mantém", sourceItems: ["sections e componentes em src/app", "schemas, settings e serviços", "CSS que pertence ao componente"], generatedItems: ["sections/*.liquid", "snippets/*.liquid", "assets/*.js para ilhas"], shopifyItems: ["layout, templates e config", "locales e assets de marca", "dados: product, collection, cart"], walkTitle: "Como ler o fluxo", walk: "Tudo começa em src/app: cada .tsx carrega uma diretiva que diz onde o Liquid deve sair. O comando npm run dev observa esses arquivos e, a cada save, reescreve sections/, snippets/ e assets/ na raiz do tema. O resto — layout, templates JSON, config, locales — continua sendo Shopify nativo e nunca é gerado. Por isso o preview final sempre roda com shopify theme dev, não com Vite.",
         ownership: "Quem é dono de cada arquivo?", rows: [["src/app/sections", "Você", "Section Liquid + schema"], ["src/app/components", "Você", "Snippet ou bundle de ilha"], ["sections/ e snippets/", "Compiler", "Não editar manualmente"], ["templates/*.json", "Você", "Ordem e configuração de páginas"], ["layout/, config/, locales/", "Você", "Arquivos Shopify nativos"]], headers: ["Local", "Responsável", "Papel"],
         config: "Configuração mínima", configText: "componentsDir aponta para o código TSX. output indica a raiz do tema, onde a saída Liquid, snippets e bundles serão escritos.",
         semantics: "O que o compilador entende", transformation: "Transformações TSX para Liquid", semanticsItems: ["A diretiva no topo define o destino: use sections, use snippets, use react ou use dom.", "Expressões de dados Shopify são escapadas por padrão; use strings de expressão Liquid quando precisar de filtros como money ou t.", "Condições e map previsíveis viram if e for Liquid. O resultado é renderizado no servidor.", "Schemas anexados à section viram o bloco {% schema %} que o Theme Editor lê."],
@@ -30,7 +31,7 @@ export default function DocsGuide() {
       }
     : {
         title: "How to think about a Liquidify theme", intro: "Liquidify does not replace Shopify. It adds a TSX authoring layer for sections, snippets, and interactions, while the theme remains a conventional Shopify structure.",
-        pipeline: "Compilation pipeline", source: "You edit", generated: "Liquidify generates", shopify: "Shopify owns", sourceItems: ["sections and components in src/app", "schemas, settings, and services", "CSS that belongs to each component"], generatedItems: ["sections/*.liquid", "snippets/*.liquid", "assets/*.js for islands"], shopifyItems: ["layout, templates, and config", "locales and brand assets", "data: product, collection, cart"],
+        pipeline: "Compilation pipeline", source: "You edit", generated: "Liquidify generates", shopify: "Shopify owns", sourceItems: ["sections and components in src/app", "schemas, settings, and services", "CSS that belongs to each component"], generatedItems: ["sections/*.liquid", "snippets/*.liquid", "assets/*.js for islands"], shopifyItems: ["layout, templates, and config", "locales and brand assets", "data: product, collection, cart"], walkTitle: "How to read the flow", walk: "Everything starts in src/app: each .tsx carries a directive saying where its Liquid belongs. Running npm run dev watches those files and, on every save, rewrites sections/, snippets/, and assets/ at the theme root. Everything else — layout, JSON templates, config, locales — stays native Shopify and is never generated. That is why the final preview always runs on shopify theme dev, never on Vite.",
         ownership: "Who owns each file?", rows: [["src/app/sections", "You", "Liquid section + schema"], ["src/app/components", "You", "Snippet or island bundle"], ["sections/ and snippets/", "Compiler", "Do not edit manually"], ["templates/*.json", "You", "Page order and configuration"], ["layout/, config/, locales/", "You", "Native Shopify files"]], headers: ["Location", "Owner", "Role"],
         config: "Minimum configuration", configText: "componentsDir points to the TSX source. output is the theme root, where Liquid output, snippets, and bundles are written.",
         semantics: "What the compiler understands", transformation: "TSX to Liquid transformations", semanticsItems: ["The directive at the top defines the target: use sections, use snippets, use react, or use dom.", "Shopify data expressions are escaped by default; use Liquid-expression strings when filters such as money or t are required.", "Predictable conditions and map calls become Liquid if and for. The result is server-rendered.", "Schemas attached to a section become the {% schema %} block read by Theme Editor."],
@@ -49,6 +50,11 @@ export default function DocsGuide() {
           <article><span>02</span><h4>{copy.generated}</h4><ul>{copy.generatedItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
           <article><span>03</span><h4>{copy.shopify}</h4><ul>{copy.shopifyItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
         </div>
+      </div>
+      <PipelineFigure />
+      <div className="docs-deep-card walk-card">
+        <h3>{copy.walkTitle}</h3>
+        <p>{copy.walk}</p>
       </div>
       <div className="docs-guide-grid">
         <div>

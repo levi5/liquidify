@@ -1,1 +1,58 @@
-/* Estilos específicos de Builtins (usa .table global). */
+.builtins-page { min-width: 0; }
+
+.builtin-section-title { margin-top: 2.5rem; }
+
+.builtin-list {
+  display: grid;
+  gap: 1.1rem;
+  margin-top: 1.4rem;
+}
+
+.builtin-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.3rem;
+  box-shadow: var(--shadow);
+  min-width: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.builtin-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent 70%);
+  opacity: 0.8;
+}
+
+.builtin-head {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.builtin-name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.builtin-sub {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.builtin-text {
+  margin: 0.3rem 0 1rem;
+  font-size: 0.93rem;
+  line-height: 1.6;
+  color: var(--muted);
+}

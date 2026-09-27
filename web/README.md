@@ -20,17 +20,29 @@ web/
     ├── index.css           # variáveis, base, botões, tabelas, code
     └── components/
         ├── Header/         # index.tsx + style.css
-        ├── Hero/
-        ├── Stats/
-        ├── Quickstart/
+        ├── Hero/           # home: pipeline TSX→Liquid + features
+        ├── StoreDemo/      # example: showcase curado (sem file viewer)
+        ├── GettingStarted/ # docs/start
+        ├── DocsGuide/      # docs/theme-model
+        ├── AuthoringGuide/ # docs/authoring
         ├── Directives/
-        ├── Playground/
-        ├── StoreDemo/
+        ├── ShopifyGuide/
         ├── Builtins/
+        ├── RuntimeGuide/
+        ├── AdvancedIslands/ # docs/islands (de docs/react-events.md)
+        ├── BuildDeep/      # api/build (de docs/compiler-build.md)
+        ├── CliReference/
+        ├── ConfigReference/
         ├── CliApi/
-        ├── Deploy/
+        ├── ApiGuide/
+        ├── GuideNav/
+        ├── Figures/        # diagramas dos Docs (pipeline, island, editor)
+        ├── Snippet/
+        ├── CodeBlock/
         └── Footer/
 ```
+
+Fotos da loja em `public/store/` (copiadas do template example).```
 
 ## Comandos
 

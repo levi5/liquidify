@@ -1,0 +1,5 @@
+.errors-reference > h3 { margin-top: 2.2rem; font-size: 1.05rem; scroll-margin-top: 5.8rem; }
+.ref-block .snippet { margin-top: 1rem; }
+.ref-block .snippet pre { min-width: 0; margin: 0; }
+.errors-reference .table td:first-child { white-space: nowrap; }
+@media (max-width: 760px) { .errors-reference .table td:first-child { white-space: normal; } }

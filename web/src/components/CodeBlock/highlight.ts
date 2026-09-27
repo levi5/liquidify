@@ -102,7 +102,6 @@ function compiled(lang: Lang): Compiled[] {
 
 const MAX_HIGHLIGHT = 120_000;
 
-/** Tokenize code. Returns null when the file is too large (caller renders plain text). */
 export function highlight(code: string, lang: Lang): Token[] | null {
   if (code.length > MAX_HIGHLIGHT) return null;
   const rules = compiled(lang);

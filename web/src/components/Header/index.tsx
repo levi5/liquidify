@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useLocale } from "../../i18n.tsx";
+import Search from "../Search/index.tsx";
 import "./style.css";
 
 const STORAGE_KEY = "liquidify-docs-theme";
@@ -59,10 +60,19 @@ export default function Header({ route }: { route: string }) {
       <div className="sidebar-inner">
         <div>
           <a className="brand" href="#/">
-            <span className="brand-mark">◈</span> Liquidify
+            <img
+              className="brand-logo"
+              src={`${import.meta.env.BASE_URL}assets/logo-mark.png`}
+              alt="Liquidify"
+              width="26"
+              height="26"
+            />
+            Liquidify
           </a>
           <p className="brand-tag">{copy.tagline}</p>
         </div>
+
+        <Search />
 
         <div className="sidebar-controls">
           <button className="icon-btn theme-toggle" type="button" onClick={toggleTheme} aria-label={copy.theme} aria-pressed={theme === "dark"} title={copy.theme}>

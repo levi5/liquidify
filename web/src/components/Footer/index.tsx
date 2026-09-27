@@ -21,7 +21,14 @@ export default function Footer() {
       <div className="wrap footer-inner">
         <div className="footer-brand">
           <a className="brand brand-small" href="#/">
-            <span className="brand-mark">◈</span> Liquidify
+            <img
+              className="brand-logo brand-logo-small"
+              src={`${import.meta.env.BASE_URL}assets/logo-mark.png`}
+              alt="Liquidify"
+              width="22"
+              height="22"
+            />
+            Liquidify
           </a>
           <p>
             {copy.tag} · MIT · v1.1.0-alpha.4
@@ -31,7 +38,7 @@ export default function Footer() {
         <nav className="footer-nav" aria-label={copy.navLabel}>
           <a href="#/docs/start">Docs</a>
           <a href="#/api/cli">API</a>
-          <a href="#/example/bootstrap">Example</a>
+          <a href="#/example">Example</a>
         </nav>
 
         <div className="footer-ext">
