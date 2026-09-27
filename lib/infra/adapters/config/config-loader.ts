@@ -6,7 +6,7 @@ import { ValidationError } from '../../../core/errors/validation-error'
 
 const configFiles = ['liquidify.config.json', '.liquidifyrc.json', '.liquidifyrc', 'liquidx.config.json', '.liquidxrc.json', '.liquidxrc']
 
-const ALLOWED_KEYS = new Set(['componentsDir', 'output', 'react', 'force'])
+const ALLOWED_KEYS = new Set(['componentsDir', 'output', 'react', 'force', 'plugins'])
 
 export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): LiquidifyConfig {
   if (explicitPath !== undefined && explicitPath.trim() !== '') {

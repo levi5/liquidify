@@ -21,6 +21,7 @@ import { DependencyTracker, ImportGraphBuilder } from '../../application/service
 import { SchemaValidator } from '../../application/services/schema-validation'
 import { TranspileFileUseCase } from '../../application/services/transpile-file'
 import { ValidationService } from '../../application/services/validation-service'
+import { tsxStatsPlugin } from '../../presentation/cli/plugins/tsx-stats'
 
 export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder {
   const logger = new ConsoleLogger()
@@ -44,7 +45,7 @@ export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder
   const generator = new LiquidFileSystemGenerator({ outputDir: options.output, force: options.force }, fileSystem, logger, manifest)
   const useCase = new TranspileFileUseCase(parser, generator, new ValidationService(new SchemaValidator()))
 
-  return new LiquidifyBuilder(
+  const builder = new LiquidifyBuilder(
     options,
     parser,
     useCase,
@@ -55,4 +56,8 @@ export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder
     new DirectiveScanner(astParser),
     logger,
   )
+
+  builder.registerPlugin(tsxStatsPlugin)
+
+  return builder
 }
