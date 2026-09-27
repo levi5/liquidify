@@ -1,5 +1,6 @@
 'use sections'
 
+import { t, defaultValue } from 'liquidify'
 import { RenderSnippet, RenderSvg } from 'liquidex'
 import classNames from 'classnames'
 
@@ -52,7 +53,7 @@ export const Shelf = () => {
 				</div>
 
 				{section.settings.view_all_label && section.settings.view_all_label !== 'blank' && (
-					<a className='text-link' href='{{ section.settings.view_all_link | default: routes.all_products_collection_url }}'>
+					<a className='text-link' href={defaultValue(section.settings.view_all_link, routes.all_products_collection_url)}>
 						{section.settings.view_all_label}
 						<span aria-hidden='true'>↗</span>
 					</a>
@@ -60,7 +61,7 @@ export const Shelf = () => {
 			</div>
 
 			{products.length === 0 ? (
-				<p className={styles.empty}>{"'shelf.empty_title' | t"}</p>
+				<p className={styles.empty}>{t('shelf.empty_title')}</p>
 			) : (
 				<div className={classNames(styles.cards, 'container')}>
 					<SwiperSliderRoot elementId={carouselId}>

@@ -1,5 +1,6 @@
 'use snippets'
 
+import { imageUrl, assetUrl, escape, defaultValue } from 'liquidify'
 import { RenderSvg } from 'liquidex'
 
 import { SwiperSliderArrow } from '../Swiper/Arrow'
@@ -30,11 +31,11 @@ export const Carousel = ({ blocks, elementId = 'home-banner-hero' }: { blocks: a
 				>
 					{blocks.map((block: any) => (
 						<div className={styles.slide}>
-							{block.settings.image ? (
-								<img width='2000' height='700' loading='lazy' decoding='async' src={'{{ block.settings.image | image_url: width: 2000 }}'} alt={'{{ block.settings.heading | default: "Banner" | escape }}'} />
-							) : (
-								<img width='2000' height='700' loading='lazy' decoding='async' src={"{{ 'liquidify-editorial.jpg' | asset_url }}"} alt={'{{ block.settings.heading | default: "Banner" | escape }}'} />
-							)}
+						{block.settings.image ? (
+							<img width='2000' height='700' loading='lazy' decoding='async' src={imageUrl(block.settings.image, {width: 2000})} alt={escape(defaultValue(block.settings.heading, 'Banner'))} />
+						) : (
+							<img width='2000' height='700' loading='lazy' decoding='async' src={assetUrl('liquidify-editorial.jpg')} alt={escape(defaultValue(block.settings.heading, 'Banner'))} />
+						)}
 						</div>
 					))}
 				</SwiperCarousel>

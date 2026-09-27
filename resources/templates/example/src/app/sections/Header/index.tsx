@@ -1,5 +1,6 @@
 'use sections'
 
+import { t, escape, defaultValue } from 'liquidify'
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
@@ -21,11 +22,11 @@ export const Header = () => {
 					<RenderSnippet slot={MenuMobile} options={linklists['menu'].links} />
 				</div>
 
-				<a className='wordmark' href={routes.root_url} aria-label={"'header.home_page' | t"}>
-					{'settings.brand_name | default: shop.name | escape'}
-				</a>
+			<a className='wordmark' href={routes.root_url} aria-label={t('header.home_page')}>
+				{escape(defaultValue(settings.brand_name, shop.name))}
+			</a>
 
-				<nav className={classNames(styles['desktop-nav'])} aria-label={"'header.main_menu' | t"}>
+			<nav className={classNames(styles['desktop-nav'])} aria-label={t('header.main_menu')}>
 					<RenderSnippet slot={MenuDesktop} options={linklists['menu'].links} />
 				</nav>
 

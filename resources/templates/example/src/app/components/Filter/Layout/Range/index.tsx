@@ -1,10 +1,12 @@
 'use snippets'
 
+import { escape } from 'liquidify'
+
 export const FilterRangeLayout = ({ filter }: { filter: any }) => {
 	return (
 		<details className='sidebar-filter-group' open>
 			<summary>
-				{'filter.label | escape'} <span aria-hidden='true'>+</span>
+				{escape(filter.label)} <span aria-hidden='true'>+</span>
 			</summary>
 
 			<div className='sidebar-price-fields'>

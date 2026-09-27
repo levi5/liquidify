@@ -29,6 +29,8 @@ export const assetUrl = (file: string): string => file
 
 export const imageUrl = (src: unknown, _size?: number | string | ImageSizeOptions): string => String(src ?? '')
 
+export const urlEncode = (value: unknown): string => encodeURIComponent(String(value ?? ''))
+
 export const money = (cents: unknown): string => String(cents ?? '')
 
 export const moneyWithCurrency = (cents: unknown): string => String(cents ?? '')

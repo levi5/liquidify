@@ -1,5 +1,6 @@
 'use sections'
 
+import { t, escape } from 'liquidify'
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
@@ -22,8 +23,8 @@ export const MainCollection = () => {
 			<RenderSnippet slot={Breadcrumb} className='' />
 
 			<div className={classNames(styles['page-heading'])}>
-				<p className='eyebrow'>{"'collection.eyebrow' | t"}</p>
-				<h1>{'collection.title | escape'}</h1>
+			<p className='eyebrow'>{t('collection.eyebrow')}</p>
+			<h1>{escape(collection.title)}</h1>
 				{collection.description && <div className='rich-text'>{'{{ collection.description }}'}</div>}
 			</div>
 
@@ -32,15 +33,15 @@ export const MainCollection = () => {
 
 				<div className='catalog-results'>
 					<div className={classNames(styles['catalog-toolbar'])}>
-						<span className={classNames(styles['catalog-meta'])}>{"'collection.products_count' | t: count: collection.products_count"}</span>
+						<span className={classNames(styles['catalog-meta'])}>{t('collection.products_count', {count: collection.products_count})}</span>
 
 						<div className={classNames(styles['toolbar-actions'])}>
 							<FilterDrawer sectionId={section.id} />
 
 							<div className='sort-control'>
-								<label htmlFor='SortBy' className={classNames(styles['sort-label'])}>
-									{"'collection.sort' | t"}
-								</label>
+							<label htmlFor='SortBy' className={classNames(styles['sort-label'])}>
+								{t('collection.sort')}
+							</label>
 								<RenderSnippet slot={ThemeIcon} name='sort' size={15} />
 								<select id='SortBy' name='sort_by' form={filterFormId} data-selected={selected_sort}>
 									{collection.sort_options.map((option) => (
