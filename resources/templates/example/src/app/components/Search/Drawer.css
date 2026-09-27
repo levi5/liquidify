@@ -1,0 +1,85 @@
+.searchTrigger {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	color: var(--ink);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.searchTrigger:hover {
+	opacity: 0.6;
+}
+
+.searchDrawer {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	background: var(--paper);
+	color: var(--ink);
+}
+
+.searchBody {
+	padding: 34px 32px 0;
+}
+
+.searchLabel {
+	display: block;
+	margin-bottom: 12px;
+	font-size: 11px;
+	color: var(--muted);
+}
+
+.searchField {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	border-bottom: 1px solid var(--ink);
+	padding-bottom: 12px;
+}
+
+.searchField input {
+	flex: 1;
+	min-width: 0;
+	border: 0;
+	background: transparent;
+	font-size: 17px;
+	color: var(--ink);
+}
+
+.searchField input:focus {
+	outline: none;
+}
+
+.searchField button {
+	background: transparent;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	color: var(--ink);
+	font-size: 20px;
+	line-height: 1;
+}
+
+.searchStart {
+	padding: 40px 32px 0;
+}
+
+.searchStartLabel {
+	margin: 0 0 14px;
+	font-size: 9px;
+	font-weight: 600;
+	letter-spacing: 1.6px;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+@media (max-width: 680px) {
+	.searchBody,
+	.searchStart {
+		padding-left: 20px;
+		padding-right: 20px;
+	}
+}

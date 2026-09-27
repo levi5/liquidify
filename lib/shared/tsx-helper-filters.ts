@@ -1,0 +1,42 @@
+export const HELPER_TO_FILTER: Record<string, string> = {
+  escape: 'escape',
+  escapeOnce: 'escape_once',
+  stripHtml: 'strip_html',
+  strip: 'strip',
+  downcase: 'downcase',
+  upcase: 'upcase',
+  handleize: 'handleize',
+  markdownify: 'markdownify',
+  append: 'append',
+  prepend: 'prepend',
+  replace: 'replace',
+  remove: 'remove',
+  truncate: 'truncate',
+  truncateWords: 'truncatewords',
+  split: 'split',
+  join: 'join',
+  slice: 'slice',
+  sort: 'sort',
+  reverse: 'reverse',
+  uniq: 'uniq',
+  compact: 'compact',
+  sum: 'sum',
+  first: 'first',
+  last: 'last',
+  size: 'size',
+  money: 'money',
+  moneyWithCurrency: 'money_with_currency',
+  moneyWithoutCurrency: 'money_without_currency',
+  moneyWithoutTrailingZeros: 'money_without_trailing_zeros',
+  weightWithUnit: 'weight_with_unit',
+  assetUrl: 'asset_url',
+  imageUrl: 'image_url',
+  linkTo: 'link_to',
+  date: 'date',
+  urlEncode: 'url_encode',
+}
+
+export const TRANSLATE_HELPERS = new Set(['t', 'translate'])
+
+export const RAW_HELPERS = new Set(['raw'])
+export const JSON_HELPERS = new Set(['json'])

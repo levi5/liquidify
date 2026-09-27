@@ -3,6 +3,10 @@ import assert from 'node:assert/strict'
 import { parse } from '@babel/parser'
 import { SchemaExtractor } from '../dist/infra/adapters/parsers/babel/schema/schema-extractor.js'
 import { ImportResolver } from '../dist/infra/adapters/parsers/babel/liquid/import-resolver.js'
+import { ModuleResolver } from '../dist/infra/adapters/fs/module-resolver.js'
+import { SilentLogger } from '../dist/shared/logger.js'
+
+const makeExtractor = (fs) => new SchemaExtractor(fs, new ModuleResolver(fs), new SilentLogger())
 
 function fixture() {
   const files = new Map([
@@ -17,7 +21,7 @@ function fixture() {
 
 test('schemas resolve aliases, index files, named and star reexports', () => {
   const { fs } = fixture()
-  const extractor = new SchemaExtractor(fs)
+  const extractor = makeExtractor(fs)
   const ast = parse('import { settings } from "@/barrel"; export const schema = { name:"Hero", settings }', { sourceType: 'module' })
   assert.deepEqual(extractor.extract(ast, '/theme/src/Hero.tsx'), {
     name: 'Hero',
@@ -27,24 +31,33 @@ test('schemas resolve aliases, index files, named and star reexports', () => {
 
 test('Liquid imports share schema resolution and preserve objects with a type key', () => {
   const { fs } = fixture()
-  assert.deepEqual(new ImportResolver(fs).resolveExternalVariable('@/default', 'default', '/theme/src/Hero.tsx'), {
+  assert.deepEqual(new ImportResolver(makeExtractor(fs)).resolveExternalVariable('@/default', 'default', '/theme/src/Hero.tsx'), {
     type: 'text',
     id: 'title',
   })
+})
+
+test('tsconfig comment stripping preserves wildcard characters inside strings', () => {
+  const files = new Map([
+    ['/theme/tsconfig.json', '{ // aliases\n "compilerOptions": { "paths": { "@src/*": ["src/*"] } } }'],
+    ['/theme/src/data.ts', 'export const value = "resolved"'],
+  ])
+  const fs = { existsSync: (file) => files.has(file), readFileSync: (file) => files.get(file) }
+  assert.equal(new ModuleResolver(fs).resolve('@src/data', '/theme/Card.tsx'), '/theme/src/data.ts')
 })
 
 test('circular reexports fail clearly instead of exhausting the call stack', () => {
   const { files, fs } = fixture()
   files.set('/theme/a.ts', 'export { x } from "./b"')
   files.set('/theme/b.ts', 'export { x } from "./a"')
-  assert.throws(() => new SchemaExtractor(fs).resolveExternalSchema('./a', 'x', '/theme/Hero.tsx'), /Circular import/)
+  assert.throws(() => makeExtractor(fs).resolveExternalSchema('./a', 'x', '/theme/Hero.tsx'), /Circular import/)
 })
 
 test('component schema can be reexported directly from another file', () => {
   const { files, fs } = fixture()
   files.set('/theme/src/schema.ts', 'export default { name:"Hero" }')
   const ast = parse('export {default as schema} from "./schema"', { sourceType: 'module' })
-  assert.deepEqual(new SchemaExtractor(fs).extract(ast, '/theme/src/Hero.tsx'), { name: 'Hero' })
+  assert.deepEqual(makeExtractor(fs).extract(ast, '/theme/src/Hero.tsx'), { name: 'Hero' })
 })
 
 for (const scenario of [
@@ -74,6 +87,6 @@ for (const scenario of [
     files.set('/theme/base.json', JSON.stringify({ compilerOptions: scenario.parent }))
     files.set('/theme/app/tsconfig.json', JSON.stringify({ extends: '../base.json', compilerOptions: scenario.child }))
     files.set(scenario.target, 'export const value = "resolved"')
-    assert.equal(new ImportResolver(fs).resolveExternalVariable('@/data', 'value', '/theme/app/Card.tsx'), 'resolved')
+    assert.equal(new ImportResolver(makeExtractor(fs)).resolveExternalVariable('@/data', 'value', '/theme/app/Card.tsx'), 'resolved')
   })
 }

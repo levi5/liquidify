@@ -1,6 +1,6 @@
 # Liquidify 🚀
 
-> **Status:** Alpha — `v1.0.0-alpha.0`
+> **Status:** Alpha — `v1.1.0-alpha.4`
 
 **Liquidify** is an advanced compiler that transforms **JSX/TSX** components into **Shopify Liquid** code, powered by Babel and esbuild. Write your Shopify theme sections and snippets using React-like syntax and let Liquidify compile them into production-ready `.liquid` files.
 
@@ -47,6 +47,7 @@ npx liquidify init
 ```
 
 This creates:
+
 - Shopify theme folders (`layout/`, `templates/`, `sections/`, `snippets/`, `assets/`, `config/`, `locales/`)
 - Default Shopify files (`theme.liquid`, `index.json`, `settings_schema.json`, `css-variables.liquid`)
 - Liquidify example components (`Hero.tsx` section, `Counter.tsx` React Island, `Badge.tsx` snippet)
@@ -61,14 +62,18 @@ Create a `liquidify.config.json` at the root of your Shopify theme project:
 ```json
 {
   "componentsDir": "src/components",
-  "output": "."
+  "output": "liquidify"
 }
 ```
+
+> Use `"output": "."` when the config lives at your Shopify theme root and compiled files should be written in place.
 
 | Option          | Default          | Description                                  |
 |-----------------|------------------|----------------------------------------------|
 | `componentsDir` | `src/components` | Directory where your TSX/JSX components live |
 | `output`        | `liquidify`      | Output directory (your Shopify theme root)   |
+| `force`         | `false`          | Overwrite unmanaged output files             |
+| `react`         | `{strictCsp:true}` | React runtime options (`strictCsp`)        |
 
 ---
 
@@ -82,6 +87,11 @@ npx liquidify
 npx liquidify --watch
 # or alias:
 npx liquidx --watch
+
+# Use an explicit config file, skip the banner, or print the version
+npx liquidify --config ./liquidify.config.json
+npx liquidify --no-banner
+npx liquidify --version
 ```
 
 ---
@@ -177,7 +187,7 @@ import {
 
 Strict CSP mode is enabled by default. See [event examples and Shopify section lifecycle](docs/react-events.md) for JSX handlers, registered Liquid actions, native DOM listeners, and cleanup when sections reload in the theme editor.
 
-Veja [compilação incremental, limpeza de saídas e resolução de imports](docs/compiler-build.md) para o comportamento do build e do watch.
+See [incremental compilation, output cleanup and import resolution](docs/compiler-build.md) for build and watch behavior.
 
 ## ⚙️ Programmatic API
 
@@ -205,7 +215,7 @@ builder.watch()
 
 ## 📁 Project Structure
 
-```
+```txt
 your-shopify-theme/
 ├── src/
 │   └── components/
@@ -222,7 +232,7 @@ your-shopify-theme/
 
 ## 🛠️ CLI Reference
 
-```
+```txt
 Usage:
   liquidify [options]
   liquidify init [directory] [options]

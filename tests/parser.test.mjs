@@ -88,6 +88,192 @@ export default function List({ items }) {
     assert.equal(component.html, '<ul>{% for item in items limit: 8 %}<li>{{ item.title | escape }}</li>{% endfor %}</ul>')
   })
 
+  it('compiles .slice(0, variable) without chaining minus onto the sliced array', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function List({ items, limit }) {
+  const visible = items.slice(0, limit)
+  return <ul>{visible.map((item) => <li>{item.title}</li>)}</ul>
+}`,
+      '/theme/src/components/snippets/List.tsx',
+    )
+    assert.match(component.html, /{% assign visible = items \| slice: 0, limit %}/)
+    assert.doesNotMatch(component.html, /\| minus:/)
+  })
+
+  it('compiles .slice(dynamicStart, dynamicEnd) with a temp length assign', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function List({ items, start, end }) {
+  const visible = items.slice(start, end)
+  return <ul>{visible.map((item) => <li>{item.title}</li>)}</ul>
+}`,
+      '/theme/src/components/snippets/List.tsx',
+    )
+    assert.match(component.html, /{% assign __liquidify_slice_\d+ = end \| minus: start %}/)
+    assert.match(component.html, /{% assign visible = items \| slice: start, __liquidify_slice_\d+ %}/)
+  })
+
+  it('keeps chained string concatenation as append instead of plus', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Label({ first, last }) {
+  const label = first + " " + last
+  return <p>{label}</p>
+}`,
+      '/theme/src/components/snippets/Label.tsx',
+    )
+    assert.match(component.html, /{% assign label = first \| append: " " \| append: last %}/)
+  })
+
+  it('keeps numeric addition as plus', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Total({ price, tax }) {
+  const total = price + tax
+  const count = price + 1
+  return <p>{total} {count}</p>
+}`,
+      '/theme/src/components/snippets/Total.tsx',
+    )
+    assert.match(component.html, /{% assign total = price \| plus: tax %}/)
+    assert.match(component.html, /{% assign count = price \| plus: 1 %}/)
+  })
+
+  it('guards || fallbacks against nil, empty, false and zero', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Cols({ settings }) {
+  const columns = settings.columns || 4
+  return <p>{columns}</p>
+}`,
+      '/theme/src/components/snippets/Cols.tsx',
+    )
+    assert.match(component.html, /{% assign columns = settings\.columns %}/)
+    assert.match(component.html, /{% if columns == nil or columns == "" or columns == false or columns == 0 %}/)
+    assert.doesNotMatch(component.html, /\| default:/)
+  })
+
+  it('negates numeric flags with explicit nil, false, zero and empty checks', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Count({ count }) {
+  return <div>{!count ? 'empty' : 'full'}</div>
+}`,
+      '/theme/src/components/snippets/Count.tsx',
+    )
+    assert.match(component.html, /count == nil or count == false or count == 0 or count == ""/)
+    assert.doesNotMatch(component.html, /== blank/)
+  })
+
+  it('normalizes bare identifier conditions in && branches', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Badge({ count }) {
+  return <div>{count && <span>items</span>}</div>
+}`,
+      '/theme/src/components/snippets/Badge.tsx',
+    )
+    assert.match(component.html, /{% if count != nil and count != false and count != 0 and count != "" %}/)
+  })
+
+  it('omits attributes whose && guard is falsy', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Pic({ hasAlt, title }) {
+  return <img alt={hasAlt && title} />
+}`,
+      '/theme/src/components/snippets/Pic.tsx',
+    )
+    assert.match(component.html, /{% if hasAlt == nil or hasAlt == "" or hasAlt == false or hasAlt == 0 %}{% else %}/)
+    assert.doesNotMatch(component.html, /<img alt="{{ title/)
+  })
+
+  it('hoists piped translate params instead of leaking the pipe', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+import { t } from 'liquidify'
+export default function Label({ count }) {
+  const label = t('products.count', count || 1)
+  return <p>{label}</p>
+}`,
+      '/theme/src/components/snippets/LabelT.tsx',
+    )
+    assert.match(component.html, /{% assign __liquidify_t_\d+ = count %}/)
+    assert.match(component.html, /{% if __liquidify_t_\d+ == nil or __liquidify_t_\d+ == "" or __liquidify_t_\d+ == false or __liquidify_t_\d+ == 0 %}/)
+    assert.match(component.html, /{% assign __liquidify_t_\d+ = 1 %}/)
+    assert.match(component.html, /\| t: __liquidify_t_\d+/)
+  })
+
+  it('hoists piped join separator', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Tags({ tags, sep }) {
+  const line = tags.join(sep || ", ")
+  return <p>{line}</p>
+}`,
+      '/theme/src/components/snippets/Tags.tsx',
+    )
+    assert.match(component.html, /__liquidify_join_\d+/)
+    assert.match(component.html, /{% if __liquidify_join_\d+ == nil or __liquidify_join_\d+ == "" or __liquidify_join_\d+ == false or __liquidify_join_\d+ == 0 %}/)
+    assert.match(component.html, /{% assign __liquidify_join_\d+ = ", " %}/)
+    assert.match(component.html, /\| join: __liquidify_join_\d+/)
+  })
+
+  it('hoists dynamic for-loop limit for sliced ranges', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Slice({ items, start, end }) {
+  return <ul>{items.slice(start, end).map((item) => <li>{item.title}</li>)}</ul>
+}`,
+      '/theme/src/components/snippets/Slice.tsx',
+    )
+    assert.match(component.html, /{% assign __liquidify_limit_\d+ = end \| minus: start %}/)
+    assert.match(component.html, /{% for item in items limit: __liquidify_limit_\d+ offset: start %}/)
+  })
+
+  it('hoists piped where values instead of leaking the pipe', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Filtered({ items, fallback }) {
+  const list = items.filter((p) => p.type == (fallback || "x"))
+  return <ul>{list.map((item) => <li>{item.title}</li>)}</ul>
+}`,
+      '/theme/src/components/snippets/Filtered.tsx',
+    )
+    assert.match(component.html, /__liquidify_where_\d+/)
+    assert.match(component.html, /{% if __liquidify_where_\d+ == nil or __liquidify_where_\d+ == "" or __liquidify_where_\d+ == false or __liquidify_where_\d+ == 0 %}/)
+    assert.match(component.html, /{% assign __liquidify_where_\d+ = "x" %}/)
+    assert.match(component.html, /\| where: "type", __liquidify_where_\d+/)
+  })
+
+  it('keeps char-local filters inline in template literals', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+import { escape } from 'liquidify'
+export default function Esc({ a, b }) {
+  const label = \`\${a}\${escape(b)}\`
+  return <p>{label}</p>
+}`,
+      '/theme/src/components/snippets/Esc.tsx',
+    )
+    assert.doesNotMatch(component.html, /__liquidify_template_\d+/)
+    assert.match(component.html, /\| append: b \| escape/)
+  })
+
   it('detects dom mode and keeps plain html', async () => {
     const parser = makeParser()
     const component = await parser.parse(
@@ -156,10 +342,7 @@ export default function MobileMenu() {
 }`,
       '/theme/src/components/snippets/Card.tsx',
     )
-    assert.equal(
-      inAttr.html.trim(),
-      '<img alt="{{ settings.brand_name | default: shop.name | escape }}" />',
-    )
+    assert.equal(inAttr.html.trim(), '<img alt="{{ settings.brand_name | default: shop.name | escape }}" />')
   })
 
   it('correctly compiles ternary expressions containing liquid filter strings without turning them into raw JS', async () => {
@@ -198,10 +381,30 @@ export default function Hero() {
     </section>
   )
 }`,
-      path.resolve(import.meta.dirname, '../resources/templates/example/src/components/sections/Hero/index.tsx'),
+      path.resolve(import.meta.dirname, '../resources/templates/example/src/app/sections/Home/Hero/index.tsx'),
     )
     assert.ok(component.html.includes('<section class="fashion-hero container">'))
     assert.ok(component.html.includes('<h1 class="title">Title</h1>'))
     assert.ok(component.html.includes('<button class="button button-dark">Button</button>'))
+  })
+
+  it('emits snippet children as raw markup while still escaping text props', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Panel({ title }) {
+  return (
+    <div className="panel">
+      <span>{title}</span>
+      {children}
+    </div>
+  )
+}`,
+      '/theme/src/app/components/Panel.tsx',
+    )
+
+    assert.ok(component.html.includes('{{ children }}'), component.html)
+    assert.ok(!component.html.includes('children | escape'), component.html)
+    assert.ok(component.html.includes('{{ title | escape }}'), component.html)
   })
 })

@@ -17,7 +17,7 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true,
+			"preset": "recommended",
 			"a11y": {
 				"useKeyWithClickEvents": "off"
 			},
@@ -51,8 +51,29 @@
 	"files": {
 		"includes": [
 			"lib/**",
-			"!lib/types",
-			"!lib/ui"
+			"tests/**"
 		]
-	}
+	},
+	"overrides": [
+		{
+			"includes": [
+				"tests/**"
+			],
+			"linter": {
+				"rules": {
+					"suspicious": {
+						"noTemplateCurlyInString": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": [
+				"tests/fixtures/**"
+			],
+			"linter": {
+				"enabled": false
+			}
+		}
+	]
 }

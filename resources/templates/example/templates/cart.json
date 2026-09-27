@@ -1,11 +1,25 @@
 {
   "sections": {
     "main": {
-      "type": "main-cart",
-      "settings": {}
+      "type": "empty-state",
+      "settings": {
+        "heading": "Seu carrinho está vazio",
+        "text": "Navegue pelos produtos e encontre o que combina com você.",
+        "action_label": "Ver produtos",
+        "action_link": "/collections/all"
+      }
+    },
+    "shelf_1": {
+      "type": "shelf",
+      "settings": {
+        "title": "Complete the look.",
+        "collection": "all",
+        "limit": 8
+      }
     }
   },
   "order": [
-    "main"
+    "main",
+    "shelf_1"
   ]
 }

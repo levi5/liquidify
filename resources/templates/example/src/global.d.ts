@@ -1,4 +1,5 @@
 import 'liquidify'
+import type { Article, Blog, Cart, Collection, FallbackProps, Page, Product, Shop } from 'liquidify'
 
 declare module 'liquidify' {
   interface Product {
@@ -14,6 +15,17 @@ declare global {
     products: import('liquidify').Product[]
     products_count: number
   }
+  const menu_json: string
 }
 
+export type { Article, Blog, Cart, Collection, FallbackProps, Page, Product, Shop }
 
+export interface LiquidGlobalsExample {
+  blog: Blog
+  article: Article
+  page: Page
+  product: Product
+  collection: Collection
+  cart: Cart
+  shop: Shop
+}

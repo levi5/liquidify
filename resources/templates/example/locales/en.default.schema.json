@@ -1,0 +1,542 @@
+{
+  "settings_schema": {
+    "visual_identity": "Visual identity",
+    "brand_name": {
+      "label": "Logo name"
+    },
+    "primary_color": {
+      "label": "Primary color"
+    },
+    "accent_color": {
+      "label": "Accent color"
+    },
+    "background_color": {
+      "label": "Background color"
+    }
+  },
+  "sections": {
+    "brand_story": {
+      "name": "Brand editorial",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        },
+        "description": {
+          "label": "Description"
+        },
+        "image": {
+          "label": "Image"
+        },
+        "link": {
+          "label": "Link"
+        }
+      },
+      "presets": {
+        "default": "Brand editorial"
+      }
+    },
+    "categories": {
+      "name": "Fashion categories",
+      "settings": {
+        "eyebrow": {
+          "label": "Eyebrow"
+        },
+        "heading": {
+          "label": "Heading"
+        },
+        "intro_1": {
+          "label": "Text (line 1)"
+        },
+        "intro_2": {
+          "label": "Text (line 2)"
+        }
+      },
+      "blocks": {
+        "card": {
+          "name": "Category",
+          "settings": {
+            "image": {
+              "label": "Image"
+            },
+            "image_asset": {
+              "label": "Image from theme",
+              "info": "File name of an asset in assets/, used when no image is picked."
+            },
+            "label": {
+              "label": "Label (optional)"
+            },
+            "title": {
+              "label": "Title"
+            },
+            "url": {
+              "label": "Link"
+            }
+          }
+        }
+      },
+      "presets": {
+        "default": "Fashion categories"
+      }
+    },
+    "collection_list": {
+      "name": "Collection list"
+    },
+    "contact": {
+      "name": "Contact form"
+    },
+    "featured_collection": {
+      "name": "Featured products",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        },
+        "collection": {
+          "label": "Collection"
+        }
+      },
+      "presets": {
+        "default": "Featured products"
+      }
+    },
+    "footer": {
+      "name": "Footer and newsletter",
+      "settings": {
+        "menu": {
+          "label": "Information menu"
+        },
+        "background": {
+          "label": "Background color"
+        }
+      }
+    },
+    "header": {
+      "name": "Header and announcements",
+      "settings": {
+        "announcement": {
+          "label": "Announcement 1"
+        },
+        "announcement_2": {
+          "label": "Announcement 2"
+        },
+        "announcement_3": {
+          "label": "Announcement 3"
+        },
+        "menu": {
+          "label": "Custom menu (optional)"
+        },
+        "women_link": {
+          "label": "Women link"
+        },
+        "men_link": {
+          "label": "Men link"
+        },
+        "accessories_link": {
+          "label": "Accessories link"
+        }
+      },
+      "blocks": {
+        "message": {
+          "name": "Message",
+          "settings": {
+            "text": {
+              "label": "Text"
+            }
+          }
+        }
+      }
+    },
+    "hero": {
+      "name": "Fashion hero",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        },
+        "highlight": {
+          "label": "Highlight"
+        },
+        "description": {
+          "label": "Description"
+        },
+        "button": {
+          "label": "Button"
+        },
+        "link": {
+          "label": "Main link"
+        },
+        "image": {
+          "label": "Women's photo"
+        },
+        "men_image": {
+          "label": "Men's photo"
+        },
+        "women_link": {
+          "label": "Women's link"
+        },
+        "men_link": {
+          "label": "Men's link"
+        }
+      },
+      "presets": {
+        "default": "Fashion hero"
+      }
+    },
+    "info_banner": {
+      "name": "Brand campaign",
+      "settings": {
+        "eyebrow": {
+          "label": "Eyebrow"
+        },
+        "heading": {
+          "label": "Heading"
+        },
+        "description": {
+          "label": "Text"
+        },
+        "button": {
+          "label": "Button text"
+        },
+        "link": {
+          "label": "Button link"
+        },
+        "mark": {
+          "label": "Watermark"
+        },
+        "image": {
+          "label": "Image"
+        },
+        "caption": {
+          "label": "Image caption"
+        }
+      },
+      "presets": {
+        "default": "Brand campaign"
+      }
+    },
+    "main_article": {
+      "name": "Article"
+    },
+    "main_blog": {
+      "name": "Journal"
+    },
+    "main_cart": {
+      "name": "Bag"
+    },
+    "main_collection": {
+      "name": "Catalog",
+      "settings": {
+        "filter_heading": {
+          "label": "Filters"
+        },
+        "products_per_page": {
+          "label": "Products per page"
+        }
+      }
+    },
+    "main_page": {
+      "name": "Page"
+    },
+    "main_product": {
+      "name": "Product details"
+    },
+    "main_search": {
+      "name": "Search results",
+      "settings": {
+        "products_per_page": {
+          "label": "Results per page"
+        }
+      }
+    },
+    "not_found": {
+      "name": "Page not found"
+    },
+    "product_recommendations": {
+      "name": "Related products",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        }
+      },
+      "presets": {
+        "default": "Related products"
+      }
+    },
+    "shelf": {
+      "name": "Product shelf",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        },
+        "collection": {
+          "label": "Collection"
+        },
+        "limit": {
+          "label": "Products per shelf"
+        },
+        "eyebrow": {
+          "label": "Subtitle (eyebrow)"
+        },
+        "title": {
+          "label": "Shelf title"
+        },
+        "subtitle": {
+          "label": "Subtitle"
+        },
+        "view_all_label": {
+          "label": "Link text"
+        },
+        "view_all_link": {
+          "label": "Button link"
+        },
+        "limit": {
+          "label": "Products per shelf"
+        },
+        "columns": {
+          "label": "Columns on desktop"
+        },
+        "columns_tablet": {
+          "label": "Columns on tablet"
+        },
+        "columns_mobile": {
+          "label": "Columns on mobile"
+        },
+        "show_arrows": {
+          "label": "Show arrows"
+        },
+        "show_pagination": {
+          "label": "Show pagination"
+        },
+        "autoplay": {
+          "label": "Advance automatically"
+        },
+        "autoplay_delay": {
+          "label": "Autoplay interval (ms)"
+        }
+      },
+      "presets": {
+        "default": "Product shelf"
+      },
+      "headers": {
+        "slider": "Slider"
+      }
+    },
+    "values": {
+      "name": "Store benefits",
+      "presets": {
+        "default": "Store benefits"
+      }
+    },
+    "banner_hero": {
+      "name": "Hero banner",
+      "settings": {
+        "autoplay": {
+          "label": "Enable autoplay"
+        },
+        "autoplay_speed": {
+          "label": "Speed (seconds)"
+        }
+      },
+      "blocks": {
+        "slider": {
+          "name": "Slide",
+          "settings": {
+            "image": {
+              "label": "Image"
+            },
+            "heading": {
+              "label": "Heading"
+            },
+            "button_label": {
+              "label": "Button text"
+            },
+            "button_link": {
+              "label": "Button link"
+            }
+          }
+        }
+      },
+      "presets": {
+        "default": "Hero banner"
+      }
+    },
+    "collection": {
+      "name": "Collection",
+      "blocks": {
+        "filter_item": {
+          "name": "Filter",
+          "settings": {
+            "title": {
+              "label": "Title"
+            }
+          }
+        }
+      }
+    },
+    "empty_state": {
+      "name": "Empty state",
+      "settings": {
+        "heading": {
+          "label": "Heading"
+        },
+        "text": {
+          "label": "Text"
+        },
+        "action_label": {
+          "label": "Button text"
+        },
+        "action_link": {
+          "label": "Button link"
+        }
+      },
+      "presets": {
+        "default": "Empty state"
+      }
+    },
+    "info_card": {
+      "name": "Info cards",
+      "blocks": {
+        "card": {
+          "name": "Info card",
+          "settings": {
+            "image": {
+              "label": "Image"
+            },
+            "title": {
+              "label": "Title"
+            },
+            "description": {
+              "label": "Description"
+            },
+            "button_label": {
+              "label": "Button text"
+            },
+            "button_link": {
+              "label": "Button link"
+            },
+            "layout": {
+              "label": "Image position",
+              "options": {
+                "left": {
+                  "label": "Image on the left"
+                },
+                "right": {
+                  "label": "Image on the right"
+                }
+              }
+            },
+            "background_color": {
+              "label": "Background color"
+            }
+          }
+        }
+      },
+      "presets": {
+        "default": "Info cards"
+      }
+    },
+    "newsletter": {
+      "name": "Newsletter",
+      "settings": {
+        "eyebrow": {
+          "label": "Eyebrow"
+        },
+        "title_1": {
+          "label": "Title (line 1)"
+        },
+        "title_2": {
+          "label": "Title (line 2)"
+        },
+        "label": {
+          "label": "Field label"
+        },
+        "note": {
+          "label": "Note below the field"
+        },
+        "background": {
+          "label": "Background color"
+        }
+      },
+      "presets": {
+        "default": "Newsletter"
+      }
+    },
+    "product_info": {
+      "name": "Product info",
+      "settings": {
+        "with_thumbnail": {
+          "label": "Show thumbnail"
+        }
+      },
+      "blocks": {
+        "variation": {
+          "name": "Variation",
+          "settings": {
+            "variation": {
+              "label": "Variation name",
+              "info": "E.g. Color, Size, Material"
+            },
+            "mode": {
+              "label": "Selector mode",
+              "options": {
+                "grid": {
+                  "label": "Grid"
+                },
+                "slider": {
+                  "label": "Slider"
+                },
+                "select": {
+                  "label": "Dropdown"
+                }
+              }
+            }
+          }
+        },
+        "benefits": {
+          "name": "Benefit"
+        }
+      }
+    }
+  },
+  "fragments": {
+    "box": {
+      "settings": {
+        "text": {
+          "label": "Text"
+        },
+        "background_color": {
+          "label": "Background color"
+        },
+        "text_color": {
+          "label": "Text color"
+        },
+        "padding_top": {
+          "label": "Padding top"
+        },
+        "padding_right": {
+          "label": "Padding right"
+        },
+        "padding_bottom": {
+          "label": "Padding bottom"
+        },
+        "padding_left": {
+          "label": "Padding left"
+        },
+        "border_radius": {
+          "label": "Corner radius"
+        }
+      }
+    },
+    "picture": {
+      "settings": {
+        "imagemDesktop": {
+          "label": "Desktop image"
+        },
+        "imagemTablet": {
+          "label": "Tablet image"
+        },
+        "imagemMobile": {
+          "label": "Mobile image"
+        }
+      }
+    }
+  }
+}

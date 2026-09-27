@@ -2,10 +2,12 @@ const esbuild = require('esbuild')
 const { ReactRuntimeBuilder } = require('../../dist/infra/adapters/compilers/react/runtime/runtime-builder')
 const { ReactComponentCompiler } = require('../../dist/infra/adapters/compilers/react/component-compiler')
 const { CssInjector } = require('../../dist/infra/adapters/compilers/react/runtime/css-injector')
+const { SilentLogger } = require('../../dist/shared/logger')
 
 const buildRuntimeScript = (compiler = esbuild) => new ReactRuntimeBuilder(compiler).build()
 
-const createComponentCompiler = (options) => new ReactComponentCompiler(esbuild, new CssInjector(), options)
+const createComponentCompiler = (options = {}) =>
+  new ReactComponentCompiler(esbuild, new CssInjector(), options, process.cwd(), new SilentLogger())
 
 const mockPreactCompiler = () => ({
   build: (options) =>

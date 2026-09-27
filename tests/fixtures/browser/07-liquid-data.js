@@ -17,7 +17,10 @@ window.scenarios.push({
     dataNode.removeAttribute('data-liquid-value')
     for (const value of cases) {
       dataParent.setAttribute('data-liquid-value', JSON.stringify(value))
-      check(JSON.stringify(window.LiquidifyGetProps(dataNode).value) === JSON.stringify(value), 'Inherited Liquid values must preserve type')
+      check(
+        JSON.stringify(window.LiquidifyGetProps(dataNode).value) === JSON.stringify(value),
+        'Inherited Liquid values must preserve type',
+      )
     }
 
     dataParent.setAttribute('data-liquid-value', '[1,2]')

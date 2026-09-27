@@ -36,8 +36,10 @@ window.registerLiquidifyAction = (name, handler) => {
 }
 
 const eventSubscriptions = new WeakMap()
+const subscriberCounts = new Map()
+const pendingEmits = new Map()
 window.LiquidifyEvents = {
-  on(event, callback) {
+  on(event: string, callback: (data: any) => void) {
     let events = eventSubscriptions.get(callback)
     if (!events) {
       events = new Map()
@@ -48,17 +50,21 @@ window.LiquidifyEvents = {
       handlers = new Set()
       events.set(event, handlers)
     }
-    const handler = (e) => callback(e.detail)
+    const handler = (e: Event) => callback((e as CustomEvent).detail)
     handlers.add(handler)
+    subscriberCounts.set(event, (subscriberCounts.get(event) || 0) + 1)
     window.addEventListener(event, handler)
     return () => {
       window.removeEventListener(event, handler)
       handlers.delete(handler)
       if (!handlers.size && events.get(event) === handlers) events.delete(event)
       if (!events.size && eventSubscriptions.get(callback) === events) eventSubscriptions.delete(callback)
+      const left = (subscriberCounts.get(event) || 1) - 1
+      if (left > 0) subscriberCounts.set(event, left)
+      else subscriberCounts.delete(event)
     }
   },
-  off(event, callback) {
+  off(event: string, callback: (data: any) => void) {
     const events = eventSubscriptions.get(callback)
     const handlers = events?.get(event)
     if (!handlers) return
@@ -66,8 +72,14 @@ window.LiquidifyEvents = {
     handlers.clear()
     events.delete(event)
     if (!events.size) eventSubscriptions.delete(callback)
+    subscriberCounts.delete(event)
   },
-  emit(event, data) {
+  emit(event: string, data: any) {
+    if (!subscriberCounts.get(event)) {
+      const queued = pendingEmits.get(event)
+      if (queued) queued.push(data)
+      else pendingEmits.set(event, [data])
+    }
     const ev = new CustomEvent(event, {
       detail: data,
       bubbles: true,
@@ -78,14 +90,21 @@ window.LiquidifyEvents = {
 }
 window.LiquidxEvents = window.LiquidifyEvents
 
-window.LiquidifyUseEvent = (event, callback) => {
+window.LiquidifyTakePendingEvents = (event) => {
+  const queued = pendingEmits.get(event)
+  pendingEmits.delete(event)
+  return queued || []
+}
+;(window as any).LiquidxTakePendingEvents = window.LiquidifyTakePendingEvents
+
+window.LiquidifyUseEvent = (event: string, callback: (data: any) => void) => {
   const savedCallback = React.useRef(callback)
   React.useEffect(() => {
     savedCallback.current = callback
   }, [callback])
 
   React.useEffect(() => {
-    const listener = (data) => {
+    const listener = (data: any) => {
       if (savedCallback.current) savedCallback.current(data)
     }
     return window.LiquidifyEvents.on(event, listener)
@@ -93,21 +112,21 @@ window.LiquidifyUseEvent = (event, callback) => {
 }
 window.LiquidxUseEvent = window.LiquidifyUseEvent
 
-window.LiquidifyEmitEvent = (event, data) => {
+window.LiquidifyEmitEvent = (event: string, data: any) => {
   window.LiquidifyEvents.emit(event, data)
 }
 window.LiquidxEmitEvent = window.LiquidifyEmitEvent
 
 const suspendedSections = new WeakSet()
-window.LiquidifyCanMount = (container) => {
+window.LiquidifyCanMount = (container: Element) => {
   if (!container.isConnected) return false
-  for (let node = container; node; node = node.parentElement) {
+  for (let node = container; node; node = node.parentElement as Element) {
     if (suspendedSections.has(node)) return false
   }
   return true
 }
-window.LiquidifyMount = (container, name = container.getAttribute('component')) => {
-  clearTimeout(container._unmountTimeout)
+window.LiquidifyMount = (container: Element, name = container.getAttribute('component')) => {
+  clearTimeout(container._unmountTimeout as ReturnType<typeof setTimeout>)
   container._unmountTimeout = null
   container._liquidifyReadyCleanup?.()
   if (!name || !window.LiquidifyCanMount(container)) return
@@ -127,14 +146,15 @@ window.LiquidifyMount = (container, name = container.getAttribute('component')) 
     document.addEventListener('liquidx:ready:' + name, mount)
   }
 }
-window.LiquidifyUnmount = (container) => {
-  clearTimeout(container._unmountTimeout)
+window.LiquidifyUnmount = (container: Element) => {
+  clearTimeout(container._unmountTimeout as ReturnType<typeof setTimeout>)
   container._unmountTimeout = null
   container._liquidifyReadyCleanup?.()
   container._liquidifyObserver?.disconnect()
   delete container._liquidifyObserver
   if (container._reactRoot) {
-    const result = _try.sync(() => container._reactRoot.unmount())
+    const root = container._reactRoot
+    const result = _try.sync(() => root.unmount())
     if (result.isLeft()) console.error('[Liquidify] Root unmount failed. Check effect cleanup functions.', container, result.value)
     delete container._reactRoot
   }
@@ -168,7 +188,7 @@ const updateRoots = () => {
     window.LiquidifyMount(container, componentName)
   }
 }
-window.LiquidifyRegisterRoot = (id, componentName) => {
+window.LiquidifyRegisterRoot = (id: string, componentName: string) => {
   registeredRoots.set(id, componentName)
   if (!rootObserver) {
     rootObserver = new MutationObserver(updateRoots)
@@ -184,7 +204,7 @@ const sectionRoots = (section) => {
 }
 if (typeof document !== 'undefined') {
   document.addEventListener('shopify:section:unload', (event) => {
-    const section = event.target
+    const section = event.target as Element | null
     if (!section || section.nodeType !== 1) return
     suspendedSections.add(section)
     for (const container of sectionRoots(section)) {
@@ -194,7 +214,7 @@ if (typeof document !== 'undefined') {
     }
   })
   document.addEventListener('shopify:section:load', (event) => {
-    const section = event.target
+    const section = event.target as Element | null
     if (!section || section.nodeType !== 1) return
     suspendedSections.delete(section)
     for (const container of sectionRoots(section)) {

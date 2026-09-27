@@ -1,3 +1,5 @@
+import { _match } from 'funcio'
+
 export class HTMLAttributeConverter {
   private readonly SPECIAL_CASES: Record<string, string> = {
     className: 'class',
@@ -5,25 +7,25 @@ export class HTMLAttributeConverter {
   }
 
   public toHtmlAttribute(name: string): string {
-    if (!name) return name
-    if (name === 'key' || name === 'ref') return ''
-
-    if (this.SPECIAL_CASES[name]) return this.SPECIAL_CASES[name]
-
-    if (name.startsWith('data-') || name.startsWith('aria-')) return name
-
-    if (name.startsWith('on') && name[2] === name[2]?.toUpperCase()) return name.toLowerCase()
-
-    return name.toLowerCase()
+    return _match(true)
+      .with(!name, () => name)
+      .with(name === 'key' || name === 'ref', () => '')
+      .with(this.SPECIAL_CASES[name] !== undefined, () => this.SPECIAL_CASES[name])
+      .with(name.startsWith('data-') || name.startsWith('aria-'), () => name)
+      .with(name.startsWith('on') && name[2] === name[2]?.toUpperCase(), () => name.toLowerCase())
+      .with(true, () => name.toLowerCase())
+      .exec() as string
   }
 
-  public convertProps(props: Record<string, any>): Record<string, any> {
-    return Object.entries(props).reduce<Record<string, any>>((acc, [key, value]) => {
-      const htmlKey = this.toHtmlAttribute(key)
-      if (!htmlKey) return acc
+  public convertProps(props: Record<string, unknown>): Record<string, unknown> {
+    return Object.entries(props).reduce<Record<string, unknown>>((acc, [key, value]) => this.assignProp(acc, key, value), {})
+  }
 
-      acc[htmlKey] = value
-      return acc
-    }, {})
+  private assignProp(acc: Record<string, unknown>, key: string, value: unknown): Record<string, unknown> {
+    const htmlKey = this.toHtmlAttribute(key)
+    return _match(htmlKey === '')
+      .with(true, () => acc)
+      .with(false, () => ({ ...acc, [htmlKey]: value }))
+      .exec() as Record<string, unknown>
   }
 }

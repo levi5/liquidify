@@ -9,7 +9,9 @@ export function ShopifyProbe({ label }) {
       window.sectionPings = (window.sectionPings || 0) + 1
     })
     const unregister = registerLiquidifyAction('section-action', () => {})
-    const timer = setInterval(() => { window.sectionTicks = (window.sectionTicks || 0) + 1 }, 20)
+    const timer = setInterval(() => {
+      window.sectionTicks = (window.sectionTicks || 0) + 1
+    }, 20)
     return () => {
       unsubscribe()
       unregister()
@@ -17,5 +19,9 @@ export function ShopifyProbe({ label }) {
       window.sectionCleanups = (window.sectionCleanups || 0) + 1
     }
   }, [])
-  return <button className="section-counter" onClick={() => setClicks(clicks + 1)}>{label}: {clicks}</button>
+  return (
+    <button className='section-counter' onClick={() => setClicks(clicks + 1)}>
+      {label}: {clicks}
+    </button>
+  )
 }

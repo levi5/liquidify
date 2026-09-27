@@ -1,4 +1,4 @@
 {
-  "componentsDir": "src/components",
+  "componentsDir": "src/app",
   "output": "."
 }

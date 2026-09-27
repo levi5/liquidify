@@ -1,10 +1,19 @@
 import generate from '@babel/generator'
+import { _match } from 'funcio'
 import { escapeHtml, jsonForHtml, liquidJsonOutput } from '../../../../../shared/html'
 import type { ReactComponentConfig } from '../../../../../types/liquid'
-import type { ImportResolver } from './import-resolver'
-import type { Expression, JSXElement, JSXEmptyExpression } from '@babel/types'
+import type { ImportResolver, ImportInfo } from './import-resolver'
+import type { Expression, JSXAttribute, JSXElement, JSXEmptyExpression, JSXExpressionContainer, Node } from '@babel/types'
+import { isJSXAttribute, isJSXExpressionContainer, isJSXIdentifier, isStringLiteral } from '@babel/types'
+import { evaluateStatic, NOT_STATIC, type StaticValue } from '../css/import-extractor'
 
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+
+interface CollectedProps {
+  props: string[]
+  elementId: string
+  eager: boolean
+}
 
 export class ReactComponentParser {
   constructor(
@@ -20,96 +29,141 @@ export class ReactComponentParser {
   ) {}
 
   public transformReactComponent(node: JSXElement, tagName: string, context?: ParsingContext): string {
-    const registry = this.getReactRegistry()
-    if (!registry.has(tagName)) {
-      return ''
-    }
+    const config = this.getReactRegistry().get(tagName)
+    return _match(config === undefined)
+      .with(true, () => '')
+      .with(false, () => this.renderIsland(node, tagName, config as ReactComponentConfig, context))
+      .exec() as string
+  }
 
+  private renderIsland(node: JSXElement, tagName: string, config: ReactComponentConfig, context?: ParsingContext): string {
     this.addScriptAsset(tagName, context)
-    const config = registry.get(tagName)!
+    return _match(!config.rootId)
+      .with(true, () => this.renderHydrated(node, tagName, context))
+      .with(false, () => `<div id="${escapeHtml(config.rootId as string)}"></div>`)
+      .exec() as string
+  }
 
-    if (config.rootId) {
-      return `<div id="${escapeHtml(config.rootId)}"></div>`
+  private renderHydrated(node: JSXElement, tagName: string, context?: ParsingContext): string {
+    const collected = node.openingElement.attributes.reduce((acc, attr) => this.collectProp(acc, attr, context), {
+      props: [] as string[],
+      elementId: '',
+      eager: false,
+    })
+    const children = this.renderChildren(node.children, undefined, context)
+    const body = _match(collected.props.length > 0)
+      .with(true, () => `<script type="application/json" data-react-props>{${collected.props.join(', ')}}</script>${children}`)
+      .with(false, () => children)
+      .exec() as string
+    const eagerAttr = _match(collected.eager)
+      .with(true, () => ' data-hydrate="eager"')
+      .with(false, () => '')
+      .exec() as string
+    return `<react-island${collected.elementId}${eagerAttr} style="display: flex;" component="${tagName}">${body}</react-island>`
+  }
+
+  private collectProp(
+    acc: CollectedProps,
+    attr: JSXElement['openingElement']['attributes'][number],
+    context?: ParsingContext,
+  ): CollectedProps {
+    return _match(isJSXAttribute(attr) && isJSXIdentifier(attr.name))
+      .with(true, () => this.applyProp(acc, attr as JSXAttribute, context))
+      .with(false, () => acc)
+      .exec() as CollectedProps
+  }
+
+  private applyProp(acc: CollectedProps, attr: JSXAttribute, context?: ParsingContext): CollectedProps {
+    const propName = (attr.name as { name: string }).name
+    return _match(propName)
+      .with('elementId', () => this.collectElementId(acc, attr, context))
+      .with('eager', () => ({ ...acc, eager: true }))
+      .with(propName, () => ({ ...acc, props: [...acc.props, `"${propName}": ${this.propValueOf(attr, context)}`] }))
+      .exec() as CollectedProps
+  }
+
+  private collectElementId(acc: CollectedProps, attr: JSXAttribute, context?: ParsingContext): CollectedProps {
+    const elementId = this.elementIdOf(attr)
+
+    return {
+      ...acc,
+      elementId,
+      props: elementId ? [...acc.props, `"elementId": ${this.propValueOf(attr, context)}`] : acc.props,
     }
+  }
 
-    const propsObj: string[] = []
-    let elementId = ''
-    let eagerHydration = false
+  private propValueOf(attr: JSXAttribute, context?: ParsingContext): string {
+    return _match(true)
+      .with(isStringLiteral(attr.value), () => jsonForHtml((attr.value as { value: string }).value))
+      .with(isJSXExpressionContainer(attr.value), () =>
+        this.parseExpressionContainer(
+          (attr.value as JSXExpressionContainer).expression as Expression | JSXEmptyExpression,
+          'true',
+          context,
+        ),
+      )
+      .with(true, () => 'true')
+      .exec() as string
+  }
 
-    if (node.openingElement.attributes.length > 0) {
-      for (const attr of node.openingElement.attributes) {
-        if (attr.type === 'JSXAttribute' && attr.name.type === 'JSXIdentifier') {
-          const propName = attr.name.name
-          let propValue: string = 'true'
+  private elementIdOf(attr: JSXAttribute): string {
+    const expression = this.expressionIdOf(attr.value)
+    return _match(true)
+      .with(isStringLiteral(attr.value), () => ` id="${escapeHtml((attr.value as { value: string }).value)}"`)
+      .with(expression !== undefined, () => ` id="{{ ${generate(expression as Expression).code} | escape }}"`)
+      .with(true, () => '')
+      .exec() as string
+  }
 
-          if (attr.value) {
-            if (attr.value.type === 'StringLiteral') {
-              propValue = jsonForHtml(attr.value.value)
-            } else if (attr.value.type === 'JSXExpressionContainer') {
-              propValue = this.parseExpressionContainer(attr.value.expression, propValue, context)
-            }
-          }
-
-          if (propName === 'elementId') {
-            elementId =
-              attr.value?.type === 'StringLiteral'
-                ? ` id="${escapeHtml(attr.value.value)}"`
-                : ` id="{{ ${generate((attr.value as any).expression).code} | escape }}"`
-          } else if (propName === 'eager') {
-            eagerHydration = true
-          } else {
-            propsObj.push(`"${propName}": ${propValue}`)
-          }
-        }
-      }
-    }
-
-    let childrenHTML = this.renderChildren(node.children, undefined, context)
-
-    if (propsObj.length > 0) {
-      childrenHTML = `<script type="application/json" data-react-props>{${propsObj.join(', ')}}</script>${childrenHTML}`
-    }
-
-    const eagerAttr = eagerHydration ? ' data-hydrate="eager"' : ''
-    return `<react-island${elementId}${eagerAttr} style="display: flex;" component="${tagName}">${childrenHTML}</react-island>`
+  private expressionIdOf(value: JSXAttribute['value']): Expression | undefined {
+    return _match(isJSXExpressionContainer(value) && (value as JSXExpressionContainer).expression.type !== 'JSXEmptyExpression')
+      .with(true, () => (value as JSXExpressionContainer).expression as Expression)
+      .with(false, () => undefined)
+      .exec() as Expression | undefined
   }
 
   private parseExpressionContainer(expression: Expression | JSXEmptyExpression, fallbackValue: string, context?: ParsingContext): string {
-    if (expression.type === 'StringLiteral' || expression.type === 'NumericLiteral' || expression.type === 'BooleanLiteral') {
-      return jsonForHtml(expression.value)
-    }
+    return _match(true)
+      .with(expression.type === 'StringLiteral' || expression.type === 'NumericLiteral' || expression.type === 'BooleanLiteral', () =>
+        jsonForHtml((expression as { value: string | number | boolean }).value),
+      )
+      .with(expression.type === 'ObjectExpression' || expression.type === 'ArrayExpression', () => this.staticPropValue(expression as Node))
+      .with(expression.type === 'Identifier', () => this.identifierPropValue(expression as Expression, context))
+      .with(expression.type === 'MemberExpression', () => liquidJsonOutput(generate(expression as Expression).code))
+      .with(true, () => fallbackValue)
+      .exec() as string
+  }
 
-    if (expression.type === 'ObjectExpression' || expression.type === 'ArrayExpression') {
-      const code = generate(expression).code
-      try {
-        const evaluated = new Function(`return ${code}`)()
-        return jsonForHtml(evaluated)
-      } catch (error) {
-        console.info(error)
-        return liquidJsonOutput(code)
-      }
-    }
+  private staticPropValue(expression: Node): string {
+    const evaluated = evaluateStatic(expression)
+    return _match(evaluated === NOT_STATIC)
+      .with(true, () => liquidJsonOutput(generate(expression as Expression).code))
+      .with(false, () => jsonForHtml((evaluated as StaticValue) === undefined ? null : evaluated))
+      .exec() as string
+  }
 
-    if (expression.type === 'Identifier') {
-      const name = expression.name
-      const imports = this.importResolver.getImports()
-      const currentFilePath = context?.currentFilePath || this.getCurrentFilePath()
+  private identifierPropValue(expression: Expression, context?: ParsingContext): string {
+    const name = (expression as { name: string }).name
+    const currentFilePath = context?.currentFilePath || this.getCurrentFilePath()
+    return _match(!currentFilePath)
+      .with(true, () => liquidJsonOutput(name))
+      .with(false, () => this.importedPropValue(name, currentFilePath as string))
+      .exec() as string
+  }
 
-      if (currentFilePath && imports.has(name)) {
-        const imported = imports.get(name)!
-        const resolvedValue = this.importResolver.resolveExternalVariable(imported.source, imported.specifierName, currentFilePath)
-        if (resolvedValue !== null) {
-          return jsonForHtml(resolvedValue)
-        }
-      }
-      return liquidJsonOutput(name)
-    }
+  private importedPropValue(name: string, currentFilePath: string): string {
+    const imported = this.importResolver.getImports().get(name)
+    return _match(imported === undefined)
+      .with(true, () => liquidJsonOutput(name))
+      .with(false, () => this.resolvedPropValue(imported as ImportInfo, name, currentFilePath))
+      .exec() as string
+  }
 
-    if (expression.type === 'MemberExpression') {
-      const code = generate(expression).code
-      return liquidJsonOutput(code)
-    }
-
-    return fallbackValue
+  private resolvedPropValue(imported: ImportInfo, name: string, currentFilePath: string): string {
+    const resolvedValue = this.importResolver.resolveExternalVariable(imported.source, imported.specifierName, currentFilePath)
+    return _match(resolvedValue === null)
+      .with(true, () => liquidJsonOutput(name))
+      .with(false, () => jsonForHtml(resolvedValue))
+      .exec() as string
   }
 }

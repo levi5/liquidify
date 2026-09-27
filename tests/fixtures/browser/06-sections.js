@@ -21,7 +21,8 @@ window.scenarios.push({
 
     const unaffectedRoot = document.querySelector('react-island[component="ImportProbe"]')._reactRoot
     const mountedRoot = editorIsland._reactRoot
-    const emitSection = (type) => section.dispatchEvent(new CustomEvent('shopify:section:' + type, { bubbles: true, detail: { sectionId: 'test' } }))
+    const emitSection = (type) =>
+      section.dispatchEvent(new CustomEvent('shopify:section:' + type, { bubbles: true, detail: { sectionId: 'test' } }))
     emitSection('load')
     emitSection('load')
     check(editorIsland._reactRoot === mountedRoot && window.sectionMounts === 1, 'Repeated section load must not duplicate roots')
@@ -42,8 +43,14 @@ window.scenarios.push({
     emitSection('unload')
     emitSection('unload')
     check(!editorIsland._reactRoot && !replacementRoot._reactRoot, 'Section unload must immediately unmount islands and ID roots')
-    check(!lateIsland._liquidifyReadyCleanup && !pendingIsland._liquidifyObserver, 'Section unload must cancel pending listeners and observers')
-    check(window.sectionCleanups === 1 && !window.LiquidifyActions.has('section-action'), 'Effects and registered actions must clean up exactly once')
+    check(
+      !lateIsland._liquidifyReadyCleanup && !pendingIsland._liquidifyObserver,
+      'Section unload must cancel pending listeners and observers',
+    )
+    check(
+      window.sectionCleanups === 1 && !window.LiquidifyActions.has('section-action'),
+      'Effects and registered actions must clean up exactly once',
+    )
 
     const stoppedTicks = window.sectionTicks
     window.LiquidifyEvents.emit('section:ping')
@@ -51,14 +58,20 @@ window.scenarios.push({
     await wait()
     check(window.sectionPings === 1 && window.sectionTicks === stoppedTicks, 'Unloaded sections must release subscriptions and timers')
     check(!editorIsland._reactRoot && !replacementRoot._reactRoot, 'DOM mutations must not remount an unloaded section')
-    check(document.querySelector('react-island[component="ImportProbe"]')._reactRoot === unaffectedRoot, 'Other sections must remain mounted')
+    check(
+      document.querySelector('react-island[component="ImportProbe"]')._reactRoot === unaffectedRoot,
+      'Other sections must remain mounted',
+    )
 
     pendingIsland.remove()
     setSectionProps('Depois')
     replacementRoot.textContent = 'Dados atualizados'
     emitSection('load')
     await wait()
-    check(editorIsland.textContent === 'Depois: 0' && replacementRoot.textContent === 'Dados atualizados', 'Section reload must use fresh props and ID root content')
+    check(
+      editorIsland.textContent === 'Depois: 0' && replacementRoot.textContent === 'Dados atualizados',
+      'Section reload must use fresh props and ID root content',
+    )
     check(window.sectionMounts === 2, 'Section must remount once after unload')
 
     editorIsland.querySelector('button').click()

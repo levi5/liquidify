@@ -4,9 +4,23 @@ export interface TranspileOptions {
   minify?: boolean
 }
 
-export type BuildOptions = any
+export interface EsbuildOptions {
+  entryPoints?: string[]
+  bundle?: boolean
+  outfile?: string
+  write?: boolean
+  plugins?: unknown[]
+  [key: string]: unknown
+}
+
+export interface BuildResult {
+  outputFiles?: { path: string; text: string }[]
+  [key: string]: unknown
+}
+
+export type BuildOptions = EsbuildOptions & Record<string, unknown>
 
 export interface Compiler {
   transpileSync(code: string, options?: TranspileOptions): { code: string }
-  build(options: BuildOptions): Promise<any>
+  build(options: BuildOptions): Promise<BuildResult>
 }

@@ -26,7 +26,11 @@ describe('ConfigLoader', () => {
     fs.writeFileSync(path.join(cwd, '.liquidifyrc.json'), JSON.stringify({ output: 'ignored' }))
     fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ componentsDir: 'src/components', output: '.' }))
 
-    assert.deepEqual(ConfigLoader.load(cwd), { ...DEFAULT_CONFIG, componentsDir: 'src/components', output: '.' })
+    assert.deepEqual(ConfigLoader.load(cwd), {
+      ...DEFAULT_CONFIG,
+      componentsDir: path.resolve(cwd, 'src/components'),
+      output: path.resolve(cwd, '.'),
+    })
   })
 
   it('rejects corrupt configuration with its file path', () => {
@@ -76,5 +80,29 @@ describe('React configuration validation', () => {
   it('does not share mutable defaults between loads', () => {
     loadConfig(cwd).react.strictCsp = false
     assert.equal(loadConfig(cwd).react.strictCsp, true)
+  })
+
+  it('loads an explicit config file path', () => {
+    const file = path.join(cwd, 'custom.json')
+    fs.writeFileSync(file, JSON.stringify({ componentsDir: 'src/components', output: '.' }))
+    const config = loadConfig(cwd, file)
+    assert.equal(config.output, path.resolve(cwd, '.'))
+    assert.deepEqual(ConfigLoader.loadFromFile(file), config)
+  })
+
+  it('rejects a missing explicit config file', () => {
+    assert.throws(() => loadConfig(cwd, path.join(cwd, 'missing.json')), ValidationError)
+  })
+
+  it('suggests similar key names on typos', () => {
+    fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ componentDir: 'src' }))
+    assert.throws(
+      () => loadConfig(cwd),
+      (error) => {
+        assert.ok(error instanceof ValidationError)
+        assert.match(error.message, /Did you mean "componentsDir"/)
+        return true
+      },
+    )
   })
 })

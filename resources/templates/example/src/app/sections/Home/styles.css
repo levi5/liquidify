@@ -1,0 +1,64 @@
+.homeBannerHero {
+	max-width: 1440px;
+	width: 100%;
+	margin: 0 auto;
+
+	padding-top: 2.5rem;
+}
+
+@media (max-width: 680px) {
+	.homeBannerHero {
+		padding-top: 1.5rem;
+	}
+}
+
+.homeBannerHero .benefitsWrapper {
+	padding: 1.6rem;
+	background-color: #edededb3;
+	display: flex;
+	align-items: center;
+}
+
+.homeBannerHero .benefits {
+	max-width: 120rem;
+	width: 100%;
+	margin: 0 auto;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	overflow: hidden;
+	scroll-behavior: smooth;
+	transition: 0.3s ease;
+	gap: 4rem;
+}
+
+.homeBannerHero .benefits .benefit {
+	flex: 0 0 auto;
+	display: flex;
+	align-items: center;
+	font-size: 1.4rem;
+	white-space: nowrap;
+	gap: 1rem;
+}
+
+.homeBannerHero .benefitsWrapper .nav {
+	width: 2.4rem;
+	height: 2.4rem;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: none;
+	cursor: pointer;
+	background-color: transparent;
+}
+.homeBannerHero .benefitsWrapper .nav.hidden {
+	display: none;
+}
+
+.homeBannerHero .benefitsWrapper .nav svg {
+	width: 1.8rem;
+	height: 1.8rem;
+	color: black;
+}

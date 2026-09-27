@@ -1,0 +1,89 @@
+.infoCard {
+	max-width: 150rem;
+	width: 100%;
+	margin: 0 auto;
+	margin-top: 9rem;
+}
+
+.infoCard .infoCardWrapper {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+
+.infoCard .infoCardWrapper.infoCardWLeft {
+	flex-direction: row;
+}
+
+.infoCard .infoCardWrapper.infoCardWRight {
+	flex-direction: row-reverse;
+}
+
+.infoCard .infoCardImage,
+.infoCard .infoCardText {
+	width: 100%;
+}
+
+.infoCard .infoCardImage img {
+	width: 100%;
+	height: auto;
+	object-fit: fill;
+}
+
+.infoCard .infoCardText {
+	max-width: 39rem;
+	padding: 3rem 1rem;
+	margin: auto;
+	display: flex;
+	flex-direction: column;
+}
+
+.infoCard .infoCardText .infoCardTitle {
+	font-size: 2.8rem;
+	font-weight: 500;
+	line-height: 3.6rem;
+}
+
+.infoCard .infoCardText .infoCardButton,
+.infoCard .infoCardText .infoCardDescription {
+	margin-top: 1.6rem;
+	font-size: 1.4rem;
+	line-height: 2rem;
+}
+
+.infoCard .infoCardText .infoCardButton {
+	width: fit-content;
+	padding: 1.2rem 1.6rem;
+	color: white;
+	border-radius: 3rem;
+	text-decoration: none;
+	background-color: black;
+}
+
+@media screen and (min-width: 48em) {
+	.infoCard .infoCardWrapper {
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.infoCard .infoCardImage,
+	.infoCard .infoCardText {
+		width: 50%;
+	}
+
+	.infoCard .infoCardText {
+		padding: 2rem 1rem;
+	}
+}
+.infoCardNoImage .infoCardText {
+	max-width: none;
+	padding-inline: 3rem;
+}
+
+.infoCardEmpty {
+	padding: 3rem 1rem;
+	text-align: center;
+	font-size: 13px;
+	color: var(--muted);
+}

@@ -3,9 +3,13 @@ import assert from 'node:assert/strict'
 import { parseExpression } from '@babel/parser'
 import { ExpressionParser } from '../dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
 import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
+import { ReactComponentCompiler } from '../dist/infra/adapters/compilers/react/component-compiler.js'
 import { ParsingContext } from '../dist/core/entities/parsing-context.js'
-import { detectDirectives, ComponentRegistry } from '../dist/application/services/component-registry.js'
+import { ComponentRegistry, DirectiveScanner } from '../dist/application/services/component-registry.js'
 import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
+
+const scanner = () => new DirectiveScanner(new ASTParser())
+const detectDirectives = (source) => scanner().scan(source)
 
 const expressions = () =>
   new ExpressionParser(new EsbuildCompiler(), { getCssModules: () => new Map() }, { isMapCallExpression: () => false })
@@ -29,7 +33,7 @@ test('arithmetic preserves the precedence of nested operands and renames', () =>
 })
 
 test('unsupported find predicates report location and a useful diagnostic', () => {
-  for (const source of ['items.find(predicate)', 'items.find()', 'items.find(item => { return item.available })']) {
+  for (const source of ['items.find(predicate)', 'items.find()', 'items.find(item => { const x = 1; return x; })']) {
     assert.throws(
       () =>
         expressions().generateLiquidCode(
@@ -77,6 +81,7 @@ test('registry rejects duplicate names and normalized script name collisions', a
     const registry = new ComponentRegistry(
       { parse: async () => ({ name: names[index++], mode: 'react' }) },
       { readFileSync: () => '"use react"' },
+      scanner(),
     )
     await assert.rejects(registry.scan(['/a.tsx', '/b.tsx']), /name conflict/)
   }
@@ -87,7 +92,55 @@ test('mixed conditions produce nested Liquid conditions instead of boolean assig
   const result = expressions().generateLiquidCode(parseExpression('a && (b || c)'), true, undefined, context)
   assert.equal(result, '__liquidify_condition_0')
   const markup = context.getPendingAssigns()
-  assert.match(markup, /{% if a %}{% if b %}/)
-  assert.match(markup, /{% if c %}/)
+  assert.match(markup, /{% if a != nil and a != false and a != 0 and a != "" %}{% if b != nil and b != false and b != 0 and b != "" %}/)
+  assert.match(markup, /{% if c != nil and c != false and c != 0 and c != "" %}/)
   assert.doesNotMatch(markup, /assign [^%]*(?: and | or )/)
+})
+
+test('negated conditions never emit parentheses rejected by Shopify', () => {
+  const single = expressions().generateLiquidCode(parseExpression('!current_tags'), true, undefined, new ParsingContext())
+  assert.equal(single, 'current_tags == nil or current_tags == false or current_tags == 0 or current_tags == ""')
+
+  const orChain = expressions().generateLiquidCode(
+    parseExpression('!blocks || blocks.size == 0'),
+    true,
+    undefined,
+    new ParsingContext(),
+  )
+  assert.equal(orChain, 'blocks == nil or blocks == false or blocks == 0 or blocks == "" or blocks.size == 0')
+  assert.doesNotMatch(orChain, /[()]/)
+})
+
+test('negation mixed with && stabilizes via nested conditions instead of parentheses', () => {
+  const context = new ParsingContext()
+  const result = expressions().generateLiquidCode(parseExpression('!a && b'), true, undefined, context)
+  assert.equal(result, '__liquidify_condition_0')
+  const markup = context.getPendingAssigns()
+  assert.doesNotMatch(markup, /[()]/)
+  assert.doesNotMatch(markup, /{% if [^%]* and [^%]* or [^%]*%}/)
+  assert.doesNotMatch(markup, /{% if [^%]* or [^%]* and [^%]*%}/)
+})
+
+test('react components reject raw Liquid storefront tags', async () => {
+  const compiler = new ReactComponentCompiler(
+    { build: async () => ({ outputFiles: [{ path: 'out.js', text: '' }] }) },
+    { build: () => '', buildCall: () => '' },
+    {},
+    '/tmp',
+    { warn: () => {}, error: () => {} },
+  )
+  await assert.rejects(
+    compiler.compile(
+      { name: 'SearchDrawer' },
+      `export const SearchDrawer = () => <form action='{{ routes.search_url }}' />`,
+      '/theme/SearchDrawer.tsx',
+    ),
+    (error) => {
+      assert.equal(error.name, 'ValidationError')
+      assert.equal(error.filePath, '/theme/SearchDrawer.tsx')
+      assert.match(error.message, /rootUrl/)
+      return true
+    },
+  )
+  await compiler.compile({ name: 'SearchDrawer' }, `export const SearchDrawer = () => <form action='/search' />`)
 })

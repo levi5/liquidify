@@ -1,0 +1,216 @@
+.catalog-sidebar {
+  border: 0.1rem solid var(--line);
+  border-radius: 0.8rem;
+  padding: 2.2rem;
+  min-width: 0;
+}
+
+.sidebar-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.2rem;
+  font-size: 1.7rem;
+  font-weight: 600;
+  min-height: 2.8rem;
+}
+
+.sidebar-toggle > span {
+  font-size: 2rem;
+  font-weight: 400;
+}
+
+.sidebar-sections[open] > .sidebar-toggle > span {
+  transform: rotate(45deg);
+}
+
+.sidebar-filter-group {
+  border-top: 0.1rem solid var(--line);
+  margin-top: 2rem;
+  padding-top: 0.5rem;
+}
+
+.sidebar-filter-group > summary {
+  display: flex;
+  justify-content: space-between;
+  gap: 1.2rem;
+  align-items: center;
+  padding: 1.4rem 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.sidebar-filter-group[open] > summary > span {
+  transform: rotate(45deg);
+}
+
+.sidebar-filter-values {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+  padding-bottom: 0.8rem;
+  max-height: 29rem;
+  overflow: auto;
+}
+
+.sidebar-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  font-size: 1.1rem;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.sidebar-option input {
+  margin: 0.2rem 0 0;
+  flex-shrink: 0;
+}
+
+.sidebar-option small {
+  color: var(--muted);
+  font-size: 1rem;
+}
+
+.sidebar-price-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.sidebar-price-fields label {
+  font-size: 1.1rem;
+}
+
+.sidebar-price-fields input {
+  width: 100%;
+  padding: 1rem 0.8rem;
+  border-radius: 0.4rem;
+  margin-top: 0.6rem;
+  font-size: 1.2rem;
+}
+
+.sidebar-filter-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.7rem;
+  align-items: flex-start;
+  margin-top: 2.4rem;
+}
+
+.sidebar-filter-actions .button {
+  width: 100%;
+  justify-content: center;
+  min-height: 4.3rem;
+  padding: 1rem;
+  font-size: 1.1rem;
+}
+
+.sidebar-filter-actions .text-link {
+  font-size: 1rem;
+}
+
+.sidebar-empty {
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin-top: 1rem;
+}
+
+.collection-filter-dialog {
+  position: fixed;
+  inset: 0;
+  margin: 0 auto 0 0;
+  width: min(88vw, 38rem);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: 1.2rem 0 4rem #00000012;
+}
+
+.collection-filter-dialog:not([open]) {
+  display: none;
+}
+
+.collection-filter-dialog::backdrop {
+  background: #0008;
+  backdrop-filter: blur(0.2rem);
+}
+
+.collection-filter-dialog[open] {
+  animation: filter-in 0.2s ease-out;
+}
+
+.filter-drawer-body {
+  padding: 0 2.4rem 2.8rem;
+}
+
+.filter-drawer-body .sidebar-toggle {
+  display: none;
+}
+
+.filter-drawer-body .sidebar-filter-group:first-child {
+  border-top: 0;
+  margin-top: 0.8rem;
+}
+
+.filter-drawer-body .sidebar-option {
+  font-size: 1.3rem;
+  min-height: 3.2rem;
+  align-items: center;
+}
+
+.filter-drawer-body .sidebar-option input {
+  width: 1.7rem;
+  height: 1.7rem;
+  margin: 0;
+}
+
+.filter-drawer-body .sidebar-filter-group > summary {
+  font-size: 1.4rem;
+  min-height: 4.8rem;
+}
+
+.filter-drawer-body .sidebar-filter-actions {
+  position: sticky;
+  bottom: -2.8rem;
+  background: var(--paper);
+  padding: 2rem 0 max(2.2rem, env(safe-area-inset-bottom));
+  border-top: 0.1rem solid var(--line);
+  align-items: center;
+}
+
+.filter-drawer-body .sidebar-filter-actions .button {
+  max-width: none;
+  min-height: 4.8rem;
+}
+
+.filter-drawer-body .sidebar-price-fields {
+  max-width: none;
+}
+
+@keyframes filter-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 1024px) {
+  .catalog-sidebar[data-drawer-ready] {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-filter-dialog[open] {
+    animation: none;
+  }
+}

@@ -5,7 +5,7 @@ window.scenarios.push({
     await wait()
     check(document.querySelector('#FilterDrawer-test').open, 'Example filters must open')
 
-    document.querySelector('[aria-label="Fechar filtros"]').click()
+    document.querySelector('#FilterDrawer-test .dialog-header .icon-button').click()
     await wait()
     check(!document.querySelector('#FilterDrawer-test').open, 'Example filters must close')
 

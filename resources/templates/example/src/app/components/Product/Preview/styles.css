@@ -1,0 +1,143 @@
+.product-gallery {
+  display: grid;
+  gap: 12px;
+  width: 100%;
+}
+react-island[component="SwiperSliderRoot"] {
+  width: 100%;
+  display: flex !important;
+}
+.product-main {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  order: 1;
+  background: var(--surface);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.product-thumbs {
+  order: 2;
+  min-width: 0;
+  width: 100%;
+}
+.product-main > react-island[component="SwiperCarousel"] {
+  display: block !important;
+}
+.product-main > react-island[component="SwiperCarousel"]:not([data-react-hydrated]) {
+  min-height: 320px;
+  background: linear-gradient(100deg, var(--surface) 35%, #e9e9e9 50%, var(--surface) 65%);
+  background-size: 200% 100%;
+  animation: preview-shimmer 1.5s ease-in-out infinite;
+}
+@keyframes preview-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .product-main > react-island[component="SwiperCarousel"]:not([data-react-hydrated]) {
+    animation: none;
+  }
+}
+.product-main > react-island[component="SwiperCarousel"] > img:not(:first-of-type) {
+  display: none;
+}
+.product-main img {
+  aspect-ratio: 5/6;
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.product-main .swiper-pagination {
+  position: absolute;
+  inset: auto 0 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  z-index: 3;
+  pointer-events: none;
+}
+.product-main .swiper-pagination-bullet {
+  width: 8px;
+  height: 8px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.55;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+  transition:
+    width 250ms ease,
+    opacity 250ms ease;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.product-main .swiper-pagination-bullet:hover {
+  opacity: 0.85;
+}
+.product-main .swiper-pagination-bullet-active {
+  width: 26px;
+  opacity: 1;
+}
+.product-main .swiper-pagination-bullet:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.galleryArrowLeft,
+.galleryArrowRight {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  height: fit-content;
+  margin: auto 0;
+  color: white;
+}
+.galleryArrowLeft {
+  left: 1rem;
+}
+.galleryArrowRight {
+  right: 1rem;
+}
+.product-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 5/6;
+  background: var(--surface);
+  border-radius: 10px;
+}
+.product-media {
+  margin-top: 20px;
+}
+.product-media video,
+.product-media iframe,
+.product-media model-viewer {
+  width: 100%;
+  max-height: 650px;
+}
+
+@media screen and (min-width: 1024px) {
+  .product-gallery {
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+  }
+  .product-gallery-single {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .product-thumbs {
+    order: 1;
+    position: sticky;
+    top: 16px;
+  }
+  .product-main {
+    order: 2;
+  }
+}

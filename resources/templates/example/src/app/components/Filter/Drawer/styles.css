@@ -1,0 +1,14 @@
+.button.mobile-filter-trigger {
+  display: none;
+}
+
+@media (max-width: 1024px) {
+  .button.mobile-filter-trigger {
+    min-height: 4.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    font-size: 1.1rem;
+  }
+}

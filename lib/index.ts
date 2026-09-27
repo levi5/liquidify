@@ -1,4 +1,5 @@
 export * from './types/liquidex'
+export * from './shared/tsx-helpers'
 export * from './main/factories/make-liquidify-builder'
 export * from './presentation/cli/commands/build'
 export * from './presentation/cli/commands/init'

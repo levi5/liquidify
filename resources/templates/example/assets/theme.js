@@ -1,1 +1,186 @@
-(()=>{var T=()=>{let t=window.Shopify?.routes?.root||window.LiquidifyTheme?.root||"/";return t.endsWith("/")?t:`${t}/`};async function h(t="cart.js",e){let n=await fetch(`${T()}${t}`,{method:e?"POST":"GET",headers:{Accept:"application/json",...e?{"Content-Type":"application/json"}:{}},credentials:"same-origin",...e?{body:JSON.stringify(e)}:{}}),r=await n.json();if(!n.ok)throw new Error(r.description||r.message||"Não foi possível atualizar a sacola. Tente novamente.");return r}function q(t,e=!1){document.dispatchEvent(new CustomEvent("liquidify-theme:cart",{detail:{cart:t,open:e}}))}async function E(t,e){await h("cart/add.js",{items:[{id:t,quantity:e}]});try{q(await h(),!0)}catch{document.dispatchEvent(new CustomEvent("liquidify-theme:cart-refresh",{detail:{open:!0}}))}}var s=new WeakMap;function S(t){t.querySelectorAll("[data-announcement]").forEach(e=>{if(s.has(e))return;let n=Array.from(e.querySelectorAll("[data-announcement-message]")).filter(l=>l.textContent?.trim());if(n.length<2)return;let r=0,a=window.matchMedia("(prefers-reduced-motion: reduce)").matches,o=!1,i=e.querySelector("[data-announcement-pause]"),c=l=>{r=(r+l+n.length)%n.length,n.forEach((L,w)=>{L.hidden=w!==r})},u=()=>{i.textContent=a?"▶":"Ⅱ",i.setAttribute("aria-pressed",String(a)),i.setAttribute("aria-label",a?"Reproduzir avisos":"Pausar avisos")},d=()=>c(1),m=()=>c(-1),p=()=>{a=!a,u()},f=()=>{o=!0},g=()=>{o=!1};e.querySelector("[data-announcement-next]")?.addEventListener("click",d),e.querySelector("[data-announcement-prev]")?.addEventListener("click",m),i.addEventListener("click",p),e.addEventListener("pointerenter",f),e.addEventListener("pointerleave",g),u();let y=window.setInterval(()=>{!a&&!o&&!document.hidden&&!e.matches(":focus-within")&&c(1)},4500);s.set(e,()=>{clearInterval(y),e.querySelector("[data-announcement-next]")?.removeEventListener("click",d),e.querySelector("[data-announcement-prev]")?.removeEventListener("click",m),i.removeEventListener("click",p),e.removeEventListener("pointerenter",f),e.removeEventListener("pointerleave",g),s.delete(e)})})}function v(t=document){t.querySelectorAll("select[data-selected]").forEach(e=>{e.value=e.dataset.selected||e.options[0]?.value||""}),S(t)}v();document.addEventListener("shopify:section:load",()=>v());document.addEventListener("shopify:section:unload",t=>{t.target.querySelectorAll("[data-announcement]").forEach(e=>s.get(e)?.())});document.addEventListener("submit",async t=>{let e=t.target;if(!e.matches("[data-quick-add]")||(t.preventDefault(),e.dataset.pending))return;let n=e.querySelector("button[type=submit]"),r=e.querySelector(".quick-add-message"),a=Number(new FormData(e).get("id"));if(a){e.dataset.pending="true",n.disabled=!0,r.textContent="Adicionando…";try{await E(a,1),r.textContent="Adicionado à sua sacola."}catch(o){r.textContent=o instanceof Error?o.message:"Não foi possível adicionar. Tente novamente."}finally{delete e.dataset.pending,n.disabled=!1}}});document.addEventListener("click",t=>{let e=t.target.closest("[data-product-thumbnail]");if(!e)return;let n=document.getElementById("ProductMainImage");n&&(t.preventDefault(),n.src=e.dataset.productThumbnail,n.alt=e.querySelector("img")?.alt||n.alt,n.parentElement.href=e.href)});document.addEventListener("liquidify-theme:variant-image",t=>{let e=document.getElementById("ProductMainImage");e&&(e.src=t.detail,e.parentElement.href=e.src)});})();
+"use strict";
+(function() {
+  window.liquidify = window.liquidify || window.liquidx || {};
+  window.liquidx = window.liquidify;
+  window.liquidify[''] = {};
+  const scope = window.liquidify[''];
+const translate = (key, fallback) => {
+  const i18n = window.LiquidifyTheme?.i18n;
+  return i18n?.[key] || fallback;
+};
+const rootUrl = () => {
+  const root = window.Shopify?.routes?.root || window.LiquidifyTheme?.root || "/";
+  return root.endsWith("/") ? root : `${root}/`;
+};
+const addItem = async (id, quantity) => {
+  const response = await fetch(`${rootUrl()}cart/add.js`, {
+    method: "POST",
+    credentials: "same-origin",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json"
+    },
+    body: JSON.stringify({
+      id,
+      quantity
+    })
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data.description || data.message || translate("theme_add_error", "Could not add. Try again."));
+  }
+  return response.json();
+};
+const announcementCleanup = /* @__PURE__ */ new WeakMap();
+function prepareAnnouncements(root) {
+  root.querySelectorAll("[data-announcement]").forEach((bar) => {
+    if (announcementCleanup.has(bar)) return;
+    const messages = Array.from(bar.querySelectorAll("[data-announcement-message]")).filter((item) => item.textContent?.trim());
+    if (messages.length < 2) return;
+    let index = 0;
+    let paused = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let hovered = false;
+    const pause = bar.querySelector("[data-announcement-pause]");
+    const show = (step) => {
+      index = (index + step + messages.length) % messages.length;
+      messages.forEach((message, position) => {
+        message.hidden = position !== index;
+      });
+    };
+    const updatePause = () => {
+      if (!pause) return;
+      pause.textContent = paused ? "\u25B6" : "\u2161";
+      pause.setAttribute("aria-pressed", String(paused));
+      pause.setAttribute("aria-label", paused ? translate("theme_play_announcements", "Play announcements") : translate("theme_pause_announcements", "Pause announcements"));
+    };
+    const next = () => show(1);
+    const previous = () => show(-1);
+    const toggle = () => {
+      paused = !paused;
+      updatePause();
+    };
+    const enter = () => {
+      hovered = true;
+    };
+    const leave = () => {
+      hovered = false;
+    };
+    bar.querySelector("[data-announcement-next]")?.addEventListener("click", next);
+    bar.querySelector("[data-announcement-prev]")?.addEventListener("click", previous);
+    pause?.addEventListener("click", toggle);
+    bar.addEventListener("pointerenter", enter);
+    bar.addEventListener("pointerleave", leave);
+    updatePause();
+    const timer = window.setInterval(() => {
+      if (!paused && !hovered && !document.hidden && !bar.matches(":focus-within")) show(1);
+    }, 4500);
+    announcementCleanup.set(bar, () => {
+      clearInterval(timer);
+      bar.querySelector("[data-announcement-next]")?.removeEventListener("click", next);
+      bar.querySelector("[data-announcement-prev]")?.removeEventListener("click", previous);
+      pause?.removeEventListener("click", toggle);
+      bar.removeEventListener("pointerenter", enter);
+      bar.removeEventListener("pointerleave", leave);
+      announcementCleanup.delete(bar);
+    });
+  });
+}
+const benefitsCleanup = /* @__PURE__ */ new WeakMap();
+function prepareBenefits(root) {
+  root.querySelectorAll("[data-benefits-carousel]").forEach((wrapper) => {
+    if (benefitsCleanup.has(wrapper)) return;
+    const track = wrapper.querySelector("[data-benefits-track]");
+    const prev = wrapper.querySelector("[data-benefits-prev]");
+    const next = wrapper.querySelector("[data-benefits-next]");
+    if (!track) return;
+    const update = () => {
+      const {
+        scrollLeft,
+        scrollWidth,
+        clientWidth
+      } = track;
+      const maxScroll = scrollWidth - clientWidth;
+      const overflow = scrollWidth > clientWidth + 2;
+      track.style.justifyContent = overflow ? "flex-start" : "space-between";
+      prev?.classList.toggle("hidden", !overflow || scrollLeft <= 0);
+      next?.classList.toggle("hidden", !overflow || scrollLeft >= maxScroll - 2);
+    };
+    const step = () => track.clientWidth * 0.8;
+    const onPrev = () => track.scrollBy({
+      left: -step(),
+      behavior: "smooth"
+    });
+    const onNext = () => track.scrollBy({
+      left: step(),
+      behavior: "smooth"
+    });
+    prev?.addEventListener("click", onPrev);
+    next?.addEventListener("click", onNext);
+    track.addEventListener("scroll", update, {
+      passive: true
+    });
+    window.addEventListener("resize", update);
+    update();
+    benefitsCleanup.set(wrapper, () => {
+      prev?.removeEventListener("click", onPrev);
+      next?.removeEventListener("click", onNext);
+      track.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+      benefitsCleanup.delete(wrapper);
+    });
+  });
+}
+function prepare(root = document) {
+  root.querySelectorAll("select[data-selected]").forEach((select) => {
+    select.value = select.dataset.selected || select.options[0]?.value || "";
+  });
+  prepareAnnouncements(root);
+  prepareBenefits(root);
+}
+prepare();
+document.addEventListener("shopify:section:load", (event) => prepare(event.target));
+document.addEventListener("shopify:section:unload", (event) => {
+  const section = event.target;
+  if (!section) return;
+  section.querySelectorAll("[data-announcement]").forEach((bar) => announcementCleanup.get(bar)?.());
+  section.querySelectorAll("[data-benefits-carousel]").forEach((wrapper) => benefitsCleanup.get(wrapper)?.());
+});
+document.addEventListener("submit", async (event) => {
+  const form = event.target;
+  if (!form.matches("[data-quick-add]")) return;
+  event.preventDefault();
+  if (form.dataset.pending) return;
+  const button = form.querySelector("button[type=submit]");
+  const message = form.querySelector(".quick-add-message");
+  const id = Number(new FormData(form).get("id"));
+  if (!id) return;
+  form.dataset.pending = "true";
+  button.disabled = true;
+  message.textContent = translate("theme_adding", "Adding\u2026");
+  try {
+    const cart = await addItem(id, 1);
+    message.textContent = translate("theme_added_to_bag", "Added to your bag.");
+    window.dispatchEvent(new CustomEvent("cart:updated", {
+      detail: {
+        action: "add",
+        id,
+        cart
+      }
+    }));
+  } catch (error) {
+    message.textContent = error instanceof Error ? error.message : translate("theme_add_error", "Could not add. Try again.");
+  } finally {
+    delete form.dataset.pending;
+    button.disabled = false;
+  }
+});
+
+  scope.translate = translate;
+  scope.rootUrl = rootUrl;
+  scope.addItem = addItem;
+  scope.announcementCleanup = announcementCleanup;
+  scope.prepareAnnouncements = prepareAnnouncements;
+  scope.benefitsCleanup = benefitsCleanup;
+  scope.prepareBenefits = prepareBenefits;
+  scope.prepare = prepare;
+})();

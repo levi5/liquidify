@@ -8,31 +8,37 @@
     "theme_support_email": "suporte@example.com"
   },
   {
-    "name": "Identidade visual",
+    "name": "t:settings_schema.visual_identity",
     "settings": [
       {
         "type": "text",
         "id": "brand_name",
-        "label": "Nome no logotipo",
+        "label": "t:settings_schema.brand_name.label",
         "default": "Liquidify"
       },
       {
         "type": "color",
         "id": "primary_color",
-        "label": "Cor principal",
+        "label": "t:settings_schema.primary_color.label",
         "default": "#171717"
       },
       {
         "type": "color",
         "id": "accent_color",
-        "label": "Cor de destaque",
+        "label": "t:settings_schema.accent_color.label",
         "default": "#414141"
       },
       {
         "type": "color",
         "id": "background_color",
-        "label": "Cor de fundo",
+        "label": "t:settings_schema.background_color.label",
         "default": "#ffffff"
+      },
+      {
+        "type": "checkbox",
+        "id": "currency_code_enabled",
+        "label": "t:settings_schema.currency_code_enabled.label",
+        "default": true
       }
     ]
   }

@@ -1,13 +1,13 @@
 window.LiquidifyComponents = window.LiquidifyComponents || window.LiquidxComponents || {}
 
-window.LiquidifyParseProps = (node) => {
-  const props = {}
+window.LiquidifyParseProps = (node: Element) => {
+  const props: Record<string, unknown> = {}
   Array.from(node.attributes || []).forEach((attr) => {
     const val = attr.value
-    let finalVal = val
+    let finalVal: unknown = val
     if (val === 'true') finalVal = true
     else if (val === 'false') finalVal = false
-    else if (!isNaN(val) && val.trim() !== '') finalVal = Number(val)
+    else if (!Number.isNaN(Number(val)) && val.trim() !== '') finalVal = Number(val)
 
     let key = attr.name
     if (key === 'class') key = 'className'
@@ -50,8 +50,8 @@ window.LiquidifyParseProps = (node) => {
   return props
 }
 
-const getComponent = (tagName, islandComp) => {
-  let C = islandComp ? window.LiquidifyComponents[islandComp] : null
+const getComponent = (tagName: string, islandComp: string | null) => {
+  let C: any = islandComp ? window.LiquidifyComponents[islandComp] : null
   if (!C) {
     const k = Object.keys(window.LiquidifyComponents).find((k) => k.toLowerCase() === tagName.toLowerCase())
     if (k) C = window.LiquidifyComponents[k]
@@ -59,25 +59,26 @@ const getComponent = (tagName, islandComp) => {
   return C && C.default ? C.default : C
 }
 
-window.LiquidifyCreateReactElement = (node, index) => {
+window.LiquidifyCreateReactElement = (node: Node, index: number) => {
   if (!node) return null
   if (node.nodeType === 3) return node.textContent
-  if (node.nodeType !== 1 || node.tagName === 'SCRIPT') return null
-  const nodeName = node.tagName
-  const islandComp = node.getAttribute('component')
+  if (node.nodeType !== 1 || (node as Element).tagName === 'SCRIPT') return null
+  const element = node as Element
+  const nodeName = element.tagName
+  const islandComp = element.getAttribute('component')
   const Comp = getComponent(nodeName, islandComp)
 
   if (islandComp || Comp) {
     return window.React.createElement(LazyIsland, {
-      ...window.LiquidifyParseProps(node),
+      ...window.LiquidifyParseProps(element),
       key: index,
       componentName: islandComp || nodeName,
-      node: node,
+      node: element,
     })
   }
 
-  const props = window.LiquidifyParseProps(node)
-  const childNodes = Array.from(node.childNodes || [])
+  const props = window.LiquidifyParseProps(element)
+  const childNodes = Array.from(element.childNodes || [])
   return window.React.createElement(
     nodeName.toLowerCase(),
     { key: index, ...props },
@@ -85,7 +86,7 @@ window.LiquidifyCreateReactElement = (node, index) => {
   )
 }
 
-function LazyIsland({ componentName, node, ...props }) {
+function LazyIsland({ componentName, node, ...props }: { componentName: string; node: Element; [key: string]: any }) {
   const [Comp, setComp] = window.React.useState(() => getComponent(node.tagName, componentName))
   window.React.useEffect(() => {
     if (Comp) return
@@ -95,6 +96,8 @@ function LazyIsland({ componentName, node, ...props }) {
     }
     document.addEventListener('liquidify:ready:' + componentName, onReady)
     document.addEventListener('liquidx:ready:' + componentName, onReady)
+
+    onReady()
     return () => {
       document.removeEventListener('liquidify:ready:' + componentName, onReady)
       document.removeEventListener('liquidx:ready:' + componentName, onReady)
@@ -115,14 +118,14 @@ function LazyIsland({ componentName, node, ...props }) {
   return window.React.createElement(Comp, { ...props, children })
 }
 
-const mergeLiquidValue = (previous, value) => {
+const mergeLiquidValue = (previous: unknown, value: unknown): unknown => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) return value
   const base = previous !== null && typeof previous === 'object' && !Array.isArray(previous) ? previous : {}
   return { ...base, ...value }
 }
 
-window.LiquidifyGetProps = (node, propName = 'store') => {
-  const props = { elementId: node.id || node.tagName.toLowerCase() }
+window.LiquidifyGetProps = (node: Element, propName = 'store') => {
+  const props: Record<string, unknown> = { elementId: node.id || node.tagName.toLowerCase() }
   let parent = node.parentElement
   while (parent) {
     const script = Array.from(parent.children).find(
@@ -149,19 +152,20 @@ window.LiquidifyGetProps = (node, propName = 'store') => {
     parent = parent.parentElement
   }
   for (const attr of Array.from(node.attributes)) {
-    let val = attr.value
+    let val: unknown = attr.value
     if (/^data-liquid(?:-|$)/.test(attr.name)) {
       const key =
         attr.name === 'data-liquid' || attr.name === 'data-liquid-store'
           ? propName
           : attr.name.replace('data-liquid-', '').replace(/-([a-z])/g, (g) => g[1].toUpperCase())
-      val = window.LiquidifyParseJSON(val, node, attr.name, val, true)
+      val = window.LiquidifyParseJSON(attr.value, node, attr.name, attr.value, true)
       props[key] = mergeLiquidValue(props[key], val)
       continue
     }
-    if (val === 'true') val = true
-    else if (val === 'false') val = false
-    else if (!isNaN(val) && val.trim() !== '') val = Number(val)
+    const raw = attr.value
+    if (raw === 'true') val = true
+    else if (raw === 'false') val = false
+    else if (!Number.isNaN(Number(raw)) && raw.trim() !== '') val = Number(raw)
     props[attr.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase())] = val
   }
   const propsScript = Array.from(node.children).find((c) => (c as any).tagName === 'SCRIPT' && (c as any).hasAttribute('data-react-props'))
@@ -197,6 +201,9 @@ if (__liquidifyRegistration.isLeft())
 
 if (!window.LiquidifyHydrate) window.LiquidifyHydrate = window.LiquidxHydrate || {}
 window.LiquidxHydrate = window.LiquidifyHydrate
+
+const hasLayoutBox = (container: Element) => getComputedStyle(container).display !== 'contents'
+
 window.LiquidifyHydrate['__LIQUIDIFY_COMPONENT__'] = (container) => {
   if (!window.LiquidifyCanMount(container)) return
   if (container._liquidifyObserver) return
@@ -223,7 +230,7 @@ window.LiquidifyHydrate['__LIQUIDIFY_COMPONENT__'] = (container) => {
     root.render(window.React.createElement(__LIQUIDIFY_COMPONENT__, props))
   }
   if (container.getAttribute('data-hydrate') === 'eager') hydrate()
-  else if ('IntersectionObserver' in window) {
+  else if ('IntersectionObserver' in window && hasLayoutBox(container)) {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
@@ -251,7 +258,7 @@ if (!customElements.get('react-island')) {
       this._liquidifyReadyCleanup?.()
       this._liquidifyObserver?.disconnect()
       delete this._liquidifyObserver
-      clearTimeout(this._unmountTimeout)
+      clearTimeout(this._unmountTimeout as ReturnType<typeof setTimeout>)
       this._unmountTimeout = setTimeout(() => {
         if (!this.isConnected) window.LiquidifyUnmount(this)
       }, 100)

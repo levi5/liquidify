@@ -174,6 +174,24 @@ test('global scripts are removed from managed aggregate output on deletion', asy
   assert.match(fs.readFileSync(aggregate, 'utf8'), /manual footer/)
 })
 
+test('untyped script components emit a script but no empty section shell', async (t) => {
+  const { builder, output, write } = setup(t)
+  write('src/components/Boot.ts', '"use dom:global"; console.log("boot")')
+  write('src/components/Widget.tsx', '"use script"; console.log("widget")')
+  await builder.build()
+  assert.equal(fs.existsSync(path.join(output, 'assets/boot.js')), true)
+  assert.equal(fs.existsSync(path.join(output, 'assets/widget.js')), true)
+  assert.equal(fs.existsSync(path.join(output, 'sections/boot.liquid')), false)
+  assert.equal(fs.existsSync(path.join(output, 'sections/widget.liquid')), false)
+})
+
+test('script components that declare a type still emit their Liquid file', async (t) => {
+  const { builder, output, write } = setup(t)
+  write('src/components/Bar.tsx', '"use blocks"; export default function Bar(){return <p>bar</p>}')
+  await builder.build()
+  assert.equal(fs.existsSync(path.join(output, 'blocks/bar.liquid')), true)
+})
+
 test('conflicting pure Liquid output names are rejected without replacing output', async (t) => {
   const { builder, output, write } = setup(t)
   await builder.build()

@@ -1,18 +1,53 @@
 {
   "sections": {
     "main": {
-      "type": "main-product",
-      "settings": {}
-    },
-    "featured": {
-      "type": "product-recommendations",
+      "type": "product-info",
+      "blocks": {
+        "variation_cor": {
+          "type": "variation",
+          "settings": {
+            "variation": "Cor",
+            "mode": "slider"
+          }
+        },
+        "variation_tamanho": {
+          "type": "variation",
+          "settings": {
+            "variation": "Tamanho",
+            "mode": "grid"
+          }
+        },
+        "variation_material": {
+          "type": "variation",
+          "settings": {
+            "variation": "Material",
+            "mode": "select"
+          }
+        }
+      },
+      "block_order": [
+        "variation_cor",
+        "variation_tamanho",
+        "variation_material"
+      ],
       "settings": {
-        "heading": "Complete o look."
+        "with_thumbnail": true
+      }
+    },
+    "shelf_related": {
+      "type": "shelf",
+      "settings": {
+        "eyebrow": "KEEP DISCOVERING",
+        "title": "Complete the look.",
+        "view_all_label": "View collection",
+        "view_all_link": "/collections/all",
+        "collection": "all",
+        "limit": 8
       }
     }
   },
   "order": [
     "main",
-    "featured"
+    "shelf_related"
   ]
 }

@@ -46,6 +46,17 @@ test('Liquid event attributes interpolate values and escape quotes', () => {
   )
 })
 
+test('Liquid event attributes keep JS logical operators executable', () => {
+  const converter = new LiquidAttributeConverter(expressions())
+  const element = parseExpression(
+    `<button onClick={() => (window.emit || window.fallback)?.('message::menu-mobile', true)} />`,
+    { plugins: ['jsx'] },
+  )
+  const result = converter.getAttributes(element.openingElement.attributes)
+  assert.doesNotMatch(result, /\{\{\s*or\s*\|/)
+  assert.match(result, /\|\|/)
+})
+
 test('expression output retains null coalescing and HTML escaping', () => {
   const output = expressions().parseExpression(parseExpression('title ?? "Fallback"'))
   assert.equal(output, '{% if title != nil %}{{ title | escape }}{% else %}{{ "Fallback" | escape }}{% endif %}')
@@ -124,7 +135,10 @@ test('LiquidVariableParser parses variable declarations, destructuring, and fall
     '{% else %}',
     '  {% assign x = 2 %}',
     '{% endif %}',
-    '{% assign y = name | default: "default" %}',
+    '{% assign y = name %}',
+    '{% if y == nil or y == "" or y == false or y == 0 %}',
+    '  {% assign y = "default" %}',
+    '{% endif %}',
     '{% assign z = opt %}',
     '{% if z == nil %}',
     '  {% assign z = "nil_fallback" %}',
@@ -133,10 +147,7 @@ test('LiquidVariableParser parses variable declarations, destructuring, and fall
 })
 
 test('LiquidVariableParser parses if statement assignments and map calls', () => {
-  const ast = parse(
-    'if (available) { count = 1; items.map(i => i); } else { count += 2; }',
-    { plugins: ['jsx', 'typescript'] },
-  )
+  const ast = parse('if (available) { count = 1; items.map(i => i); } else { count += 2; }', { plugins: ['jsx', 'typescript'] })
   const variableParser = new LiquidVariableParser((node) => {
     if (node.type === 'Identifier') return node.name
     if (node.type === 'NumericLiteral') return String(node.value)
@@ -155,10 +166,25 @@ test('LiquidVariableParser parses if statement assignments and map calls', () =>
   ])
 })
 
+test('page title default escape stays as liquid output', () => {
+  const parser = expressions()
+  assert.equal(
+    parser.parseExpression(parseExpression('\'page.title | default: "Vamos conversar." | escape\'')),
+    '{{ page.title | default: "Vamos conversar." | escape }}',
+  )
+  assert.equal(
+    parser.parseExpression(parseExpression('`page.title | default: "Vamos conversar." | escape`')),
+    '{{ page.title | default: "Vamos conversar." | escape }}',
+  )
+  assert.equal(
+    parser.parseExpression(parseExpression('"{{ page.title | default: \\"Vamos conversar.\\" | escape }}"')),
+    '{{ page.title | default: "Vamos conversar." | escape }}',
+  )
+  assert.equal(parser.parseExpression(parseExpression('"Plain Text"')), 'Plain Text')
+})
+
 test('expression parser rewrites dynamic classNames calls to append filters', () => {
   const parser = expressions()
   const result = parser.generateLiquidCode(parseExpression('classNames(styles.base, dynamicClass)'), false)
   assert.equal(result, 'styles.base | append: " " | append: dynamicClass')
 })
-
-
