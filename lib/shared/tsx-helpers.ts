@@ -40,3 +40,7 @@ export const moneyWithoutCurrency = (cents: unknown): string => String(cents ?? 
 export const moneyWithoutTrailingZeros = (cents: unknown): string => String(cents ?? '')
 
 export const weightWithUnit = (value: unknown): string => String(value ?? '')
+
+export const date = (value: unknown, format: string): string => `${String(value ?? '')} ${format}`
+
+export const linkTo = (url: string, text?: string): string => `${String(url ?? '')} ${text ? String(text) : ''}`.trim()
