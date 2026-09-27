@@ -13,6 +13,7 @@ import {
   PROD_TSX, PROD_LIQUID, PROD_CSS,
 } from "./content2.ts";
 import { CatalogPreview, ProductPreview, NewsletterPreview, CartPreview } from "./previews.tsx";
+import "./style.css";
 
 const SETUP = `npx liquidify init minha-loja --template example
 cd minha-loja

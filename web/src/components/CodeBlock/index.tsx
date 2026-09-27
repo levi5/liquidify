@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { detectLanguage, highlight } from "./highlight";
 import type { Lang } from "./highlight";
+import "./style.css";
 
 export default function CodeBlock({
   code,
