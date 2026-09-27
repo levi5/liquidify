@@ -1,9 +1,9 @@
-.figure { margin: 1.4rem 0 0; min-width: 0; }
+.figure { margin: 2.24rem 0 0; min-width: 0; }
 
 .figure-caption {
-  margin: 0.6rem 0 0;
+  margin: 0.96rem 0 0;
   color: var(--muted);
-  font-size: 0.82rem;
+  font-size: 1.312rem;
   text-align: center;
 }
 
@@ -19,9 +19,9 @@
 }
 
 .flow-node {
-  padding: 1.1rem 1rem 1rem;
+  padding: 1.76rem 1.6rem 1.6rem;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.72rem;
   align-content: start;
   position: relative;
   min-width: 0;
@@ -32,49 +32,49 @@
 .flow-node + .flow-node::before {
   content: "→";
   position: absolute;
-  top: 1rem;
-  left: -0.62rem;
-  width: 1.1rem;
-  height: 1.1rem;
+  top: 1.6rem;
+  left: -0.992rem;
+  width: 1.76rem;
+  height: 1.76rem;
   display: grid;
   place-items: center;
   background: var(--accent-dark);
   color: #fff;
   border-radius: 50%;
-  font-size: 0.7rem;
+  font-size: 1.12rem;
   font-weight: 800;
 }
 
 .flow-n {
   display: grid;
   place-items: center;
-  width: 1.6rem;
-  height: 1.6rem;
+  width: 2.56rem;
+  height: 2.56rem;
   border-radius: 50%;
   background: var(--accent-soft);
   color: var(--accent-dark);
   font-weight: 800;
-  font-size: 0.78rem;
+  font-size: 1.248rem;
 }
 
-.flow-node strong { font-size: 0.92rem; letter-spacing: -0.01em; }
+.flow-node strong { font-size: 1.472rem; letter-spacing: -0.01em; }
 
 .flow-node ul {
   margin: 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.25rem;
+  gap: 0.4rem;
 }
 
-.flow-node code { font-size: 0.72rem; overflow-wrap: anywhere; }
+.flow-node code { font-size: 1.152rem; overflow-wrap: anywhere; }
 
 .flow-node em {
   font-style: normal;
-  font-size: 0.74rem;
+  font-size: 1.184rem;
   color: var(--muted);
   border-top: 1px solid var(--line);
-  padding-top: 0.4rem;
+  padding-top: 0.64rem;
 }
 
 .lanes {
@@ -87,28 +87,28 @@
   overflow: hidden;
 }
 
-.lane { padding: 1rem 1.1rem; display: grid; gap: 0.7rem; }
+.lane { padding: 1.6rem 1.76rem; display: grid; gap: 1.12rem; }
 
 .lane-tag {
-  font-size: 0.72rem;
+  font-size: 1.152rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--accent-dark);
   background: var(--accent-soft);
   border-radius: 999px;
-  padding: 0.25rem 0.7rem;
+  padding: 0.4rem 1.12rem;
   width: max-content;
 }
 
-.lane-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.6rem; }
+.lane-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.96rem; }
 
 .lane-card {
   border: 1px solid var(--line);
   border-radius: 12px;
-  padding: 0.7rem 0.8rem;
+  padding: 1.12rem 1.28rem;
   display: grid;
-  gap: 0.2rem;
+  gap: 0.32rem;
   background: var(--bg);
   min-width: 0;
 }
@@ -118,16 +118,16 @@
   background: linear-gradient(180deg, var(--accent-soft), transparent);
 }
 
-.lane-card strong { font-size: 0.84rem; overflow-wrap: anywhere; }
-.lane-card span { font-size: 0.76rem; color: var(--muted); }
+.lane-card strong { font-size: 1.344rem; overflow-wrap: anywhere; }
+.lane-card span { font-size: 1.216rem; color: var(--muted); }
 
 .lane-arrow {
   text-align: center;
-  font-size: 0.74rem;
+  font-size: 1.184rem;
   font-weight: 800;
   color: var(--accent-dark);
   background: var(--bg2);
-  padding: 0.35rem;
+  padding: 0.56rem;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
@@ -147,19 +147,19 @@
 .editor-side {
   background: var(--bg2);
   border-right: 1px solid var(--line);
-  padding: 1rem;
+  padding: 1.6rem;
   display: grid;
-  gap: 0.4rem;
+  gap: 0.64rem;
   align-content: start;
 }
 
 .editor-title {
-  font-size: 0.68rem;
+  font-size: 1.088rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
-  margin-top: 0.3rem;
+  margin-top: 0.48rem;
 }
 
 .editor-title:first-child { margin-top: 0; }
@@ -168,8 +168,8 @@
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0.45rem 0.6rem;
-  font-size: 0.8rem;
+  padding: 0.72rem 0.96rem;
+  font-size: 1.28rem;
   font-weight: 600;
 }
 
@@ -179,17 +179,17 @@
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 8px;
-  padding: 0.45rem 0.6rem;
-  font-size: 0.78rem;
+  padding: 0.72rem 0.96rem;
+  font-size: 1.248rem;
   color: var(--muted);
 }
 
 .editor-field.short { width: 75%; }
 
 .editor-view {
-  padding: 1.4rem 1.2rem;
+  padding: 2.24rem 1.92rem;
   display: grid;
-  gap: 0.5rem;
+  gap: 0.8rem;
   align-content: center;
   justify-items: start;
   background:
@@ -198,29 +198,29 @@
 }
 
 .editor-eyebrow {
-  font-size: 0.68rem;
+  font-size: 1.088rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--muted);
 }
 
-.editor-view strong { font-size: 1.9rem; letter-spacing: -0.04em; line-height: 1; }
+.editor-view strong { font-size: 3.04rem; letter-spacing: -0.04em; line-height: 1; }
 
 .editor-btn {
   background: #141827;
   color: #fff;
   border-radius: 999px;
-  padding: 0.45rem 0.9rem;
-  font-size: 0.76rem;
+  padding: 0.72rem 1.44rem;
+  font-size: 1.216rem;
   font-weight: 700;
-  margin-top: 0.3rem;
+  margin-top: 0.48rem;
 }
 
 @media (max-width: 900px) {
   .flow { grid-template-columns: minmax(0, 1fr); }
   .flow-node + .flow-node { border-left: 0; border-top: 1px dashed var(--line); }
-  .flow-node + .flow-node::before { content: "↓"; top: -0.62rem; left: 1rem; }
+  .flow-node + .flow-node::before { content: "↓"; top: -0.992rem; left: 1.6rem; }
   .lane-cards { grid-template-columns: minmax(0, 1fr); }
   .editor-mock { grid-template-columns: minmax(0, 1fr); }
   .editor-side { border-right: 0; border-bottom: 1px solid var(--line); }

@@ -60,9 +60,9 @@ export default function BuildDeep() {
   return (
     <section className="wrap section">
       <h2>{copy.title}</h2><p className="section-sub">{copy.intro}</p>
-      <div className="docs-deep-grid" style={{ marginTop: "1.6rem" }}>
+      <div className="docs-deep-grid" style={{ marginTop: "2.56rem" }}>
         <article className="docs-deep-card"><h3>{copy.incr}</h3><ul>{copy.incrItems.map((item) => <li key={item}>{item}</li>)}</ul></article>
-        <div style={{ display: "grid", gap: "1rem", alignContent: "start" }}>
+        <div style={{ display: "grid", gap: "1.6rem", alignContent: "start" }}>
           <Snippet code={DISPOSE_TS} language="tsx" />
           <Snippet code={MANIFEST_JSON} language="json" />
         </div>

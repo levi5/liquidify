@@ -1,17 +1,25 @@
 .search-trigger {
+  min-width: 30rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: space-between;
+  gap: 0.8rem;
   margin-left: auto;
-  padding: 0.6rem 0.7rem 0.6rem 0.85rem;
+  padding: 0.96rem 1.12rem 0.96rem 1.36rem;
   border: 1px solid var(--line);
   border-radius: 999px;
   background: color-mix(in srgb, var(--card) 80%, var(--bg2));
   color: var(--muted);
   font: inherit;
-  font-size: 0.92rem;
+  font-size: 1.472rem;
   cursor: pointer;
   transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.search-trigger-wrapper{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .search-trigger:hover,
@@ -27,9 +35,9 @@
 
 .search-trigger-kbd {
   font-family: inherit;
-  font-size: 0.76rem;
+  font-size: 1.216rem;
   letter-spacing: 0.02em;
-  padding: 0.14rem 0.48rem;
+  padding: 0.224rem 0.768rem;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--bg2);
@@ -46,13 +54,13 @@
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding: clamp(1rem, 9vh, 7rem) 1.25rem 2rem;
+  padding: clamp(1.6rem, 9vh, 11.2rem) 2rem 3.2rem;
   animation: search-fade 0.12s ease;
 }
 
 .search-dialog {
-  width: min(46rem, 100%);
-  max-height: min(34rem, 80vh);
+  width: min(73.6rem, 100%);
+  max-height: min(54.4rem, 80vh);
   display: flex;
   flex-direction: column;
   min-height: 0;
@@ -67,8 +75,8 @@
 .search-field {
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 1.05rem 1.2rem;
+  gap: 1.28rem;
+  padding: 1.68rem 1.92rem;
   border-bottom: 1px solid var(--line);
   flex: none;
 }
@@ -86,8 +94,8 @@
   background: transparent;
   color: var(--text);
   font: inherit;
-  font-size: 1.14rem;
-  padding: 0.2rem 0;
+  font-size: 1.824rem;
+  padding: 0.32rem 0;
 }
 
 .search-input::placeholder {
@@ -101,7 +109,7 @@
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  padding: 0.35rem;
+  padding: 0.56rem;
   border-radius: 6px;
   line-height: 0;
 }
@@ -118,10 +126,10 @@
 .search-clear kbd,
 .search-keys kbd {
   font-family: inherit;
-  font-size: 0.7rem;
-  min-width: 1.35rem;
+  font-size: 1.12rem;
+  min-width: 2.16rem;
   text-align: center;
-  padding: 0.1rem 0.35rem;
+  padding: 0.16rem 0.56rem;
   border: 1px solid var(--line);
   border-bottom-width: 2px;
   border-radius: 5px;
@@ -133,14 +141,14 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0.4rem 0;
+  padding: 0.64rem 0;
   overscroll-behavior: contain;
 }
 
 .search-group-label {
   margin: 0;
-  padding: 0.6rem 1.2rem 0.3rem;
-  font-size: 0.7rem;
+  padding: 0.96rem 1.92rem 0.48rem;
+  font-size: 1.12rem;
   font-weight: 700;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -150,8 +158,8 @@
 .search-hit {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
-  padding: 0.6rem 1.2rem;
+  gap: 0.24rem;
+  padding: 0.96rem 1.92rem;
   text-decoration: none;
   color: inherit;
   border-left: 2px solid transparent;
@@ -163,7 +171,7 @@
 }
 
 .search-hit-title {
-  font-size: 1rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: var(--text);
   overflow-wrap: anywhere;
@@ -183,7 +191,7 @@
 }
 
 .search-hit-note {
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   line-height: 1.35;
   color: var(--muted);
   display: -webkit-box;
@@ -193,7 +201,7 @@
 }
 
 .search-empty {
-  padding: 2rem 1.25rem 2.25rem;
+  padding: 3.2rem 2rem 3.6rem;
   text-align: center;
 }
 
@@ -203,8 +211,8 @@
 }
 
 .search-empty-hint {
-  margin-top: 0.35rem !important;
-  font-size: 0.85rem;
+  margin-top: 0.56rem !important;
+  font-size: 1.36rem;
   font-weight: 400 !important;
   color: var(--muted);
 }
@@ -214,11 +222,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.5rem 1rem;
+  gap: 1.6rem;
+  padding: 0.8rem 1.6rem;
   border-top: 1px solid var(--line);
   background: color-mix(in srgb, var(--bg2) 55%, var(--card));
-  font-size: 0.76rem;
+  font-size: 1.216rem;
   color: var(--muted);
 }
 
@@ -229,7 +237,7 @@
 .search-keys {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.56rem;
   white-space: nowrap;
 }
 
@@ -253,7 +261,8 @@
   }
 
   .search-trigger {
-    padding: 0.5rem;
+    min-width: fit-content;
+    padding: 0.8rem;
   }
 
   .search-keys {

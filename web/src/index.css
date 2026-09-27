@@ -13,7 +13,7 @@
   --shadow: 0 18px 42px rgba(45, 52, 80, 0.09);
   --shadow-sm: 0 6px 18px rgba(45, 52, 80, 0.07);
   --radius: 18px;
-  --wrap: 1160px;
+  --wrap: 144rem;
   color-scheme: light;
 }
 
@@ -40,6 +40,7 @@
 
 html {
   scroll-behavior: smooth;
+  font-size: 62.5%;
 }
 
 body {
@@ -71,10 +72,10 @@ pre {
   background: var(--code-bg);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  padding: 1rem 1.1rem;
+  padding: 1.6rem 1.76rem;
   overflow: auto;
   color: #f2ede4;
-  font-size: 0.86rem;
+  font-size: 1.376rem;
   line-height: 1.6;
 }
 
@@ -97,15 +98,15 @@ a {
 
 .skip-link {
   position: absolute;
-  top: 0.5rem;
-  left: 0.5rem;
+  top: 0.8rem;
+  left: 0.8rem;
   z-index: 80;
   transform: translateY(-200%);
-  padding: 0.5rem 0.9rem;
+  padding: 0.8rem 1.44rem;
   border-radius: 8px;
   background: var(--accent);
   color: #fff;
-  font-size: 0.85rem;
+  font-size: 1.36rem;
   font-weight: 600;
   text-decoration: none;
   transition: transform 0.15s ease;
@@ -120,20 +121,20 @@ main:focus {
 }
 
 .ref-note {
-  margin: 1rem 0 0;
+  margin: 1.6rem 0 0;
   color: var(--muted);
-  font-size: 0.89rem;
+  font-size: 1.424rem;
   max-width: 66ch;
 }
 
 .ref-block {
-  margin-top: 2.2rem;
+  margin-top: 3.52rem;
 }
 
 .ref-block > h3 {
-  margin: 0 0 0.75rem;
-  font-size: 1.05rem;
-  scroll-margin-top: 5.8rem;
+  margin: 0 0 1.2rem;
+  font-size: 1.68rem;
+  scroll-margin-top: 9.28rem;
 }
 
 .muted-code {
@@ -142,12 +143,12 @@ main:focus {
 }
 
 .anchor-target {
-  scroll-margin-top: 5.8rem;
+  scroll-margin-top: 9.28rem;
 }
 
 .content {
   min-width: 0;
-  padding-top: 4.8rem;
+  padding-top: 7.68rem;
   padding-bottom: 0;
   flex: 1 0 auto;
   display: flex;
@@ -156,44 +157,44 @@ main:focus {
 
 .content main {
   flex: 1 0 auto;
-  padding-bottom: 1rem;
+  padding-bottom: 1.6rem;
 }
 
 .wrap {
   max-width: var(--wrap);
   margin: 0 auto;
-  padding: 0 2.25rem;
+  padding: 0 3.6rem;
 }
 
 .section {
-  padding: 5rem 0 0;
-  scroll-margin-top: 5.8rem;
+  padding: 8rem 0 0;
+  scroll-margin-top: 9.28rem;
 }
 
 .page-intro {
-  padding-top: 4.4rem;
-  padding-bottom: 0.2rem;
+  padding-top: 7.04rem;
+  padding-bottom: 0.32rem;
 }
 
 .page-intro h1 {
   max-width: 14ch;
   margin: 0;
-  font-size: clamp(2.6rem, 5vw, 4.5rem);
+  font-size: clamp(4.16rem, 5vw, 7.2rem);
   line-height: 0.98;
   letter-spacing: -0.06em;
 }
 
 .page-intro > p:last-child {
   max-width: 58ch;
-  margin: 1rem 0 0;
+  margin: 1.6rem 0 0;
   color: var(--muted);
-  font-size: 1.08rem;
+  font-size: 1.728rem;
 }
 
-.guide-shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 2rem; max-width: 1380px; margin: 0 auto; padding: 0 2.25rem; align-items: start; }.guide-shell > * { min-width: 0; }.guide-main { min-width: 0; max-width: 100%; }.guide-main .wrap { max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }.guide-main .page-intro { padding-top: 2rem; padding-left: 0; padding-right: 0; }.guide-main .section { padding-top: 2.2rem; }
+.guide-shell { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 3.2rem; max-width: 1380px; margin: 0 auto; padding: 0 3.6rem; align-items: start; }.guide-shell > * { min-width: 0; }.guide-main { min-width: 0; max-width: 100%; }.guide-main .wrap { max-width: none; margin-left: 0; margin-right: 0; padding-left: 0; padding-right: 0; }.guide-main .page-intro { padding-top: 3.2rem; padding-left: 0; padding-right: 0; }.guide-main .section { padding-top: 3.52rem; }
 @media (min-width: 1241px) { .guide-shell-toc { grid-template-columns: 220px minmax(0, 1fr) 190px; } }
 @media (max-width: 1150px) {
-  .guide-shell { grid-template-columns: 200px minmax(0, 1fr); gap: 1.25rem; }
+  .guide-shell { grid-template-columns: 200px minmax(0, 1fr); gap: 2rem; }
   .pipeline-grid,
   .docs-guide-grid,
   .docs-deep-grid,
@@ -220,14 +221,14 @@ main:focus {
   .config-code-grid pre,
   .shopify-grid pre { min-height: 0; }
 }
-@media (max-width: 960px) { .guide-shell { grid-template-columns: minmax(0, 1fr); gap: 1rem; padding: 0 1.25rem; } }
+@media (max-width: 960px) { .guide-shell { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; padding: 0 2rem; } }
 
 .section h2 {
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-size: clamp(2.88rem, 3vw, 4rem);
   letter-spacing: -0.045em;
-  margin: 0 0 0.55rem;
+  margin: 0 0 0.88rem;
   position: relative;
-  padding-top: 0.6rem;
+  padding-top: 0.96rem;
 }
 
 .section h2::before {
@@ -243,7 +244,7 @@ main:focus {
 
 .section-sub {
   color: var(--muted);
-  font-size: 1.05rem;
+  font-size: 1.68rem;
   max-width: 62ch;
   line-height: 1.65;
 }
@@ -251,17 +252,17 @@ main:focus {
 .kicker {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.64rem;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  font-size: 0.76rem;
+  font-size: 1.216rem;
   font-weight: 800;
   color: var(--accent-dark);
   background: var(--accent-soft);
   border: 1px solid color-mix(in srgb, var(--accent) 25%, transparent);
   border-radius: 999px;
-  padding: 0.28rem 0.75rem;
-  margin: 0 0 0.7rem;
+  padding: 0.448rem 1.2rem;
+  margin: 0 0 1.12rem;
 }
 
 .muted {
@@ -269,21 +270,21 @@ main:focus {
 }
 
 .small {
-  font-size: 0.85rem;
+  font-size: 1.36rem;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.64rem;
   border: 1px solid var(--line);
   color: var(--text);
   background: var(--card);
   border-radius: 999px;
-  padding: 0.65rem 1.2rem;
+  padding: 1.04rem 1.92rem;
   text-decoration: none;
   cursor: pointer;
-  font-size: 0.95rem;
+  font-size: 1.52rem;
   font-weight: 650;
   box-shadow: var(--shadow-sm);
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
@@ -302,8 +303,8 @@ main:focus {
 }
 
 .btn-small {
-  padding: 0.35rem 0.8rem;
-  font-size: 0.85rem;
+  padding: 0.56rem 1.28rem;
+  font-size: 1.36rem;
 }
 
 .btn-dark {
@@ -315,14 +316,14 @@ main:focus {
 .icon-btn {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.56rem;
   background: var(--bg2);
   border: 1px solid var(--line);
   color: var(--text);
   border-radius: 999px;
-  padding: 0.42rem 0.75rem;
+  padding: 0.672rem 1.2rem;
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 1.312rem;
   font-weight: 600;
 }
 
@@ -331,9 +332,9 @@ main:focus {
 }
 
 .code-title {
-  font-size: 0.8rem;
+  font-size: 1.28rem;
   color: var(--muted);
-  margin: 0.6rem 0;
+  margin: 0.96rem 0;
   display: block;
   font-weight: 600;
 }
@@ -342,17 +343,17 @@ main:focus {
   background: linear-gradient(180deg, color-mix(in srgb, var(--card) 92%, var(--accent-soft)), var(--card));
   border: 1px solid var(--line);
   border-radius: 16px;
-  padding: 0.4rem 0.9rem 0.9rem;
+  padding: 0.64rem 1.44rem 1.44rem;
   box-shadow: var(--shadow);
 }
 
 .code-card pre {
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.64rem;
 }
 
 .table-wrap {
   overflow-x: auto;
-  margin: 1rem 0;
+  margin: 1.6rem 0;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -374,8 +375,8 @@ main:focus {
 
   .table th,
   .table td {
-    padding: 0.5rem 0.55rem;
-    font-size: 0.88rem;
+    padding: 0.8rem 0.88rem;
+    font-size: 1.408rem;
   }
 }
 
@@ -391,7 +392,7 @@ main:focus {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  margin: 1rem 0;
+  margin: 1.6rem 0;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -403,9 +404,9 @@ main:focus {
 .table th,
 .table td {
   text-align: left;
-  padding: 0.65rem 0.8rem;
+  padding: 1.04rem 1.28rem;
   border-bottom: 1px solid var(--line);
-  font-size: 0.93rem;
+  font-size: 1.488rem;
   vertical-align: top;
 }
 
@@ -434,14 +435,14 @@ pre {
 
 .row {
   display: flex;
-  gap: 0.6rem;
-  margin-top: 0.7rem;
+  gap: 0.96rem;
+  margin-top: 1.12rem;
 }
 
 .cols {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 1rem;
+  gap: 1.6rem;
   min-width: 0;
 }
 
@@ -450,7 +451,7 @@ pre {
 .dir-cols {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 0.8rem;
+  gap: 1.28rem;
   min-width: 0;
 }
 
@@ -459,7 +460,7 @@ pre {
 .dir-cols pre {
   max-height: 420px;
   min-height: 0;
-  font-size: 0.8rem;
+  font-size: 1.28rem;
 }
 
 @media (max-width: 1250px) {
@@ -472,6 +473,6 @@ pre {
   }
 
   .wrap {
-    padding: 0 1.25rem;
+    padding: 0 2rem;
   }
 }

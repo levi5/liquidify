@@ -255,6 +255,7 @@ export default function Search() {
         aria-haspopup="dialog"
         aria-expanded={open}
       >
+                <div className="search-trigger-wrapper">
         <span className="search-trigger-icon" aria-hidden="true">
           <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <circle cx="8.5" cy="8.5" r="5.5" />
@@ -262,6 +263,7 @@ export default function Search() {
           </svg>
         </span>
         <span className="search-trigger-label">{copy.open}</span>
+        </div>
         <kbd className="search-trigger-kbd">{isMac ? "⌘" : "Ctrl"} K</kbd>
       </button>
 
