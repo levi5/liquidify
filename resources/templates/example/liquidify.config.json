@@ -1,4 +1,5 @@
 {
   "componentsDir": "src/app",
-  "output": "."
+  "output": ".",
+  "plugins": ["tsx-stats"]
 }

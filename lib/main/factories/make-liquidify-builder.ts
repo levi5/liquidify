@@ -21,7 +21,7 @@ import { DependencyTracker, ImportGraphBuilder } from '../../application/service
 import { SchemaValidator } from '../../application/services/schema-validation'
 import { TranspileFileUseCase } from '../../application/services/transpile-file'
 import { ValidationService } from '../../application/services/validation-service'
-import { tsxStatsPlugin } from '../../presentation/cli/plugins/tsx-stats'
+
 
 export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder {
   const logger = new ConsoleLogger()
@@ -57,7 +57,9 @@ export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder
     logger,
   )
 
-  builder.registerPlugin(tsxStatsPlugin)
+  for (const plugin of options.plugins ?? []) {
+    builder.registerPlugin(plugin)
+  }
 
   return builder
 }

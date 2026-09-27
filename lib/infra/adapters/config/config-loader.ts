@@ -3,10 +3,16 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { DEFAULT_CONFIG, type LiquidifyConfig } from '../../../core/entities/config'
 import { ValidationError } from '../../../core/errors/validation-error'
+import { tsxStatsPlugin } from '../../../presentation/cli/plugins/tsx-stats'
+import type { LiquidifyPlugin } from '../../../core/protocols/plugin'
 
 const configFiles = ['liquidify.config.json', '.liquidifyrc.json', '.liquidifyrc', 'liquidx.config.json', '.liquidxrc.json', '.liquidxrc']
 
 const ALLOWED_KEYS = new Set(['componentsDir', 'output', 'react', 'force', 'plugins'])
+
+const BUILTIN_PLUGINS: Record<string, LiquidifyPlugin> = {
+  'tsx-stats': tsxStatsPlugin,
+}
 
 export function loadConfig(cwd: string = process.cwd(), explicitPath?: string): LiquidifyConfig {
   if (explicitPath !== undefined && explicitPath.trim() !== '') {
@@ -99,11 +105,13 @@ function validateConfig(fullPath: string, value: unknown): LiquidifyConfig {
     .exec()
   const react = validateReact(fullPath, raw.react)
   const cwd = path.dirname(fullPath)
+  const plugins = resolvePlugins(raw.plugins, cwd)
   return {
     ...merged,
     componentsDir: path.resolve(cwd, merged.componentsDir as string),
     output: path.resolve(cwd, merged.output as string),
     react: { ...DEFAULT_CONFIG.react, ...react },
+    plugins,
   }
 }
 
@@ -139,6 +147,23 @@ function checkReactShape(fullPath: string, react: Record<string, unknown>): Liqu
     })
     .exec()
   return react as LiquidifyConfig['react']
+}
+
+function resolvePlugins(raw: unknown, cwd: string): LiquidifyPlugin[] {
+  if (raw === undefined) return []
+  if (!Array.isArray(raw)) {
+    throw new ValidationError('Configuration plugins must be an array of strings.', path.join(cwd, 'liquidify.config.json'))
+  }
+  return raw.map((item) => {
+    if (typeof item !== 'string') {
+      throw new ValidationError('Configuration plugins must be an array of strings.', path.join(cwd, 'liquidify.config.json'))
+    }
+    const plugin = BUILTIN_PLUGINS[item]
+    if (!plugin) {
+      throw new ValidationError(`Unknown plugin "${item}". Available: ${Object.keys(BUILTIN_PLUGINS).join(', ')}`, path.join(cwd, 'liquidify.config.json'))
+    }
+    return plugin
+  })
 }
 
 export const ConfigLoader = { load: loadConfig, loadFromFile: loadConfigFromFile }
