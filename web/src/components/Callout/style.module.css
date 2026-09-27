@@ -1,0 +1,27 @@
+.callout {
+  display: flex;
+  gap: 1.2rem;
+  margin: 2rem 0;
+  padding: 1.6rem 1.84rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--accent-soft);
+}
+
+.mark {
+  flex: none;
+  color: var(--accent);
+  font-size: 1.6rem;
+  line-height: 1.4;
+}
+
+.callout p {
+  margin: 0;
+  color: var(--text);
+  font-size: 1.44rem;
+  line-height: 1.6;
+}
+
+.callout p + p {
+  margin-top: 0.8rem;
+}
