@@ -111,9 +111,9 @@
 
 .theme-toggle {
   display: grid;
+  place-items: center;
   width: 3.52rem;
   height: 3.52rem;
-  place-items: center;
   padding: 0;
 }
 
