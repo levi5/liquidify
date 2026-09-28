@@ -2,6 +2,7 @@
 export const CATALOG_TSX = `'use snippets'
 
 import { PaginateByLiquid, RenderSnippet } from 'liquidex'
+import { escape } from 'liquidex/helpers'
 import classNames from 'classnames'
 
 import { Card } from '../Card'
@@ -51,15 +52,15 @@ export const Catalog = ({ by = 12 }: { by?: number }) => {
               const page_number = Number(part.title)
               return part.is_link ? (
                 <a href={part.url} aria-label={"'pagination.go_to' | t: page: part.title"}>
-                  {'part.title | escape'}
+                  {escape(part.title)}
                 </a>
               ) : page_number == paginate.current_page ? (
                 <span aria-current='page' aria-label={"'pagination.current' | t: page: part.title"}>
-                  {'part.title | escape'}
+                  {escape(part.title)}
                 </span>
               ) : (
                 <span className={classNames(styles['pagination-ellipsis'])} aria-hidden='true'>
-                  {'part.title | escape'}
+                  {escape(part.title)}
                 </span>
               )
             })}
@@ -191,6 +192,7 @@ export const CATALOG_CSS = `/* Catalog/styles.css → {% stylesheet %} de snippe
 export const NEWS_TSX = `'use sections'
 
 import { FormBlock } from 'liquidex'
+import { escape } from 'liquidex/helpers'
 import classNames from 'classnames'
 
 import { NEWSLETTER_SCHEMA } from '../../../schemas/Newsletter/newsletter.schema'
@@ -224,7 +226,7 @@ export const Newsletter = () => {
             </div>
 
             {form['posted_successfully?'] && <p role='status'>{"'footer.subscribed' | t"}</p>}
-            {form.errors && <div role='alert'>{'form.errors | default_errors'}</div>}
+            {form.errors && <div role='alert'>{"'footer.email_error' | t"}</div>}
 
             <p className={classNames(styles['newsletter-note'])}>{section.settings.note}</p>
           </FormBlock>
@@ -347,6 +349,7 @@ export const PROD_TSX = `// ProductInfo/index.tsx — completo ('use sections', 
 'use sections'
 
 import { RenderSnippet, Raw } from 'liquidex'
+import { escape, money } from 'liquidex/helpers'
 import classNames from 'classnames'
 
 import { ProductPreview } from '../../components/Product/Preview'
@@ -376,15 +379,15 @@ export const ProductInfo = () => {
         </div>
 
         <div className={classNames(styles['product-detail-copy'])}>
-          <p className='eyebrow'>{'product.vendor | escape'}</p>
-          <h1>{'product.title | escape'}</h1>
+          <p className='eyebrow'>{escape(product.vendor)}</p>
+          <h1>{escape(product.title)}</h1>
           <p className={classNames(styles['product-intro'])}>{"'products.product.intro' | t"}</p>
 
           {/* Ponte Liquid → React: o produto inteiro vai serializado para as ilhas */}
           <liquid-data data-liquid-store='{{ product | json }}'>
             <ProductProvider elementId='product-provider' selectFirstVariant={false} store={product}>
               <p className={classNames(styles['detail-price'])} data-product-price>
-                {'product.selected_or_first_available_variant.price | money'}
+                {money(product.selected_or_first_available_variant.price)}
               </p>
 
               {blocks?.map((block) => {

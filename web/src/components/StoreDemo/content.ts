@@ -1,6 +1,7 @@
 export const HERO_TSX = `'use sections'
 
 import { RenderSvg } from 'liquidex'
+import { escape, imageUrl, assetUrl, defaultValue } from 'liquidex/helpers'
 import classNames from 'classnames'
 import styles from './styles.css'
 
@@ -13,18 +14,18 @@ export const Hero = () => {
             <span className={classNames(styles['new-season-dot'])}></span> {"'hero.eyebrow' | t"}
           </p>
           <h1>
-            {section.settings.heading ? 'section.settings.heading | escape' : "'hero.heading' | t"}
+            {section.settings.heading ? escape(section.settings.heading) : "'hero.heading' | t"}
             <br />
-            <span>{section.settings.highlight ? 'section.settings.highlight | escape' : "'hero.highlight' | t"}</span>
+            <span>{section.settings.highlight ? escape(section.settings.highlight) : "'hero.highlight' | t"}</span>
           </h1>
           <p className={classNames(styles['hero-description'])}>
-            {section.settings.description ? 'section.settings.description | escape' : "'hero.description' | t"}
+            {section.settings.description ? escape(section.settings.description) : "'hero.description' | t"}
           </p>
           <a
             className="button button-dark"
-            href="{{ section.settings.link | default: routes.all_products_collection_url }}"
+            href={defaultValue(section.settings.link, routes.all_products_collection_url)}
           >
-            {section.settings.button ? 'section.settings.button | escape' : "'hero.button' | t"}
+            {section.settings.button ? escape(section.settings.button) : "'hero.button' | t"}
             <span aria-hidden="true">↗</span>
           </a>
           <div className={classNames(styles['hero-bottom-note'])}>
@@ -34,19 +35,19 @@ export const Hero = () => {
         </div>
         <a
           className={classNames(styles['fashion-hero-photo'], styles['hero-women'])}
-          href="{{ section.settings.women_link | default: '/collections/all/women' }}"
+          href={defaultValue(section.settings.women_link, '/collections/all/women')}
         >
           {section.settings.image ? (
             <img
-              src="{{ section.settings.image | image_url: width: 1200 }}"
-              alt={section.settings.image.alt ? 'section.settings.image.alt | escape' : "'hero.women_alt' | t"}
+              src={imageUrl(section.settings.image, { width: 1200 })}
+              alt={section.settings.image.alt ? escape(section.settings.image.alt) : "'hero.women_alt' | t"}
               width="900"
               height="1200"
               fetchPriority="high"
             />
           ) : (
             <img
-              src="{{ 'liquidify-women.jpg' | asset_url }}"
+              src={assetUrl('liquidify-women.jpg')}
               alt={"'hero.women_alt' | t"}
               width="900"
               height="1200"
@@ -61,19 +62,19 @@ export const Hero = () => {
         </a>
         <a
           className={classNames(styles['fashion-hero-photo'], styles['hero-men'])}
-          href="{{ section.settings.men_link | default: '/collections/all/men' }}"
+          href={defaultValue(section.settings.men_link, '/collections/all/men')}
         >
           {section.settings.men_image ? (
             <img
-              src="{{ section.settings.men_image | image_url: width: 1000 }}"
-              alt={section.settings.men_image.alt ? 'section.settings.men_image.alt | escape' : "'hero.men_alt' | t"}
+              src={imageUrl(section.settings.men_image, { width: 1000 })}
+              alt={section.settings.men_image.alt ? escape(section.settings.men_image.alt) : "'hero.men_alt' | t"}
               width="900"
               height="1200"
               fetchPriority="high"
             />
           ) : (
             <img
-              src="{{ 'liquidify-men.jpg' | asset_url }}"
+              src={assetUrl('liquidify-men.jpg')}
               alt={"'hero.men_alt' | t"}
               width="900"
               height="1200"
@@ -289,6 +290,7 @@ export const HERO_CSS = `/* Home/Hero/styles.css → {% stylesheet %} de section
 export const CARD_TSX = `'use snippets'
 
 import { RenderSnippet } from 'liquidex'
+import { escape, imageUrl, money, defaultValue } from 'liquidex/helpers'
 import classNames from 'classnames'
 
 import { ThemeIcon } from '../Icon'
@@ -328,10 +330,10 @@ export const Card = ({ item }: { item: CardItem }) => {
         {item.featured_image ? (
           <img
             className={classNames(styles['product-primary-image'])}
-            src='{{ item.featured_image | image_url: width: 700 }}'
-            srcSet='{{ item.featured_image | image_url: width: 350 }} 350w, {{ item.featured_image | image_url: width: 550 }} 550w, {{ item.featured_image | image_url: width: 700 }} 700w'
+            src={imageUrl(item.featured_image, { width: 700 })}
+            srcSet={\`\${imageUrl(item.featured_image, { width: 350 })} 350w, \${imageUrl(item.featured_image, { width: 550 })} 550w, \${imageUrl(item.featured_image, { width: 700 })} 700w\`}
             sizes='(max-width: 740px) 50vw, 25vw'
-            alt='{{ item.featured_image.alt | default: item.title | escape }}'
+            alt={defaultValue(item.featured_image.alt, escape(item.title))}
             loading='lazy'
             decoding='async'
             width='700'
@@ -346,7 +348,7 @@ export const Card = ({ item }: { item: CardItem }) => {
         {item.images && item.images.size > 1 && (
           <img
             className={classNames(styles['product-secondary-image'])}
-            src='{{ item.images[1] | image_url: width: 700 }}'
+            src={imageUrl(item.images[1], { width: 700 })}
             alt=''
             aria-hidden='true'
             loading='lazy'
@@ -367,15 +369,15 @@ export const Card = ({ item }: { item: CardItem }) => {
 
       <div className={classNames(styles['product-info'])}>
         <h3>
-          <a href={item.url}>{'item.title | escape'}</a>
+          <a href={item.url}>{escape(item.title)}</a>
         </h3>
 
         <div className={classNames(styles['product-prices'])}>
           <strong>
             {item.price_min !== item.price_max && <small>{"'products.product.from_price' | t"}</small>}
-            {'item.price | money'}
+            {money(item.price)}
           </strong>
-          {item.compare_at_price > item.price && <s>{'item.compare_at_price | money'}</s>}
+          {item.compare_at_price > item.price && <s>{money(item.compare_at_price)}</s>}
         </div>
 
         {item.available ? (
@@ -610,6 +612,8 @@ import { CartService } from '../../services/Cart/cart.service'
 import { QuantitySelector } from '../Quantity/Selector'
 import { ToastHost } from '../Toast'
 
+import { money } from 'liquidex/helpers'
+
 import './styles.css'
 
 type CartItem = {
@@ -694,7 +698,7 @@ export const MiniCart = (_props: { elementId: string }) => {
               <div className={'miniCartFooter'}>
                 <div className={'miniCartSubtotal'}>
                   <span>Subtotal</span>
-                  {/* … formatMoney(state.total_price) … */}
+                  {/* … money(state.total_price) … */}
                 </div>
                 <a className='button button-dark' href='/cart'>Finalizar compra ↗</a>
               </div>

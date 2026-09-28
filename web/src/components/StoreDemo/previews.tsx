@@ -1,23 +1,15 @@
 import { useState } from "react";
 import { useLocale } from "../../i18n.tsx";
-
-const brl = (v: number) => `R$ ${v}`;
+import { brl, isValidEmail, getCatalogItems, paginate, getTotalPages, getSubtotal } from "./helpers.ts";
 
 export function CatalogPreview({ womenImg, menImg }: { womenImg: string; menImg: string }) {
   const { locale } = useLocale();
   const pt = locale === "pt-BR";
-  const names = pt
-    ? ["Vestido Seda", "Casaco Linho", "Bolsa Couro", "Camisa Branca", "Saia Plissada", "Blazer Areia", "Calça Wide", "Top Canelado", "Lenço Estampa"]
-    : ["Silk Dress", "Linen Coat", "Leather Bag", "White Shirt", "Pleated Skirt", "Sand Blazer", "Wide Pants", "Ribbed Top", "Print Scarf"];
-  const items = names.map((name, i) => ({
-    name,
-    price: 289 + i * 40,
-    img: i === 0 ? womenImg : i === 1 ? menImg : null as string | null,
-  }));
+  const items = getCatalogItems(pt, womenImg, menImg);
   const PER_PAGE = 3;
-  const total = Math.ceil(items.length / PER_PAGE);
+  const total = getTotalPages(items.length, PER_PAGE);
   const [page, setPage] = useState(1);
-  const visible = items.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const visible = paginate(items, page, PER_PAGE);
 
   return (
     <div className="mock-catalog">
@@ -94,7 +86,7 @@ export function NewsletterPreview() {
   const [status, setStatus] = useState<"idle" | "error" | "done">("idle");
 
   function submit() {
-    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim())) setStatus("done");
+    if (isValidEmail(email)) setStatus("done");
     else setStatus("error");
   }
 
@@ -132,7 +124,7 @@ export function CartPreview() {
     { id: 1, title: pt ? "Camisa Linho" : "Linen Shirt", variant: "P / Bege", price: 289 },
     { id: 2, title: pt ? "Vestido Seda" : "Silk Dress", variant: "M / Preto", price: 459 },
   ]);
-  const subtotal = items.reduce((sum, item) => sum + item.price, 0);
+  const subtotal = getSubtotal(items);
 
   return (
     <div className="mock-cart">
