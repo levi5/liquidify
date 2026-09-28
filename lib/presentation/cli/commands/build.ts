@@ -1,9 +1,10 @@
 import type { DependencyTracker } from '../../../application/services/dependency-tracker'
-import { _match, _try, _Array } from 'funcio'
+import { _match, _try } from 'funcio'
 import { EventEmitter } from 'node:events'
 import type { FSWatcher } from 'chokidar'
 import { glob } from 'glob'
 import chokidar from 'chokidar'
+import os from 'node:os'
 import path from 'node:path'
 import type { PluginStats } from '../../../core/protocols/plugin'
 
@@ -157,20 +158,17 @@ export class LiquidifyBuilder extends EventEmitter {
   }
 
   private async buildComponents(files: string[]) {
-    const failures: Array<{ file: string; error: unknown }> = []
-    await _Array.forEachAsync(files, async (file) => {
+    const results = await this.processFilesInParallel(files, async (file) => {
       const filePath = path.resolve(file)
-      const compiled = await _try.async(async () => {
-        const source = this.fileSystem.readFileSync(filePath)
-        const directives = this.scanner.scan(source, filePath)
-        const skippable = (filePath.endsWith('.ts') || filePath.endsWith('.js')) && !directives.isDom && !directives.isSnippet
-        if (!skippable) await this.useCase.execute(source, filePath)
-      })
-      compiled.match({
-        right: () => undefined,
-        left: (error) => failures.push({ file: filePath, error }),
-      })
+      const source = this.fileSystem.readFileSync(filePath)
+      const directives = this.scanner.scan(source, filePath)
+      const skippable = (filePath.endsWith('.ts') || filePath.endsWith('.js')) && !directives.isDom && !directives.isSnippet
+      if (!skippable) await this.useCase.execute(source, filePath)
     })
+    const failures: Array<{ file: string; error: unknown }> = []
+    for (const result of results) {
+      if (result.error !== undefined) failures.push({ file: result.file, error: result.error })
+    }
     _match(true)
       .with(failures.length === 1, () => {
         const single = failures[0] as { file: string; error: unknown }
@@ -186,6 +184,29 @@ export class LiquidifyBuilder extends EventEmitter {
       })
       .with(true, () => undefined)
       .exec()
+  }
+
+  private async processFilesInParallel(
+    files: string[],
+    worker: (file: string) => Promise<void>,
+  ): Promise<Array<{ file: string; error?: unknown }>> {
+    const results: Array<{ file: string; error?: unknown }> = new Array(files.length)
+    const workerCount = Math.max(1, Math.min(files.length, os.cpus().length))
+    let cursor = 0
+    const runWorker = async (): Promise<void> => {
+      while (cursor < files.length) {
+        const index = cursor++
+        const file = files[index] as string
+        try {
+          await worker(file)
+          results[index] = { file }
+        } catch (error) {
+          results[index] = { file, error }
+        }
+      }
+    }
+    await Promise.all(Array.from({ length: workerCount }, () => runWorker()))
+    return results
   }
 
   public watch() {

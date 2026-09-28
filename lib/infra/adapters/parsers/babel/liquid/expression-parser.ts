@@ -114,6 +114,17 @@ export class ExpressionParser {
   }
 
   public generateLiquidCode(node: Node, inCondition = false, renames?: Record<string, string>, context?: ParsingContext): string {
+    const collector = context?.errorCollector
+    if (collector === undefined) return this.generate(node, inCondition, renames, context)
+    try {
+      return this.generate(node, inCondition, renames, context)
+    } catch (error) {
+      collector.add(error, context?.currentFilePath)
+      return ''
+    }
+  }
+
+  private generate(node: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): string {
     return _match(isTemplateLiteral(node))
       .with(true, () => this.templateParser.parse(node as TemplateLiteral, context, renames))
       .with(false, () => this.generateNodeCode(node, inCondition, renames, context))
@@ -228,18 +239,13 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
     const parsed = context as ParsingContext
     const parts = this.logicParts(n).map((part) => this.generateLiquidCode(part as Expression, false, renames, context))
     const temp = parsed.allocateName('logic')
-    console.error(`[MUTATE] BEFORE n.type=${(n as any).type}`)
     const [head, ...tail] = parts
     parsed.addPendingAssign(`{% assign ${temp} = ${head} %}`)
-    console.error(`[MUTATE] AFTER HEAD n.type=${(n as any).type}`)
     tail.forEach((code) => {
       const guard = this.logicGuard(n.operator, temp, code)
-      console.error(`[MUTATE] ADDING GUARD for op=${n.operator} code=${code}`)
       parsed.addPendingAssign(guard)
     })
-    console.error(`[MUTATE] AFTER TAIL n.type=${(n as any).type}`)
     Object.assign(n, identifier(temp))
-    console.error(`[MUTATE] AFTER ASSIGN n.type=${(n as any).type}`)
   }
 
   private logicParts(n: LogicalExpression): Expression[] {
@@ -642,11 +648,8 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
     const isJsonStringify = isIdentifier(obj) && (obj as { name: string }).name === 'JSON' && n.arguments.length > 0
     _match(true)
       .with(isJsonParse, () => {
-        throw new ValidationError(
-          'JSON.parse() has no Liquid equivalent. Pass parsed data as props instead.',
-          this.filePathOf(context),
-          this.errorLocation(n),
-        )
+        const arg = this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context)
+        Object.assign(n, identifier(`${arg} | parse_json`))
       })
       .with(isJsonStringify, () => {
         const arg = this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context)
@@ -662,7 +665,7 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
     _match(isIdentifier(obj) && (obj as { name: string }).name === 'Object')
       .with(true, () => {
         throw new ValidationError(
-          'Object.keys() has no direct Liquid filter. Iterate with `for (const key of Object.keys(obj))` is not supported; use `{% for pair in obj %}{{ pair[0] }}{% endfor %}` pattern or pass keys as an array prop.',
+          'Object.keys() has no direct Liquid filter. Use `{% for pair in obj %}{{ pair[0] }}{% endfor %}` to iterate keys, or pass keys as an array prop.',
           this.filePathOf(context),
           this.errorLocation(n),
         )
@@ -844,6 +847,19 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   private normalizeUnary(n: Node, renames?: Record<string, string>, context?: ParsingContext): void {
     _match(isUnaryExpression(n) && (n as UnaryExpression).operator === '!')
       .with(true, () => this.negateNode(n as UnaryExpression, renames, context))
+      .with(false, () => this.normalizeTypeof(n, context))
+      .exec()
+  }
+
+  private normalizeTypeof(n: Node, context?: ParsingContext): void {
+    _match(isUnaryExpression(n) && (n as UnaryExpression).operator === 'typeof')
+      .with(true, () => {
+        throw new ValidationError(
+          'typeof has no Liquid equivalent. Use nil checks (x == nil), string comparisons, or pass type information as props instead.',
+          this.filePathOf(context),
+          this.errorLocation(n as unknown as CallExpression),
+        )
+      })
       .with(false, () => undefined)
       .exec()
   }
@@ -868,6 +884,16 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   }
 
   private rewriteBinary(n: BinaryExpression, renames?: Record<string, string>, context?: ParsingContext): void {
+    _match(n.operator === 'instanceof')
+      .with(true, () => {
+        throw new ValidationError(
+          'instanceof has no Liquid equivalent. Pass type information as props or use string comparison instead.',
+          this.filePathOf(context),
+          this.errorLocation(n as unknown as CallExpression),
+        )
+      })
+      .with(false, () => undefined)
+      .exec()
     _match(n.operator)
       .with('===', () => {
         n.operator = '=='
@@ -1064,6 +1090,17 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   }
 
   public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+    const collector = context?.errorCollector
+    if (collector === undefined) return this.parseExpressionNodes(expr, renames, context)
+    try {
+      return this.parseExpressionNodes(expr, renames, context)
+    } catch (error) {
+      collector.add(error, context?.currentFilePath)
+      return ''
+    }
+  }
+
+  private parseExpressionNodes(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
     const helper = this.helperCallParser.parseHelperExpression(expr, renames, context)
     return _match(true)
       .with(helper !== null, () => helper as string)

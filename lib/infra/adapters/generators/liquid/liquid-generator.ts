@@ -16,6 +16,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
   private readonly options: ResolvedGeneratorOptions
   private inBuild = false
   private pendingTouch = false
+  private writeChain: Promise<unknown> = Promise.resolve()
 
   constructor(
     options: GeneratorOptions,
@@ -61,6 +62,15 @@ export class LiquidFileSystemGenerator implements IGenerator {
   }
 
   public async generate(component: ParsedComponent, sourcePath?: string): Promise<void> {
+    const run = this.writeChain.then(() => this.generateExclusive(component, sourcePath))
+    this.writeChain = run.then(
+      () => undefined,
+      () => undefined,
+    )
+    return run
+  }
+
+  private async generateExclusive(component: ParsedComponent, sourcePath?: string): Promise<void> {
     const effectiveSource = _match(!this.inBuild)
       .with(true, () => undefined)
       .with(false, () => sourcePath)

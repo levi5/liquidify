@@ -1,5 +1,6 @@
 import { _Maybe, _match } from 'funcio'
 import type { InlineComponentNode } from '../../types/component'
+import type { ErrorCollector } from '../errors/error-collector'
 
 const orDefault = <T>(value: T | undefined, fallback: T): T => _Maybe.of(value).getOrElse(fallback) as T
 
@@ -14,6 +15,7 @@ export interface ParsingContextData {
   mode?: string
   inlineComponents?: Map<string, InlineComponentNode>
   outputContext?: 'text' | 'raw' | 'json'
+  errorCollector?: ErrorCollector
 }
 
 export class ParsingContext {
@@ -27,6 +29,7 @@ export class ParsingContext {
   public mode?: string
   public inlineComponents?: Map<string, InlineComponentNode>
   public outputContext: 'text' | 'raw' | 'json' = 'text'
+  public errorCollector?: ErrorCollector
   private sequence = 0
 
   constructor(data: ParsingContextData = {}) {
@@ -40,6 +43,7 @@ export class ParsingContext {
     this.mode = orDefault(data.mode, undefined)
     this.inlineComponents = orDefault(data.inlineComponents, undefined)
     this.outputContext = orDefault(data.outputContext, 'text')
+    this.errorCollector = orDefault(data.errorCollector, undefined)
   }
 
   public static derive(context: ParsingContext | undefined, patch: ParsingContextData): ParsingContext {
@@ -55,6 +59,7 @@ export class ParsingContext {
       inlineComponents:
         (patch.inlineComponents ?? context?.inlineComponents) ? new Map(patch.inlineComponents ?? context?.inlineComponents) : undefined,
       outputContext: orDefault(patch.outputContext ?? context?.outputContext, 'text'),
+      errorCollector: patch.errorCollector ?? context?.errorCollector,
     })
   }
 

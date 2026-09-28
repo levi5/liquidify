@@ -5,8 +5,13 @@ import {
   isIdentifier,
   isJSXAttribute,
   isJSXExpressionContainer,
+  isJSXIdentifier,
+  isJSXNamespacedName,
+  isJSXSpreadAttribute,
+  isMemberExpression,
   isObjectExpression,
   isObjectProperty,
+  isSpreadElement,
   isStringLiteral,
   isUnaryExpression,
   isBinaryExpression,
@@ -16,6 +21,7 @@ import {
   type ArrowFunctionExpression,
   type JSXAttribute,
   type JSXExpressionContainer,
+  type JSXNamespacedName,
   type JSXSpreadAttribute,
   type Expression,
   type Node,
@@ -54,9 +60,24 @@ export class LiquidAttributeConverter {
     context?: ParsingContext,
   ): string {
     return attributes
-      .map((attr) => this.convertAttribute(attr, renames, context))
+      .map((attr) => this.convertAttributeGuarded(attr, renames, context))
       .filter(Boolean)
       .join('')
+  }
+
+  private convertAttributeGuarded(
+    attribute: JSXAttribute | JSXSpreadAttribute,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    const collector = context?.errorCollector
+    if (collector === undefined) return this.convertAttribute(attribute, renames, context)
+    try {
+      return this.convertAttribute(attribute, renames, context)
+    } catch (error) {
+      collector.add(error, context?.currentFilePath)
+      return ''
+    }
   }
 
   private convertAttribute(
@@ -66,20 +87,70 @@ export class LiquidAttributeConverter {
   ): string {
     if (!isJSXAttribute(attribute)) return this.handleSpreadAttribute(attribute, context)
     const rawName = (attribute as JSXAttribute).name
-    if (rawName.type !== 'JSXIdentifier') {
+    if (isJSXNamespacedName(rawName)) {
+      return this.convertNamespacedAttribute(attribute as JSXAttribute, rawName, renames, context)
+    }
+    if (!isJSXIdentifier(rawName)) {
       throw new ValidationError(
-        `Namespaced JSX attribute "${rawName.type}" is not supported in Liquid output. Use data-* attributes instead.`,
+        'Namespaced JSX attributes are not supported in Liquid output. Use data-* attributes instead.',
         context?.currentFilePath,
       )
     }
     return this.convertNamedAttribute(attribute as JSXAttribute, renames, context)
   }
 
-  private handleSpreadAttribute(_attribute: JSXAttribute | JSXSpreadAttribute, context?: ParsingContext): string {
+  private convertNamespacedAttribute(
+    attribute: JSXAttribute,
+    rawName: JSXNamespacedName,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    const dataName = `data-${rawName.namespace.name}-${rawName.name.name}`
+    const renamed = { ...attribute, name: { type: 'JSXIdentifier', name: dataName } } as JSXAttribute
+    return this.convertNamedAttribute(renamed, renames, context)
+  }
+
+  private handleSpreadAttribute(attribute: JSXAttribute | JSXSpreadAttribute, context?: ParsingContext): string {
+    if (!isJSXSpreadAttribute(attribute)) return ''
+    const argument = attribute.argument
+    if (isObjectExpression(argument)) {
+      return this.flattenSpreadObject(argument, context)
+    }
+    if (isIdentifier(argument) || isMemberExpression(argument)) {
+      const spreadName = isIdentifier(argument) ? argument.name : 'props'
+      throw new ValidationError(
+        `JSX spread attributes ({...${spreadName}}) are not supported in Liquid output. List props explicitly (e.g. <div className={props.className} id={props.id}>).`,
+        context?.currentFilePath,
+      )
+    }
     throw new ValidationError(
-      'JSX spread attributes ({...props}) are not supported in Liquid output. List props explicitly (e.g. <div className={props.className} id={props.id}>).',
+      'JSX spread attributes are not supported in Liquid output. List props explicitly (e.g. <div className={props.className} id={props.id}>).',
       context?.currentFilePath,
     )
+  }
+
+  private flattenSpreadObject(expression: ObjectExpression, context?: ParsingContext): string {
+    return expression.properties
+      .map((prop) => {
+        if (isSpreadElement(prop)) {
+          throw new ValidationError(
+            'Spread elements inside object expressions in JSX spread attributes are not supported.',
+            context?.currentFilePath,
+          )
+        }
+        if (!isObjectProperty(prop)) return ''
+        const key = _match(true)
+          .with(isIdentifier(prop.key as Node), () => pascalToKebab((prop.key as { name: string }).name))
+          .with(isStringLiteral(prop.key as Node), () => (prop.key as { value: string }).value)
+          .with(true, () => '')
+          .exec() as string
+        if (key === '') return ''
+        const value = prop.value as Expression
+        const rendered = this.renderValue(value, undefined, context)
+        return ` ${key}="${rendered}"`
+      })
+      .filter(Boolean)
+      .join('')
   }
 
   private convertNamedAttribute(attribute: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -248,9 +319,10 @@ export class LiquidAttributeConverter {
   }
 
   private handleStyleValue(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
-    return _match(isObjectExpression(expression))
-      .with(true, () => this.handleStyleObject(expression as ObjectExpression, renames, context))
-      .with(false, () => {
+    return _match(true)
+      .with(isObjectExpression(expression), () => this.handleStyleObject(expression as ObjectExpression, renames, context))
+      .with(isConditionalExpression(expression), () => this.handleStyleConditional(expression as ConditionalExpression, renames, context))
+      .with(true, () => {
         const code = this.expressionParser.generateLiquidCode(expression, false, renames, context)
         if (code.includes('{%')) {
           throw new ValidationError(
@@ -259,6 +331,40 @@ export class LiquidAttributeConverter {
           )
         }
         return ` style="${this.pendingOf(context)}${escapedOutput(code)}"`
+      })
+      .exec() as string
+  }
+
+  private handleStyleConditional(
+    expression: ConditionalExpression,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
+    const yes = this.renderStyleString(expression.consequent as Expression, renames, context)
+    const no = this.renderStyleString(expression.alternate as Expression, renames, context)
+    const markup = renderCondition(expression.test, yes, no, (node) => this.expressionParser.generateLiquidCode(node, true, renames, context))
+    return ` style="${this.pendingOf(context)}${markup}"`
+  }
+
+  private renderStyleString(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+    return _match(isStringLiteral(expression))
+      .with(true, () => (expression as { value: string }).value)
+      .with(isObjectExpression(expression), () => {
+        const styles = (expression as ObjectExpression).properties
+          .filter(isObjectProperty)
+          .map((prop) => this.styleEntry(prop, renames, context))
+          .filter(Boolean)
+        return styles.join(' ')
+      })
+      .with(true, () => {
+        const code = this.expressionParser.generateLiquidCode(expression, false, renames, context)
+        if (code.includes('{%')) {
+          throw new ValidationError(
+            'Liquid block tags are not supported inside style="...". Hoist the condition outside the attribute.',
+            context?.currentFilePath,
+          )
+        }
+        return escapedOutput(code)
       })
       .exec() as string
   }
