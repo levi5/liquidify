@@ -7,6 +7,10 @@ import { sha256Hex } from '../../../../shared/liquid-helpers'
 import { MANIFEST_VERSION, OUTPUT_RESERVED } from '../../../../shared/liquid-constants'
 import type { Logger } from '../../../../shared/logger'
 
+if (typeof globalThis.structuredClone !== 'function') {
+  globalThis.structuredClone = <T>(value: T): T => JSON.parse(JSON.stringify(value))
+}
+
 type Entry = { files: Record<string, string>; scripts: string[]; css: string }
 type Entries = Record<string, Entry>
 const isRecord = (value: unknown): value is Record<string, unknown> =>

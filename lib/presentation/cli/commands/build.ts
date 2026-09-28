@@ -94,6 +94,7 @@ export class LiquidifyBuilder extends EventEmitter {
       if (directives.isReact) active.push('use react')
       if (directives.isDom) active.push('use dom')
       if (directives.isSnippet) active.push('use snippets')
+      if (directives.isSections) active.push('use sections')
       const label = active.length > 0 ? active.join(', ') : 'none'
       stats.byDirective[label] = (stats.byDirective[label] || 0) + 1
     }
