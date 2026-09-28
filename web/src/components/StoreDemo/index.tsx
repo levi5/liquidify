@@ -16,13 +16,21 @@ import {
 import { CatalogPreview, ProductPreview, NewsletterPreview, CartPreview } from "./previews.tsx";
 import "./style.css";
 
-const SETUP = `npx liquidify init minha-loja --template example
+const SETUP_PT = `npx liquidify init minha-loja --template example
 cd minha-loja
 npm install
 npm run dev
 
 # segundo terminal: prévia na development store
 npm run preview -- --store sua-loja.myshopify.com`;
+
+const SETUP_EN = `npx liquidify init my-store --template example
+cd my-store
+npm install
+npm run dev
+
+# second terminal: preview on the development store
+npm run preview -- --store your-store.myshopify.com`;
 
 type Tab = "tsx" | "liquid" | "css";
 
@@ -233,7 +241,7 @@ export default function StoreDemo() {
       <p className="section-sub">{copy.intro}</p>
 
       <div className="setup-card">
-        <Snippet title={copy.setupTitle} code={SETUP} language="plain" />
+        <Snippet title={copy.setupTitle} code={pt ? SETUP_PT : SETUP_EN} language="plain" />
       </div>
 
       <div className="showcase-list">

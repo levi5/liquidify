@@ -84,7 +84,7 @@
 
 .hero-pipeline {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, minmax(0, 1fr)));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.28rem;
   margin: 3.52rem 0 0;
   padding: 0;
@@ -243,7 +243,7 @@
 
 .feature-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, minmax(0, 1fr)));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.28rem;
   margin-top: 4rem;
 }
@@ -287,6 +287,12 @@
   font-size: 1.408rem;
   line-height: 1.55;
 }
+
+.first-answers { list-style: none; margin: 1.6rem 0 0; padding: 0; display: grid; gap: 0.8rem; }
+.first-answers a { display: grid; gap: 0.16rem; padding: 0.88rem 1.2rem; border: 1px solid var(--line); border-radius: 12px; background: var(--card); text-decoration: none; color: inherit; box-shadow: var(--shadow); }
+.first-answers a:hover { border-color: var(--accent); }
+.first-answers strong { font-size: 1.4rem; color: var(--text); }
+.first-answers span { font-size: 1.36rem; color: var(--muted); }
 
 @media (max-width: 1020px) {
   .hero-layout { grid-template-columns: minmax(0, 1fr); }

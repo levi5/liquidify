@@ -87,7 +87,7 @@ export default function PageToc({ chapter }: { chapter: Chapter }) {
               <li key={id}>
                 <a
                   href={toHref(`${chapter.href}#${id}`)}
-                  className={activeId === id ? "active" : undefined}
+                  className={activeId === id ? styles.active : undefined}
                   aria-current={activeId === id ? "location" : undefined}
                 >
                   {label}

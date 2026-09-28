@@ -7,7 +7,7 @@ import { docsFiles } from "./vite-docs-files.ts";
 
 function appVersion(): string {
   return _try
-    .sync(() => JSON.parse(readFileSync(new URL("./package.json", import.meta.url), "utf-8")) as { version?: unknown })
+    .sync(() => JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf-8")) as { version?: unknown })
     .match({
       right: (pkg) =>
         _Maybe.of(

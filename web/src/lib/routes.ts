@@ -3,7 +3,7 @@ import { _match, _Maybe } from "funcio";
 export type Area = "home" | "docs" | "api" | "example" | "not-found";
 export type Route = { area: Area; chapter: string; anchor: string };
 
-const DOCS = new Set(["start", "theme-model", "authoring", "shopify", "runtime", "islands", "schema", "types"]);
+const DOCS = new Set(["hello", "concepts", "faq", "start", "theme-model", "authoring", "shopify", "runtime", "islands", "schema", "types"]);
 const API = new Set(["cli", "config", "runtime", "filters", "tsx", "builder", "build", "errors", "plugins"]);
 
 function base(): string {

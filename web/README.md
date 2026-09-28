@@ -25,6 +25,9 @@ web/
         ├── Header/         # index.tsx + style.css
         ├── Hero/           # home: pipeline TSX→Liquid + features
         ├── StoreDemo/      # example: showcase curado (sem file viewer)
+        ├── HelloWorld/     # docs/hello: tutorial com output real do compilador
+        ├── Concepts/       # docs/concepts: modos, glossário, pipeline
+        ├── Faq/            # docs/faq: troubleshooting com links
         ├── GettingStarted/ # docs/start
         ├── DocsGuide/      # docs/theme-model
         ├── AuthoringGuide/ # docs/authoring

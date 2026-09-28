@@ -99,7 +99,11 @@
   gap: 0.56rem;
   padding: 0.96rem 1.12rem;
   border-bottom: 1px solid #343a52;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.showcase-tabs::-webkit-scrollbar { width: 0; height: 0; }
+.showcase-tabs button { white-space: nowrap; }
 
 .showcase-tabs button {
   border: 1px solid #4b5168;
@@ -195,7 +199,7 @@
 
 .mock-shelf {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, minmax(0, 1fr)));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.96rem;
 }
 
@@ -321,7 +325,7 @@
 
 .mock-mini-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, minmax(0, 1fr)));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.8rem;
 }
 

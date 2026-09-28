@@ -38,7 +38,7 @@ export default function Header({ route }: { route: string }) {
   const { locale, setLocale } = useLocale();
   const copy = locale === "pt-BR"
     ? {
-        links: ["Docs", "API", "Example"],
+        links: ["Comece aqui", "Docs", "API", "Example"],
         theme: "Alternar tema",
         light: "Claro",
         dark: "Escuro",
@@ -47,7 +47,7 @@ export default function Header({ route }: { route: string }) {
         tagline: "Shopify em TSX",
       }
     : {
-        links: ["Docs", "API", "Example"],
+        links: ["Start here", "Docs", "API", "Example"],
         theme: "Toggle theme",
         light: "Light",
         dark: "Dark",
@@ -56,9 +56,10 @@ export default function Header({ route }: { route: string }) {
         tagline: "Build Shopify in TSX",
       };
   const links = [
-    { href: toHref("#/docs/start"), label: copy.links[0], route: "docs" },
-    { href: toHref("#/api/cli"), label: copy.links[1], route: "api" },
-    { href: toHref("#/example"), label: copy.links[2], route: "example" },
+    { href: toHref("#/docs/hello"), label: copy.links[0], route: "docs" },
+    { href: toHref("#/docs/start"), label: copy.links[1], route: "docs" },
+    { href: toHref("#/api/cli"), label: copy.links[2], route: "api" },
+    { href: toHref("#/example"), label: copy.links[3], route: "example" },
   ];
 
   useEffect(() => {

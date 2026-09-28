@@ -42,6 +42,9 @@ jobs:
           grep -q 'property="og:title"' web/dist/index.html
           grep -q 'rel="canonical"' web/dist/index.html
           grep -q 'application/ld+json' web/dist/index.html
+          grep -q 'liquidify/docs/hello' web/dist/sitemap.xml
+          grep -q 'liquidify/docs/concepts' web/dist/sitemap.xml
+          grep -q 'liquidify/docs/faq' web/dist/sitemap.xml
       - name: Check no legacy hash links remain
         run: |
           if grep -rho 'href="#/' web/src/ | grep -q .; then

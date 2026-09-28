@@ -25,6 +25,53 @@ export type Section = {
 
 export const DOCS_CHAPTERS: Chapter[] = [
   {
+    id: "hello",
+    area: "docs",
+    href: "#/docs/hello",
+    title: { en: "Hello World tutorial", "pt-BR": "Tutorial Hello World" },
+    summary: {
+      en: "Write one TSX file, run one command, and read the real Liquid output.",
+      "pt-BR": "Escreva um arquivo TSX, rode um comando e leia o Liquid real gerado.",
+    },
+    sections: [
+      { id: "write-file", title: { en: "Write the file", "pt-BR": "Escreva o arquivo" }, terms: ["hello world", "first component", "primeiro componente", "where to put file", "onde colocar arquivo", "create file", "criar arquivo", "Hello.tsx"] },
+      { id: "run", title: { en: "Run the compiler", "pt-BR": "Rode o compilador" }, terms: ["run", "rodar", "command", "comando", "terminal", "npx liquidify", "watch", "build"] },
+      { id: "read-output", title: { en: "Read the output", "pt-BR": "Leia o resultado" }, terms: ["generated", "gerado", "output", "saída", "sections/hello.liquid", "schema output", "real output", "resultado real"] },
+      { id: "success", title: { en: "Check it worked", "pt-BR": "Confira se funcionou" }, terms: ["success", "sucesso", "verify", "verificar", "files appear", "checkpoint"] },
+      { id: "next", title: { en: "Next steps", "pt-BR": "Próximos passos" }, terms: ["next", "próximos", "concepts", "conceitos", "faq", "keep learning", "continuar"] },
+    ],
+  },
+  {
+    id: "concepts",
+    area: "docs",
+    href: "#/docs/concepts",
+    title: { en: "Core concepts", "pt-BR": "Conceitos centrais" },
+    summary: {
+      en: "Directives, islands, snippets, sections, and schema: the five ideas behind every file.",
+      "pt-BR": "Diretivas, ilhas, snippets, sections e schema: as cinco ideias por trás de cada arquivo.",
+    },
+    sections: [
+      { id: "modes", title: { en: "One directive, one output", "pt-BR": "Uma diretiva, um resultado" }, terms: ["vs", "difference", "diferença", "modes", "modos", "use snippets", "use react", "use sections", "directive", "diretiva"] },
+      { id: "glossary", title: { en: "Glossary", "pt-BR": "Glossário" }, terms: ["glossary", "glossário", "terms", "termos", "island", "ilha", "snippet", "section", "schema", "block", "template", "liquid-data", "react-island", "what is", "o que é"] },
+      { id: "pipeline", title: { en: "From TSX to storefront", "pt-BR": "Do TSX à vitrine" }, terms: ["pipeline", "flow", "fluxo", "compile", "compilar", "browser", "navegador", "server", "servidor"] },
+    ],
+  },
+  {
+    id: "faq",
+    area: "docs",
+    href: "#/docs/faq",
+    title: { en: "FAQ & troubleshooting", "pt-BR": "FAQ e solução de problemas" },
+    summary: {
+      en: "Short answers to the failures every newcomer hits, each linked to the full reference.",
+      "pt-BR": "Respostas curtas para as falhas que todo iniciante encontra, cada uma ligada à referência completa.",
+    },
+    sections: [
+      { id: "editor", title: { en: "Theme Editor problems", "pt-BR": "Problemas no Theme Editor" }, terms: ["section not in editor", "section não aparece", "not showing", "não aparece", "editor", "missing", "blank page", "página em branco", "why not working", "por que não funciona"] },
+      { id: "build", title: { en: "Build problems", "pt-BR": "Problemas de build" }, terms: ["build fails", "build falha", "error", "erro", "no output", "sem saída", "watch", "config", "manifest", "theme check", "theme-check"] },
+      { id: "data", title: { en: "Data problems", "pt-BR": "Problemas de dados" }, terms: ["products missing", "produtos", "menus", "collection", "coleção", "empty", "vazio", "filter", "filtro", "string", "auth", "login", "shopify cli"] },
+    ],
+  },
+  {
     id: "start",
     area: "docs",
     href: "#/docs/start",

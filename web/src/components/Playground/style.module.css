@@ -26,9 +26,10 @@
   margin-top: 1.6rem;
 }
 .field {
+  min-width: 0;
+  height: auto;
   display: grid;
   gap: 0.8rem;
-  min-width: 0;
 }
 .out {
   min-width: 0;
@@ -40,6 +41,10 @@
   margin: 0;
   max-height: 420px;
 }
+.preset-row { display: flex; gap: 0.8rem; flex-wrap: wrap; margin-top: 1.6rem; }
+.preset-row button { border: 1px solid var(--line); background: var(--card); color: var(--text); border-radius: 999px; padding: 0.64rem 1.44rem; font: 600 1.36rem/1.4 Inter, sans-serif; cursor: pointer; }
+.preset-row button:hover { border-color: var(--accent); }
+.preset-row button.active { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-dark); font-weight: 700; }
 @media (max-width: 960px) {
   .grid {
     grid-template-columns: minmax(0, 1fr);

@@ -61,9 +61,16 @@ export default function Hero() {
         description:
           "O Liquidify compila componentes React-like em sections, snippets e islands que o Shopify entende — com schema, stylesheet e bundles gerados juntos.",
         action: "Começar pela documentação",
+        tutorial: "Tutorial Hello World em 5 min",
         secondary: "Ver a loja example",
         install: "npx liquidify init minha-loja --template example",
         demoLabel: "Conversão real do compilador",
+        answers: [
+          ["Preciso de loja?", "Uma development store grátis basta para a prévia.", "#/docs/start"],
+          ["Preciso saber React?", "Não. TSX básico basta; o interativo vive nas ilhas.", "#/docs/concepts"],
+          ["É bom para SEO?", "Sim. O HTML vem do servidor; o JS só hidrata ilhas.", "#/docs/runtime"],
+          ["Substitui meu tema?", "Não. Gera sections e snippets dentro do tema Shopify.", "#/docs/theme-model"],
+        ],
         pipeline: [
           ["1", "Escreva", "Sections e snippets em TSX, com dados Shopify via {{ }}.", "#/docs/authoring"],
           ["2", "Compile", "Liquid + schema + CSS + JS gerados sem editar à mão.", "#/docs/theme-model"],
@@ -85,9 +92,16 @@ export default function Hero() {
         description:
           "Liquidify compiles React-like components into sections, snippets, and islands Shopify understands — with schema, stylesheet, and bundles generated together.",
         action: "Start with the docs",
+        tutorial: "5-min Hello World tutorial",
         secondary: "See the example store",
         install: "npx liquidify init my-store --template example",
         demoLabel: "Real compiler conversion",
+        answers: [
+          ["Do I need a store?", "A free development store is enough for preview.", "#/docs/start"],
+          ["Do I need React?", "No. Basic TSX is enough; interactivity lives in islands.", "#/docs/concepts"],
+          ["Is it SEO-safe?", "Yes. HTML comes from the server; JS only hydrates islands.", "#/docs/runtime"],
+          ["Does it replace my theme?", "No. It generates sections and snippets inside the Shopify theme.", "#/docs/theme-model"],
+        ],
         pipeline: [
           ["1", "Write", "Sections and snippets in TSX, with Shopify data via {{ }}.", "#/docs/authoring"],
           ["2", "Compile", "Liquid + schema + CSS + JS generated, no hand-editing.", "#/docs/theme-model"],
@@ -157,7 +171,10 @@ export default function Hero() {
           </h1>
           <p className={styles.lede}>{copy.description}</p>
           <div className={styles.heroCta}>
-            <a className={cx('btn', 'btn-primary')} href={toHref("#/docs/start")}>
+            <a className={cx('btn', 'btn-primary')} href={toHref("#/docs/hello")}>
+              {copy.tutorial} →
+            </a>
+            <a className="btn" href={toHref("#/docs/start")}>
               {copy.action} →
             </a>
             <a className="btn" href={toHref("#/example")}>
@@ -170,6 +187,16 @@ export default function Hero() {
               {copied ? (locale === "pt-BR" ? "Copiado ✓" : "Copied ✓") : (locale === "pt-BR" ? "Copiar" : "Copy")}
             </button>
           </div>
+          <ul className={styles.firstAnswers}>
+            {copy.answers.map(([q, a, href]) => (
+              <li key={q}>
+                <a href={toHref(href)}>
+                  <strong>{q}</strong>
+                  <span>{a}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div className={styles.heroDemo}>
@@ -188,7 +215,7 @@ export default function Hero() {
                   aria-selected={tab === "tsx"}
                   aria-controls="hero-panel"
                   tabIndex={tab === "tsx" ? 0 : -1}
-                  className={tab === "tsx" ? "active" : ""}
+                  className={tab === "tsx" ? styles.active : ""}
                   onClick={() => setTab("tsx")}
                 >
                   ProductCard.tsx
@@ -201,7 +228,7 @@ export default function Hero() {
                   aria-selected={tab === "liquid"}
                   aria-controls="hero-panel"
                   tabIndex={tab === "liquid" ? 0 : -1}
-                  className={tab === "liquid" ? "active" : ""}
+                  className={tab === "liquid" ? styles.active : ""}
                   onClick={() => setTab("liquid")}
                 >
                   card.liquid

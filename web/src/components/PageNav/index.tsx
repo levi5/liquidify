@@ -5,6 +5,9 @@ import styles from "./style.module.css";
 import { cx } from "../../constants/cx.ts";
 
 const EDIT_PATHS: Record<string, string> = {
+  hello: "HelloWorld",
+  concepts: "Concepts",
+  faq: "Faq",
   start: "GettingStarted",
   "theme-model": "DocsGuide",
   authoring: "AuthoringGuide",

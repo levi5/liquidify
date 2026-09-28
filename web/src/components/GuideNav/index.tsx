@@ -19,7 +19,7 @@ export default function GuideNav({
       <nav aria-label={ariaLabel ?? title}>
         {links.map((link) => (
           <a
-            className={link.href === active ? "active" : ""}
+            className={link.href === active ? styles.active : ""}
             href={link.href}
             key={link.href}
             aria-current={link.href === active ? "page" : undefined}

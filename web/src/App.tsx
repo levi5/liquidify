@@ -23,6 +23,9 @@ const DocsGuide = lazy(() => import("./components/DocsGuide/index.tsx"));
 const ApiGuide = lazy(() => import("./components/ApiGuide/index.tsx"));
 const AuthoringGuide = lazy(() => import("./components/AuthoringGuide/index.tsx"));
 const GettingStarted = lazy(() => import("./components/GettingStarted/index.tsx"));
+const HelloWorld = lazy(() => import("./components/HelloWorld/index.tsx"));
+const Concepts = lazy(() => import("./components/Concepts/index.tsx"));
+const Faq = lazy(() => import("./components/Faq/index.tsx"));
 const ShopifyGuide = lazy(() => import("./components/ShopifyGuide/index.tsx"));
 const RuntimeGuide = lazy(() => import("./components/RuntimeGuide/index.tsx"));
 const AdvancedIslands = lazy(() => import("./components/AdvancedIslands/index.tsx"));
@@ -47,6 +50,9 @@ function PageIntro({ kicker, title, description }: { kicker: string; title: stri
 }
 
 const DOCS_PAGES: Record<string, () => ReactElement> = {
+  hello: () => <HelloWorld />,
+  concepts: () => <Concepts />,
+  faq: () => <Faq />,
   start: () => <GettingStarted />,
   "theme-model": () => <DocsGuide />,
   authoring: () => (
