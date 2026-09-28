@@ -27,11 +27,12 @@
 }
 
 .directive-head {
+  margin-top: 1rem;
   display: flex;
   align-items: center;
   gap: 1.12rem;
   flex-wrap: wrap;
-  margin-bottom: 0.8rem;
+  margin-bottom: 1.6rem;
 }
 
 .directive-name {
