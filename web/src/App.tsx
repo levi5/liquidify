@@ -23,6 +23,8 @@ import SchemaReference from "./components/SchemaReference/index.tsx";
 import RuntimeReference from "./components/RuntimeReference/index.tsx";
 import FiltersReference from "./components/FiltersReference/index.tsx";
 import ErrorsReference from "./components/ErrorsReference/index.tsx";
+import PluginGuide from "./components/PluginGuide/index.tsx";
+import TypesReference from "./components/TypesReference/index.tsx";
 import PageToc from "./components/PageToc/index.tsx";
 import PageNav from "./components/PageNav/index.tsx";
 import Footer from "./components/Footer/index.tsx";
@@ -78,6 +80,7 @@ const DOCS_PAGES: Record<string, () => ReactElement> = {
   runtime: () => <RuntimeGuide />,
   islands: () => <AdvancedIslands />,
   schema: () => <SchemaReference />,
+  types: () => <TypesReference />,
 };
 
 function DocsPage({ chapter }: { chapter: string }) {
@@ -93,6 +96,7 @@ const API_PAGES: Record<string, (props: { islands: boolean }) => ReactElement> =
   runtime: () => <RuntimeReference />,
   filters: () => <FiltersReference />,
   errors: () => <ErrorsReference />,
+  plugins: () => <PluginGuide />,
   cli: () => (
     <>
       <CliReference />

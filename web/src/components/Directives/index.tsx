@@ -433,6 +433,46 @@ export default function Directives() {
           : "A string literal at the top of the file decides what the compiler emits. Type axis (sections/snippets/blocks) = where Liquid goes; mode axis (react/dom/script) = whether JS comes along; modifiers ('use react(id)', 'use context') tune hydration. Below, each with a real example from the example template."}
       </p>
 
+      <article className="directive-card" id="diretiva-validacao">
+        <header className="directive-head">
+          <code className="directive-name">{pt ? "Regras de validação" : "Validation rules"}</code>
+        </header>
+        <p className="directive-when">
+          {pt
+            ? "O compilador reagce com ValidationError quando: (1) código React (use react) aparece em sections/snippets/blocks; (2) JavaScript sem diretiva use dom/use script aparece em sections/snippets/blocks. Use 'use dom' para JS puro ou mantenha como Liquid puro."
+            : "The compiler throws ValidationError when: (1) React code (use react) appears in sections/snippets/blocks; (2) JavaScript without use dom/use script directive appears in sections/snippets/blocks. Use 'use dom' for plain JS or keep it as pure Liquid."}
+        </p>
+        <div className="dir-cols">
+          <Snippet
+            title={pt ? "Erro: React em sections" : "Error: React in sections"}
+            code={`'use sections'
+
+// ERRO: React code is not allowed in "sections".
+// Use 'use dom' for plain JavaScript or keep it as pure Liquid.
+export function Hero() {
+  const [state, setState] = useState(null) // ❌
+  return <div>{state}</div>
+}`}
+            language="tsx"
+          />
+          <Snippet
+            title={pt ? "Correto: use dom" : "Correct: use dom"}
+            code={`'use sections'
+'use dom'
+
+// CORRETO: JS puro com use dom
+export function Hero() {
+  const button = document.querySelector('.btn')
+  button?.addEventListener('click', () => {
+    console.log('clicked')
+  })
+  return <div>Static content</div>
+}`}
+            language="tsx"
+          />
+        </div>
+      </article>
+
       <div className="directive-list">
         {docs.map((doc) => (
           <article className="directive-card" key={doc.id} id={`diretiva-${doc.id}`}>

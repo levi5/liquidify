@@ -269,6 +269,41 @@ export default function FiltersReference() {
       </div>
 
       <div className="ref-block">
+        <h3 id="helper-examples">{pt ? "Exemplos de todos os helpers" : "Examples of all helpers"}</h3>
+        <div className={styles.refCodeGrid}>
+          <Snippet code={`// Escape e sanitização
+import { escape, escapeOnce } from "liquidify";
+<p>{escape(userInput)}</p>
+<p>{escapeOnce(mixedContent)}</p>`} language="tsx" title="escape / escapeOnce" />
+          <Snippet code={`// JSON e dados
+import { json, raw } from "liquidify";
+<script type="application/json">{json(data)}</script>
+<Raw html={trustedHtml} />`} language="tsx" title="json / raw" />
+          <Snippet code={`// Default e tradução
+import { defaultValue, t, translate } from "liquidify";
+<span>{defaultValue(product.title, "Sem título")}</span>
+<span>{t('products.product.sale')}</span>
+<span>{translate('products.product.new')}</span>`} language="tsx" title="defaultValue / t / translate" />
+          <Snippet code={`// URLs e assets
+import { assetUrl, imageUrl, urlEncode, linkTo } from "liquidify";
+<img src={imageUrl(product.image, { width: 800 })} />
+<link rel="stylesheet" href={assetUrl("theme.css")} />
+<a href={urlEncode(searchTerm)}>Buscar</a>
+<a href={linkTo("/products/" + product.handle, product.title)} />`} language="tsx" title="assetUrl / imageUrl / urlEncode / linkTo" />
+          <Snippet code={`// Dinheiro e peso
+import { money, moneyWithCurrency, moneyWithoutCurrency, moneyWithoutTrailingZeros, weightWithUnit } from "liquidify";
+<span>{money(product.price)}</span>
+<span>{moneyWithCurrency(product.price)}</span>
+<span>{moneyWithoutCurrency(product.price)}</span>
+<span>{moneyWithoutTrailingZeros(product.price)}</span>
+<span>{weightWithUnit(variant.weight)}</span>`} language="tsx" title="money / moneyWithCurrency / moneyWithoutCurrency / moneyWithoutTrailingZeros / weightWithUnit" />
+          <Snippet code={`// Data
+import { date } from "liquidify";
+<time>{date(product.published_at, "%d/%m/%Y")}</time>`} language="tsx" title="date" />
+        </div>
+      </div>
+
+      <div className="ref-block">
         <h3 id="strings">{copy.strings}</h3>
         <p className="ref-note">{copy.stringsText}</p>
         <Snippet code={STRING_LIKE} language="tsx" title="STRING_LIKE_METHODS" />

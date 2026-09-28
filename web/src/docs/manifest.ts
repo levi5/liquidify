@@ -148,6 +148,25 @@ export const DOCS_CHAPTERS: Chapter[] = [
       { id: "typed-attrs", title: { en: "Types in data-liquid-*", "pt-BR": "Tipos em data-liquid-*" }, terms: ["data-liquid", "boolean", "array", "null", "merge"] },
     ],
   },
+  {
+    id: "types",
+    area: "docs",
+    href: "#/docs/types",
+    title: { en: "Shopify types", "pt-BR": "Tipos Shopify" },
+    summary: {
+      en: "Every global interface available in TSX: Product, Collection, Cart, Shop, and window globals.",
+      "pt-BR": "Todas as interfaces globais disponíveis em TSX: Product, Collection, Cart, Shop e globais.",
+    },
+    sections: [
+      { id: "types-product", title: { en: "Product", "pt-BR": "Product" }, terms: ["product", "variant", "price", "featured_image"] },
+      { id: "types-collection", title: { en: "Collection", "pt-BR": "Collection" }, terms: ["collection", "products", "filters", "sort"] },
+      { id: "types-cart", title: { en: "Cart", "pt-BR": "Cart" }, terms: ["cart", "items", "total", "currency"] },
+      { id: "types-shop", title: { en: "Shop", "pt-BR": "Shop" }, terms: ["shop", "name", "currency", "policies"] },
+      { id: "types-globals", title: { en: "Available globals", "pt-BR": "Globais disponíveis" }, terms: ["routes", "request", "section", "block", "form", "localization"] },
+      { id: "types-paginate", title: { en: "Paginate", "pt-BR": "Paginate" }, terms: ["paginate", "pages", "previous", "next"] },
+      { id: "types-usage", title: { en: "Usage example", "pt-BR": "Exemplo de uso" }, terms: ["typescript", "interface", "scope"] },
+    ],
+  },
 ];
 
 export const API_CHAPTERS: Chapter[] = [
@@ -292,6 +311,25 @@ export const API_CHAPTERS: Chapter[] = [
       { id: "naming", title: { en: "Naming rules", "pt-BR": "Regras de nome" }, terms: ["pascalToKebab", "safe filename", "conflict", "collision"] },
       { id: "limits", title: { en: "Hard limits", "pt-BR": "Limites rígidos" }, terms: ["1mb", "css", "transpile cache", "1000"] },
       { id: "runtime-console", title: { en: "Runtime console messages", "pt-BR": "Mensagens de console do runtime" }, terms: ["console.error", "unmount failed", "registration failed", "action requires"] },
+    ],
+  },
+  {
+    id: "plugins",
+    area: "api",
+    href: "#/api/plugins",
+    title: { en: "Plugins", "pt-BR": "Plugins" },
+    summary: {
+      en: "Extend Liquidify with plugins that run at the end of each build and receive compilation statistics.",
+      "pt-BR": "Estenda o Liquidify com plugins que rodam ao final de cada build e recebem estatísticas.",
+    },
+    sections: [
+      { id: "plugin-interface", title: { en: "LiquidifyPlugin interface", "pt-BR": "Interface LiquidifyPlugin" }, terms: ["plugin", "setup", "onBuildEnd"] },
+      { id: "plugin-builtin", title: { en: "Built-in: tsx-stats", "pt-BR": "Built-in: tsx-stats" }, terms: ["tsx-stats", "statistics", "console"] },
+      { id: "plugin-custom", title: { en: "Creating a local plugin", "pt-BR": "Criando um plugin local" }, terms: [".plugins", "local", "custom"] },
+      { id: "plugin-config", title: { en: "Enabling plugins", "pt-BR": "Ativando plugins" }, terms: ["plugins", "config", "array"] },
+      { id: "plugin-programmatic", title: { en: "Programmatic usage", "pt-BR": "Uso programático" }, terms: ["registerPlugin", "builder"] },
+      { id: "plugin-stats", title: { en: "PluginStats", "pt-BR": "PluginStats" }, terms: ["total", "tsx", "jsx", "byDirective"] },
+      { id: "plugin-usecases", title: { en: "Use cases", "pt-BR": "Casos de uso" }, terms: ["report", "metrics", "ci"] },
     ],
   },
 ];

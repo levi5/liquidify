@@ -18,6 +18,15 @@ const MANIFEST_JSON = `// .liquidify-manifest.json (na pasta output — não pub
   }
 }`;
 
+const MANIFEST_ADVANCED = `// Hash validation: SHA-256 (64 hex chars)
+// Conflict detection: mesmo path gerado por 2+ componentes = erro
+// Preservação: output editado à mão NÃO é sobrescrito
+// Fence system: liquidify:start/end marca áreas geradas
+//   Scripts: // liquidify:start → // liquidify:end
+//   CSS: /* liquidify:start */ → /* liquidify:end */
+// Safe paths: apenas assets|sections|snippets|blocks + .js|.liquid
+// Rollback: writes adiados, erro preserva saídas anteriores`;
+
 export default function BuildDeep() {
   const { locale } = useLocale();
   const pt = locale === "pt-BR";
@@ -64,6 +73,7 @@ export default function BuildDeep() {
         <div style={{ display: "grid", gap: "1.6rem", alignContent: "start" }}>
           <Snippet code={DISPOSE_TS} language="tsx" />
           <Snippet code={MANIFEST_JSON} language="json" />
+          <Snippet code={MANIFEST_ADVANCED} language="tsx" title="Hash, Conflict, Fence, Rollback" />
         </div>
       </div>
       <div className="docs-deep-grid">

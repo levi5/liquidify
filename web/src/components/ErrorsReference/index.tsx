@@ -51,6 +51,56 @@ const RUNTIME_MESSAGES = `[Liquidify] An action requires a name and a function.
 [Liquidify] Root unmount failed. Check effect cleanup functions.
 [Liquidify] Load react-runtime.js before component scripts.`;
 
+const ERROR_COLLECTOR = `// lib/core/errors/error-collector.ts
+export interface CollectedError {
+  message: string
+  filePath?: string
+  location?: { line: number; column: number }
+}
+
+export class AggregateValidationError extends ValidationError {
+  public readonly errors: readonly CollectedError[]
+
+  constructor(errors: readonly CollectedError[]) {
+    const detail = errors
+      .map((error, index) => {
+        const where = \`\${error.filePath ?? '<input>'}\${error.location ? \`:\${error.location.line}:\${error.location.column}\` : ''}\`
+        return \`  \${index + 1}. \${where}: \${error.message}\`
+      })
+      .join('\\n')
+    super(\`Failed with \${errors.length} error(s):\\n\${detail}\`, errors[0]?.filePath, errors[0]?.location)
+    this.name = 'AggregateValidationError'
+    this.errors = errors
+  }
+}
+
+export class ErrorCollector {
+  private readonly collected: CollectedError[] = []
+
+  public add(error: unknown, filePath?: string): void { /* ... */ }
+  public get count(): number { /* ... */ }
+  public get hasErrors(): boolean { /* ... */ }
+  public get errors(): readonly CollectedError[] { /* ... */ }
+  public toError(): AggregateValidationError | null { /* ... */ }
+  public throwIfErrors(): void { /* ... */ }
+}`;
+
+const VALIDATION_RULES = `// Regras de validação do ValidationService
+// lib/application/services/validation-service.ts
+
+// 1. React code em sections/snippets/blocks
+//    ERRO: React code is not allowed in "sections".
+//    CORRETO: use 'use dom' para JS puro ou mantenha como Liquid puro.
+
+// 2. JavaScript sem diretiva em sections/snippets/blocks
+//    ERRO: Using JavaScript in "sections" requires the 'use dom' ou 'use script' directive.
+//    CORRETO: Adicione 'use dom' no início do corpo da função.
+
+// 3. Como o validator determina o folder
+//    - Path contém /sections/ OU component.type === 'sections'
+//    - Path contém /snippets/ OU component.type === 'snippets'
+//    - Path contém /blocks/ OU component.type === 'blocks'`;
+
 export default function ErrorsReference() {
   const { locale } = useLocale();
   const pt = locale === "pt-BR";
@@ -245,6 +295,16 @@ export default function ErrorsReference() {
         <h3 id="limits">{copy.limits}</h3>
         <p className="ref-note">{copy.limitsText}</p>
         <Snippet code={LIMITS} language="tsx" title="limites" />
+      </div>
+
+      <div className="ref-block">
+        <h3 id="error-collector">ErrorCollector</h3>
+        <Snippet code={ERROR_COLLECTOR} language="tsx" title="lib/core/errors/error-collector.ts" />
+      </div>
+
+      <div className="ref-block">
+        <h3 id="validation-rules">Regras de validação</h3>
+        <Snippet code={VALIDATION_RULES} language="tsx" title="ValidationService" />
       </div>
 
       <div className="ref-block">
