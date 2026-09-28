@@ -6,12 +6,12 @@ import {
   HERO_TSX, HERO_LIQUID, HERO_CSS,
   CARD_TSX, CARD_LIQUID, CARD_CSS,
   MINICART_TSX, MINICART_LIQUID, MINICART_CSS,
-} from "./content.ts";
+} from "../../constants/store-demo.ts";
 import {
   CATALOG_TSX, CATALOG_LIQUID, CATALOG_CSS,
   NEWS_TSX, NEWS_LIQUID, NEWS_CSS,
   PROD_TSX, PROD_LIQUID, PROD_CSS,
-} from "./content2.ts";
+} from "../../constants/store-demo-extra.ts";
 import { CatalogPreview, ProductPreview, NewsletterPreview, CartPreview } from "./previews.tsx";
 import "./style.css";
 
