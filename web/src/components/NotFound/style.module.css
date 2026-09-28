@@ -1,0 +1,6 @@
+.title {
+  font-size: clamp(3.2rem, 5vw, 5.6rem);
+  letter-spacing: -0.05em;
+  margin: 0 0 1rem;
+  line-height: 1.02;
+}

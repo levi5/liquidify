@@ -1,4 +1,6 @@
 import { useLocale } from "../../i18n.tsx";
+import { toHref } from "../../lib/routes.ts";
+import { APP_VERSION } from "../../lib/version.ts";
 import styles from "./style.module.css";
 import { cx } from "../../constants/cx.ts";
 
@@ -21,25 +23,27 @@ export default function Footer() {
     <footer className={styles.siteFooter}>
       <div className={cx('wrap', styles.footerInner)}>
         <div className={styles.footerBrand}>
-          <a className={cx(styles.brand, styles.brandSmall)} href="#/">
+          <a className={cx(styles.brand, styles.brandSmall)} href={toHref("#/")}>
             <img
               className={cx(styles.brandLogo, styles.brandLogoSmall)}
               src={`${import.meta.env.BASE_URL}assets/logo-mark.png`}
-              alt="Liquidify"
+              alt=""
               width="22"
               height="22"
+              loading="lazy"
+              decoding="async"
             />
             Liquidify
           </a>
           <p>
-            {copy.tag} · MIT · v1.1.0-alpha.4
+            {copy.tag} · MIT · v{APP_VERSION}
           </p>
         </div>
 
         <nav className={styles.footerNav} aria-label={copy.navLabel}>
-          <a href="#/docs/start">Docs</a>
-          <a href="#/api/cli">API</a>
-          <a href="#/example">Example</a>
+          <a href={toHref("#/docs/start")}>Docs</a>
+          <a href={toHref("#/api/cli")}>API</a>
+          <a href={toHref("#/example")}>Example</a>
         </nav>
 
         <div className={styles.footerExt}>

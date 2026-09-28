@@ -50,3 +50,41 @@
     display: none;
   }
 }
+
+.page-toc-mobile {
+  display: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 1rem 1.4rem;
+  margin-top: 1.6rem;
+  font-size: 1.4rem;
+}
+
+.page-toc-mobile summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 1.2rem;
+}
+
+.page-toc-mobile ul {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.page-toc-mobile a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+@media (max-width: 1240px) {
+  .page-toc-mobile {
+    display: block;
+  }
+}

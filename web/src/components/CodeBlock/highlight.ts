@@ -1,25 +1,24 @@
+import { _match, _Maybe } from "funcio";
+
 export type Lang = "tsx" | "json" | "liquid" | "css" | "yaml" | "md" | "plain";
 
 export type Token = { text: string; cls?: string };
 
+const TS_EXTS = new Set(["ts", "tsx", "js", "jsx", "mjs", "cjs", "html"]);
+
 export function detectLanguage(path: string): Lang {
   const ext = path.split(".").pop()?.toLowerCase() ?? "";
-  if (ext === "json") return "json";
-  if (ext === "liquid") return "liquid";
-  if (ext === "css" || ext === "scss") return "css";
-  if (ext === "md") return "md";
-  if (ext === "yml" || ext === "yaml") return "yaml";
-  if (
-    ext === "ts" ||
-    ext === "tsx" ||
-    ext === "js" ||
-    ext === "jsx" ||
-    ext === "mjs" ||
-    ext === "cjs" ||
-    ext === "html"
-  )
-    return "tsx";
-  return "plain";
+  return _Maybe.of(
+    _match(ext)
+      .with("json", () => "json" as Lang)
+      .with("liquid", () => "liquid" as Lang)
+      .with("css", () => "css" as Lang)
+      .with("scss", () => "css" as Lang)
+      .with("md", () => "md" as Lang)
+      .with("yml", () => "yaml" as Lang)
+      .with("yaml", () => "yaml" as Lang)
+      .exec(),
+  ).getOrElse(_match(TS_EXTS.has(ext)).with(true, () => "tsx" as Lang).with(false, () => "plain" as Lang).exec());
 }
 
 const TS_KEYWORDS =

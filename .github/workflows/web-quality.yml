@@ -1,0 +1,61 @@
+name: Web quality
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - "web/**"
+      - ".github/workflows/web-quality.yml"
+  pull_request:
+    paths:
+      - "web/**"
+  workflow_dispatch:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - name: Install docs deps
+        run: pnpm --dir web install --ignore-workspace
+      - name: Typecheck + build
+        run: pnpm --dir web build
+      - name: Check SEO artifacts
+        run: |
+          test -f web/dist/index.html
+          test -f web/dist/404.html
+          test -f web/dist/robots.txt
+          test -f web/dist/sitemap.xml
+          test -f web/dist/llms.txt
+          test -f web/dist/manifest.webmanifest
+          grep -q 'property="og:title"' web/dist/index.html
+          grep -q 'rel="canonical"' web/dist/index.html
+          grep -q 'application/ld+json' web/dist/index.html
+      - name: Check no legacy hash links remain
+        run: |
+          if grep -rho 'href="#/' web/src/ | grep -q .; then
+            echo "Legacy hash links found:"
+            grep -rn 'href="#/' web/src/ || true
+            exit 1
+          fi
+      - name: Check no broken funcio fallback
+        run: |
+          if grep -rn '\._(' web/src/ web/vite.config.ts web/vite-docs-files.ts; then
+            echo "funcio _() fallback returns null in 0.0.32: use exhaustive .with() plus _Maybe instead"
+            exit 1
+          fi
+      - name: Check heavy assets
+        run: |
+          ls -lh web/dist/assets/
+          test ! -f web/dist/assets/logo.png

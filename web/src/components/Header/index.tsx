@@ -1,18 +1,36 @@
 import { useEffect, useState } from "react";
+import { _match, _Maybe } from "funcio";
 import { useLocale } from "../../i18n.tsx";
+import { toHref } from "../../lib/routes.ts";
+import { APP_VERSION } from "../../lib/version.ts";
 import Search from "../Search/index.tsx";
 import styles from "./style.module.css";
 import { cx } from "../../constants/cx.ts";
 
 const STORAGE_KEY = "liquidify-docs-theme";
 
+function storedTheme(): "light" | "dark" | null {
+  return _Maybe.of(
+    _match(window.localStorage.getItem(STORAGE_KEY))
+      .with("light", () => "light" as const)
+      .with("dark", () => "dark" as const)
+      .exec(),
+  ).getOrElse(null);
+}
+
+function systemTheme(): "light" | "dark" {
+  return _match(window.matchMedia("(prefers-color-scheme: dark)").matches)
+    .with(true, () => "dark" as const)
+    .with(false, () => "light" as const)
+    .exec();
+}
+
 function getInitialTheme(): "light" | "dark" {
-  if (typeof window === "undefined") return "light";
-  const saved = window.localStorage.getItem(STORAGE_KEY);
-  if (saved === "light" || saved === "dark") return saved;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return _Maybe.of(
+    _match(typeof window)
+      .with("undefined", () => "light" as const)
+      .exec(),
+  ).getOrElse(_Maybe.of(storedTheme()).getOrElse(systemTheme()));
 }
 
 export default function Header({ route }: { route: string }) {
@@ -38,9 +56,9 @@ export default function Header({ route }: { route: string }) {
         tagline: "Build Shopify in TSX",
       };
   const links = [
-    { href: "#/docs", label: copy.links[0], route: "docs" },
-    { href: "#/api", label: copy.links[1], route: "api" },
-    { href: "#/example", label: copy.links[2], route: "example" },
+    { href: toHref("#/docs/start"), label: copy.links[0], route: "docs" },
+    { href: toHref("#/api/cli"), label: copy.links[1], route: "api" },
+    { href: toHref("#/example"), label: copy.links[2], route: "example" },
   ];
 
   useEffect(() => {
@@ -57,16 +75,18 @@ export default function Header({ route }: { route: string }) {
   }
 
   return (
-    <aside className={styles.sidebar}>
+    <header className={styles.sidebar}>
       <div className={styles.sidebarInner}>
         <div>
-          <a className={styles.brand} href="#/">
+          <a className={styles.brand} href={toHref("#/")} aria-label="Liquidify home">
             <img
               className={styles.brandLogo}
               src={`${import.meta.env.BASE_URL}assets/logo-mark.png`}
-              alt="Liquidify"
+              alt=""
               width="26"
               height="26"
+              fetchPriority="high"
+              decoding="async"
             />
             Liquidify
           </a>
@@ -97,7 +117,7 @@ export default function Header({ route }: { route: string }) {
         </nav>
 
         <div className={styles.sidebarFoot}>
-          <span className={styles.version}>v1.1.0-alpha.4</span>
+          <span className={styles.version}>v{APP_VERSION}</span>
           <a
             className={cx('btn', 'btn-small')}
             href="https://github.com/levi5/liquidify"
@@ -108,6 +128,6 @@ export default function Header({ route }: { route: string }) {
           </a>
         </div>
       </div>
-    </aside>
+    </header>
   );
 }

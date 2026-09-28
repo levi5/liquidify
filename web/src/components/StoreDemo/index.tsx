@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, type KeyboardEvent } from "react";
+import { _match, _Maybe } from "funcio";
 import { useLocale } from "../../i18n.tsx";
 import CodeBlock from "../CodeBlock/index.tsx";
 import Snippet from "../Snippet/index.tsx";
@@ -60,6 +61,32 @@ function ShowcaseBlock({
     liquid: { label: liquidFile, code: liquid, path: "output.liquid" },
     css: { label: cssFile, code: css, path: "styles.css" },
   };
+  const tabIds: Tab[] = ["tsx", "liquid", "css"];
+
+  function focusTab(next: Tab) {
+    setTab(next);
+    window.requestAnimationFrame(() => {
+      document.querySelector<HTMLButtonElement>(`[data-showcase-tab="${index}-${next}"]`)?.focus();
+    });
+  }
+
+  function go(event: KeyboardEvent, next: Tab) {
+    event.preventDefault();
+    focusTab(next);
+  }
+
+  function onTabKeyDown(event: KeyboardEvent) {
+    const at = tabIds.indexOf(tab);
+    _Maybe.of(
+      _match(event.key)
+        .with("ArrowRight", () => go(event, tabIds[(at + 1) % tabIds.length]))
+        .with("ArrowLeft", () => go(event, tabIds[(at - 1 + tabIds.length) % tabIds.length]))
+        .with("Home", () => go(event, tabIds[0]))
+        .with("End", () => go(event, tabIds[tabIds.length - 1]))
+        .exec(),
+    ).getOrElse(undefined);
+  }
+
   return (
     <article className="showcase-block">
       <div className="showcase-info">
@@ -76,13 +103,16 @@ function ShowcaseBlock({
         <div className="showcase-preview">{preview}</div>
       </div>
       <div className="showcase-code">
-        <div className="showcase-tabs" role="tablist">
-          {(Object.keys(files) as Tab[]).map((id) => (
+        <div className="showcase-tabs" role="tablist" aria-label={title} onKeyDown={onTabKeyDown}>
+          {tabIds.map((id) => (
             <button
               key={id}
               type="button"
               role="tab"
+              data-showcase-tab={`${index}-${id}`}
               aria-selected={tab === id}
+              aria-controls={`showcase-panel-${index}`}
+              tabIndex={tab === id ? 0 : -1}
               className={tab === id ? "active" : ""}
               onClick={() => setTab(id)}
             >
@@ -90,7 +120,9 @@ function ShowcaseBlock({
             </button>
           ))}
         </div>
-        <CodeBlock code={files[tab].code} path={files[tab].path} />
+        <div id={`showcase-panel-${index}`} role="tabpanel">
+          <CodeBlock code={files[tab].code} path={files[tab].path} showCopy />
+        </div>
       </div>
     </article>
   );
@@ -230,10 +262,10 @@ export default function StoreDemo() {
                 <span className="mock-btn">Explorar ↗</span>
               </div>
               <div className="mock-photo">
-                <img src={womenImg} alt="" loading="lazy" />
+                <img src={womenImg} alt="" loading="eager" decoding="async" width="925" height="617" fetchPriority="high" />
               </div>
               <div className="mock-photo alt">
-                <img src={menImg} alt="" loading="lazy" />
+                <img src={menImg} alt="" loading="lazy" decoding="async" width="925" height="617" />
               </div>
             </div>
           }
@@ -255,7 +287,7 @@ export default function StoreDemo() {
             <div className="mock-shelf" aria-hidden="true">
               {[[pt ? "Vestido Seda" : "Silk Dress", "R$ 459", womenImg], [pt ? "Casaco Linho" : "Linen Coat", "R$ 689", menImg], [pt ? "Bolsa Couro" : "Leather Bag", "R$ 389", null]].map(([name, price, img]) => (
                 <div className="mock-card" key={name as string}>
-                  <div className="mock-img">{img ? <img src={img as string} alt="" loading="lazy" /> : "LQ."}</div>
+                  <div className="mock-img">{img ? <img src={img as string} alt="" loading="lazy" decoding="async" width="925" height="617" /> : "LQ."}</div>
                   <span>{name}</span>
                   <strong>{price}</strong>
                 </div>

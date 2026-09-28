@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { _match, _Maybe } from "funcio";
 import { useLocale } from "../../i18n.tsx";
 import { CHAPTERS, t as tr, type Chapter } from "../../docs/manifest.ts";
+import { navigate, toHref } from "../../lib/routes.ts";
 import {
   highlight,
   search,
@@ -110,9 +112,12 @@ function toPageResult(chapter: Chapter): SearchResult {
 }
 
 function labelFor(result: SearchResult, copy: Copy): string {
-  if (result.kind === "name" && result.group) return copy.groups[result.group];
-  if (result.kind === "page") return copy.pages;
-  return copy.sections;
+  return _Maybe.of(
+    _match(true)
+      .with(result.kind === "name" && result.group !== undefined, () => copy.groups[result.group as NameGroup])
+      .with(result.kind === "page", () => copy.pages)
+      .exec(),
+  ).getOrElse(copy.sections);
 }
 
 function Marked({ text, query }: { text: string; query: string }) {
@@ -137,9 +142,13 @@ export default function Search() {
   const triggerRef = useRef<HTMLButtonElement>(null);
 
   const results = useMemo(() => {
-    if (query.trim()) return search(query);
-    const byName = DEFAULT_NAMES.map((name) => search(name, 1)[0]).filter(Boolean);
-    return [...CHAPTERS.map(toPageResult), ...byName];
+    return _match(query.trim() !== "")
+      .with(true, () => search(query))
+      .with(false, () => {
+        const byName = DEFAULT_NAMES.map((name) => search(name, 1)[0]).filter(Boolean);
+        return [...CHAPTERS.map(toPageResult), ...byName];
+      })
+      .exec();
   }, [query]);
 
   const display = useCallback(
@@ -161,69 +170,97 @@ export default function Search() {
         target?.tagName === "SELECT" ||
         target?.isContentEditable === true;
 
-      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
-        event.preventDefault();
-        setOpen((value) => !value);
-        return;
-      }
-      if (event.key === "/" && !typing && !event.metaKey && !event.ctrlKey && !event.altKey) {
-        event.preventDefault();
-        setOpen(true);
-        return;
-      }
-      if (event.key === "Escape") setOpen(false);
+      _Maybe.of(
+        _match(true)
+          .with((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k", () => {
+            event.preventDefault();
+            setOpen((value) => !value);
+          })
+          .with(event.key === "/" && !typing && !event.metaKey && !event.ctrlKey && !event.altKey, () => {
+            event.preventDefault();
+            setOpen(true);
+          })
+          .with(event.key === "Escape", () => setOpen(false))
+          .exec(),
+      ).getOrElse(undefined);
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, []);
 
   useEffect(() => {
-    if (!open) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    window.requestAnimationFrame(() => inputRef.current?.focus());
-    return () => {
-      document.body.style.overflow = previous;
-    };
+    return _match(!open)
+      .with(true, () => undefined)
+      .with(false, () => {
+        const previous = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        window.requestAnimationFrame(() => inputRef.current?.focus());
+        return () => {
+          document.body.style.overflow = previous;
+        };
+      })
+      .exec();
   }, [open]);
 
   useEffect(() => {
-    if (open) return;
-    setQuery("");
-    triggerRef.current?.focus();
+    _match(open)
+      .with(true, () => undefined)
+      .with(false, () => {
+        setQuery("");
+        triggerRef.current?.focus();
+      })
+      .exec();
   }, [open]);
 
   const go = useCallback((href: string) => {
     setOpen(false);
-    window.location.hash = href;
+    navigate(href);
   }, []);
 
+  function moveCursor(delta: number) {
+    setCursor((value) => (results.length === 0 ? 0 : (value + delta + results.length) % results.length));
+  }
+
+  function trapTab(event: React.KeyboardEvent) {
+    const stops = ([inputRef.current, clearRef.current].filter(Boolean) as HTMLElement[]).filter(
+      (el) => el.offsetParent !== null || el === document.activeElement,
+    );
+    _match(stops.length === 0)
+      .with(true, () => undefined)
+      .with(false, () => {
+        const at = stops.indexOf(document.activeElement as HTMLElement);
+        event.preventDefault();
+        stops[(at + (event.shiftKey ? -1 : 1) + stops.length) % stops.length].focus();
+      })
+      .exec();
+  }
+
   const onKeyDown = (event: React.KeyboardEvent) => {
-    if (event.key === copy.kbdDown || event.key === "ArrowDown") {
-      event.preventDefault();
-      setCursor((value) => (results.length === 0 ? 0 : (value + 1) % results.length));
-    } else if (event.key === copy.kbdUp || event.key === "ArrowUp") {
-      event.preventDefault();
-      setCursor((value) => (results.length === 0 ? 0 : (value - 1 + results.length) % results.length));
-    } else if (event.key === "Enter") {
-      event.preventDefault();
-      const hit = results[cursor];
-      if (hit) go(hit.href);
-    } else if (event.key === "Home") {
-      event.preventDefault();
-      setCursor(0);
-    } else if (event.key === "End") {
-      event.preventDefault();
-      setCursor(Math.max(0, results.length - 1));
-    } else if (event.key === "Tab") {
-      const stops = ([inputRef.current, clearRef.current].filter(Boolean) as HTMLElement[])
-        .filter((el) => el.offsetParent !== null || el === document.activeElement);
-      if (stops.length === 0) return;
-      const at = stops.indexOf(document.activeElement as HTMLElement);
-      event.preventDefault();
-      const next = stops[(at + (event.shiftKey ? -1 : 1) + stops.length) % stops.length];
-      next.focus();
-    }
+    _Maybe.of(
+      _match(true)
+        .with(event.key === copy.kbdDown || event.key === "ArrowDown", () => {
+          event.preventDefault();
+          moveCursor(1);
+        })
+        .with(event.key === copy.kbdUp || event.key === "ArrowUp", () => {
+          event.preventDefault();
+          moveCursor(-1);
+        })
+        .with(event.key === "Enter", () => {
+          event.preventDefault();
+          _Maybe.of(results[cursor]).map((hit) => go((hit as SearchResult).href));
+        })
+        .with(event.key === "Home", () => {
+          event.preventDefault();
+          setCursor(0);
+        })
+        .with(event.key === "End", () => {
+          event.preventDefault();
+          setCursor(Math.max(0, results.length - 1));
+        })
+        .with(event.key === "Tab", () => trapTab(event))
+        .exec(),
+    ).getOrElse(undefined);
   };
 
   useEffect(() => {
@@ -234,9 +271,7 @@ export default function Search() {
     const buckets = new Map<string, SearchResult[]>();
     for (const result of results) {
       const label = labelFor(result, copy);
-      const bucket = buckets.get(label);
-      if (bucket) bucket.push(result);
-      else buckets.set(label, [result]);
+      buckets.set(label, [...(buckets.get(label) ?? []), result]);
     }
     return [...buckets].map(([label, items]) => ({ label, items }));
   }, [results, copy]);
@@ -291,6 +326,7 @@ export default function Search() {
                 role="combobox"
                 aria-expanded="true"
                 aria-controls="search-results"
+                aria-activedescendant={`search-option-${cursor}`}
                 aria-autocomplete="list"
                 placeholder={copy.placeholder}
                 value={query}
@@ -335,10 +371,11 @@ export default function Search() {
                       <a
                         key={result.key}
                         role="option"
+                        id={`search-option-${index}`}
                         aria-selected={active}
                         data-active={active}
                         className={styles.searchHit}
-                        href={result.href}
+                        href={toHref(result.href)}
                         onMouseEnter={() => setCursor(index)}
                         onClick={(event) => {
                           event.preventDefault();

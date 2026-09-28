@@ -7,3 +7,32 @@
 .tok-fn { color: #ffcb6b; }
 .tok-comp { color: #82aaff; }
 .tok-attr { color: #a5c4ff; }
+
+.codeblock-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.codeblock-wrap pre {
+  margin: 0;
+}
+
+.codeblock-wrap pre:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.codeblock-copy {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e8ebf7;
+  backdrop-filter: blur(6px);
+}
+
+.codeblock-copy:hover {
+  border-color: #fff;
+}

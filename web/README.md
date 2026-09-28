@@ -18,6 +18,9 @@ web/
     ├── main.tsx
     ├── App.tsx
     ├── index.css           # variáveis, base, botões, tabelas, code
+    ├── lib/
+    │   ├── routes.ts       # history routing, toHref, navigate, legacy hash redirect
+    │   └── version.ts      # APP_VERSION via vite define
     └── components/
         ├── Header/         # index.tsx + style.css
         ├── Hero/           # home: pipeline TSX→Liquid + features
@@ -36,6 +39,9 @@ web/
         ├── CliApi/
         ├── ApiGuide/
         ├── GuideNav/
+        ├── BackToTop/      # botão voltar ao topo
+        ├── NotFound/       # página 404
+        ├── Playground/     # prévia TSX→Liquid editável na home
         ├── Figures/        # diagramas dos Docs (pipeline, island, editor)
         ├── Snippet/
         ├── CodeBlock/

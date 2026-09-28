@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { _match, _Maybe } from "funcio";
 import { useLocale } from "../../i18n.tsx";
 import { brl, isValidEmail, getCatalogItems, paginate, getTotalPages, getSubtotal } from "./helpers.ts";
 
@@ -19,7 +20,7 @@ export function CatalogPreview({ womenImg, menImg }: { womenImg: string; menImg:
       <div className="mock-mini-grid">
         {visible.map((item) => (
           <div className="mock-mini-card" key={item.name}>
-            <div className="mock-img small">{item.img ? <img src={item.img} alt="" loading="lazy" /> : "LQ."}</div>
+            <div className="mock-img small">{item.img ? <img src={item.img} alt="" loading="lazy" decoding="async" width="925" height="617" /> : "LQ."}</div>
             <span>{item.name}</span>
             <strong>{brl(item.price)}</strong>
           </div>
@@ -58,7 +59,7 @@ export function ProductPreview({ img }: { img: string }) {
   return (
     <div className="mock-product">
       <div className="mock-product-gallery">
-        <img src={img} alt="" loading="lazy" />
+        <img src={img} alt="" loading="lazy" decoding="async" width="925" height="617" />
       </div>
       <div className="mock-product-buy">
         <span className="mock-eyebrow">Essentials</span>
@@ -86,8 +87,10 @@ export function NewsletterPreview() {
   const [status, setStatus] = useState<"idle" | "error" | "done">("idle");
 
   function submit() {
-    if (isValidEmail(email)) setStatus("done");
-    else setStatus("error");
+    _match(isValidEmail(email))
+      .with(true, () => setStatus("done"))
+      .with(false, () => setStatus("error"))
+      .exec();
   }
 
   return (
@@ -105,7 +108,13 @@ export function NewsletterPreview() {
               onChange={(e) => { setEmail(e.target.value); setStatus("idle"); }}
               placeholder={pt ? "Seu melhor e-mail" : "Your best email"}
               aria-label="Email"
-              onKeyDown={(e) => { if (e.key === "Enter") submit(); }}
+              onKeyDown={(e) => {
+                _Maybe.of(
+                  _match(e.key)
+                    .with("Enter", () => submit())
+                    .exec(),
+                ).getOrElse(undefined);
+              }}
             />
             <button type="button" onClick={submit} aria-label={pt ? "Assinar" : "Subscribe"}>↗</button>
           </div>
