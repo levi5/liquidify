@@ -273,11 +273,15 @@ export class LiquidAttributeConverter {
   private hasTopLevelLogic(code: string): boolean {
     let single = false
     let dbl = false
+    let tick = false
     for (let i = 0; i < code.length - 4; i++) {
       const c = code[i]
-      if (c === "'" && !dbl) single = !single
-      else if (c === '"' && !single) dbl = !dbl
-      else if (!single && !dbl && (code.startsWith(' and ', i) || code.startsWith(' or ', i))) return true
+      const prev = i > 0 ? code[i - 1] : ''
+      const escaped = prev === '\\'
+      if (!escaped && c === "'" && !dbl && !tick) single = !single
+      else if (!escaped && c === '"' && !single && !tick) dbl = !dbl
+      else if (!escaped && c === '`' && !single && !dbl) tick = !tick
+      else if (!single && !dbl && !tick && (code.startsWith(' and ', i) || code.startsWith(' or ', i))) return true
     }
     return false
   }

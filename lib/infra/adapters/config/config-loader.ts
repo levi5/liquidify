@@ -1,6 +1,7 @@
 import { _match, _try } from 'funcio'
 import fs from 'node:fs'
 import path from 'node:path'
+import vm from 'node:vm'
 import { createRequire } from 'node:module'
 import { transformSync } from 'esbuild'
 import { DEFAULT_CONFIG, type LiquidifyConfig } from '../../../core/entities/config'
@@ -186,7 +187,7 @@ function loadLocalPlugin(name: string, configPath: string): LiquidifyPlugin | nu
     const mod = filePath.endsWith('.ts') || filePath.endsWith('.tsx')
       ? loadTypeScriptPlugin(filePath)
       : nodeRequire(filePath)
-    const plugin = mod.default ?? mod
+    const plugin = (mod as { default?: unknown }).default ?? mod
     if (isValidPlugin(plugin)) return plugin
     throw new ValidationError(
       `Local plugin "${name}" at ${filePath} does not export a valid LiquidifyPlugin. ` +
@@ -195,7 +196,10 @@ function loadLocalPlugin(name: string, configPath: string): LiquidifyPlugin | nu
     )
   } catch (error) {
     if (error instanceof ValidationError) throw error
-    return null
+    throw new ValidationError(
+      `Failed to load local plugin "${name}" at ${filePath}: ${error instanceof Error ? error.message : String(error)}`,
+      configPath,
+    )
   }
 }
 
@@ -207,7 +211,9 @@ function loadTypeScriptPlugin(filePath: string): unknown {
     target: 'es2020',
   })
   const module = { exports: {} as Record<string, unknown> }
-  const fn = new Function('module', 'exports', 'require', result.code)
+
+  const script = new vm.Script(`(function(module, exports, require) {\n${result.code}\n})`, { filename: filePath })
+  const fn = script.runInThisContext({ timeout: 5000 }) as (m: unknown, e: unknown, r: unknown) => void
   fn(module, module.exports, nodeRequire)
   return module.exports
 }
@@ -221,7 +227,7 @@ function loadNpmPlugin(name: string, configPath: string): LiquidifyPlugin | null
   }
   try {
     const mod = nodeRequire(resolved)
-    const plugin = mod.default ?? mod
+    const plugin = (mod as { default?: unknown }).default ?? mod
     if (isValidPlugin(plugin)) return plugin
     throw new ValidationError(
       `Package "${name}" was found but does not export a valid LiquidifyPlugin. ` +
@@ -230,7 +236,10 @@ function loadNpmPlugin(name: string, configPath: string): LiquidifyPlugin | null
     )
   } catch (error) {
     if (error instanceof ValidationError) throw error
-    return null
+    throw new ValidationError(
+      `Failed to load plugin "${name}" at ${resolved}: ${error instanceof Error ? error.message : String(error)}`,
+      configPath,
+    )
   }
 }
 

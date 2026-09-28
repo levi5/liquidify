@@ -236,8 +236,8 @@ export class LiquidFileSystemGenerator implements IGenerator {
     const targetDir = this.liquidDir(component, sourcePath)
     const liquidPath = join(targetDir, `${fileName}.liquid`)
     const resolvedTarget = resolve(targetDir)
-    const rel = relative(resolvedTarget, resolve(liquidPath))
-    if (rel.startsWith('..') || isAbsolute(rel)) {
+    const rel = relative(resolvedTarget, resolve(liquidPath)).replace(/\\/g, '/')
+    if (rel.startsWith('..') || rel.startsWith('../') || isAbsolute(rel)) {
       throw new ValidationError(`Unsafe output path for component "${component.name}".`, sourcePath)
     }
     const isNewFile = !(await this.fileSystem.exists(liquidPath))
@@ -267,8 +267,8 @@ export class LiquidFileSystemGenerator implements IGenerator {
   private async generateScriptFile(component: ParsedComponent, fileName: string, sourcePath?: string): Promise<void> {
     const scriptPath = join(this.options.assetsDir, `${fileName}.js`)
     const resolvedAssets = resolve(this.options.assetsDir)
-    const rel = relative(resolvedAssets, resolve(scriptPath))
-    if (rel.startsWith('..') || isAbsolute(rel)) {
+    const rel = relative(resolvedAssets, resolve(scriptPath)).replace(/\\/g, '/')
+    if (rel.startsWith('..') || rel.startsWith('../') || isAbsolute(rel)) {
       throw new ValidationError(`Unsafe script path for component "${component.name}".`, sourcePath)
     }
     const isNewFile = !(await this.fileSystem.exists(scriptPath))

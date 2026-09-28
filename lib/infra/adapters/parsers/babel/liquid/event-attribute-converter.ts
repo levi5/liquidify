@@ -24,14 +24,48 @@ const jsReserved = new Set([
   'else',
   'for',
   'while',
+  'do',
   'break',
   'continue',
+  'switch',
+  'case',
+  'default',
+  'try',
+  'catch',
+  'finally',
+  'throw',
   'true',
   'false',
   'null',
   'undefined',
   'typeof',
   'instanceof',
+  'in',
+  'of',
+  'as',
+  'from',
+  'import',
+  'export',
+  'class',
+  'extends',
+  'super',
+  'this',
+  'await',
+  'async',
+  'yield',
+  'void',
+  'delete',
+  'static',
+  'get',
+  'set',
+  'debugger',
+  'enum',
+  'implements',
+  'interface',
+  'package',
+  'private',
+  'protected',
+  'public',
   'window',
   'document',
   'console',
@@ -41,11 +75,15 @@ const jsReserved = new Set([
   'JSON',
   'Object',
   'Array',
+  'String',
+  'Number',
+  'Boolean',
   'Error',
   'CustomEvent',
-  'this',
   'setTimeout',
   'setInterval',
+  'clearTimeout',
+  'clearInterval',
   'location',
   'history',
   'URLSearchParams',
@@ -82,7 +120,7 @@ export class EventAttributeConverter {
 
   private restoreJsOperators(code: string): string {
     const literals: string[] = []
-    const protectedCode = code.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'/g, (literal) => {
+    const protectedCode = code.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/g, (literal) => {
       literals.push(literal)
       return `__LIQUIDIFY_JS_LITERAL_${literals.length - 1}__`
     })
@@ -117,7 +155,19 @@ export class EventAttributeConverter {
       .with(true, () => jsCode)
       .with(false, () => this.interpolateLiquidVariables(jsCode))
       .exec() as string
-    return ` ${attributeName}="${interpolated.replace(/"/g, '&quot;')}"`
+    return ` ${attributeName}="${this.escapeAttributeValue(interpolated)}"`
+  }
+
+  private escapeAttributeValue(value: string): string {
+
+    return value
+      .split(/({{[\s\S]*?}})/g)
+      .map((part) =>
+        part.startsWith('{{')
+          ? part.replace(/"/g, "'")
+          : part.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'),
+      )
+      .join('')
   }
 
   private callHandler(

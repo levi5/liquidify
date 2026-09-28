@@ -1,14 +1,27 @@
 import { _match } from 'funcio'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
+function scanState() {
+  return { single: false, dbl: false, tick: false, escaped: false }
+}
+
+function stepQuote(c: string, prev: string, s: { single: boolean; dbl: boolean; tick: boolean }): void {
+  const escaped = prev === '\\'
+  if (!escaped && c === "'" && !s.dbl && !s.tick) s.single = !s.single
+  else if (!escaped && c === '"' && !s.single && !s.tick) s.dbl = !s.dbl
+  else if (!escaped && c === '`' && !s.single && !s.dbl) s.tick = !s.tick
+}
+
+function inString(s: { single: boolean; dbl: boolean; tick: boolean }): boolean {
+  return s.single || s.dbl || s.tick
+}
+
 export function hasTopLevelPipe(code: string): boolean {
-  let single = false
-  let dbl = false
+  const s = scanState()
   for (let i = 0; i < code.length - 2; i++) {
     const c = code[i]
-    if (c === "'" && !dbl) single = !single
-    else if (c === '"' && !single) dbl = !dbl
-    else if (!single && !dbl && c === ' ' && code[i + 1] === '|' && code[i + 2] === ' ') return true
+    stepQuote(c, i > 0 ? code[i - 1] : '', s)
+    if (!inString(s) && c === ' ' && code[i + 1] === '|' && code[i + 2] === ' ') return true
   }
   return false
 }
@@ -41,17 +54,36 @@ const CHAR_LOCAL_FILTERS: ReadonlySet<string> = new Set([
   'url_decode',
   'append',
   'prepend',
+  'json',
+  'default',
+  'size',
+  'first',
+  'last',
+  'join',
+  'split',
+  'where',
+  'where_exp',
+  'sort',
+  'uniq',
+  'reverse',
+  'minus',
+  'plus',
+  'times',
+  'divided_by',
+  'modulo',
+  'round',
+  'ceil',
+  'floor',
+  'abs',
 ])
 
 export function lastTopLevelFilter(code: string): string | null {
-  let single = false
-  let dbl = false
+  const s = scanState()
   let last: string | null = null
   for (let i = 0; i < code.length - 2; i++) {
     const c = code[i]
-    if (c === "'" && !dbl) single = !single
-    else if (c === '"' && !single) dbl = !dbl
-    else if (!single && !dbl && c === ' ' && code[i + 1] === '|' && code[i + 2] === ' ') {
+    stepQuote(c, i > 0 ? code[i - 1] : '', s)
+    if (!inString(s) && c === ' ' && code[i + 1] === '|' && code[i + 2] === ' ') {
       const rest = code.slice(i + 3).trimStart()
       const name = rest.split(/[^a-zA-Z_]/, 1)[0] ?? ''
       last = name === '' ? last : name
@@ -92,28 +124,24 @@ export function hoistLogicalOperators(code: string, prefix: string, context?: Pa
 }
 
 function hasTopLevelLogical(code: string): boolean {
-  let single = false
-  let dbl = false
+  const s = scanState()
   for (let i = 0; i < code.length - 4; i++) {
     const c = code[i]
-    if (c === "'" && !dbl) single = !single
-    else if (c === '"' && !single) dbl = !dbl
-    else if (!single && !dbl && (code.startsWith(' or ', i) || code.startsWith(' and ', i))) return true
+    stepQuote(c, i > 0 ? code[i - 1] : '', s)
+    if (!inString(s) && (code.startsWith(' or ', i) || code.startsWith(' and ', i))) return true
   }
   return false
 }
 
 function splitTopLevelLogical(code: string): { expr: string; operator: 'or' | 'and' }[] {
   const parts: { expr: string; operator: 'or' | 'and' }[] = []
-  let single = false
-  let dbl = false
+  const s = scanState()
   let current = ''
   let operator: 'or' | 'and' | null = null
   for (let i = 0; i < code.length; i++) {
     const c = code[i]
-    if (c === "'" && !dbl) single = !single
-    else if (c === '"' && !single) dbl = !dbl
-    else if (!single && !dbl) {
+    stepQuote(c, i > 0 ? code[i - 1] : '', s)
+    if (!inString(s)) {
       if (code.startsWith(' or ', i)) {
         parts.push({ expr: current.trim(), operator: 'or' })
         current = ''

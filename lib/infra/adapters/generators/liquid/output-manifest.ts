@@ -215,12 +215,15 @@ export class OutputManifest {
   }
 
   private safePath(relative: string): string {
-    const resolved = path.resolve(this.root, relative)
+    const normalized = relative.replace(/\\/g, '/')
+    const resolved = path.resolve(this.root, normalized)
+    const rel = path.relative(this.root, resolved).replace(/\\/g, '/')
     _match(
-      !relative ||
-        path.isAbsolute(relative) ||
-        path.relative(this.root, resolved).startsWith('..') ||
-        !/^(assets|sections|snippets|blocks)[/\\].+\.(js|liquid)$/.test(relative),
+      !normalized ||
+        path.isAbsolute(normalized) ||
+        rel === '..' ||
+        rel.startsWith('../') ||
+        !/^[^./][\w\-./]*\.(js|liquid|css|json)$/.test(normalized),
     )
       .with(true, () => {
         throw new ValidationError(`Unsafe output path in manifest: ${relative}`, this.manifestPath)
@@ -312,12 +315,12 @@ export class OutputManifest {
 
   private mergeAggregate(previous: string, content: string, start: string, end: string): string {
     const begin = previous.indexOf(start)
-    const finish = previous.indexOf(end, begin)
+    const finish = begin >= 0 ? previous.indexOf(end, begin + start.length) : -1
     const managed = _match(content === '')
       .with(true, () => '')
       .with(false, () => `${start}\n${content}\n${end}`)
       .exec() as string
-    return _match(begin >= 0 && finish >= begin)
+    return _match(begin >= 0 && finish > begin)
       .with(true, () => previous.slice(0, begin) + managed + previous.slice(finish + end.length))
       .with(false, () => previous + this.aggregateSuffix(previous, managed))
       .exec() as string

@@ -4,7 +4,6 @@ import { EventEmitter } from 'node:events'
 import type { FSWatcher } from 'chokidar'
 import { glob } from 'glob'
 import chokidar from 'chokidar'
-import os from 'node:os'
 import path from 'node:path'
 import type { PluginStats } from '../../../core/protocols/plugin'
 
@@ -190,22 +189,17 @@ export class LiquidifyBuilder extends EventEmitter {
     files: string[],
     worker: (file: string) => Promise<void>,
   ): Promise<Array<{ file: string; error?: unknown }>> {
+
     const results: Array<{ file: string; error?: unknown }> = new Array(files.length)
-    const workerCount = Math.max(1, Math.min(files.length, os.cpus().length))
-    let cursor = 0
-    const runWorker = async (): Promise<void> => {
-      while (cursor < files.length) {
-        const index = cursor++
-        const file = files[index] as string
-        try {
-          await worker(file)
-          results[index] = { file }
-        } catch (error) {
-          results[index] = { file, error }
-        }
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index] as string
+      try {
+        await worker(file)
+        results[index] = { file }
+      } catch (error) {
+        results[index] = { file, error }
       }
     }
-    await Promise.all(Array.from({ length: workerCount }, () => runWorker()))
     return results
   }
 

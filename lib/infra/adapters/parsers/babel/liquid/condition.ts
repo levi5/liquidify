@@ -1,4 +1,4 @@
-import { isIdentifier, isLogicalExpression, isMemberExpression, isOptionalMemberExpression, isUnaryExpression, type LogicalExpression, type Node, type UnaryExpression } from '@babel/types'
+import { isLogicalExpression, isUnaryExpression, type LogicalExpression, type Node, type UnaryExpression } from '@babel/types'
 import { _match } from 'funcio'
 
 export function renderCondition(node: Node, yes: string, no: string, generate: (node: Node) => string): string {
@@ -34,9 +34,15 @@ function renderBranch(node: Node, yes: string, no: string, generate: (node: Node
   return `{% if ${truthyTest(node, generate(node))} %}${yes}${otherwise}{% endif %}`
 }
 
-export function truthyTest(node: Node, code: string): string {
-  return _match(isIdentifier(node) || isMemberExpression(node) || isOptionalMemberExpression(node))
-    .with(true, () => `${code} != nil and ${code} != false and ${code} != 0 and ${code} != ""`)
-    .with(false, () => code)
+export function truthyTest(_node: Node, code: string): string {
+  const trimmed = code.trim()
+  // Literals and explicit comparisons are already boolean; anything else
+  // (identifiers, member access, calls like `list.size`, filters like
+  // `x | size`) needs the full nil/false/0/empty guard so `0` isn't truthy.
+  const isBooleanLiteral = trimmed === 'true' || trimmed === 'false'
+  const isComparison = /==|!=|>=|<=|>|<| and | or |contains\b/.test(trimmed)
+  return _match(isBooleanLiteral || isComparison)
+    .with(true, () => code)
+    .with(false, () => `${code} != nil and ${code} != false and ${code} != 0 and ${code} != ""`)
     .exec() as string
 }

@@ -212,18 +212,24 @@ export class ExpressionParser {
   }
 
 private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
-    const nn = n as any
-    const key = `${nn.start}:${nn.end}:${nn.operator}`
+    if ((n as { type?: string }).type === 'Identifier') return
+    if (!isLogicalExpression(n)) return
+    const op = (n as LogicalExpression).operator
+    if (!(op === '??' || (op === '&&' && !inCondition))) return
     const processed = context?.processedNodes
-    if (processed?.has(key)) return
-    if ((n as any).type === 'Identifier') return
-    _match(isLogicalExpression(n) && ((n as LogicalExpression).operator === '??' || ((n as LogicalExpression).operator === '&&' && !inCondition)))
-      .with(true, () => {
-        processed?.add(key)
-        this.rewriteLogicValue(n as LogicalExpression, renames, context)
-      })
-      .with(false, () => undefined)
-      .exec()
+
+    const marker = n as Node & { __liquidifyNormalized?: string }
+    if (marker.__liquidifyNormalized === op) return
+    if (processed !== undefined) {
+      const nn = n as unknown as { start?: number; end?: number; operator?: string }
+      if (nn.start !== undefined && nn.end !== undefined) {
+        const key = `${nn.start}:${nn.end}:${nn.operator}`
+        if (processed.has(key)) return
+        processed.add(key)
+      }
+    }
+    marker.__liquidifyNormalized = op
+    this.rewriteLogicValue(n as LogicalExpression, renames, context)
   }
 
   private rewriteLogicValue(n: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): void {
@@ -1136,6 +1142,10 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   }
 
   private parseStringLiteral(expr: { value: string }, context?: ParsingContext): string {
+    // String literals containing Liquid syntax are an intentional DSL:
+    // developers write `{'settings.title | default: shop.name'}` to emit
+    // live Liquid (see parser tests). Static source is trusted at compile
+    // time, so preserve that feature and only escape plain text.
     return _match(true)
       .with(expr.value.includes('{{') || expr.value.includes('{%'), () => expr.value)
       .with(expr.value.includes('|'), () => `{{ ${expr.value.trim()} }}`)

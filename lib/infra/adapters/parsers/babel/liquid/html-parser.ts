@@ -35,6 +35,9 @@ export class LiquidHtmlParser {
   public renderHTMLElement(node: JSXElement, tagName: string, renames?: Record<string, string>, context?: ParsingContext): string {
     const state = { hasRawHtml: false, rawHtml: '', bridge: [] as JSXAttribute[] }
     const filteredAttributes = node.openingElement.attributes.filter((attr) => this.keepAttribute(attr, tagName, state, renames, context))
+    if (state.hasRawHtml && voidTags.has(tagName)) {
+      throw new Error(`dangerouslySetInnerHTML cannot be used on void element <${tagName} />.`)
+    }
     const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, context)
     const childContext = _match(tagName === 'style' || tagName === 'script')
       .with(true, () => ParsingContext.derive(context, { outputContext: 'raw' }))
@@ -137,16 +140,13 @@ export class LiquidHtmlParser {
   }
 
   private extractDangerouslyContent(attr: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
-    return _Maybe
-      .of(attr.value && isJSXExpressionContainer(attr.value) && isObjectExpression(attr.value.expression))
-      .map(
-        (valid) =>
-          _match(valid)
-            .with(false, () => '')
-            .with(true, () => this.dangerouslyHtml(attr, renames, context))
-            .exec() as string,
+    const container = attr.value
+    if (!isJSXExpressionContainer(container) || !isObjectExpression(container.expression)) {
+      throw new Error(
+        'dangerouslySetInnerHTML requires an object literal like {{ __html: code }}.',
       )
-      .getOrElse('')
+    }
+    return this.dangerouslyHtml(attr, renames, context)
   }
 
   private dangerouslyHtml(attr: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -157,7 +157,10 @@ export class LiquidHtmlParser {
         isObjectProperty(prop) &&
         ((isIdentifier(prop.key) && prop.key.name === '__html') || (isStringLiteral(prop.key) && prop.key.value === '__html')),
     )
-    if (htmlProp === undefined || !isObjectProperty(htmlProp) || !isExpression(htmlProp.value)) return ''
+    if (htmlProp === undefined || !isObjectProperty(htmlProp) || !isExpression(htmlProp.value)) {
+      throw new Error('dangerouslySetInnerHTML requires an __html property with an expression value.')
+    }
+
     return this.expressionParser.parseExpression(htmlProp.value, renames, ParsingContext.derive(context, { outputContext: 'raw' }))
   }
 }

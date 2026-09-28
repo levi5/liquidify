@@ -377,7 +377,7 @@ export class LiquidStatementParser {
       )
     }
     this.assertAscendingStep(step, statement, context)
-    return this.countingLoopMarkup('while', parsed.name, '0', parsed.limit, statement.body, rest, renames, context)
+    return this.countingLoopMarkup('while', parsed.name, '0', parsed.limit, statement.body, rest, renames, context, parsed.inclusive)
   }
 
   private renderFor(statement: ForStatement, rest: Statement[], renames?: Record<string, string>, context?: ParsingContext): string {
@@ -434,7 +434,7 @@ export class LiquidStatementParser {
       )
     }
     this.assertAscendingStep(resolved, statement, context)
-    return this.countingLoopMarkup('for', parsed.name, start.start, parsed.limit, statement.body, rest, renames, context)
+    return this.countingLoopMarkup('for', parsed.name, start.start, parsed.limit, statement.body, rest, renames, context, parsed.inclusive)
   }
 
   private renderThrow(statement: ThrowStatement, rest: Statement[], renames?: Record<string, string>, context?: ParsingContext): string {
@@ -451,27 +451,34 @@ export class LiquidStatementParser {
     rest: Statement[],
     renames?: Record<string, string>,
     context?: ParsingContext,
+    inclusive = false,
   ): string {
     const limitCode = this.variables.generateLiquidCode(limit, false, renames, context)
     const bodyCode = this.renderBody(this.blockStatements(body), renames, context)
-    return `{% comment %} ${kind} loop → {% for ${name} in (${start}..${limitCode}) %} (Liquid ranges are inclusive) {% endcomment %}\n{% for ${name} in (${start}..${limitCode}) %}\n${bodyCode}\n{% endfor %}\n${this.renderBody(rest, renames, context)}`
+
+    const endCode = inclusive ? limitCode : `(${limitCode} | minus: 1)`
+    return `{% comment %} ${kind} loop → {% for ${name} in (${start}..${endCode}) %} (Liquid ranges are inclusive) {% endcomment %}\n{% for ${name} in (${start}..${endCode}) %}\n${bodyCode}\n{% endfor %}\n${this.renderBody(rest, renames, context)}`
   }
 
   private parseCountingTest(
     test: Expression | null | undefined,
     renames?: Record<string, string>,
     context?: ParsingContext,
-  ): { name: string; limit: Expression } | undefined {
+  ): { name: string; limit: Expression; inclusive: boolean } | undefined {
     if (test === null || test === undefined || !isBinaryExpression(test)) return undefined
-    if (test.operator !== '<' && test.operator !== '<=' && test.operator !== '>' && test.operator !== '>=') return undefined
+    if (test.operator !== '<' && test.operator !== '<=') return undefined
     const left = test.left as Expression
     const right = test.right as Expression
-    const counter = isIdentifier(left) ? left : isIdentifier(right) ? right : undefined
+    const counterOnLeft = isIdentifier(left)
+    const counter = counterOnLeft ? left : isIdentifier(right) ? right : undefined
     if (counter === undefined) return undefined
-    const limit = isIdentifier(left) ? right : left
+
+    if (!counterOnLeft) return undefined
+    const limit = right
     const limitCode = this.variables.generateLiquidCode(limit, false, renames, context)
-    if (new RegExp(`\\b${(counter as Identifier).name}\\b`).test(limitCode)) return undefined
-    return { name: (counter as Identifier).name, limit }
+    const counterName = (counter as Identifier).name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    if (new RegExp(`\\b${counterName}\\b`).test(limitCode)) return undefined
+    return { name: (counter as Identifier).name, limit, inclusive: test.operator === '<=' }
   }
 
   private assertAscendingStep(step: number, statement: Statement, context?: ParsingContext): void {

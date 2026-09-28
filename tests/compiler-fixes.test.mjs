@@ -69,7 +69,7 @@ test('only real module directives classify components', () => {
   for (const source of ['// "use react"\nexport const a = 1', 'const text = "use react"', 'function helper() { "use react" }']) {
     assert.equal(detectDirectives(source).isReact, false)
   }
-  assert.deepEqual(detectDirectives('// comment\n"use react (#root)";'), { isReact: true, isDom: false, isSnippet: false, rootId: 'root' })
+  assert.deepEqual(detectDirectives('// comment\n"use react (#root)";'), { isReact: true, isDom: false, isSnippet: false, isSections: false, rootId: 'root' })
 })
 
 test('registry rejects duplicate names and normalized script name collisions', async () => {
