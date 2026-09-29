@@ -298,8 +298,7 @@ import { Badges } from '../Badges'
 
 import styles from './styles.css'
 
-// Tipos explicitados para o exemplo (no template, tipos
-// compartilhados vivem em src/app/types, ex. TBadgesMetaField).
+
 type Badge = {
   text: string
   color: string

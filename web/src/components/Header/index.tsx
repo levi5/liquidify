@@ -33,7 +33,7 @@ function getInitialTheme(): "light" | "dark" {
   ).getOrElse(_Maybe.of(storedTheme()).getOrElse(systemTheme()));
 }
 
-export default function Header({ route }: { route: string }) {
+export default function Header({ route, chapter }: { route: string; chapter?: string }) {
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const { locale, setLocale } = useLocale();
   const copy = locale === "pt-BR"
@@ -56,10 +56,10 @@ export default function Header({ route }: { route: string }) {
         tagline: "Build Shopify in TSX",
       };
   const links = [
-    { href: toHref("#/docs/hello"), label: copy.links[0], route: "docs" },
-    { href: toHref("#/docs/start"), label: copy.links[1], route: "docs" },
-    { href: toHref("#/api/cli"), label: copy.links[2], route: "api" },
-    { href: toHref("#/example"), label: copy.links[3], route: "example" },
+    { href: toHref("#/docs/hello"), label: copy.links[0], route: "docs", key: "start", chapter: "hello" },
+    { href: toHref("#/docs/start"), label: copy.links[1], route: "docs", key: "docs", chapter: "start" },
+    { href: toHref("#/api/cli"), label: copy.links[2], route: "api", key: "api", chapter: "" },
+    { href: toHref("#/example"), label: copy.links[3], route: "example", key: "example", chapter: "" },
   ];
 
   useEffect(() => {
@@ -110,11 +110,23 @@ export default function Header({ route }: { route: string }) {
         </div>
 
         <nav className={styles.sideNav} aria-label={copy.nav}>
-          {links.map((link) => (
-            <a key={link.href} href={link.href} className={route === link.route ? styles.active : undefined}>
-              {link.label}
-            </a>
-          ))}
+          {links.map((link) => {
+            const isActive = link.key === "start"
+              ? route === "docs" && (chapter === "hello" || chapter === undefined)
+              : link.key === "docs"
+                ? route === "docs" && chapter !== "hello"
+                : route === link.route;
+            return (
+              <a
+                key={link.key}
+                href={link.href}
+                className={isActive ? styles.active : undefined}
+                aria-current={isActive ? "page" : undefined}
+              >
+                {link.label}
+              </a>
+            );
+          })}
         </nav>
 
         <div className={styles.sidebarFoot}>

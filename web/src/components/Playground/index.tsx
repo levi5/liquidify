@@ -5,53 +5,7 @@ import Callout from "../Callout/index.tsx";
 import { toHref } from "../../lib/routes.ts";
 import styles from "./style.module.css";
 import { cx } from "../../constants/cx.ts";
-
-type PresetId = "snippets" | "sections" | "react";
-
-const PRESETS: Record<PresetId, { file: string; out: string; code: string }> = {
-  snippets: {
-    file: "Badge.tsx",
-    out: "badge.liquid (preview)",
-    code: `"use snippets"
-
-export function Badge({ label }: { label: string }) {
-  return <span className="badge">{label}</span>
-}`,
-  },
-  sections: {
-    file: "Hello.tsx",
-    out: "hello.liquid (preview)",
-    code: `"use sections"
-
-export const schema = {
-  name: "Hello",
-  settings: [
-    { type: "text", id: "heading", label: "Heading" }
-  ]
-}
-
-export default function Hello() {
-  return (
-    <section className="hello">
-      <h2>{section.settings.heading}</h2>
-    </section>
-  )
-}`,
-  },
-  react: {
-    file: "Counter.tsx",
-    out: "counter.liquid (preview)",
-    code: `"use react"
-
-export default function Counter() {
-  return (
-    <react-island component="Counter">
-      <button data-liquidify-on-click="increment">+</button>
-    </react-island>
-  )
-}`,
-  },
-};
+import { PLAYGROUND_PRESETS as PRESETS, type PlaygroundPresetId as PresetId } from "../../cms/playground.ts";
 
 function naiveTsxToLiquid(tsx: string): string {
   let out = tsx;
@@ -114,15 +68,26 @@ export default function Playground() {
             key={id}
             type="button"
             role="tab"
+            id={`playground-tab-${id}`}
             aria-selected={preset === id}
+            aria-controls="playground-panel"
+            tabIndex={preset === id ? 0 : -1}
             className={preset === id ? styles.active : ""}
             onClick={() => pick(id)}
+            onKeyDown={(e) => {
+              const ids = Object.keys(PRESETS) as PresetId[];
+              const at = ids.indexOf(preset);
+              if (e.key === "ArrowRight") { e.preventDefault(); pick(ids[(at + 1) % ids.length]); }
+              if (e.key === "ArrowLeft") { e.preventDefault(); pick(ids[(at - 1 + ids.length) % ids.length]); }
+              if (e.key === "Home") { e.preventDefault(); pick(ids[0]); }
+              if (e.key === "End") { e.preventDefault(); pick(ids[ids.length - 1]); }
+            }}
           >
             "{`use ${id}`}"
           </button>
         ))}
       </div>
-      <div className={styles.grid}>
+      <div className={styles.grid} id="playground-panel" role="tabpanel" aria-labelledby={`playground-tab-${preset}`} tabIndex={0}>
         <label className={styles.field}>
           <span className="code-title">{PRESETS[preset].file}</span>
           <textarea

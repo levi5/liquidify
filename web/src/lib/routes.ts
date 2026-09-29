@@ -68,18 +68,24 @@ export function canonicalPath(href: string): string {
     .exec();
 }
 
-function knownChapter(chapters: Set<string>, chapter: string, fallback: string): string {
-  return _match(chapters.has(chapter))
-    .with(true, () => chapter)
-    .with(false, () => fallback)
+function knownChapter(chapters: Set<string>, chapter: string, fallback: string): string | null {
+  return _match(chapter === "" ? true : chapters.has(chapter))
+    .with(true, () => (chapter === "" ? fallback : chapter))
+    .with(false, () => null)
     .exec();
 }
 
 function routeFromParts(area: string, chapter: string, anchor: string): Route {
   return _Maybe.of(
     _match(area)
-      .with("docs", (): Route => ({ area: "docs", chapter: knownChapter(DOCS, chapter, "start"), anchor }))
-      .with("api", (): Route => ({ area: "api", chapter: knownChapter(API, chapter, "cli"), anchor }))
+      .with("docs", (): Route | null => {
+        const known = knownChapter(DOCS, chapter, "start");
+        return known === null ? { area: "not-found", chapter: `docs/${chapter}`, anchor } : { area: "docs", chapter: known, anchor };
+      })
+      .with("api", (): Route | null => {
+        const known = knownChapter(API, chapter, "cli");
+        return known === null ? { area: "not-found", chapter: `api/${chapter}`, anchor } : { area: "api", chapter: known, anchor };
+      })
       .with("example", (): Route => ({ area: "example", chapter: "", anchor }))
       .with("", (): Route => ({ area: "home", chapter: "", anchor }))
       .exec(),
@@ -97,8 +103,9 @@ export function stripBase(pathname: string): string {
 
 function routeFromLegacyHash(hash: string): Route {
   const { path, anchor } = splitPathAnchor(hash.replace(/^#\/?/, ""));
-  const [area, chapter] = path.split("/");
-  window.history.replaceState(null, "", toHref(`#/${path}${anchor ? `#${anchor}` : ""}`));
+  const clean = stripRepeatedBase(path);
+  const [area, chapter] = clean.split("/");
+  window.history.replaceState(null, "", toHref(`#/${clean}${anchor ? `#${anchor}` : ""}`));
   return routeFromParts(area ?? "", chapter ?? "", anchor);
 }
 
@@ -125,7 +132,8 @@ export function getRoute(): Route {
 }
 
 function navigateAnchor(url: string): void {
-  const el = document.querySelector(url);
+  const id = decodeURIComponent(url.slice(1));
+  const el = id ? document.getElementById(id) : null;
   _match(el === null)
     .with(true, () => undefined)
     .with(false, () => (el as Element).scrollIntoView())

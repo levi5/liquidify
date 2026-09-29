@@ -5,7 +5,11 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
+    "allowImportingTsExtensions": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "types": ["node", "vite/client"],
     "strict": true
   },
-  "include": ["vite.config.ts"]
+  "include": ["vite.config.ts", "vite-docs-files.ts", "src/docs/manifest.ts", "src/docs/search-index.ts", "src/cms/*.ts", "src/i18n.tsx"]
 }

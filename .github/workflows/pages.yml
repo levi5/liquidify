@@ -39,7 +39,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
       - name: Install docs deps
-        run: pnpm --dir web install --ignore-workspace
+        run: pnpm --dir web install --ignore-workspace --frozen-lockfile
       - name: Build docs
         run: pnpm --dir web build
       - name: Setup Pages

@@ -56,11 +56,12 @@ export default defineConfig({
     },
   },
   build: {
-    chunkSizeWarningLimit: 600,
+    chunkSizeWarningLimit: 300,
     rollupOptions: {
       output: {
         manualChunks: {
           react: ["react", "react-dom"],
+          funcio: ["funcio"],
         },
       },
     },

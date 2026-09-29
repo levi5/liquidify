@@ -69,7 +69,6 @@ body {
   font: 16px/1.65 Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
     sans-serif;
   transition: background 0.2s ease, color 0.2s ease;
-  overflow-x: clip;
 }
 
 code,
@@ -123,7 +122,7 @@ a {
   transform: translateY(-200%);
   padding: 0.8rem 1.44rem;
   border-radius: 8px;
-  background: var(--accent);
+  background: var(--accent-dark);
   color: #fff;
   font-size: 1.36rem;
   font-weight: 600;
@@ -131,11 +130,16 @@ a {
   transition: transform 0.15s ease;
 }
 
+[data-theme="dark"] .skip-link {
+  background: #fff;
+  color: #141827;
+}
+
 .skip-link:focus {
   transform: translateY(0);
 }
 
-main:focus {
+main:focus:not(:focus-visible) {
   outline: none;
 }
 
@@ -180,6 +184,12 @@ h3:hover .anchor-link,
   opacity: 1;
 }
 
+@media (hover: none) {
+  .anchor-link {
+    opacity: 1;
+  }
+}
+
 .anchor-link[data-copied="true"]::after {
   content: " ✓";
 }
@@ -191,6 +201,12 @@ h3:hover .anchor-link,
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
+}
+
+@media (max-width: 960px) {
+  .content {
+    padding-top: 11rem;
+  }
 }
 
 .content main {
@@ -408,12 +424,11 @@ h3:hover .anchor-link,
   border-radius: 14px;
   box-shadow: var(--shadow);
   -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+  scrollbar-width: thin;
 }
 
 .table-wrap::-webkit-scrollbar {
-  width: 0;
-  height: 0;
+  height: 8px;
 }
 
 @media (max-width: 480px) {

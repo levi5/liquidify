@@ -17,6 +17,8 @@ function llmsTxt(): string {
     "",
     "> Build a complete Shopify store in TSX and compile it to Liquid. Reference for the",
     "> directives, filters, runtime exports, builder API, and CLI.",
+    ">",
+    "> EN + PT-BR: the docs site is bilingual (EN default, pt-BR via language switch).",
     "",
     "Every page is a history-routed app route: the path is the page and the fragment",
     "is the section anchor.",
@@ -31,6 +33,7 @@ function llmsTxt(): string {
     lines.push(`## ${label}`, "");
     for (const chapter of CHAPTERS.filter((c) => c.area === area)) {
       lines.push(`- [${chapter.title.en}](${abs(chapter.href)}): ${chapter.summary.en}`);
+      lines.push(`  - PT-BR: [${chapter.title["pt-BR"]}](${abs(chapter.href)}): ${chapter.summary["pt-BR"]}`);
       for (const section of chapter.sections) {
         lines.push(`  - [${section.title.en}](${abs(`${chapter.href}#${section.id}`)})`);
       }
@@ -41,13 +44,19 @@ function llmsTxt(): string {
   return lines.join("\n");
 }
 
+const BUILD_DATE = process.env.BUILD_DATE ?? "2026-01-01";
+
 function sitemapXml(): string {
-  const today = new Date().toISOString().slice(0, 10);
+  const priorityFor = (href: string): string => {
+    if (href === "" || href === "#/docs/hello" || href === "#/docs/start" || href === "#/api/cli") return "1.0";
+    if (href === "#/example") return "0.9";
+    return "0.7";
+  };
   const entries = [
-    `<url><loc>${abs("")}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>`,
-    `<url><loc>${abs("#/example")}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>`,
+    `<url><loc>${abs("")}</loc><lastmod>${BUILD_DATE}</lastmod><changefreq>weekly</changefreq><priority>${priorityFor("")}</priority></url>`,
+    `<url><loc>${abs("#/example")}</loc><lastmod>${BUILD_DATE}</lastmod><changefreq>weekly</changefreq><priority>${priorityFor("#/example")}</priority></url>`,
     ...CHAPTERS.map(
-      (c) => `<url><loc>${abs(c.href)}</loc><lastmod>${today}</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>`,
+      (c) => `<url><loc>${abs(c.href)}</loc><lastmod>${BUILD_DATE}</lastmod><changefreq>weekly</changefreq><priority>${priorityFor(c.href)}</priority></url>`,
     ),
   ];
   return [
@@ -62,7 +71,7 @@ function sitemapXml(): string {
 function robotsTxt(): string {
   return [
     "User-agent: *",
-    "Allow: /",
+    "Allow: /liquidify/",
     "",
     `Sitemap: ${ORIGIN}${BASE}/sitemap.xml`,
     "",

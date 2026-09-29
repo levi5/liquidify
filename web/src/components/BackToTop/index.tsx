@@ -34,12 +34,16 @@ export default function BackToTop({ label }: { label: string }) {
     window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
   }
 
-  return _match(visible)
-    .with(true, () => (
-      <button type="button" className={styles.backToTop} onClick={scrollTop} aria-label={label}>
-        ↑
-      </button>
-    ))
-    .with(false, () => null)
-    .exec();
+  return (
+    <button
+      type="button"
+      className={styles.backToTop}
+      onClick={scrollTop}
+      aria-label={label}
+      hidden={!visible}
+      tabIndex={visible ? 0 : -1}
+    >
+      ↑
+    </button>
+  );
 }

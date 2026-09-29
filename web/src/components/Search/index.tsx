@@ -4,12 +4,8 @@ import { _match, _Maybe } from "funcio";
 import { useLocale } from "../../i18n.tsx";
 import { CHAPTERS, t as tr, type Chapter } from "../../docs/manifest.ts";
 import { navigate, toHref } from "../../lib/routes.ts";
-import {
-  highlight,
-  search,
-  type NameGroup,
-  type SearchResult,
-} from "../../docs/search-index.ts";
+import { highlight, search, type NameGroup, type SearchResult } from "../../docs/search-index.ts";
+import { SEARCH_COPY, SEARCH_DEFAULT_NAMES } from "../../cms/search.ts";
 import styles from "./style.module.css";
 
 type Copy = {
@@ -29,73 +25,6 @@ type Copy = {
   results: string;
   groups: Record<NameGroup, string>;
 };
-
-const EN: Copy = {
-  open: "Search",
-  placeholder: "Search the reference…",
-  clear: "Clear search",
-  jump: "Jump to",
-  pages: "Pages",
-  sections: "Sections",
-  noResults: "No matches",
-  noResultsHint: "Try a directive, a filter, a runtime export, or a flag.",
-  hint: "to select · to close",
-  kbdUp: "↑",
-  kbdDown: "↓",
-  kbdEnter: "↵",
-  kbdEsc: "esc",
-  results: "results",
-  groups: {
-    directive: "Directive",
-    primitive: "Primitive",
-    filter: "Filter",
-    runtime: "Runtime API",
-    event: "Event",
-    config: "Configuration",
-    flag: "CLI flag",
-    error: "Error",
-    element: "Element",
-  },
-};
-
-const PT: Copy = {
-  open: "Buscar",
-  placeholder: "Buscar na referência…",
-  clear: "Limpar busca",
-  jump: "Ir para",
-  pages: "Páginas",
-  sections: "Seções",
-  noResults: "Nenhum resultado",
-  noResultsHint: "Tente uma diretiva, um filtro, um export de runtime ou uma flag.",
-  hint: "para selecionar · para fechar",
-  kbdUp: "↑",
-  kbdDown: "↓",
-  kbdEnter: "↵",
-  kbdEsc: "esc",
-  results: "resultados",
-  groups: {
-    directive: "Diretiva",
-    primitive: "Primitivo",
-    filter: "Filtro",
-    runtime: "API de runtime",
-    event: "Evento",
-    config: "Configuração",
-    flag: "Flag de CLI",
-    error: "Erro",
-    element: "Elemento",
-  },
-};
-
-const DEFAULT_NAMES = [
-  "use react",
-  "RenderSnippet",
-  "registerLiquidifyAction",
-  "strictCsp",
-  "--watch",
-  "liquid-data",
-  "money",
-  "DynamicBlock",
-];
 
 function toPageResult(chapter: Chapter): SearchResult {
   return {
@@ -132,7 +61,7 @@ function Marked({ text, query }: { text: string; query: string }) {
 
 export default function Search() {
   const { locale } = useLocale();
-  const copy = locale === "pt-BR" ? PT : EN;
+  const copy = SEARCH_COPY[locale];
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
@@ -145,7 +74,7 @@ export default function Search() {
     return _match(query.trim() !== "")
       .with(true, () => search(query))
       .with(false, () => {
-        const byName = DEFAULT_NAMES.map((name) => search(name, 1)[0]).filter(Boolean);
+        const byName = SEARCH_DEFAULT_NAMES.map((name) => search(name, 1)[0]).filter(Boolean);
         return [...CHAPTERS.map(toPageResult), ...byName];
       })
       .exec();
@@ -222,15 +151,20 @@ export default function Search() {
   }
 
   function trapTab(event: React.KeyboardEvent) {
-    const stops = ([inputRef.current, clearRef.current].filter(Boolean) as HTMLElement[]).filter(
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(`a[class*='searchHit']`)).filter(
+      (el) => el.offsetParent !== null,
+    );
+    const stops = ([inputRef.current, ...links, clearRef.current].filter(Boolean) as HTMLElement[]).filter(
       (el) => el.offsetParent !== null || el === document.activeElement,
     );
-    _match(stops.length === 0)
+    // Fallback to input+clear when no results rendered yet
+    const focusables = stops.length > 0 ? stops : ([inputRef.current, clearRef.current].filter(Boolean) as HTMLElement[]);
+    _match(focusables.length === 0)
       .with(true, () => undefined)
       .with(false, () => {
-        const at = stops.indexOf(document.activeElement as HTMLElement);
+        const at = focusables.indexOf(document.activeElement as HTMLElement);
         event.preventDefault();
-        stops[(at + (event.shiftKey ? -1 : 1) + stops.length) % stops.length].focus();
+        focusables[(at + (event.shiftKey ? -1 : 1) + focusables.length) % focusables.length].focus();
       })
       .exec();
   }
@@ -277,7 +211,7 @@ export default function Search() {
   }, [results, copy]);
 
   let flatIndex = -1;
-  const isMac = typeof navigator !== "undefined" && /mac/i.test(navigator.platform);
+  const isMac = typeof navigator !== "undefined" && (/mac/i.test((navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ?? "") || /mac/i.test(navigator.userAgent));
 
   return (
     <>
@@ -311,6 +245,9 @@ export default function Search() {
               aria-modal="true"
               aria-label={copy.open}
               onClick={(event) => event.stopPropagation()}
+              onKeyDown={(event) => {
+                if (event.key === "Tab") trapTab(event);
+              }}
             >
             <div className={styles.searchField}>
               <span className={styles.searchFieldIcon} aria-hidden="true">
@@ -324,9 +261,9 @@ export default function Search() {
                 className={styles.searchInput}
                 type="text"
                 role="combobox"
-                aria-expanded="true"
+                aria-expanded={results.length > 0}
                 aria-controls="search-results"
-                aria-activedescendant={`search-option-${cursor}`}
+                aria-activedescendant={results.length > 0 ? `search-option-${cursor}` : undefined}
                 aria-autocomplete="list"
                 placeholder={copy.placeholder}
                 value={query}

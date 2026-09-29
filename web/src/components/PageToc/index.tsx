@@ -11,56 +11,42 @@ export default function PageToc({ chapter }: { chapter: Chapter }) {
   const [activeId, setActiveId] = useState("");
 
   useEffect(() => {
-    const ids = chapter.sections
-      .map((section) => section.id)
-      .filter((id) => document.getElementById(id) !== null);
-    setPresent(ids);
-    setActiveId("");
+    let cancelled = false;
+    let attempts = 0;
+    const collect = () => {
+      if (cancelled) return;
+      const ids = chapter.sections
+        .map((section) => section.id)
+        .filter((id) => document.getElementById(id) !== null);
+      setPresent(ids);
+      setActiveId("");
+      attempts += 1;
+      if (ids.length === 0 && attempts < 5) window.requestAnimationFrame(collect);
+    };
+    const frame = window.requestAnimationFrame(collect);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+    };
   }, [chapter, locale]);
 
   useEffect(() => {
     return _match(present.length === 0)
       .with(true, () => undefined)
       .with(false, () => {
-        let frame = 0;
-
-        const measure = () => {
-          frame = 0;
-          let current = present[0];
-          for (const id of present) {
-            _Maybe.of(document.getElementById(id)).map((node) => {
-              const target = node as HTMLElement;
-              _match(target.getBoundingClientRect().top <= 100)
-                .with(true, () => {
-                  current = id;
-                })
-                .with(false, () => undefined)
-                .exec();
-            });
-          }
-          setActiveId((value) => (value === current ? value : current));
-        };
-
-        const onScroll = () => {
-          _match(frame === 0)
-            .with(true, () => {
-              frame = window.requestAnimationFrame(measure);
-            })
-            .with(false, () => undefined)
-            .exec();
-        };
-
-        measure();
-        window.addEventListener("scroll", onScroll, { passive: true });
-        window.addEventListener("resize", onScroll);
-        return () => {
-          _match(frame !== 0)
-            .with(true, () => window.cancelAnimationFrame(frame))
-            .with(false, () => undefined)
-            .exec();
-          window.removeEventListener("scroll", onScroll);
-          window.removeEventListener("resize", onScroll);
-        };
+        const observer = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) setActiveId(entry.target.id);
+            }
+          },
+          { rootMargin: "-20% 0px -70% 0px", threshold: 0 },
+        );
+        for (const id of present) {
+          const node = document.getElementById(id);
+          if (node) observer.observe(node);
+        }
+        return () => observer.disconnect();
       })
       .exec();
   }, [present.join("|")]);

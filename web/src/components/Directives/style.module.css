@@ -1,14 +1,16 @@
-.directives-page { min-width: 0; }
+.directivesPage {
+  min-width: 0;
+}
 
-.directive-list {
+.directiveList {
   display: grid;
   gap: 1.76rem;
   margin-top: 2.56rem;
 }
 
-.directive-card {
-  margin-top: 1rem;
+.directiveCard {
   min-width: 0;
+  margin-top: 1rem;
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -16,9 +18,14 @@
   box-shadow: var(--shadow);
   overflow: hidden;
   position: relative;
+  scroll-margin-top: 9.28rem;
 }
 
-.directive-card::before {
+.equivCard {
+  margin-top: 1.76rem;
+}
+
+.directiveCard::before {
   content: "";
   position: absolute;
   inset: 0 0 auto;
@@ -27,8 +34,7 @@
   opacity: 0.8;
 }
 
-.directive-head {
-  margin-top: 1rem;
+.directiveHead {
   display: flex;
   align-items: center;
   gap: 1.12rem;
@@ -36,7 +42,7 @@
   margin-bottom: 1.6rem;
 }
 
-.directive-name {
+.directiveName {
   font-size: 1.6rem;
   font-weight: 800;
   color: var(--accent-dark);
@@ -44,19 +50,21 @@
   border-color: color-mix(in srgb, var(--accent) 30%, transparent);
 }
 
-.directive-gen {
+.directiveGen {
   color: var(--muted);
   font-size: 1.376rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
-.directive-when {
+.directiveWhen {
   margin: 0.48rem 0;
   font-size: 1.52rem;
   line-height: 1.6;
 }
 
-.directive-rule {
+.directiveRule {
   margin: 0 0 1.6rem;
   font-size: 1.376rem;
   color: var(--muted);
@@ -65,4 +73,8 @@
   line-height: 1.55;
 }
 
-.equiv-card { margin-top: 1.76rem; }
+@media (max-width: 960px) {
+  .directiveCard {
+    padding: 1.6rem 1.44rem;
+  }
+}

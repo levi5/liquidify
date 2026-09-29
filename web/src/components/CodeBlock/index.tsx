@@ -43,11 +43,11 @@ export default function CodeBlock({
   return (
     <div className="codeblock-wrap">
       {showCopy && code && (
-        <button type="button" className="codeblock-copy icon-btn" onClick={copy} aria-live="polite">
-          {copied ? (copiedLabel ?? "Copied ✓") : (copyLabel ?? "Copy")}
+        <button type="button" className="codeblock-copy icon-btn" onClick={copy} aria-label={copied ? (copiedLabel ?? "Copied ✓") : (copyLabel ?? "Copy")}>
+          <span aria-live="polite">{copied ? (copiedLabel ?? "Copied ✓") : (copyLabel ?? "Copy")}</span>
         </button>
       )}
-      <pre className={loading ? "is-loading" : ""} tabIndex={0} aria-label={path}>
+      <pre className={loading ? "is-loading" : ""} tabIndex={0} role="region" aria-label={path}>
         <code>
           {loading && !code ? (
             loadingLabel ?? "Loading…"

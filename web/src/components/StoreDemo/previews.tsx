@@ -26,7 +26,7 @@ export function CatalogPreview({ womenImg, menImg }: { womenImg: string; menImg:
           </div>
         ))}
       </div>
-      <div className="mock-pages" role="navigation" aria-label="Paginação">
+      <nav className="mock-pages" aria-label={pt ? "Paginação" : "Pagination"}>
         <button type="button" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} aria-label={pt ? "Anterior" : "Previous"}>←</button>
         {Array.from({ length: total }, (_, i) => i + 1).map((n) => (
           <button key={n} type="button" className={n === page ? "on" : ""} aria-current={n === page ? "page" : undefined} onClick={() => setPage(n)}>
@@ -34,7 +34,7 @@ export function CatalogPreview({ womenImg, menImg }: { womenImg: string; menImg:
           </button>
         ))}
         <button type="button" onClick={() => setPage((p) => Math.min(total, p + 1))} disabled={page === total} aria-label={pt ? "Próxima" : "Next"}>→</button>
-      </div>
+      </nav>
     </div>
   );
 }

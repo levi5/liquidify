@@ -7,7 +7,7 @@ function key(value: string): string {
     value
       .toLowerCase()
       .normalize("NFD")
-      .replace(/[̀-ͯ]/g, "")
+      .replace(/[\u0300-\u036f]/g, "")
       .replace(/[^\p{L}\p{N}]+/gu, " ")
       .trim()
       .replace(/^\d+\s+/, "")
@@ -59,14 +59,16 @@ function anchorSection(
 }
 
 function injectCopyLink(heading: HTMLElement, baseHref: string): void {
+  const pt = document.documentElement.lang === "pt-BR";
   _match(Boolean(heading.id) && !heading.querySelector("[data-anchor-link]"))
     .with(true, () => {
       const link = document.createElement("a");
       link.href = `${baseHref}#${heading.id}`;
       link.setAttribute("data-anchor-link", "true");
       link.className = "anchor-link";
-      link.setAttribute("aria-label", `Copy link to ${heading.textContent?.trim() ?? heading.id}`);
-      link.title = "Copy link";
+      const label = heading.textContent?.trim() ?? heading.id;
+      link.setAttribute("aria-label", pt ? `Copiar link para ${label}` : `Copy link to ${label}`);
+      link.title = pt ? "Copiar link" : "Copy link";
       link.textContent = "#";
       link.addEventListener("click", (event) => {
         event.preventDefault();
@@ -106,6 +108,6 @@ export default function SectionAnchors({ chapter }: { chapter: Chapter | undefin
         }
       });
     });
-  });
+  }, [chapter?.area, chapter?.id, chapter?.sections.length]);
   return null;
 }

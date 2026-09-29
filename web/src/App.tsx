@@ -6,7 +6,6 @@ import SectionAnchors from "./docs/anchors.ts";
 import { basePath, getRoute, navigate, toHref, type Route } from "./lib/routes.ts";
 import Header from "./components/Header/index.tsx";
 import Hero from "./components/Hero/index.tsx";
-import Playground from "./components/Playground/index.tsx";
 import GuideNav from "./components/GuideNav/index.tsx";
 import PageToc from "./components/PageToc/index.tsx";
 import PageNav from "./components/PageNav/index.tsx";
@@ -15,6 +14,7 @@ import Loading from "./components/Loading/index.tsx";
 import Footer from "./components/Footer/index.tsx";
 
 const StoreDemo = lazy(() => import("./components/StoreDemo/index.tsx"));
+const Playground = lazy(() => import("./components/Playground/index.tsx"));
 const NotFound = lazy(() => import("./components/NotFound/index.tsx"));
 const Directives = lazy(() => import("./components/Directives/index.tsx"));
 const Builtins = lazy(() => import("./components/Builtins/index.tsx"));
@@ -258,28 +258,52 @@ export default function App() {
   }, [route.area, route.chapter, locale]);
 
   useEffect(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const target = route.anchor ? document.getElementById(route.anchor) : null;
     _match(target === null)
-      .with(true, () => window.scrollTo(0, 0))
-      .with(false, () => (target as HTMLElement).scrollIntoView())
+      .with(true, () => window.scrollTo({ top: 0, behavior: "auto" }))
+      .with(false, () => (target as HTMLElement).scrollIntoView({ block: "start", behavior: reduced ? "auto" : "smooth" }))
       .exec();
-    mainRef.current?.focus({ preventScroll: true });
+    _match(Boolean(route.anchor) && target !== null)
+      .with(true, () => {
+        const el = target as HTMLElement;
+        const prev = el.getAttribute("tabindex");
+        el.setAttribute("tabindex", "-1");
+        el.focus({ preventScroll: true });
+        if (prev === null) el.removeAttribute("tabindex");
+        else el.setAttribute("tabindex", prev);
+      })
+      .with(false, () => mainRef.current?.focus({ preventScroll: true }))
+      .exec();
   }, [route.area, route.chapter, route.anchor]);
 
   useEffect(() => {
-    const root = document.querySelector(".guide-main") ?? document;
-    root.querySelectorAll("table.table").forEach((table) => {
-      _match(table.querySelector("caption") === null)
-        .with(true, () => table.setAttribute("role", "table"))
-        .with(false, () => undefined)
-        .exec();
-      table.querySelectorAll("thead th").forEach((th) => {
-        _match(th.hasAttribute("scope"))
-          .with(true, () => undefined)
-          .with(false, () => th.setAttribute("scope", "col"))
+    let cancelled = false;
+    let attempts = 0;
+    const enhance = () => {
+      if (cancelled) return;
+      const root = document.querySelector(".guide-main") ?? document;
+      const tables = root.querySelectorAll("table.table");
+      tables.forEach((table) => {
+        _match(table.querySelector("caption") === null)
+          .with(true, () => table.setAttribute("role", "table"))
+          .with(false, () => undefined)
           .exec();
+        table.querySelectorAll("thead th").forEach((th) => {
+          _match(th.hasAttribute("scope"))
+            .with(true, () => undefined)
+            .with(false, () => th.setAttribute("scope", "col"))
+            .exec();
+        });
       });
-    });
+      attempts += 1;
+      if (tables.length === 0 && attempts < 5) window.requestAnimationFrame(enhance);
+    };
+    const frame = window.requestAnimationFrame(enhance);
+    return () => {
+      cancelled = true;
+      window.cancelAnimationFrame(frame);
+    };
   }, [route.area, route.chapter, locale]);
 
   const chapters = route.area === "docs" ? DOCS_CHAPTERS : API_CHAPTERS;
@@ -297,7 +321,7 @@ export default function App() {
       <a className="skip-link" href="#content">
         {copy.skip}
       </a>
-      <Header route={route.area} />
+      <Header route={route.area} chapter={route.chapter} />
       <div className="content">
         <main id="content" ref={mainRef} tabIndex={-1}>
           <Suspense fallback={<Loading />}>
