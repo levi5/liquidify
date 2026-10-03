@@ -1,5 +1,6 @@
 import { _Maybe, _match } from 'funcio'
 import type { InlineComponentNode } from '../../types/component'
+import type { ErrorCollector } from '../errors/error-collector'
 
 const orDefault = <T>(value: T | undefined, fallback: T): T => _Maybe.of(value).getOrElse(fallback) as T
 
@@ -14,6 +15,9 @@ export interface ParsingContextData {
   mode?: string
   inlineComponents?: Map<string, InlineComponentNode>
   outputContext?: 'text' | 'raw' | 'json'
+  errorCollector?: ErrorCollector
+  /** @internal shared sequence holder so derived contexts don't collide */
+  sequenceRef?: { value: number }
 }
 
 export class ParsingContext {
@@ -27,7 +31,8 @@ export class ParsingContext {
   public mode?: string
   public inlineComponents?: Map<string, InlineComponentNode>
   public outputContext: 'text' | 'raw' | 'json' = 'text'
-  private sequence = 0
+  public errorCollector?: ErrorCollector
+  private sequenceRef: { value: number } = { value: 0 }
 
   constructor(data: ParsingContextData = {}) {
     this.blocksSchema = orDefault(data.blocksSchema, [])
@@ -40,28 +45,31 @@ export class ParsingContext {
     this.mode = orDefault(data.mode, undefined)
     this.inlineComponents = orDefault(data.inlineComponents, undefined)
     this.outputContext = orDefault(data.outputContext, 'text')
+    this.errorCollector = orDefault(data.errorCollector, undefined)
+    this.sequenceRef = orDefault(data.sequenceRef, { value: 0 })
   }
 
   public static derive(context: ParsingContext | undefined, patch: ParsingContextData): ParsingContext {
     return new ParsingContext({
-      blocksSchema: [...orDefault(context?.blocksSchema, [])],
-      scriptAssets: new Set(orDefault(context?.scriptAssets, new Set())),
-      renames: { ...orDefault(context?.renames, {}) },
-      pendingAssigns: new Set(orDefault(context?.pendingAssigns, new Set())),
-      processedNodes: new Set(orDefault(context?.processedNodes, new Set())),
+      blocksSchema: patch.blocksSchema ?? context?.blocksSchema ?? [],
+      scriptAssets: patch.scriptAssets ?? context?.scriptAssets ?? new Set(),
+      renames: { ...orDefault(context?.renames, {}), ...orDefault(patch.renames, {}) },
+      pendingAssigns: patch.pendingAssigns ?? context?.pendingAssigns ?? new Set(),
+      processedNodes: patch.processedNodes ?? context?.processedNodes ?? new Set(),
       currentFilePath: orDefault(patch.currentFilePath ?? context?.currentFilePath, undefined),
       componentName: orDefault(patch.componentName ?? context?.componentName, undefined),
       mode: orDefault(patch.mode ?? context?.mode, undefined),
-      inlineComponents:
-        (patch.inlineComponents ?? context?.inlineComponents) ? new Map(patch.inlineComponents ?? context?.inlineComponents) : undefined,
+      inlineComponents: patch.inlineComponents ?? context?.inlineComponents,
       outputContext: orDefault(patch.outputContext ?? context?.outputContext, 'text'),
+      errorCollector: patch.errorCollector ?? context?.errorCollector,
+      sequenceRef: patch.sequenceRef ?? context?.sequenceRef ?? { value: 0 },
     })
   }
 
   public allocateName(prefix: string): string {
     const safePrefix = String(prefix ?? '').replace(/[^a-zA-Z0-9_]/g, '_') || 'slot'
-    const allocated = `__liquidify_${safePrefix}_${this.sequence}`
-    this.sequence += 1
+    const allocated = `__liquidify_${safePrefix}_${this.sequenceRef.value}`
+    this.sequenceRef.value += 1
     return allocated
   }
 

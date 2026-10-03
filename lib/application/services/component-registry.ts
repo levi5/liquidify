@@ -12,6 +12,7 @@ export interface ComponentDirectives {
   isReact: boolean
   isDom: boolean
   isSnippet: boolean
+  isSections: boolean
   rootId: string
 }
 
@@ -31,6 +32,7 @@ export class DirectiveScanner {
       isReact: react !== undefined,
       isDom: values.some((value) => DOM_DIRECTIVE_PATTERN.test(value)),
       isSnippet: values.includes('use snippets'),
+      isSections: values.includes('use sections'),
       rootId: _match(rawId === undefined)
         .with(true, () => '')
         .with(false, () => (rawId as string).replace(/^#/, ''))

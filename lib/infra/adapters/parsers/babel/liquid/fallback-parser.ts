@@ -1,4 +1,4 @@
-import { isLogicalExpression, isObjectExpression, type LogicalExpression, type Node } from '@babel/types'
+import { isLogicalExpression, type LogicalExpression, type Node } from '@babel/types'
 import { _match } from 'funcio'
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
@@ -32,10 +32,7 @@ export class FallbackParser {
   private orGuard(idName: string, node: unknown, renames?: Record<string, string>, context?: ParsingContext): string[] {
     const code = this.generateLiquidCode(node as Node, false, renames, context)
     const guard = `{% if ${idName} == nil or ${idName} == "" or ${idName} == false or ${idName} == 0 %}`
-    return _match(isObjectExpression(node as Node))
-      .with(true, () => [guard, '{% endif %}'])
-      .with(false, () => [guard, `  {% assign ${idName} = ${code} %}`, '{% endif %}'])
-      .exec() as string[]
+    return [guard, `  {% assign ${idName} = ${code} %}`, '{% endif %}']
   }
 
   public parseNilFallback(idName: string, init: unknown, renames?: Record<string, string>, context?: ParsingContext): string[] {

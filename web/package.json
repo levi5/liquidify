@@ -1,0 +1,26 @@
+{
+  "name": "liquidify-docs",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Site estático de documentação do Liquidify (Vite + React), publicado no GitHub Pages",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json && vite build",
+    "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "funcio": "^0.0.32",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "@vitejs/plugin-react": "^4.4.1",
+    "typescript": "~5.9.2",
+    "vite": "^6.3.5"
+  }
+}

@@ -1,0 +1,12 @@
+.tutorial h2 { scroll-margin-top: 9.28rem; }
+.tutorial h3 { margin: 0 0 1.12rem; font-size: 1.68rem; scroll-margin-top: 9.28rem; }
+.step-grid { display: grid; grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 1.6rem; margin-top: 2.88rem; }
+.step-grid > article { padding: 1.84rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); align-self: start; }
+.step-grid > article p { margin: 0; color: var(--muted); font-size: 1.44rem; }
+.step-grid ul { display: grid; gap: 0.8rem; margin: 0; padding-left: 1.92rem; color: var(--muted); font-size: 1.44rem; }
+.step-grid > div { display: grid; gap: 1.2rem; min-width: 0; align-content: start; }
+.step-grid pre { margin: 0; min-width: 0; }
+.next-card { margin-top: 2.88rem; padding: 1.84rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+.next-card a { white-space: nowrap; }
+.next-card :global(.row) { flex-wrap: wrap; }
+@media (max-width: 760px) { .step-grid { grid-template-columns: minmax(0, 1fr); } }

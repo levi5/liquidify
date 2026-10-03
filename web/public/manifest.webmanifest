@@ -1,0 +1,22 @@
+{
+  "name": "Liquidify Docs",
+  "short_name": "Liquidify",
+  "description": "TSX to Shopify Liquid compiler — docs, API reference, and example store.",
+  "start_url": "/liquidify/",
+  "scope": "/liquidify/",
+  "display": "standalone",
+  "background_color": "#f6f7fc",
+  "theme_color": "#141827",
+  "icons": [
+    {
+      "src": "/liquidify/assets/logo-mark.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/liquidify/assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

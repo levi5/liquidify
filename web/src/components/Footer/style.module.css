@@ -1,0 +1,106 @@
+.site-footer {
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+  padding: 2.56rem 0;
+  background: var(--card);
+}
+
+.footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.footer-brand p {
+  margin: 0.48rem 0 0;
+  color: var(--muted);
+  font-size: 1.28rem;
+}
+
+.brand-small {
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  font-size: 1.68rem;
+  line-height: 2.4rem;
+  padding: 0.32rem 0;
+}
+
+.brand-logo-small {
+  width: 2.16rem;
+  height: 2.16rem;
+  border-radius: 6px;
+}
+
+.footer-nav {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.footer-nav a {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 1.36rem;
+  font-weight: 600;
+  padding: 0.64rem 1.12rem;
+  border-radius: 999px;
+}
+
+.footer-nav a:hover {
+  color: var(--accent-dark);
+  background: var(--bg2);
+}
+
+.footer-ext {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.ext-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.64rem 1.28rem 0.64rem 0.72rem;
+  color: var(--text);
+  background: var(--bg);
+  text-decoration: none;
+  font-size: 1.312rem;
+  font-weight: 600;
+}
+
+.ext-btn:hover {
+  border-color: var(--accent);
+}
+
+.ext-btn code {
+  font-size: 1.248rem;
+}
+
+.npm-badge {
+  display: inline-block;
+  background: #cb3837;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.152rem;
+  letter-spacing: 0.02em;
+  border-radius: 6px;
+  padding: 0.24rem 0.64rem;
+  line-height: 1.4;
+}
+
+.ext-icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+  .footer-inner {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

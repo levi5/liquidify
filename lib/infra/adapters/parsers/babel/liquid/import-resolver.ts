@@ -10,6 +10,7 @@ import {
   isIdentifier,
   isImportDeclaration,
   isImportDefaultSpecifier,
+  isImportNamespaceSpecifier,
   isImportSpecifier,
   traverseFast,
 } from '@babel/types'
@@ -58,7 +59,8 @@ export class ImportResolver {
 
   private registerDeclaration(node: ImportDeclaration): void {
     const source = node.source.value
-    const isCss = source.endsWith('.css') || source.endsWith('.scss')
+    const lower = source.toLowerCase()
+    const isCss = lower.endsWith('.css') || lower.endsWith('.scss') || lower.endsWith('.sass') || lower.endsWith('.less')
     node.specifiers.forEach((spec) => {
       this.registerSpecifier(spec, source, isCss)
     })
@@ -68,6 +70,7 @@ export class ImportResolver {
     _match(true)
       .with(isImportSpecifier(spec), () => this.registerNamed(spec as ImportSpecifier, source, isCss))
       .with(isImportDefaultSpecifier(spec), () => this.registerDefault(spec as ImportDefaultSpecifier, source, isCss))
+      .with(isImportNamespaceSpecifier(spec), () => this.registerNamespace(spec as ImportNamespaceSpecifier, source, isCss))
       .with(true, () => undefined)
       .exec()
   }
@@ -94,6 +97,18 @@ export class ImportResolver {
       source,
       specifierName: 'default',
       isDefault: true,
+    })
+    _match(isCss)
+      .with(true, () => this.cssModules.add(spec.local.name))
+      .with(false, () => undefined)
+      .exec()
+  }
+
+  private registerNamespace(spec: ImportNamespaceSpecifier, source: string, isCss: boolean): void {
+    this.imports.set(spec.local.name, {
+      source,
+      specifierName: '*',
+      isDefault: false,
     })
     _match(isCss)
       .with(true, () => this.cssModules.add(spec.local.name))

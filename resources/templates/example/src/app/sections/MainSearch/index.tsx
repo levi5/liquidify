@@ -1,5 +1,6 @@
 'use sections'
 
+import { t, escape } from 'liquidify'
 import { PaginateByLiquid, RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
@@ -13,36 +14,36 @@ export const MainSearch = () => {
 	return (
 		<section className={classNames(styles.search, 'container', 'section-space')}>
 			<div className={classNames(styles['page-heading'])}>
-				<p className='eyebrow'>{"'search.eyebrow' | t"}</p>
-				<h1>
-					{search.performed ? (
-						search.results_count === 1 ? (
-							<span>{"'search.results.one' | t: terms: search.terms"}</span>
-						) : (
-							<span>{"'search.results.other' | t: count: search.results_count, terms: search.terms"}</span>
-						)
+			<p className='eyebrow'>{t('search.eyebrow')}</p>
+			<h1>
+				{search.performed ? (
+					search.results_count === 1 ? (
+						<span>{t('search.results.one', {terms: search.terms})}</span>
 					) : (
-						<span>{"'search.title' | t"}</span>
-					)}
-				</h1>
+						<span>{t('search.results.other', {count: search.results_count, terms: search.terms})}</span>
+					)
+				) : (
+					<span>{t('search.title')}</span>
+				)}
+			</h1>
 			</div>
 
 			<form action={routes.search_url} method='get' role='search' className={classNames(styles['search-form'])}>
 				<input type='hidden' name='type' value='product' />
 				<input type='hidden' name='options[prefix]' value='last' />
 				<label htmlFor='SearchInput' className='visually-hidden'>
-					{"'search.placeholder' | t"}
+					{t('search.placeholder')}
 				</label>
 				<input
 					id='SearchInput'
 					type='search'
 					name='q'
-					value='{{ search.terms | escape }}'
-					placeholder={"'search.placeholder' | t"}
+					value={escape(search.terms)}
+					placeholder={t('search.placeholder')}
 					className={classNames(styles['search-input'])}
 				/>
 				<button type='submit' className={classNames(styles['search-submit'])}>
-					{"'general.search' | t"}
+					{t('general.search')}
 				</button>
 			</form>
 
@@ -56,50 +57,50 @@ export const MainSearch = () => {
 
 					{paginate.pages > 1 && (
 						<div className={classNames(styles['pagination-footer'])}>
-							<p className={classNames(styles['pagination-caption'])}>
-								{"'pagination.page_of' | t: current_page: paginate.current_page, pages: paginate.pages"}
-							</p>
+						<p className={classNames(styles['pagination-caption'])}>
+							{t('pagination.page_of', {current_page: paginate.current_page, pages: paginate.pages})}
+						</p>
 
-							<nav className={classNames(styles.pagination)} aria-label={"'pagination.label' | t"}>
-								{paginate.previous && (
-									<a
-										className={classNames(styles['pagination-direction'])}
-										href={paginate.previous.url}
-										aria-label={"'pagination.prev' | t"}
-										rel='prev'
-									>
-										← <span>{"'pagination.previous' | t"}</span>
+						<nav className={classNames(styles.pagination)} aria-label={t('pagination.label')}>
+							{paginate.previous && (
+								<a
+									className={classNames(styles['pagination-direction'])}
+									href={paginate.previous.url}
+									aria-label={t('pagination.prev')}
+									rel='prev'
+								>
+									← <span>{t('pagination.previous')}</span>
+								</a>
+							)}
+
+							{paginate.parts.map((part: any) => {
+								const page_number = Number(part.title)
+
+								return part.is_link ? (
+									<a href={part.url} aria-label={t('pagination.go_to', {page: part.title})}>
+										{escape(part.title)}
 									</a>
-								)}
+								) : page_number == paginate.current_page ? (
+									<span aria-current='page' aria-label={t('pagination.current', {page: part.title})}>
+										{escape(part.title)}
+									</span>
+								) : (
+									<span className={classNames(styles['pagination-ellipsis'])} aria-hidden='true'>
+										{escape(part.title)}
+									</span>
+								)
+							})}
 
-								{paginate.parts.map((part: any) => {
-									const page_number = Number(part.title)
-
-									return part.is_link ? (
-										<a href={part.url} aria-label={"'pagination.go_to' | t: page: part.title"}>
-											{'part.title | escape'}
-										</a>
-									) : page_number == paginate.current_page ? (
-										<span aria-current='page' aria-label={"'pagination.current' | t: page: part.title"}>
-											{'part.title | escape'}
-										</span>
-									) : (
-										<span className={classNames(styles['pagination-ellipsis'])} aria-hidden='true'>
-											{'part.title | escape'}
-										</span>
-									)
-								})}
-
-								{paginate.next && (
-									<a
-										className={classNames(styles['pagination-direction'])}
-										href={paginate.next.url}
-										aria-label={"'pagination.next' | t"}
-										rel='next'
-									>
-										<span>{"'pagination.next_short' | t"}</span> →
-									</a>
-								)}
+							{paginate.next && (
+								<a
+									className={classNames(styles['pagination-direction'])}
+									href={paginate.next.url}
+									aria-label={t('pagination.next')}
+									rel='next'
+								>
+									<span>{t('pagination.next_short')}</span> →
+								</a>
+							)}
 							</nav>
 						</div>
 					)}
@@ -110,10 +111,10 @@ export const MainSearch = () => {
 						<span className='empty-spark' aria-hidden='true'>
 							✳
 						</span>
-						<h2>{"'search.empty_title' | t"}</h2>
-						<p>{"'search.empty_text' | t"}</p>
-						<a className='text-link' href={routes.all_products_collection_url}>
-							{"'collection.view_all' | t"}
+					<h2>{t('search.empty_title')}</h2>
+					<p>{t('search.empty_text')}</p>
+					<a className='text-link' href={routes.all_products_collection_url}>
+						{t('collection.view_all')}
 							<span aria-hidden='true'>↗</span>
 						</a>
 					</div>

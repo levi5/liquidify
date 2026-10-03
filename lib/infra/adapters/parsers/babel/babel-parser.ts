@@ -15,6 +15,7 @@ import type { ScriptGenerator } from './script/script-generator'
 import type { ComponentMetadataType } from '../../../../types/component'
 import type { JSXResult } from '../../../../types/liquid'
 import { ValidationError } from '../../../../core/errors/validation-error'
+import { ErrorCollector } from '../../../../core/errors/error-collector'
 
 export interface BabelLiquidParserOptions {
   astParser?: ASTParser
@@ -73,13 +74,20 @@ export class BabelLiquidParser implements IParser {
   }
 
   public async parse(source: string, filePath?: string): Promise<ParsedComponent> {
+    const collector = new ErrorCollector()
+    const component = await this.parseComponent(source, filePath, collector)
+    collector.throwIfErrors()
+    return component
+  }
+
+  private async parseComponent(source: string, filePath: string | undefined, collector: ErrorCollector): Promise<ParsedComponent> {
     const ast = this.astParser.parse(source, filePath)
     const componentMetadata = this.componentExtractor.extract(ast, source)
     this.applyFileNameFallback(componentMetadata, filePath)
     const schema = this.schemaExtractor.extract(ast, filePath)
     return _match(componentMetadata.mode === 'react')
       .with(true, () => this.parseReactMode(ast, source, componentMetadata, schema, filePath))
-      .with(false, () => this.handleDefaultMode(ast, componentMetadata, schema, filePath))
+      .with(false, () => this.handleDefaultMode(ast, componentMetadata, schema, filePath, collector))
       .exec() as Promise<ParsedComponent>
   }
 
@@ -163,13 +171,14 @@ export class BabelLiquidParser implements IParser {
     ast: File,
     metadata: ComponentMetadataType,
     schema: Record<string, unknown>,
-    filePath?: string,
+    filePath: string | undefined,
+    collector: ErrorCollector,
   ): ParsedComponent {
     const css = _match(filePath === undefined)
       .with(true, () => ({ componentCss: '', globalCss: '' }))
       .with(false, () => this.cssExtractor.extract(ast, filePath as string))
       .exec() as { componentCss: string; globalCss: string }
-    const jsxResult = this.convertJsx(ast, metadata, filePath)
+    const jsxResult = this.convertJsx(ast, metadata, filePath, collector)
     const scriptStatements = _match(Array.isArray(metadata.scriptStatements))
       .with(true, () => metadata.scriptStatements)
       .with(false, () => [] as Statement[])
@@ -196,10 +205,17 @@ export class BabelLiquidParser implements IParser {
     }
   }
 
-  private convertJsx(ast: File, metadata: ComponentMetadataType, filePath?: string): JSXResult {
+  private convertJsx(ast: File, metadata: ComponentMetadataType, filePath: string | undefined, collector: ErrorCollector): JSXResult {
     return _match(true)
       .with(metadata.liquidBody != null, () =>
-        this.jsxConverter.convertBody(metadata.liquidBody as Statement[], ast, filePath, metadata.name, metadata.inlineComponents),
+        this.jsxConverter.convertBody(
+          metadata.liquidBody as Statement[],
+          ast,
+          filePath,
+          metadata.name,
+          metadata.inlineComponents,
+          collector,
+        ),
       )
       .with(metadata.jsxElement != null, () =>
         this.jsxConverter.convert(
@@ -209,6 +225,7 @@ export class BabelLiquidParser implements IParser {
           metadata.name,
           metadata.mode,
           metadata.inlineComponents,
+          collector,
         ),
       )
       .with(true, () => emptyJsx())

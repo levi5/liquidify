@@ -12,9 +12,12 @@ export function escapeHtml(value: string): string {
 }
 
 export function escapedOutput(code: string): string {
-  const escaped = _match(/\|\s*escape(?:_once)?\s*$/.test(code))
-    .with(true, () => code)
-    .with(false, () => `${code} | escape`)
+  const trimmed = code.trim()
+  const hasEscape = /(?:\|)\s*escape(?:_once)?\b/.test(trimmed)
+  const hasJson = /(?:\|)\s*json\b/.test(trimmed)
+  const escaped = _match(hasEscape || hasJson)
+    .with(true, () => trimmed)
+    .with(false, () => `${trimmed} | escape`)
     .exec() as string
   return `{{ ${escaped} }}`
 }

@@ -1,5 +1,6 @@
 'use snippets'
 
+import { t, escape, defaultValue, urlEncode } from 'liquidify'
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
@@ -12,11 +13,11 @@ export const CollectionFilter = ({ heading = '', sectionId }: { heading?: string
 	const formId = `CollectionFilters-${sectionId}`
 
 	return (
-		<aside className={classNames(styles['catalog-sidebar'])} aria-label={"'filters.label' | t"}>
+		<aside className={classNames(styles['catalog-sidebar'])} aria-label={t('filters.label')}>
 			<div data-filter-source>
 				<details className={classNames(styles['sidebar-sections'])} open>
 					<summary className={classNames(styles['sidebar-toggle'])}>
-						{heading && heading !== 'blank' ? 'heading | escape' : "'filters.title' | t"} <span aria-hidden='true'>+</span>
+						{heading && heading !== 'blank' ? escape(heading) : t('filters.title')} <span aria-hidden='true'>+</span>
 					</summary>
 
 					<form id={formId} method='get' action='{{ request.path }}'>
@@ -26,14 +27,14 @@ export const CollectionFilter = ({ heading = '', sectionId }: { heading?: string
 							</>
 						))}
 
-						{collection.filters.length === 0 && <p className={classNames(styles['sidebar-empty'])}>{"'filters.empty' | t"}</p>}
+						{collection.filters.length === 0 && <p className={classNames(styles['sidebar-empty'])}>{t('filters.empty')}</p>}
 
 						<div className={classNames(styles['sidebar-filter-actions'])}>
 							<button className='button button-dark' type='submit'>
-								{"'filters.apply' | t"}
+								{t('filters.apply')}
 							</button>
-							<a className='text-link' href='{{ request.path }}?sort_by={{ collection.sort_by | default: collection.default_sort_by | url_encode }}'>
-								{"'filters.clear' | t"}
+							<a className='text-link' href={`${request.path}?sort_by=${urlEncode(defaultValue(collection.sort_by, collection.default_sort_by))}`}>
+								{t('filters.clear')}
 							</a>
 						</div>
 					</form>

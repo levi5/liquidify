@@ -1,5 +1,6 @@
 'use sections'
 
+import { t } from 'liquidify'
 import { FormBlock } from 'liquidex'
 import classNames from 'classnames'
 
@@ -27,13 +28,13 @@ export const Newsletter = () => {
 						<label htmlFor='NewsletterEmail'>{section.settings.label}</label>
 
 						<div className={classNames(styles['email-field'])}>
-							<input id='NewsletterEmail' type='email' name='contact[email]' placeholder={"'footer.email_label' | t"} autoComplete='email' required />
-							<button type='submit' aria-label={"'footer.subscribe' | t"}>
+					<input id='NewsletterEmail' type='email' name='contact[email]' placeholder={t('footer.email_label')} autoComplete='email' required />
+						<button type='submit' aria-label={t('footer.subscribe')}>
 								↗
 							</button>
 						</div>
 
-						{form['posted_successfully?'] && <p role='status'>{"'footer.subscribed' | t"}</p>}
+						{form['posted_successfully?'] && <p role='status'>{t('footer.subscribed')}</p>}
 						{form.errors && <div role='alert'>{'form.errors | default_errors'}</div>}
 
 						<p className={classNames(styles['newsletter-note'])}>{section.settings.note}</p>

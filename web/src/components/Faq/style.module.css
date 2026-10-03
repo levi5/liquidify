@@ -1,0 +1,6 @@
+.faq h2 { scroll-margin-top: 9.28rem; }
+.faq h3 { margin: 3.52rem 0 1.12rem; font-size: 1.68rem; scroll-margin-top: 9.28rem; }
+.qa-list { display: grid; gap: 1.2rem; }
+.qa { padding: 1.6rem 1.84rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); box-shadow: var(--shadow); }
+.qa h4 { margin: 0 0 0.64rem; font-size: 1.52rem; }
+.qa p { margin: 0; color: var(--muted); font-size: 1.44rem; }

@@ -1,5 +1,6 @@
 'use sections'
 
+import { t, escape, money, json } from 'liquidify'
 import { RenderSnippet, Raw } from 'liquidex'
 import classNames from 'classnames'
 
@@ -31,18 +32,18 @@ export const ProductInfo = () => {
 				</div>
 
 				<div className={classNames(styles['product-detail-copy'])}>
-					<p className='eyebrow'>{'product.vendor | escape'}</p>
-					<h1>{'product.title | escape'}</h1>
-					<p className={classNames(styles['product-intro'])}>{"'products.product.intro' | t"}</p>
+				<p className='eyebrow'>{escape(product.vendor)}</p>
+				<h1>{escape(product.title)}</h1>
+				<p className={classNames(styles['product-intro'])}>{t('products.product.intro')}</p>
 
-					<liquid-data data-liquid-store='{{ product | json }}'>
-						<ProductProvider elementId='product-provider' selectFirstVariant={false} store={product}>
-							<p className={classNames(styles['detail-price'])} data-product-price>
-								{'product.selected_or_first_available_variant.price | money'}
-							</p>
-							<p className={classNames(styles['detail-compare-price'])} data-product-compare-price hidden>
-								{'product.selected_or_first_available_variant.compare_at_price | money'}
-							</p>
+				<liquid-data data-liquid-store={json(product)}>
+					<ProductProvider elementId='product-provider' selectFirstVariant={false} store={product}>
+						<p className={classNames(styles['detail-price'])} data-product-price>
+							{money(product.selected_or_first_available_variant.price)}
+						</p>
+						<p className={classNames(styles['detail-compare-price'])} data-product-compare-price hidden>
+							{money(product.selected_or_first_available_variant.compare_at_price)}
+						</p>
 
 							{blocks?.map((block) => {
 								const { variation, mode } = block.settings
@@ -56,12 +57,12 @@ export const ProductInfo = () => {
 
 							<div className={classNames(styles['purchase-actions'])}>
 								<div className={classNames(styles['quantity-field'])}>
-									<label htmlFor='Quantity'>{"'products.product.quantity' | t"}</label>
+									<label htmlFor='Quantity'>{t('products.product.quantity')}</label>
 									<QuantitySelector id='Quantity' name='quantity' />
 								</div>
 
 								<button type='button' className={classNames('button', 'button-dark', styles['product-add-button'])} data-product-add-to-cart='true'>
-									{"'products.product.add_to_bag' | t"}
+									{t('products.product.add_to_bag')}
 									<span aria-hidden='true'>↗</span>
 								</button>
 							</div>
@@ -71,9 +72,9 @@ export const ProductInfo = () => {
 					<div className={classNames(styles['purchase-note'])}>
 						<span aria-hidden='true'>↗</span>
 						<span>
-							{"'products.product.shipping_note' | t"}
+							{t('products.product.shipping_note')}
 							<br />
-							{"'products.product.secure_note' | t"}
+							{t('products.product.secure_note')}
 						</span>
 					</div>
 
@@ -98,7 +99,7 @@ export const ProductInfo = () => {
 
 					<details className={classNames(styles['product-accordion'])} open>
 						<summary>
-							{"'products.product.about' | t"} <span>+</span>
+							{t('products.product.about')} <span>+</span>
 						</summary>
 						<div className='rich-text'>
 							<Raw html={product.description} />
@@ -107,12 +108,12 @@ export const ProductInfo = () => {
 
 					<details className={classNames(styles['product-accordion'])}>
 						<summary>
-							{"'products.product.shipping_returns' | t"} <span>+</span>
+							{t('products.product.shipping_returns')} <span>+</span>
 						</summary>
 						<div className='rich-text'>
-							<p>{"'products.product.shipping_text' | t"}</p>
-							{shop.shipping_policy && <a href={shop.shipping_policy.url}>{"'products.product.shipping_policy' | t"}</a>}
-							{shop.refund_policy && <a href={shop.refund_policy.url}>{"'products.product.refund_policy' | t"}</a>}
+						<p>{t('products.product.shipping_text')}</p>
+						{shop.shipping_policy && <a href={shop.shipping_policy.url}>{t('products.product.shipping_policy')}</a>}
+						{shop.refund_policy && <a href={shop.refund_policy.url}>{t('products.product.refund_policy')}</a>}
 						</div>
 					</details>
 

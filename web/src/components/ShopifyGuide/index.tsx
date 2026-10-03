@@ -1,0 +1,23 @@
+import { useLocale } from "../../i18n.tsx";
+import Snippet from "../Snippet/index.tsx";
+import { EditorFigure } from "../Figures/index.tsx";
+import styles from "./style.module.css";
+import { cx } from "../../constants/cx.ts";
+
+const TEMPLATE = `{
+  "sections": {
+    "hero": { "type": "hero", "settings": { "heading": "Your style." } },
+    "shelf_featured": { "type": "shelf", "settings": { "collection": "all", "limit": 8 } }
+  },
+  "order": ["hero", "shelf_featured"]
+}`;
+
+export default function ShopifyGuide() {
+  const { locale } = useLocale();
+  const copy = locale === "pt-BR" ? {
+    title: "O que continua sendo Shopify", intro: "Liquidify gera arquivos que o Shopify entende, mas não substitui a configuração de uma loja. Templates, dados de catálogo e Theme Editor continuam sendo as fontes de verdade do storefront.", model: "Modelo de composição", modelItems: ["layout/theme.liquid envolve toda página e entrega content_for_layout.", "Section groups adicionam header e footer em todas as rotas.", "templates/*.json escolhem sections, ordem, settings e blocks iniciais.", "Sections geradas expõem schema para o Theme Editor.", "Snippets gerados são incluídos por {% render %} nas sections."], template: "Template JSON controla a página", editor: "Theme Editor", editorItems: ["Schemas traduzidos definem nomes, labels, limites e presets.", "section.settings pertence ao lojista: não a sobrescreva em código.", "section.blocks permite repetir elementos editoriais como anúncios e cartões.", "Mantenha defaults no schema e a composição inicial no JSON."], data: "Dados que você configura no Admin", rows: [["Produtos", "Imagens, variantes, preços e descrição alimentam card e ProductInfo."], ["Coleções", "A coleção all alimenta shelf e recomendações; outras viram links editoriais."], ["Menus", "menu e footer são escolhidos pelo Theme Editor e lidos pelo header/footer."], ["Search & Discovery", "Define os filtros retornados em collection.filters."], ["Políticas", "Shipping/refund policy aparecem na página de produto."], ["Idiomas", "Publique os locales para storefront e schema aparecerem traduzidos."]], headers: ["Admin", "Impacto no tema"]
+  } : {
+    title: "What remains Shopify", intro: "Liquidify generates files Shopify understands, but it does not replace store configuration. Templates, catalog data, and Theme Editor remain the storefront sources of truth.", model: "Composition model", modelItems: ["layout/theme.liquid wraps every page and provides content_for_layout.", "Section groups add header and footer to every route.", "templates/*.json chooses sections, order, initial settings, and blocks.", "Generated sections expose schema to Theme Editor.", "Generated snippets are included with {% render %} inside sections."], template: "JSON template controls the page", editor: "Theme Editor", editorItems: ["Translated schemas define names, labels, limits, and presets.", "section.settings belongs to the merchant: do not overwrite it in code.", "section.blocks repeats editorial elements such as announcements and cards.", "Keep defaults in schema and initial composition in JSON."], data: "Data you configure in Admin", rows: [["Products", "Images, variants, prices, and description feed Card and ProductInfo."], ["Collections", "The all collection feeds shelf and recommendations; others become editorial links."], ["Menus", "menu and footer are selected in Theme Editor and read by header/footer."], ["Search & Discovery", "Defines filters returned in collection.filters."], ["Policies", "Shipping/refund policy appears on product page."], ["Languages", "Publish locales so storefront and schema appear translated."]], headers: ["Admin", "Theme impact"]
+  };
+  return <section className={cx('wrap', 'section', styles.shopifyGuide)}><h2>{copy.title}</h2><p className="section-sub">{copy.intro}</p><div className={styles.shopifyGrid}><article><h3>{copy.model}</h3><ul>{copy.modelItems.map((item) => <li key={item}>{item}</li>)}</ul></article><div><Snippet title={`${copy.template}: templates/index.json`} code={TEMPLATE} language="json" /></div></div><EditorFigure /><div className={styles.shopifyGrid}><article><h3>{copy.editor}</h3><ul>{copy.editorItems.map((item) => <li key={item}>{item}</li>)}</ul></article><div><h3>{copy.data}</h3><div className="table-wrap"><table className="table"><thead><tr>{copy.headers.map((header) => <th key={header}>{header}</th>)}</tr></thead><tbody>{copy.rows.map((row) => <tr key={row[0]}><td>{row[0]}</td><td>{row[1]}</td></tr>)}</tbody></table></div></div></div></section>;
+}

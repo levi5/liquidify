@@ -1,5 +1,6 @@
 'use snippets'
 
+import { t, escape } from 'liquidify'
 import { PaginateByLiquid, RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
@@ -18,19 +19,19 @@ export const Catalog = ({ by = 12 }: { by?: number }) => {
 					))}
 				</div>
 			) : (
-				<BaseEmptyState heading={"'collection.empty_heading' | t"} text={"'collection.empty_text' | t"} actionLabel={"'collection.view_all' | t"} />
+				<BaseEmptyState heading={t('collection.empty_heading')} text={t('collection.empty_text')} actionLabel={t('collection.view_all')} />
 			)}
 
 			{paginate.pages > 1 && (
 				<div className={classNames(styles['pagination-footer'])}>
 					<p className={classNames(styles['pagination-caption'])}>
-						{"'pagination.page_of' | t: current_page: paginate.current_page, pages: paginate.pages"}
+						{t('pagination.page_of', {current_page: paginate.current_page, pages: paginate.pages})}
 					</p>
 
-					<nav className={classNames(styles.pagination)} aria-label={"'pagination.label' | t"}>
+					<nav className={classNames(styles.pagination)} aria-label={t('pagination.label')}>
 						{paginate.previous && (
-							<a className={classNames(styles['pagination-direction'])} href={paginate.previous.url} aria-label={"'pagination.prev' | t"} rel='prev'>
-								← <span>{"'pagination.previous' | t"}</span>
+							<a className={classNames(styles['pagination-direction'])} href={paginate.previous.url} aria-label={t('pagination.prev')} rel='prev'>
+								← <span>{t('pagination.previous')}</span>
 							</a>
 						)}
 
@@ -38,23 +39,23 @@ export const Catalog = ({ by = 12 }: { by?: number }) => {
 							const page_number = Number(part.title)
 
 							return part.is_link ? (
-								<a href={part.url} aria-label={"'pagination.go_to' | t: page: part.title"}>
-									{'part.title | escape'}
+								<a href={part.url} aria-label={t('pagination.go_to', {page: part.title})}>
+									{escape(part.title)}
 								</a>
 							) : page_number == paginate.current_page ? (
-								<span aria-current='page' aria-label={"'pagination.current' | t: page: part.title"}>
-									{'part.title | escape'}
+								<span aria-current='page' aria-label={t('pagination.current', {page: part.title})}>
+									{escape(part.title)}
 								</span>
 							) : (
 								<span className={classNames(styles['pagination-ellipsis'])} aria-hidden='true'>
-									{'part.title | escape'}
+									{escape(part.title)}
 								</span>
 							)
 						})}
 
 						{paginate.next && (
-							<a className={classNames(styles['pagination-direction'])} href={paginate.next.url} aria-label={"'pagination.next' | t"} rel='next'>
-								<span>{"'pagination.next_short' | t"}</span> →
+							<a className={classNames(styles['pagination-direction'])} href={paginate.next.url} aria-label={t('pagination.next')} rel='next'>
+								<span>{t('pagination.next_short')}</span> →
 							</a>
 						)}
 					</nav>

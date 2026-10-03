@@ -47,6 +47,7 @@ import { LiquidAttributeConverter } from './liquid/attribute-parser'
 import { _match } from 'funcio'
 import { pascalToKebab } from '../../../../shared/string'
 import { ValidationError } from '../../../../core/errors/validation-error'
+import type { ErrorCollector } from '../../../../core/errors/error-collector'
 import type { InlineComponentNode } from '../../../../types/component'
 
 export class LiquidParser implements ILiquidExpressionParser {
@@ -159,8 +160,9 @@ export class LiquidParser implements ILiquidExpressionParser {
     currentFilePath?: string,
     componentName?: string,
     inlineComponents?: Map<string, InlineComponentNode>,
+    errorCollector?: ErrorCollector,
   ): JSXResult {
-    const context = new ParsingContext({ currentFilePath, componentName, mode: 'liquid', inlineComponents })
+    const context = new ParsingContext({ currentFilePath, componentName, mode: 'liquid', inlineComponents, errorCollector })
     this.importResolver.resolveImports(ast)
     const html = this.statementParser.renderBody(body, undefined, context)
     return { html, blocksSchema: context.blocksSchema, scriptAssets: Array.from(context.scriptAssets) }
@@ -173,12 +175,14 @@ export class LiquidParser implements ILiquidExpressionParser {
     componentName?: string,
     mode?: string,
     inlineComponents?: Map<string, InlineComponentNode>,
+    errorCollector?: ErrorCollector,
   ): JSXResult {
     const context = new ParsingContext({
       currentFilePath,
       componentName,
       mode,
       inlineComponents,
+      errorCollector,
     })
 
     this.liquidAttributeConverter = new LiquidAttributeConverter(this, componentName, mode)

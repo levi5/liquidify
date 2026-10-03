@@ -22,6 +22,7 @@ import { SchemaValidator } from '../../application/services/schema-validation'
 import { TranspileFileUseCase } from '../../application/services/transpile-file'
 import { ValidationService } from '../../application/services/validation-service'
 
+
 export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder {
   const logger = new ConsoleLogger()
   const fileSystem = new NodeFileSystem()
@@ -44,7 +45,7 @@ export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder
   const generator = new LiquidFileSystemGenerator({ outputDir: options.output, force: options.force }, fileSystem, logger, manifest)
   const useCase = new TranspileFileUseCase(parser, generator, new ValidationService(new SchemaValidator()))
 
-  return new LiquidifyBuilder(
+  const builder = new LiquidifyBuilder(
     options,
     parser,
     useCase,
@@ -55,4 +56,10 @@ export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder
     new DirectiveScanner(astParser),
     logger,
   )
+
+  for (const plugin of options.plugins ?? []) {
+    builder.registerPlugin(plugin)
+  }
+
+  return builder
 }

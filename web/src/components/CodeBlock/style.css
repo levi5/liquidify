@@ -1,0 +1,38 @@
+.tok-com { color: #7d869c; font-style: italic; }
+.tok-str { color: #9ece8f; }
+.tok-key { color: #7dd3c0; }
+.tok-num { color: #f78c6c; }
+.tok-kw { color: #c792ea; }
+.tok-tag { color: #7dc6ff; }
+.tok-fn { color: #ffcb6b; }
+.tok-comp { color: #82aaff; }
+.tok-attr { color: #a5c4ff; }
+
+.codeblock-wrap {
+  position: relative;
+  min-width: 0;
+}
+
+.codeblock-wrap pre {
+  margin: 0;
+}
+
+.codeblock-wrap pre:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.codeblock-copy {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.18);
+  color: #e8ebf7;
+  backdrop-filter: blur(6px);
+}
+
+.codeblock-copy:hover {
+  border-color: #fff;
+}

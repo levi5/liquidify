@@ -1,0 +1,90 @@
+.page-toc {
+  position: sticky;
+  top: 10.4rem;
+  align-self: start;
+  font-size: 1.312rem;
+  line-height: 1.45;
+}
+
+.page-toc-label {
+  margin: 0 0 0.96rem;
+  font-size: 1.088rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.page-toc ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.16rem;
+  border-left: 1px solid var(--line);
+}
+
+.page-toc a {
+  display: block;
+  padding: 0.352rem 1.12rem;
+  margin-left: -1px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.page-toc a:hover {
+  color: var(--text);
+}
+
+.page-toc a.active {
+  color: var(--accent-dark);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+@media (max-width: 1240px) {
+  .page-toc {
+    display: none;
+  }
+}
+
+.page-toc-mobile {
+  display: none;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  padding: 1rem 1.4rem;
+  margin-top: 1.6rem;
+  font-size: 1.4rem;
+}
+
+.page-toc-mobile summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-size: 1.2rem;
+}
+
+.page-toc-mobile ul {
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.page-toc-mobile a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+@media (max-width: 1240px) {
+  .page-toc-mobile {
+    display: block;
+  }
+}

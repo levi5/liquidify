@@ -30,6 +30,7 @@ describe('ConfigLoader', () => {
       ...DEFAULT_CONFIG,
       componentsDir: path.resolve(cwd, 'src/components'),
       output: path.resolve(cwd, '.'),
+      plugins: [],
     })
   })
 

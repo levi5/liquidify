@@ -7,6 +7,9 @@ type GenerateCode = (node: Node, renames?: Record<string, string>, context?: Par
 
 const CROP_POSITIONS = new Set(['center', 'top', 'bottom', 'left', 'right'])
 
+const FILTER_ARG = `(?:[a-zA-Z0-9_]+\\s*:\\s*)?(?:'[^']*'|"[^"]*"|[^,'"\\s|]+)`
+const FILTER_PATTERN = new RegExp(`^\\s*\\|\\s*([a-zA-Z0-9_]+(?:\\s*:\\s*${FILTER_ARG}(?:\\s*,\\s*${FILTER_ARG})*)?)`)
+
 export class TemplateLiteralParser {
   constructor(private readonly generateCode: GenerateCode) {}
 
@@ -26,16 +29,18 @@ export class TemplateLiteralParser {
   }
 
   private dynamicTemplate(expr: TemplateLiteral, context?: ParsingContext, renames?: Record<string, string>): string {
-    const arg = `(?:[a-zA-Z0-9_]+\\s*:\\s*)?(?:'[^']*'|"[^"]*"|[^,'\\"\\s|]+)`
-    const pattern = new RegExp(`^\\s*\\|\\s*([a-zA-Z0-9_]+(?:\\s*:\\s*${arg}(?:\\s*,\\s*${arg})*)?)`)
     const head = _match(expr.quasis[0].value.raw !== '')
-      .with(true, () => `"${expr.quasis[0].value.raw}"`)
+      .with(true, () => `"${this.escapeQuasi(expr.quasis[0].value.raw)}"`)
       .with(false, () => '')
       .exec() as string
     return expr.expressions.reduce(
-      (acc, expression, index) => this.appendExpression(acc, expression, expr.quasis[index + 1].value.raw, pattern, context, renames),
+      (acc, expression, index) => this.appendExpression(acc, expression, expr.quasis[index + 1].value.raw, FILTER_PATTERN, context, renames),
       head,
     )
+  }
+
+  private escapeQuasi(raw: string): string {
+    return raw.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n')
   }
 
   private appendExpression(
@@ -59,7 +64,7 @@ export class TemplateLiteralParser {
       .exec() as string
     return _match(filters.remaining === '')
       .with(true, () => appended)
-      .with(false, () => `${appended} | append: "${filters.remaining}"`)
+      .with(false, () => `${appended} | append: "${this.escapeQuasi(filters.remaining)}"`)
       .exec() as string
   }
 
@@ -72,6 +77,8 @@ export class TemplateLiteralParser {
   }
 
   private consumeFilter(quasi: string, matched: string[], pattern: RegExp, collected: string[]): { text: string; remaining: string } {
+    // Guard against zero-length matches looping forever.
+    if (!matched[0] || matched[0].length === 0) return { text: collected.join(' | '), remaining: quasi }
     return this.extractFilters(quasi.substring(matched[0].length), pattern, [...collected, this.normalizeFilter(matched[1].trim())])
   }
 

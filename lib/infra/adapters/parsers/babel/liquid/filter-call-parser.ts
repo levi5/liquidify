@@ -85,11 +85,11 @@ export class FilterCallParser {
           return `${arrayName} | where: "${this.equalityProp(body)}", ${hoistLogicalOperators(value, 'where', context)}`
         },
       )
-      .with(
-        this.isNegationOfMember(body, itemName),
-        () =>
-          `${arrayName} | where_exp: "${itemName}", "${itemName}.${this.negatedMember(body, itemName)} == nil or ${itemName}.${this.negatedMember(body, itemName)} == false or ${itemName}.${this.negatedMember(body, itemName)} == 0 or ${itemName}.${this.negatedMember(body, itemName)} == """`,
-      )
+      .with(this.isNegationOfMember(body, itemName), () => {
+        const access = this.negatedMember(body, itemName)
+        const target = access.startsWith('[') ? `${itemName}${access}` : `${itemName}.${access}`
+        return `${arrayName} | where_exp: "${itemName}", "${target} == nil or ${target} == false or ${target} == 0 or ${target} == ''"`
+      })
       .with(this.isComparison(body, itemName), () => this.comparisonFilter(arrayName, itemName, body, renames, context))
       .with(this.isSupportedWhereExp(body), () => this.whereExpFilter(arrayName, itemName, body, renames, context))
       .with(true, () => null)
@@ -107,8 +107,12 @@ export class FilterCallParser {
   }
 
   private negatedMember(body: unknown, _itemName: string): string {
-    const arg = (body as { argument: { property: { name?: string; value?: string } } }).argument
-    return arg.property.name ?? arg.property.value ?? ''
+    const arg = (body as { argument: { property?: { name?: string; value?: string | number }; computed?: boolean } }).argument
+    const prop = arg.property?.name ?? (arg.property?.value !== undefined ? String(arg.property.value) : '')
+    if (prop === '') return '["unknown"]'
+    // Computed access like item["foo-bar"] needs bracket syntax, not `item.`.
+    if (arg.computed) return `["${prop.replace(/"/g, "'")}"]`
+    return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(prop) ? prop : `["${prop.replace(/"/g, "'")}"]`
   }
 
   private isComparison(body: unknown, itemName: string): boolean {
@@ -129,24 +133,25 @@ export class FilterCallParser {
     context?: ParsingContext,
   ): string {
     const condition = this.generateLiquidCode(this.rewriteStrict(body), true, { ...renames, [itemName]: itemName }, context)
-    return `${arrayName} | where_exp: "${itemName}", "${condition.replace(/"/g, "'")}"`
+    return `${arrayName} | where_exp: "${itemName}", "${this.escapeWhereCondition(condition)}"`
   }
 
   private rewriteStrict(body: unknown): unknown {
-    const node = body as { operator?: string }
-    _match(node.operator === '===')
+    // Clone instead of mutating the caller's AST in place.
+    const clone = JSON.parse(JSON.stringify(body)) as { operator?: string }
+    _match(clone.operator === '===')
       .with(true, () => {
-        node.operator = '=='
+        clone.operator = '=='
       })
       .with(false, () => undefined)
       .exec()
-    _match(node.operator === '!==')
+    _match(clone.operator === '!==')
       .with(true, () => {
-        node.operator = '!='
+        clone.operator = '!='
       })
       .with(false, () => undefined)
       .exec()
-    return body
+    return clone
   }
 
   private isSupportedWhereExp(body: unknown): boolean {
@@ -162,7 +167,16 @@ export class FilterCallParser {
     context?: ParsingContext,
   ): string {
     const condition = this.generateLiquidCode(this.rewriteStrict(body), true, { ...renames, [itemName]: itemName }, context)
-    return `${arrayName} | where_exp: "${itemName}", "${condition.replace(/"/g, "'")}"`
+    return `${arrayName} | where_exp: "${itemName}", "${this.escapeWhereCondition(condition)}"`
+  }
+
+  private escapeWhereCondition(condition: string): string {
+    // where_exp condition lives inside double quotes: escape backslashes,
+    // turn inner double quotes into single quotes unless the condition
+    // already contains single quotes (then escape doubles instead).
+    if (!condition.includes('"')) return condition
+    if (!condition.includes("'")) return condition.replace(/"/g, "'")
+    return condition.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
   }
 
   private isMemberAccess(body: unknown, itemName: string): boolean {

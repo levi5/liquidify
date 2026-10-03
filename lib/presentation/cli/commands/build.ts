@@ -1,10 +1,11 @@
 import type { DependencyTracker } from '../../../application/services/dependency-tracker'
-import { _match, _try, _Array } from 'funcio'
+import { _match, _try } from 'funcio'
 import { EventEmitter } from 'node:events'
 import type { FSWatcher } from 'chokidar'
 import { glob } from 'glob'
 import chokidar from 'chokidar'
 import path from 'node:path'
+import type { PluginStats } from '../../../core/protocols/plugin'
 
 import type { ComponentRegistry, DirectiveScanner } from '../../../application/services/component-registry'
 import type { BabelLiquidParser } from '../../../infra/adapters/parsers/babel/babel-parser'
@@ -25,6 +26,7 @@ export class LiquidifyBuilder extends EventEmitter {
   private registrySignature = ''
   private runtimeScript?: string
   private watchedDependencies = new Set<string>()
+  private pluginContext: { onBuildEnd: (stats: PluginStats) => void }[] = []
 
   constructor(
     private readonly options: { componentsDir: string; output: string },
@@ -40,13 +42,63 @@ export class LiquidifyBuilder extends EventEmitter {
     super()
   }
 
+  public registerPlugin(plugin: { name: string; setup: (ctx: { onBuildEnd: (callback: (stats: PluginStats) => void) => void }) => void }): void {
+    const callbacks: Array<(stats: PluginStats) => void> = []
+    const ctx = {
+      onBuildEnd: (callback: (stats: PluginStats) => void) => {
+        callbacks.push(callback)
+      },
+    }
+    plugin.setup(ctx)
+    this.pluginContext.push({
+      onBuildEnd: (stats: PluginStats) => callbacks.forEach((cb) => cb(stats)),
+    })
+  }
+
   async build() {
     this.emit('build:start')
     const result = await _try.async(() => this.buildProject())
     result.match({
-      right: () => this.emit('build:end'),
+      right: () => {
+        this.emit('build:end')
+        this.notifyBuildEnd()
+      },
       left: (error) => this.fail(error),
     })
+  }
+
+  private notifyBuildEnd(): void {
+    const stats = this.collectStats()
+    this.pluginContext.forEach((p) => p.onBuildEnd(stats))
+  }
+
+  private collectStats(): PluginStats {
+    const files = glob.sync(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}'))
+    const stats: PluginStats = {
+      total: files.length,
+      tsx: 0,
+      jsx: 0,
+      ts: 0,
+      js: 0,
+      byDirective: {},
+    }
+    for (const file of files) {
+      if (file.endsWith('.tsx')) stats.tsx++
+      else if (file.endsWith('.jsx')) stats.jsx++
+      else if (file.endsWith('.ts')) stats.ts++
+      else if (file.endsWith('.js')) stats.js++
+
+      const source = this.fileSystem.readFileSync(path.resolve(file))
+      const directives = this.scanner.scan(source, file)
+      const active: string[] = []
+      if (directives.isReact) active.push('use react')
+      if (directives.isDom) active.push('use dom')
+      if (directives.isSnippet) active.push('use snippets')
+      if (directives.isSections) active.push('use sections')
+      const label = active.length > 0 ? active.join(', ') : 'none'
+      stats.byDirective[label] = (stats.byDirective[label] || 0) + 1
+    }
+    return stats
   }
 
   private fail(error: unknown): never {
@@ -105,20 +157,17 @@ export class LiquidifyBuilder extends EventEmitter {
   }
 
   private async buildComponents(files: string[]) {
-    const failures: Array<{ file: string; error: unknown }> = []
-    await _Array.forEachAsync(files, async (file) => {
+    const results = await this.processFilesInParallel(files, async (file) => {
       const filePath = path.resolve(file)
-      const compiled = await _try.async(async () => {
-        const source = this.fileSystem.readFileSync(filePath)
-        const directives = this.scanner.scan(source, filePath)
-        const skippable = (filePath.endsWith('.ts') || filePath.endsWith('.js')) && !directives.isDom && !directives.isSnippet
-        if (!skippable) await this.useCase.execute(source, filePath)
-      })
-      compiled.match({
-        right: () => undefined,
-        left: (error) => failures.push({ file: filePath, error }),
-      })
+      const source = this.fileSystem.readFileSync(filePath)
+      const directives = this.scanner.scan(source, filePath)
+      const skippable = (filePath.endsWith('.ts') || filePath.endsWith('.js')) && !directives.isDom && !directives.isSnippet
+      if (!skippable) await this.useCase.execute(source, filePath)
     })
+    const failures: Array<{ file: string; error: unknown }> = []
+    for (const result of results) {
+      if (result.error !== undefined) failures.push({ file: result.file, error: result.error })
+    }
     _match(true)
       .with(failures.length === 1, () => {
         const single = failures[0] as { file: string; error: unknown }
@@ -134,6 +183,24 @@ export class LiquidifyBuilder extends EventEmitter {
       })
       .with(true, () => undefined)
       .exec()
+  }
+
+  private async processFilesInParallel(
+    files: string[],
+    worker: (file: string) => Promise<void>,
+  ): Promise<Array<{ file: string; error?: unknown }>> {
+
+    const results: Array<{ file: string; error?: unknown }> = new Array(files.length)
+    for (let index = 0; index < files.length; index++) {
+      const file = files[index] as string
+      try {
+        await worker(file)
+        results[index] = { file }
+      } catch (error) {
+        results[index] = { file, error }
+      }
+    }
+    return results
   }
 
   public watch() {

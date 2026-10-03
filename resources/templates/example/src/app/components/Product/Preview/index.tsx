@@ -1,5 +1,6 @@
 'use snippets'
 
+import { imageUrl, escape, defaultValue } from 'liquidify'
 import { RenderSvg } from 'liquidex'
 import classNames from 'classnames'
 
@@ -55,17 +56,17 @@ export const ProductPreview = ({ id, title, images }: ProductPreviewType) => {
 
 							<SwiperCarousel elementId={slideId} settings={PRODUCT_PREVIEW_SLIDER_SETTINGS} loop={loopGallery} pagination={true}>
 								{images.map((photo, index) => (
-									<img
-										src='{{ photo | image_url: width: 1200 }}'
-										srcSet='{{ photo | image_url: width: 600 }} 600w, {{ photo | image_url: width: 900 }} 900w, {{ photo | image_url: width: 1200 }} 1200w'
-										sizes='(max-width: 990px) 100vw, 50vw'
-										alt='{{ photo.alt | default: product.title | escape }}'
-										width='1000'
-										height='1200'
-										loading={index === 0 ? 'eager' : 'lazy'}
-										fetchpriority={index === 0 ? 'high' : 'auto'}
-										decoding='async'
-									/>
+								<img
+									src={imageUrl(photo, {width: 1200})}
+									srcSet={`${imageUrl(photo, {width: 600})} 600w, ${imageUrl(photo, {width: 900})} 900w, ${imageUrl(photo, {width: 1200})} 1200w`}
+									sizes='(max-width: 990px) 100vw, 50vw'
+									alt={escape(defaultValue(photo.alt, product.title))}
+									width='1000'
+									height='1200'
+									loading={index === 0 ? 'eager' : 'lazy'}
+									fetchpriority={index === 0 ? 'high' : 'auto'}
+									decoding='async'
+								/>
 								))}
 							</SwiperCarousel>
 

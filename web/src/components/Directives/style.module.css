@@ -1,0 +1,80 @@
+.directivesPage {
+  min-width: 0;
+}
+
+.directiveList {
+  display: grid;
+  gap: 1.76rem;
+  margin-top: 2.56rem;
+}
+
+.directiveCard {
+  min-width: 0;
+  margin-top: 1rem;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 2rem 2.08rem;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  position: relative;
+  scroll-margin-top: 9.28rem;
+}
+
+.equivCard {
+  margin-top: 1.76rem;
+}
+
+.directiveCard::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent 70%);
+  opacity: 0.8;
+}
+
+.directiveHead {
+  display: flex;
+  align-items: center;
+  gap: 1.12rem;
+  flex-wrap: wrap;
+  margin-bottom: 1.6rem;
+}
+
+.directiveName {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--accent-dark);
+  background: var(--accent-soft);
+  border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.directiveGen {
+  color: var(--muted);
+  font-size: 1.376rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+
+.directiveWhen {
+  margin: 0.48rem 0;
+  font-size: 1.52rem;
+  line-height: 1.6;
+}
+
+.directiveRule {
+  margin: 0 0 1.6rem;
+  font-size: 1.376rem;
+  color: var(--muted);
+  border-left: 3px solid var(--accent);
+  padding-left: 1.12rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 960px) {
+  .directiveCard {
+    padding: 1.6rem 1.44rem;
+  }
+}
