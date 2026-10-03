@@ -1,3 +1,6 @@
 # Exceção ao .gitignore da raiz: o lockfile do site deve ser commitado
 # para builds reproduzíveis no GitHub Pages.
 !pnpm-lock.yaml
+
+# Artefato incremental do typecheck (tsconfig.node.json usa composite).
+*.tsbuildinfo
