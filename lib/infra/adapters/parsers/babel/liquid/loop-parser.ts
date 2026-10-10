@@ -36,7 +36,7 @@ export class LiquidLoopParser {
   public renderBody?: (body: unknown, renames?: Record<string, string>, context?: ParsingContext) => string
 
   constructor(
-    private _jsxToHtml: (node: unknown, renames?: Record<string, string>, context?: ParsingContext) => string,
+    private readonly jsxToHtml: (node: unknown, renames?: Record<string, string>, context?: ParsingContext) => string,
     private liquidVariableParser: LiquidVariableParser,
   ) {}
 
@@ -447,9 +447,5 @@ export class LiquidLoopParser {
       .map((stmt) => stmt.argument)
       .find((arg) => arg !== null && arg !== undefined)
     return (argument ?? null) as Node | null
-  }
-
-  private jsxToHtml(node: unknown, renames?: Record<string, string>, context?: ParsingContext): string {
-    return this._jsxToHtml(node, renames, context)
   }
 }

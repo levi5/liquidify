@@ -36,22 +36,21 @@ yarn add liquidify@alpha
 
 ### 1. Initialize a new theme template (Recommended)
 
-Generate a complete Shopify theme structure and Liquidify configuration with ready-to-use example components:
+Generate a complete Shopify theme structure with the Liquidify example (fashion store):
 
 ```bash
 npx liquidify init [project-name]
-# or initialize with the full fashion store example:
-npx liquidify init [project-name] --template example
 # or initialize in the current folder:
 npx liquidify init
 ```
 
 This creates:
 
+- The full Liquidify example fashion store theme (250+ files)
 - Shopify theme folders (`layout/`, `templates/`, `sections/`, `snippets/`, `assets/`, `config/`, `locales/`)
 - Default Shopify files (`theme.liquid`, `index.json`, `settings_schema.json`, `css-variables.liquid`)
-- Liquidify example components (`Hero.tsx` section, `Counter.tsx` React Island, `Badge.tsx` snippet)
-- `liquidify.config.json` and `tsconfig.json`
+- Liquidify example components (sections, snippets, React islands)
+- `liquidify.config.json` and `tsconfig.json` pre-configured
 
 ---
 
@@ -173,13 +172,20 @@ import {
 } from 'liquidify'
 ```
 
-| Component          | Description                                                    |
-|--------------------|----------------------------------------------------------------|
-| `DynamicBlock`     | Renders a Liquid dynamic block (`{% content_for "blocks" %}`) |
-| `RenderSnippet`    | Renders a Liquid snippet (`{% render 'snippet' %}`)           |
-| `RenderSvg`        | Inlines an SVG via Liquid (`{% render 'icon-name' %}`)        |
-| `PaginateByLiquid` | Wraps content in a Liquid `{% paginate %}` block              |
-| `FormBlock`        | Renders a Shopify `{% form %}` tag                            |
+| Component           | Description                                                    |
+|---------------------|----------------------------------------------------------------|
+| `DynamicBlock`      | Renders a Liquid dynamic block (`{% content_for "blocks" %}`) |
+| `RenderSnippet`     | Renders a Liquid snippet (`{% render 'snippet' %}`)           |
+| `RenderSvg`         | Inlines an SVG via Liquid (`{% render 'icon-name' %}`)        |
+| `PaginateByLiquid`  | Wraps content in a Liquid `{% paginate %}` block              |
+| `FormBlock`         | Renders a Shopify `{% form %}` tag                            |
+| `Raw`               | Outputs raw Liquid without escaping                            |
+| `Fallback`          | Renders fallback content when a condition fails               |
+| `UnlessBlock`       | Inverse of `if` block (`{% unless condition %}...{% endunless %}`) |
+| `CaptureBlock`      | Captures output into a variable (`{% capture var %}...{% endcapture %}`) |
+| `TablerowByLiquid`  | Iterates over an array in Liquid (`{% tablerow %}...{% endtablerow %}`) |
+| `StylesheetBlock`   | Injects a CSS stylesheet into the page                        |
+| `JavascriptBlock`   | Injects a JavaScript script into the page                     |
 
 ---
 
@@ -241,8 +247,13 @@ Commands:
   init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
 
 Options:
-  --template, -t  Template to initialize (default: shopify-starter, options: shopify-starter, example)
+  --template, -t  Template to initialize (default: example, only option: example)
   --watch, -w     Watch for file changes and rebuild automatically
+  --force, -f     Overwrite existing output/files
+  --config <path> Use an explicit config file
+  --no-banner     Skip startup banner
+  --quiet, -q     Minimal output; implies --no-banner
+  --version, -V   Show version
   --help, -h      Show help
 
 Aliases: liquidx, liquidx:watch
@@ -252,4 +263,4 @@ Aliases: liquidx, liquidx:watch
 
 ## 📜 License
 
-MIT © [levis_nt](https://www.npmjs.com/~levis_nt)
+Proprietary - all rights reserved. See LICENSE file.

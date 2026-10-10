@@ -54,7 +54,7 @@
     "compiler"
   ],
   "author": "",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
     "@babel/generator": "^7.29.8",
     "@babel/parser": "^7.29.9",

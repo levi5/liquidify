@@ -30,9 +30,6 @@
       "liquidex": [
         "lib/types/liquidex.ts"
       ],
-      "@src/*": [
-        "src/*"
-      ],
       "@core/*": [
         "lib/core/*"
       ],
@@ -40,7 +37,7 @@
         "lib/application/*"
       ],
       "@adapters/*": [
-        "lib/adapters/*"
+        "lib/infra/adapters/*"
       ],
       "@presentation/*": [
         "lib/presentation/*"
@@ -50,13 +47,10 @@
       ],
       "@types/*": [
         "lib/types/*"
-      ],
-      "@ui/*": [
-        "lib/presentation/ui/*"
       ]
     }
   },
-  "include": ["lib/**/*", "src/**/*", "resources/templates/shopify-starter/src/**/*"],
+  "include": ["lib/**/*"],
   "exclude": [
     "node_modules",
     "dist"

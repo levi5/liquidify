@@ -1,13 +1,3 @@
-export const LIQUID_DIRECTIVES = {
-  USE_DOM: 'use dom',
-  USE_DOM_GLOBAL: 'use dom:global',
-  USE_SCRIPT: 'use script',
-  USE_SNIPPETS: 'use snippets',
-  USE_BLOCKS: 'use blocks',
-  USE_SECTIONS: 'use sections',
-  REACT_PREFIX: 'use react',
-} as const
-
 export const REACT_DIRECTIVE_PATTERN = /^use react(?:\s*\(([^)]+)\))?$/
 export const DOM_DIRECTIVE_PATTERN = /^use (dom(?::global)?|script)$/
 
@@ -175,8 +165,6 @@ export const SVG_CASE_SENSITIVE_ATTRIBUTES = new Set([
   'yChannelSelector',
   'zoomAndPan',
 ])
-
-export const LIQUID_PLACEHOLDER_PREFIX = '__liquidify'
 
 export const OUTPUT_RESERVED = new Set(['assets/react-runtime.js', 'snippets/script-global.liquid'])
 
