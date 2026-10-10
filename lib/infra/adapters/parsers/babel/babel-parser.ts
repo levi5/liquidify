@@ -164,6 +164,7 @@ export class BabelLiquidParser implements IParser {
       globalCss: '',
       hasUncoveredJs: false,
       hasJsLogic: true,
+      hasImplicitReturn: metadata.hasImplicitReturn,
     }
   }
 
@@ -202,6 +203,7 @@ export class BabelLiquidParser implements IParser {
       globalCss: css.globalCss,
       hasUncoveredJs: metadata.hasUncoveredJs,
       hasJsLogic: scriptStatements.length > 0,
+      hasImplicitReturn: metadata.hasImplicitReturn,
     }
   }
 

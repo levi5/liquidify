@@ -1,13 +1,16 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { TranspileFileUseCase } from '../dist/application/services/transpile-file.js'
+import { ValidationService } from '../dist/application/services/validation-service.js'
+import { SchemaValidator } from '../dist/application/services/schema-validation.js'
 
-function makeUseCase({ component = { name: 'Hero' }, validate = () => {} } = {}) {
+function makeUseCase({ component = { name: 'Hero' } } = {}) {
   const generated = []
+  const validator = new ValidationService(new SchemaValidator())
   const useCase = new TranspileFileUseCase(
     { parse: async () => component },
     { generate: async (parsed) => generated.push(parsed) },
-    { validate },
+    validator,
   )
   return { useCase, generated }
 }
@@ -38,13 +41,33 @@ describe('TranspileFileUseCase', () => {
   })
 
   it('propagates validation errors', async () => {
-    const boom = new Error('invalid')
     const { useCase } = makeUseCase({
-      validate: () => {
-        throw boom
-      },
+      component: { name: 'Header', type: 'sections', hasImplicitReturn: true },
     })
 
-    await assert.rejects(useCase.execute('source', '/theme/sections/Hero.tsx'), (error) => error === boom)
+    await assert.rejects(useCase.execute('source', '/theme/src/components/sections/Header.tsx'), /Implicit return.*not allowed in sections/)
+  })
+
+  it('rejects implicit return in sections', async () => {
+    const { useCase } = makeUseCase({
+      component: { name: 'Header', type: 'sections', hasImplicitReturn: true },
+    })
+    await assert.rejects(useCase.execute('source', '/theme/src/components/sections/Header.tsx'), /Implicit return.*not allowed in sections/)
+  })
+
+  it('rejects implicit return in snippets', async () => {
+    const { useCase } = makeUseCase({
+      component: { name: 'Icon', type: 'snippets', hasImplicitReturn: true },
+    })
+    await assert.rejects(useCase.execute('source', '/theme/src/components/snippets/Icon.tsx'), /Implicit return.*not allowed in snippets/)
+  })
+
+  it('allows implicit return in blocks (dom mode)', async () => {
+    const { useCase, generated } = makeUseCase({
+      component: { name: 'Badge', type: 'blocks', mode: 'dom', hasImplicitReturn: true },
+    })
+    const status = await useCase.execute('source', '/theme/src/components/blocks/Badge.tsx')
+    assert.equal(status, 'ok')
+    assert.equal(generated.length, 1)
   })
 })

@@ -106,7 +106,10 @@ export class VariableParser {
   private collectArrowBody(fn: ArrowFunctionExpression, metadata: ComponentMetadataType): void {
     _match(isBlockStatement(fn.body))
       .with(true, () => this.collectBlockBody(fn.body as BlockStatement, metadata))
-      .with(false, () => this.statementCollector.collect([returnStatement(fn.body as Expression)], metadata))
+      .with(false, () => {
+        metadata.hasImplicitReturn = true
+        this.statementCollector.collect([returnStatement(fn.body as Expression)], metadata)
+      })
       .exec()
   }
 
