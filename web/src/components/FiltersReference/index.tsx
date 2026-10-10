@@ -1,6 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import styles from "./style.module.css";
+import { cx } from "../../constants/cx";
 import {
   CLASSNAME_USAGE,
   CLASSNAMES,
@@ -50,7 +51,7 @@ export default function FiltersReference() {
   );
 
   return (
-    <section className={`'wrap' 'section' styles.filtersReference`}>
+    <section className={cx("wrap", "section", styles.filtersReference)}>
       <h2>{pt ? "Filtros e helpers" : "Filters and helpers"}</h2>
       <p className="section-sub">
         {pt

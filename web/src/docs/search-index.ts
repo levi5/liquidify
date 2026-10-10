@@ -123,7 +123,7 @@ const RUNTIME: NameEntry[] = [
   { name: "LiquidifyHydrate", group: "runtime", href: "#/api/runtime#globals", note: t("Hydration entry point per component, keyed by name.", "Ponto de hidratação por componente, indexado por nome.") },
   { name: "LiquidifyTry", group: "runtime", href: "#/api/runtime#globals", note: t("Result wrapper used to report registration failures.", "Wrapper de resultado usado para reportar falhas de registro.") },
   { name: "LiquidxEvents", group: "runtime", href: "#/api/runtime#bus", note: t("Legacy alias of LiquidifyEvents.", "Alias legado de LiquidifyEvents.") },
-  { name: "strictCsp", group: "runtime", href: "#/api/config#strictcsp", note: t("Refuses to build functions from attribute text. Default true.", "Recusa criar funções a partir de texto de atributo. Padrão true.") },
+  { name: "strictCsp", group: "runtime", href: "#/api/config#strictcsp", note: t("Fails the build on inline event handlers instead of dropping them. Default true.", "Falha o build em handlers inline em vez de descartá-los. Padrão true.") },
   { name: "makeLiquidifyBuilder", group: "runtime", href: "#/api/builder#interface", note: t("Creates a builder from a config object.", "Cria um builder a partir de um config.") },
   { name: "loadConfig", group: "runtime", href: "#/api/config#discovery", note: t("Discovers and validates the config file.", "Descobre e valida o arquivo de config.") },
   { name: "transpileFile", group: "runtime", href: "#/api/build#imports", note: t("Compiles one file and returns its result.", "Compila um arquivo e devolve o resultado.") },

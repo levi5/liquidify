@@ -163,8 +163,8 @@ function resolvePlugin(item: string, configPath: string): LiquidifyPlugin {
   if (dynamic) return dynamic
   throw new ValidationError(
     `Unknown plugin "${item}". Available built-in: ${Object.keys(BUILTIN_PLUGINS).join(', ')}. ` +
-    `For local plugins, create a .plugins/ directory next to your config file. ` +
-    `For npm plugins, ensure the package is installed and exports a valid LiquidifyPlugin.`,
+      `For local plugins, create a .plugins/ directory next to your config file. ` +
+      `For npm plugins, ensure the package is installed and exports a valid LiquidifyPlugin.`,
     configPath,
   )
 }
@@ -184,14 +184,12 @@ function loadLocalPlugin(name: string, configPath: string): LiquidifyPlugin | nu
   const filePath = candidates.find((file) => fs.existsSync(file))
   if (!filePath) return null
   try {
-    const mod = filePath.endsWith('.ts') || filePath.endsWith('.tsx')
-      ? loadTypeScriptPlugin(filePath)
-      : nodeRequire(filePath)
+    const mod = filePath.endsWith('.ts') || filePath.endsWith('.tsx') ? loadTypeScriptPlugin(filePath) : nodeRequire(filePath)
     const plugin = (mod as { default?: unknown }).default ?? mod
     if (isValidPlugin(plugin)) return plugin
     throw new ValidationError(
       `Local plugin "${name}" at ${filePath} does not export a valid LiquidifyPlugin. ` +
-      `Expected an object with "name" (string) and "setup" (function), or a default export with that shape.`,
+        `Expected an object with "name" (string) and "setup" (function), or a default export with that shape.`,
       configPath,
     )
   } catch (error) {
@@ -231,7 +229,7 @@ function loadNpmPlugin(name: string, configPath: string): LiquidifyPlugin | null
     if (isValidPlugin(plugin)) return plugin
     throw new ValidationError(
       `Package "${name}" was found but does not export a valid LiquidifyPlugin. ` +
-      `Expected an object with "name" (string) and "setup" (function), or a default export with that shape.`,
+        `Expected an object with "name" (string) and "setup" (function), or a default export with that shape.`,
       configPath,
     )
   } catch (error) {

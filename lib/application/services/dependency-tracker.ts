@@ -158,9 +158,9 @@ export class ImportGraphBuilder {
       .exec()
   }
 
-  private trackResolved(resolved: string, _file: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
+  private trackResolved(resolved: string, _file: string, graph: ImportGraph, _dependencies: Set<string>, imports: Set<string>): void {
     imports.add(resolved)
-    this.visit(resolved, graph, dependencies)
+    this.visit(resolved, graph, _dependencies)
   }
 
   private trackUnresolved(specifier: string, file: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {

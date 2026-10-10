@@ -78,13 +78,10 @@ export class FilterCallParser {
   ): string | null {
     return _match(true)
       .with(this.isMemberAccess(body, itemName), () => `${arrayName} | where: "${this.memberName(body)}"`)
-      .with(
-        this.isEqualityCheck(body, itemName),
-        () => {
-          const value = this.generateLiquidCode(this.equalityValue(body), false, renames, context)
-          return `${arrayName} | where: "${this.equalityProp(body)}", ${hoistLogicalOperators(value, 'where', context)}`
-        },
-      )
+      .with(this.isEqualityCheck(body, itemName), () => {
+        const value = this.generateLiquidCode(this.equalityValue(body), false, renames, context)
+        return `${arrayName} | where: "${this.equalityProp(body)}", ${hoistLogicalOperators(value, 'where', context)}`
+      })
       .with(this.isNegationOfMember(body, itemName), () => {
         const access = this.negatedMember(body, itemName)
         const target = access.startsWith('[') ? `${itemName}${access}` : `${itemName}.${access}`

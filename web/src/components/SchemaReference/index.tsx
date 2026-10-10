@@ -1,6 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import styles from "./style.module.css";
+import { cx } from "../../constants/cx";
 import { SCHEMA_TSX, SCHEMA_LIQUID, VALIDATION, TRANSLATION, CONTENT_FOR, SCHEMA_COPY } from "../../cms/schema.ts";
 
 export default function SchemaReference() {
@@ -8,7 +9,7 @@ export default function SchemaReference() {
   const copy = SCHEMA_COPY[locale];
 
   return (
-    <section className={`'wrap' 'section' styles.schemaReference`}>
+    <section className={cx("wrap", "section", styles.schemaReference)}>
       <h2>{locale === "pt-BR" ? "Referência de schema" : "Schema reference"}</h2>
       <p className="section-sub">{copy.intro}</p>
 

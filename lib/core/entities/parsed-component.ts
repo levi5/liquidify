@@ -15,4 +15,5 @@ export interface ParsedComponent {
   globalCss?: string
   hasUncoveredJs?: boolean
   hasJsLogic?: boolean
+  hasImplicitReturn?: boolean
 }

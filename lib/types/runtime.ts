@@ -4,20 +4,50 @@ export interface LiquidifyEventBus {
   emit(event: string, data?: any): void
 }
 
-export const LiquidifyEvents: LiquidifyEventBus = {
-  on: () => () => {},
-  off: () => {},
-  emit: () => {},
+const hasWindow = (): boolean => typeof window !== 'undefined'
+
+const noopUnsubscribe = (): void => {}
+
+const eventBus: LiquidifyEventBus = {
+  on(event, callback) {
+    if (!hasWindow() || !window.LiquidifyEvents) return noopUnsubscribe
+    return window.LiquidifyEvents.on(event, callback)
+  },
+  off(event, callback) {
+    if (!hasWindow() || !window.LiquidifyEvents) return
+    window.LiquidifyEvents.off(event, callback)
+  },
+  emit(event, data) {
+    if (!hasWindow() || !window.LiquidifyEvents) return
+    window.LiquidifyEvents.emit(event, data)
+  },
 }
 
-export function useLiquidifyEvent<T = any>(_event: string, _callback: (data: T) => void): void {}
-export function emitLiquidifyEvent<T = any>(_event: string, _data?: T): void {}
-export function registerLiquidIsland(_name: string, _component: any): void {}
+export const LiquidifyEvents: LiquidifyEventBus = eventBus
+
+export function useLiquidifyEvent<T = any>(event: string, callback: (data: T) => void): void {
+  if (!hasWindow() || !window.LiquidifyUseEvent) return
+  window.LiquidifyUseEvent(event, callback)
+}
+
+export function emitLiquidifyEvent<T = any>(event: string, data?: T): void {
+  if (!hasWindow() || !window.LiquidifyEmitEvent) return
+  window.LiquidifyEmitEvent(event, data)
+}
+
+export function registerLiquidIsland(name: string, component: any): () => void {
+  if (!hasWindow() || !window.registerLiquidIsland) return noopUnsubscribe
+  return window.registerLiquidIsland(name, component)
+}
 
 declare global {
   interface Window {
     LiquidifyActions: Map<string, (this: EventTarget, event: Event) => void>
-    registerLiquidifyAction: typeof registerLiquidifyAction
+    registerLiquidifyAction: (name: string, handler: (this: EventTarget, event: Event) => void) => () => void
+    registerLiquidIsland: (name: string, component: any) => () => void
+    LiquidxRegisterIsland: (name: string, component: any) => () => void
+    LiquidifyComponents: Record<string, unknown>
+    LiquidxComponents: Record<string, unknown>
     LiquidifyEvents: LiquidifyEventBus
     LiquidifyUseEvent: <T = any>(event: string, callback: (data: T) => void) => void
     LiquidifyEmitEvent: <T = any>(event: string, data?: T) => void
@@ -26,5 +56,6 @@ declare global {
 }
 
 export function registerLiquidifyAction(name: string, handler: (this: EventTarget, event: Event) => void): () => void {
+  if (!hasWindow() || !window.registerLiquidifyAction) return noopUnsubscribe
   return window.registerLiquidifyAction(name, handler)
 }

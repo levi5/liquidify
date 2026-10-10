@@ -1,6 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import styles from "./style.module.css";
+import { cx } from "../../constants/cx";
 import { CLI, API, CI, CLI_COPY } from "../../cms/cli.ts";
 
 export default function CliApi() {
@@ -8,7 +9,7 @@ export default function CliApi() {
   const copy = CLI_COPY[locale];
 
   return (
-    <section className={`'wrap' 'section' styles.cliApi`}>
+    <section className={cx("wrap", "section", styles.cliApi)}>
       <p className="kicker">{copy.kicker}</p>
       <h2>{copy.title}</h2>
       <div className={styles.cliGrid}>

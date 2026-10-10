@@ -4,33 +4,34 @@ import { toHref } from "../../lib/routes.ts";
 import styles from "./style.module.css";
 import { cx } from "../../constants/cx.ts";
 
-const EDIT_PATHS: Record<string, string> = {
-  hello: "HelloWorld",
-  concepts: "Concepts",
-  faq: "Faq",
-  start: "GettingStarted",
-  "theme-model": "DocsGuide",
-  authoring: "AuthoringGuide",
-  shopify: "ShopifyGuide",
-  runtime: "RuntimeGuide",
-  islands: "AdvancedIslands",
-  schema: "SchemaReference",
-  types: "TypesReference",
-  cli: "CliReference",
-  config: "ConfigReference",
-  builder: "ApiGuide",
-  tsx: "Builtins",
-  build: "BuildDeep",
-  filters: "FiltersReference",
-  errors: "ErrorsReference",
-  plugins: "PluginGuide",
+const EDIT_PATHS: Record<string, { docs: string; api: string }> = {
+  hello: { docs: "HelloWorld", api: "RuntimeReference" },
+  concepts: { docs: "Concepts", api: "RuntimeReference" },
+  faq: { docs: "Faq", api: "RuntimeReference" },
+  start: { docs: "GettingStarted", api: "RuntimeReference" },
+  "theme-model": { docs: "DocsGuide", api: "RuntimeReference" },
+  authoring: { docs: "AuthoringGuide", api: "RuntimeReference" },
+  shopify: { docs: "ShopifyGuide", api: "RuntimeReference" },
+  runtime: { docs: "RuntimeGuide", api: "RuntimeReference" },
+  islands: { docs: "AdvancedIslands", api: "RuntimeReference" },
+  schema: { docs: "SchemaReference", api: "RuntimeReference" },
+  types: { docs: "TypesReference", api: "RuntimeReference" },
+  cli: { docs: "CliReference", api: "CliReference" },
+  config: { docs: "ConfigReference", api: "ConfigReference" },
+  builder: { docs: "ApiGuide", api: "ApiGuide" },
+  tsx: { docs: "Builtins", api: "Builtins" },
+  build: { docs: "BuildDeep", api: "BuildDeep" },
+  filters: { docs: "FiltersReference", api: "FiltersReference" },
+  errors: { docs: "ErrorsReference", api: "ErrorsReference" },
+  plugins: { docs: "PluginGuide", api: "PluginGuide" },
 };
 
 export default function PageNav({ chapter }: { chapter: Chapter }) {
   const { locale } = useLocale();
   const pt = locale === "pt-BR";
   const { previous, next } = chapterNeighbours(chapter);
-  const folder = EDIT_PATHS[chapter.id] ?? "DocsGuide";
+  const editKey = EDIT_PATHS[chapter.id] ?? { docs: "DocsGuide", api: "RuntimeReference" };
+  const folder = editKey[chapter.area];
   const editHref = `https://github.com/levi5/liquidify/tree/master/web/src/components/${folder}`;
 
   return (

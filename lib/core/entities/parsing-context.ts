@@ -15,6 +15,7 @@ export interface ParsingContextData {
   mode?: string
   inlineComponents?: Map<string, InlineComponentNode>
   outputContext?: 'text' | 'raw' | 'json'
+  inSvg?: boolean
   errorCollector?: ErrorCollector
   /** @internal shared sequence holder so derived contexts don't collide */
   sequenceRef?: { value: number }
@@ -31,6 +32,7 @@ export class ParsingContext {
   public mode?: string
   public inlineComponents?: Map<string, InlineComponentNode>
   public outputContext: 'text' | 'raw' | 'json' = 'text'
+  public inSvg = false
   public errorCollector?: ErrorCollector
   private sequenceRef: { value: number } = { value: 0 }
 
@@ -45,6 +47,7 @@ export class ParsingContext {
     this.mode = orDefault(data.mode, undefined)
     this.inlineComponents = orDefault(data.inlineComponents, undefined)
     this.outputContext = orDefault(data.outputContext, 'text')
+    this.inSvg = orDefault(data.inSvg, false)
     this.errorCollector = orDefault(data.errorCollector, undefined)
     this.sequenceRef = orDefault(data.sequenceRef, { value: 0 })
   }
@@ -61,6 +64,7 @@ export class ParsingContext {
       mode: orDefault(patch.mode ?? context?.mode, undefined),
       inlineComponents: patch.inlineComponents ?? context?.inlineComponents,
       outputContext: orDefault(patch.outputContext ?? context?.outputContext, 'text'),
+      inSvg: orDefault(patch.inSvg ?? context?.inSvg, false),
       errorCollector: patch.errorCollector ?? context?.errorCollector,
       sequenceRef: patch.sequenceRef ?? context?.sequenceRef ?? { value: 0 },
     })

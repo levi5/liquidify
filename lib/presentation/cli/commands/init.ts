@@ -14,7 +14,7 @@ const IGNORED_ENTRIES = new Set([
   '.liquidify-manifest.json',
 ])
 
-const EXAMPLE_TEMPLATES = new Set(['example', 'fashion', 'store', 'fashion-store'])
+const EXAMPLE_TEMPLATES = new Set(['theme', 'starter', 'default'])
 const FALLBACK_VERSION = '^1.1.0-alpha.4'
 
 export interface InitOptions {
@@ -29,12 +29,9 @@ interface InitArgState {
   force: boolean
 }
 
-export const normalizeTemplateName = (templateName = 'example'): string => {
+export const normalizeTemplateName = (templateName = 'theme'): string => {
   const clean = (templateName || '').trim().toLowerCase()
-  return _match(EXAMPLE_TEMPLATES.has(clean))
-    .with(true, () => 'example')
-    .with(false, () => 'example')
-    .exec() as string
+  return EXAMPLE_TEMPLATES.has(clean) ? 'theme' : 'theme'
 }
 
 export function parseInitArgs(args: string[]): InitOptions {
@@ -194,7 +191,28 @@ export const copyTemplate = (sourceDir: string, targetDir: string, projectName: 
       filter: (src) => !IGNORED_ENTRIES.has(path.basename(src)),
     })
     syncPackageName(targetDir, projectName)
+    rewriteTsConfig(targetDir)
   })
+
+const rewriteTsConfig = (targetDir: string): void => {
+  const tsConfigPath = path.join(targetDir, 'tsconfig.json')
+  _try
+    .sync(() => fs.readFileSync(tsConfigPath, 'utf-8'))
+    .match({
+      right: (content) => {
+        const config = JSON.parse(content)
+        if (config.compilerOptions?.paths) {
+          delete config.compilerOptions.paths.liquidify
+          delete config.compilerOptions.paths.liquidex
+          if (Object.keys(config.compilerOptions.paths).length === 0) {
+            delete config.compilerOptions.paths
+          }
+        }
+        fs.writeFileSync(tsConfigPath, `${JSON.stringify(config, null, 2)}\n`, 'utf-8')
+      },
+      left: () => undefined,
+    })
+}
 
 const checkConflicts = (source: string, target: string): void => {
   const existing = statOf(target)
@@ -255,7 +273,7 @@ const ensureAbsent = (destination: string): void => {
     .exec()
 }
 
-export const reportInitSuccess = (targetDirArg: string, templateName = 'example'): void => {
+export const reportInitSuccess = (targetDirArg: string, templateName = 'theme'): void => {
   console.log(kleur.bold().green(`\n✨ Shopify theme structure & Liquidify template (${templateName}) ready!\n`))
   console.log('Next steps:')
   const steps = _match(!targetDirArg || targetDirArg === '.')
@@ -269,7 +287,7 @@ export const reportInitSuccess = (targetDirArg: string, templateName = 'example'
   console.log(`  ${kleur.cyan('shopify theme dev')}\n`)
 }
 
-export async function runInit(targetDirArg = '.', templateName = 'example', force = false): Promise<void> {
+export async function runInit(targetDirArg = '.', templateName = 'theme', force = false): Promise<void> {
   const normalized = normalizeTemplateName(templateName)
   const targetDir = path.resolve(process.cwd(), targetDirArg)
   const baseName = path.basename(targetDir)
@@ -296,8 +314,8 @@ export async function runInit(targetDirArg = '.', templateName = 'example', forc
 }
 
 const defaultProjectName = (normalized: string): string =>
-  _match(normalized === 'example')
-    .with(true, () => 'liquidify-fashion-theme')
+  _match(normalized === 'theme')
+    .with(true, () => 'liquidify-theme')
     .with(false, () => 'shopify-liquidify-theme')
     .exec() as string
 

@@ -113,9 +113,10 @@ export function hoistLogicalOperators(code: string, prefix: string, context?: Pa
       const headExpr = typeof head.expr === 'string' ? head.expr : String(head.expr)
       parsed.addPendingAssign(`{% assign ${temp} = ${headExpr} %}`)
       tail.forEach((part) => {
-        const guard = part.operator === 'and'
-          ? `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% else %}{% assign ${temp} = ${part.expr} %}{% endif %}`
-          : `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% assign ${temp} = ${part.expr} %}{% endif %}`
+        const guard =
+          part.operator === 'and'
+            ? `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% else %}{% assign ${temp} = ${part.expr} %}{% endif %}`
+            : `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% assign ${temp} = ${part.expr} %}{% endif %}`
         parsed.addPendingAssign(guard)
       })
       return temp

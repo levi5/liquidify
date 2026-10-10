@@ -158,7 +158,6 @@ Listeners, timers and actions created by your components must return cleanup in 
 ```sh
 npm test
 npm run test:example:browser
-npm run build:example
 npm run typecheck:example
 ```
 

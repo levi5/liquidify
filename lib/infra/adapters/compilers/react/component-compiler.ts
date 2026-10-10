@@ -8,7 +8,13 @@ import type { CssInjector } from './runtime/css-injector'
 import type { Logger } from '../../../../shared/logger'
 import { escapeHtml } from '../../../../shared/html'
 import { ValidationError } from '../../../../core/errors/validation-error'
-import { COMPONENT_NAME_PATTERN, RAW_LIQUID_GLOBALS_PATTERN, STYLESHEET_IMPORT_PATTERN } from './constants'
+import {
+  COMPONENT_NAME_PATTERN,
+  INLINE_HANDLER_PATTERN,
+  RAW_LIQUID_GLOBALS_PATTERN,
+  RUNTIME_GLOBAL_STUB,
+  STYLESHEET_IMPORT_PATTERN,
+} from './constants'
 import { parse } from '@babel/parser'
 import traverse, { type NodePath } from '@babel/traverse'
 import generate from '@babel/generator'
@@ -121,6 +127,7 @@ export class ReactComponentCompiler {
       })
       .with(false, () => undefined)
       .exec()
+    this.assertNoInlineHandlers(source, filePath)
     const rootId = _match(!metadata.reactRootId)
       .with(true, () => '')
       .with(false, () => metadata.reactRootId as string)
@@ -155,6 +162,16 @@ export class ReactComponentCompiler {
       plugins: this.getEsbuildPlugins(),
     })
     return this.assemble(result, rootId, componentName)
+  }
+
+  private assertNoInlineHandlers(source: string, filePath?: string): void {
+    if (this.options.strictCsp === false) return
+    const match = INLINE_HANDLER_PATTERN.exec(source)
+    if (!match) return
+    throw new ValidationError(
+      `Inline event handler "${match[0].trim()}" is not allowed with react.strictCsp enabled (the default) — the runtime refuses to build functions from attribute text, so the handler would be dropped in production. Pass a function (onClick={() => ...}) or use registerLiquidifyAction("name", handler) with data-liquidify-on-<event>. Set react.strictCsp to false in liquidify.config to opt into the legacy new Function behaviour.`,
+      filePath,
+    )
   }
 
   private assemble(result: BuildResult, rootId: string, componentName: string): ReactBuildResult {
@@ -243,8 +260,7 @@ export class ReactComponentCompiler {
       {
         filter: /^(liquidify|liquidx)\/runtime$/,
         namespace: 'liquidify-runtime-global',
-        content:
-          'module.exports = { registerLiquidifyAction: window.registerLiquidifyAction, registerLiquidIsland: window.registerLiquidIsland, LiquidifyEvents: window.LiquidifyEvents || window.LiquidxEvents, useLiquidifyEvent: window.LiquidifyUseEvent || window.LiquidxUseEvent, emitLiquidifyEvent: window.LiquidifyEmitEvent || window.LiquidxEmitEvent, LiquidxEvents: window.LiquidifyEvents || window.LiquidxEvents, useLiquidxEvent: window.LiquidifyUseEvent || window.LiquidxUseEvent, emitLiquidxEvent: window.LiquidifyEmitEvent || window.LiquidxEmitEvent }',
+        content: RUNTIME_GLOBAL_STUB,
       },
     ]
     externals.forEach((ext) => {

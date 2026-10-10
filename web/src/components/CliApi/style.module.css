@@ -1,0 +1,9 @@
+.cliApi {
+  padding: 1.6rem 0;
+}
+
+.cliGrid {
+  display: grid;
+  gap: 1.6rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}

@@ -117,7 +117,9 @@ export class HelperCallParser {
     if (args.length === 0) return
     const value = this.generate(args[0] as Expression, inCondition, renames, context)
     const fallback =
-      args.length > 1 ? hoistLogicalOperators(this.generate(args[1] as Expression, inCondition, renames, context), 'default', context) : '""'
+      args.length > 1
+        ? hoistLogicalOperators(this.generate(args[1] as Expression, inCondition, renames, context), 'default', context)
+        : '""'
     Object.assign(n, identifier(`${value} | default: ${fallback}`))
   }
 
@@ -131,7 +133,9 @@ export class HelperCallParser {
     const args = n.arguments.filter(hasNodeType)
     if (args.length === 0) return
     const input = this.generate(args[0] as Expression, inCondition, renames, context)
-    const rest = args.slice(1).map((arg) => hoistLogicalOperators(this.generate(arg as Expression, inCondition, renames, context), filter, context))
+    const rest = args
+      .slice(1)
+      .map((arg) => hoistLogicalOperators(this.generate(arg as Expression, inCondition, renames, context), filter, context))
     const suffix = rest.length > 0 ? `: ${rest.join(', ')}` : ''
     Object.assign(n, identifier(`${input} | ${filter}${suffix}`))
   }
@@ -146,11 +150,17 @@ export class HelperCallParser {
       .filter((prop) => isObjectProperty(prop as Node))
       .map((prop) => {
         const key = this.objectKey((prop as { key: unknown }).key)
-        const value = hoistLogicalOperators(
-          this.generate((prop as { value: Expression }).value as Expression, inCondition, renames, context),
-          'param',
-          context,
-        )
+        const valueNode = (prop as { value: Expression }).value as Expression
+        let value: string
+        if (isNumericLiteral(valueNode)) {
+          value = String((valueNode as { value: number }).value)
+        } else {
+          value = hoistLogicalOperators(
+            this.generate(valueNode, inCondition, renames, context),
+            'param',
+            context,
+          )
+        }
         return key === '' ? '' : `${key}: ${value}`
       })
       .filter(Boolean)

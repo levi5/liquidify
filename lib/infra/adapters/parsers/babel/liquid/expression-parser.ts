@@ -211,7 +211,7 @@ export class ExpressionParser {
       .exec()
   }
 
-private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+  private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     if ((n as { type?: string }).type === 'Identifier') return
     if (!isLogicalExpression(n)) return
     const op = (n as LogicalExpression).operator
@@ -270,7 +270,8 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
       .with('??', () => `{% if ${temp} == nil %}{% assign ${temp} = ${code} %}{% endif %}`)
       .with(
         '&&',
-        () => `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% else %}{% assign ${temp} = ${code} %}{% endif %}`,
+        () =>
+          `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% else %}{% assign ${temp} = ${code} %}{% endif %}`,
       )
       .with(
         true,
@@ -509,13 +510,7 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
       .exec()
   }
 
-  private rewriteDynamicSlice(
-    n: CallExpression,
-    objectCode: string,
-    start: string,
-    end: string,
-    context?: ParsingContext,
-  ): void {
+  private rewriteDynamicSlice(n: CallExpression, objectCode: string, start: string, end: string, context?: ParsingContext): void {
     _match(context !== undefined)
       .with(true, () => {
         const temp = (context as ParsingContext).allocateName('slice')
@@ -536,7 +531,9 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   private rewriteConcat(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const argCode = _match(n.arguments.length > 0)
-      .with(true, () => hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'concat', context))
+      .with(true, () =>
+        hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'concat', context),
+      )
       .with(false, () => 'empty')
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | concat: ${argCode}`))
@@ -556,11 +553,17 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   private rewriteReplace(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const from = _match(n.arguments.length > 0)
-      .with(true, () => hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'replace', context))
+      .with(true, () =>
+        hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'replace', context),
+      )
       .with(false, () => '""')
       .exec() as string
     const to = _match(n.arguments.length > 1)
-      .with(true, () => `, ${hoistPipedArg(this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context), 'replace', context)}`)
+      .with(
+        true,
+        () =>
+          `, ${hoistPipedArg(this.generateLiquidCode(n.arguments[1] as Expression, inCondition, renames, context), 'replace', context)}`,
+      )
       .with(false, () => '')
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | replace: ${from}${to}`))
@@ -576,7 +579,9 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   ): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const argCode = _match(n.arguments.length > 0)
-      .with(true, () => hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), filter, context))
+      .with(true, () =>
+        hoistPipedArg(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), filter, context),
+      )
       .with(false, () => fallback)
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | ${filter}: ${argCode}`))
@@ -683,7 +688,9 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
   private rewriteJoin(n: CallExpression, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
     const objectCode = this.generateLiquidCode((n.callee as { object: Expression }).object, inCondition, renames, context)
     const argCode = _match(n.arguments.length > 0)
-      .with(true, () => hoistLogicalOperators(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'join', context))
+      .with(true, () =>
+        hoistLogicalOperators(this.generateLiquidCode(n.arguments[0] as Expression, inCondition, renames, context), 'join', context),
+      )
       .with(false, () => '""')
       .exec() as string
     Object.assign(n, identifier(`${objectCode} | join: ${argCode}`))
@@ -1071,10 +1078,7 @@ private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string,
         .with(false, () => undefined)
         .exec()
     })
-    return (
-      (operators.has('&&') && operators.has('||')) ||
-      (hasNegation && operators.has('&&'))
-    )
+    return (operators.has('&&') && operators.has('||')) || (hasNegation && operators.has('&&'))
   }
 
   private stabilizedCondition(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {

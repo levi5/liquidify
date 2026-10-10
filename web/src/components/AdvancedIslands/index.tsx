@@ -1,13 +1,14 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import styles from "./style.module.css";
+import { cx } from "../../constants/cx";
 import { JSX_EVENT, ACTION_TSX, ACTION_LIQUID, NATIVE_JS, BUS_TSX, DATA_ATTRS, ISLANDS_COPY } from "../../cms/islands.ts";
 
 export default function AdvancedIslands() {
   const { locale } = useLocale();
   const copy = ISLANDS_COPY[locale];
   return (
-    <section className={`'wrap' 'section'`}>
+    <section className={cx("wrap", "section")}>
       <h2>{copy.title}</h2><p className="section-sub">{copy.intro}</p>
       <div className={styles.docsDeepGrid} style={{ marginTop: "2.56rem" }}>
         <article className={styles.docsDeepCard}><h3>{copy.jsx}</h3><p>{copy.jsxText}</p></article>

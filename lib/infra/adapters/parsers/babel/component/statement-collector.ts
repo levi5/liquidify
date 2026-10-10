@@ -176,10 +176,9 @@ export class StatementCollector {
   }
 
   private applyDirective(value: string, metadata: ComponentMetadataType): void {
-    _match(true)
-      .with(value.match(/^use\s+(dom(:global)?|script)$/) !== null, () => this.applyDomDirective(value, metadata))
-      .with(value.match(/^use react/) !== null, () => this.applyReactDirective(metadata))
-      .with(true, () => undefined)
+    _match(value.match(/^use\s+(dom(:global)?|script)$/) !== null)
+      .with(true, () => this.applyDomDirective(value, metadata))
+      .with(false, () => undefined)
       .exec()
   }
 
@@ -197,11 +196,6 @@ export class StatementCollector {
       .with(true, () => 'dom:global')
       .with(false, () => 'dom')
       .exec() as ComponentMetadataType['mode']
-  }
-
-  private applyReactDirective(metadata: ComponentMetadataType): void {
-    metadata.hasUseScript = true
-    metadata.mode = 'react'
   }
 
   private getDirectiveValue(statement: Directive | Statement): string | null {

@@ -1,5 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
+import { cx } from "../../constants/cx";
+import styles from "./style.module.css";
 import {
   RUNTIME_TS,
   EVENT_BUS,
@@ -15,7 +17,7 @@ export default function RuntimeReference() {
   const copy = RUNTIME_COPY[locale];
 
   return (
-    <section className={`'wrap' 'section' styles.runtimeReference`}>
+    <section className={cx("wrap", "section", styles.runtimeReference)}>
       <h2>Runtime API</h2>
       <p className="section-sub">{copy.intro}</p>
 

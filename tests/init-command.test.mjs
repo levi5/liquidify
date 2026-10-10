@@ -6,35 +6,33 @@ import path from 'node:path'
 import { parseInitArgs, resolveTemplate, copyTemplate, normalizeTemplateName } from '../dist/presentation/cli/commands/init.js'
 
 test('normalizeTemplateName normalizes aliases', () => {
-  assert.equal(normalizeTemplateName('example'), 'example')
-  assert.equal(normalizeTemplateName('fashion'), 'example')
-  assert.equal(normalizeTemplateName('store'), 'example')
-  assert.equal(normalizeTemplateName('shopify-starter'), 'example')
-  assert.equal(normalizeTemplateName('starter'), 'example')
-  assert.equal(normalizeTemplateName('start'), 'example')
-  assert.equal(normalizeTemplateName('default'), 'example')
-  assert.equal(normalizeTemplateName(), 'example')
+  assert.equal(normalizeTemplateName('theme'), 'theme')
+  assert.equal(normalizeTemplateName('starter'), 'theme')
+  assert.equal(normalizeTemplateName('default'), 'theme')
+  assert.equal(normalizeTemplateName('example'), 'theme')
+  assert.equal(normalizeTemplateName('fashion'), 'theme')
+  assert.equal(normalizeTemplateName('store'), 'theme')
+  assert.equal(normalizeTemplateName(), 'theme')
 })
 
 test('parseInitArgs handles various argument combinations', () => {
-  assert.deepEqual(parseInitArgs([]), { targetDir: '.', template: 'example' })
-  assert.deepEqual(parseInitArgs(['my-store']), { targetDir: 'my-store', template: 'example' })
-  assert.deepEqual(parseInitArgs(['my-store', '--template', 'example']), { targetDir: 'my-store', template: 'example' })
-  assert.deepEqual(parseInitArgs(['--template', 'example', 'my-store']), { targetDir: 'my-store', template: 'example' })
-  assert.deepEqual(parseInitArgs(['-t', 'example', 'my-store']), { targetDir: 'my-store', template: 'example' })
-  assert.deepEqual(parseInitArgs(['--template=example']), { targetDir: '.', template: 'example' })
-  assert.deepEqual(parseInitArgs(['-t=example']), { targetDir: '.', template: 'example' })
-  assert.deepEqual(parseInitArgs(['--template']), { targetDir: '.', template: 'example' })
-  assert.deepEqual(parseInitArgs(['my-store', '--template', 'fashion']), { targetDir: 'my-store', template: 'example' })
-  assert.deepEqual(parseInitArgs(['my-store', '--template', 'start']), { targetDir: 'my-store', template: 'example' })
-  assert.deepEqual(parseInitArgs(['my-store', '--template', 'starter']), { targetDir: 'my-store', template: 'example' })
-  assert.deepEqual(parseInitArgs(['my-store', '--force']), { targetDir: 'my-store', template: 'example', force: true })
-  assert.deepEqual(parseInitArgs(['my-store', '-f']), { targetDir: 'my-store', template: 'example', force: true })
+  assert.deepEqual(parseInitArgs([]), { targetDir: '.', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['my-store']), { targetDir: 'my-store', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['my-store', '--template', 'theme']), { targetDir: 'my-store', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['--template', 'theme', 'my-store']), { targetDir: 'my-store', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['-t', 'theme', 'my-store']), { targetDir: 'my-store', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['--template=theme']), { targetDir: '.', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['-t=theme']), { targetDir: '.', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['--template']), { targetDir: '.', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['my-store', '--template', 'starter']), { targetDir: 'my-store', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['my-store', '--template', 'default']), { targetDir: 'my-store', template: 'theme' })
+  assert.deepEqual(parseInitArgs(['my-store', '--force']), { targetDir: 'my-store', template: 'theme', force: true })
+  assert.deepEqual(parseInitArgs(['my-store', '-f']), { targetDir: 'my-store', template: 'theme', force: true })
 })
 
-test('resolveTemplate finds example template', () => {
-  const example = resolveTemplate('example')
-  assert.ok(fs.existsSync(example), `Example template should exist at ${example}`)
+test('resolveTemplate finds theme template', () => {
+  const example = resolveTemplate('theme')
+  assert.ok(fs.existsSync(example), `Theme template should exist at ${example}`)
   assert.ok(fs.existsSync(path.join(example, 'package.json')))
 })
 
@@ -45,7 +43,7 @@ test('copyTemplate copies template and updates package.json', (t) => {
   })
 
   const targetDir = path.join(tempDir, 'my-new-store')
-  const exampleSource = resolveTemplate('example')
+  const exampleSource = resolveTemplate('theme')
   const result = copyTemplate(exampleSource, targetDir, 'my-new-store')
 
   assert.ok(result.isRight(), 'copyTemplate should succeed')

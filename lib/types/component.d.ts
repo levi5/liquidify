@@ -16,4 +16,5 @@ export interface ComponentMetadataType {
   reactRootId?: string
   hasUncoveredJs?: boolean
   inlineComponents?: Map<string, InlineComponentNode>
+  hasImplicitReturn?: boolean
 }

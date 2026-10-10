@@ -69,7 +69,13 @@ test('only real module directives classify components', () => {
   for (const source of ['// "use react"\nexport const a = 1', 'const text = "use react"', 'function helper() { "use react" }']) {
     assert.equal(detectDirectives(source).isReact, false)
   }
-  assert.deepEqual(detectDirectives('// comment\n"use react (#root)";'), { isReact: true, isDom: false, isSnippet: false, isSections: false, rootId: 'root' })
+  assert.deepEqual(detectDirectives('// comment\n"use react (#root)";'), {
+    isReact: true,
+    isDom: false,
+    isSnippet: false,
+    isSections: false,
+    rootId: 'root',
+  })
 })
 
 test('registry rejects duplicate names and normalized script name collisions', async () => {
@@ -101,12 +107,7 @@ test('negated conditions never emit parentheses rejected by Shopify', () => {
   const single = expressions().generateLiquidCode(parseExpression('!current_tags'), true, undefined, new ParsingContext())
   assert.equal(single, 'current_tags == nil or current_tags == false or current_tags == 0 or current_tags == ""')
 
-  const orChain = expressions().generateLiquidCode(
-    parseExpression('!blocks || blocks.size == 0'),
-    true,
-    undefined,
-    new ParsingContext(),
-  )
+  const orChain = expressions().generateLiquidCode(parseExpression('!blocks || blocks.size == 0'), true, undefined, new ParsingContext())
   assert.equal(orChain, 'blocks == nil or blocks == false or blocks == 0 or blocks == "" or blocks.size == 0')
   assert.doesNotMatch(orChain, /[()]/)
 })

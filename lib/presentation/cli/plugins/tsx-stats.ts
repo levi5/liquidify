@@ -10,7 +10,7 @@ export const tsxStatsPlugin: LiquidifyPlugin = {
       const directives = Object.entries(stats.byDirective)
       if (directives.length > 0) {
         console.log('   Directives:')
-        directives.forEach(([name, count]) => console.log(`     ${name}: ${count}`))
+        for (const [name, count] of directives) console.log(`     ${name}: ${count}`)
       }
     })
   },

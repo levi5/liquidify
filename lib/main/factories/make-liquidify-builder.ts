@@ -22,7 +22,6 @@ import { SchemaValidator } from '../../application/services/schema-validation'
 import { TranspileFileUseCase } from '../../application/services/transpile-file'
 import { ValidationService } from '../../application/services/validation-service'
 
-
 export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder {
   const logger = new ConsoleLogger()
   const fileSystem = new NodeFileSystem()

@@ -22,10 +22,22 @@ export class ValidationService {
       .map((folder) =>
         _match(folder === '')
           .with(true, () => null)
-          .with(false, () => this.validateMode(component, folder, filePath))
+          .with(false, () => {
+            this.validateImplicitReturn(component, folder, filePath)
+            this.validateMode(component, folder, filePath)
+          })
           .exec(),
       )
       .getOrElse(null)
+  }
+
+  private validateImplicitReturn(component: ParsedComponent, folder: string, filePath: string): void {
+    if (component.hasImplicitReturn && (folder === 'sections' || folder === 'snippets')) {
+      throw new ValidationError(
+        `Implicit return (arrow function without braces) is not allowed in ${folder}. Use an explicit block body with return: () => { return <...> }`,
+        filePath,
+      )
+    }
   }
 
   private folderOf(component: ParsedComponent, filePath: string): string {

@@ -1,11 +1,12 @@
 import type { DependencyTracker } from '../../../application/services/dependency-tracker'
 import { _match, _try } from 'funcio'
 import { EventEmitter } from 'node:events'
+import os from 'node:os'
 import type { FSWatcher } from 'chokidar'
 import { glob } from 'glob'
 import chokidar from 'chokidar'
 import path from 'node:path'
-import type { PluginStats } from '../../../core/protocols/plugin'
+import type { LiquidifyPlugin, PluginStats } from '../../../core/protocols/plugin'
 
 import type { ComponentRegistry, DirectiveScanner } from '../../../application/services/component-registry'
 import type { BabelLiquidParser } from '../../../infra/adapters/parsers/babel/babel-parser'
@@ -16,6 +17,13 @@ import { LiquidifyError } from '../../../core/errors/liquidify-error'
 import type { Logger } from '../../../shared/logger'
 
 const WATCH_EVENTS = ['add', 'change', 'unlink', 'addDir', 'unlinkDir'] as const
+
+const availableParallelism = (): number => {
+  const reported = typeof os.availableParallelism === 'function' ? os.availableParallelism() : os.cpus().length
+  return Number.isFinite(reported) && reported > 0 ? reported : 1
+}
+
+export const BUILD_CONCURRENCY = Math.max(1, Math.min(8, availableParallelism()))
 
 export class LiquidifyBuilder extends EventEmitter {
   private watcher: FSWatcher | null = null
@@ -42,7 +50,7 @@ export class LiquidifyBuilder extends EventEmitter {
     super()
   }
 
-  public registerPlugin(plugin: { name: string; setup: (ctx: { onBuildEnd: (callback: (stats: PluginStats) => void) => void }) => void }): void {
+  public registerPlugin(plugin: LiquidifyPlugin): void {
     const callbacks: Array<(stats: PluginStats) => void> = []
     const ctx = {
       onBuildEnd: (callback: (stats: PluginStats) => void) => {
@@ -51,7 +59,9 @@ export class LiquidifyBuilder extends EventEmitter {
     }
     plugin.setup(ctx)
     this.pluginContext.push({
-      onBuildEnd: (stats: PluginStats) => callbacks.forEach((cb) => cb(stats)),
+      onBuildEnd: (stats: PluginStats) => {
+        for (const cb of callbacks) cb(stats)
+      },
     })
   }
 
@@ -69,7 +79,7 @@ export class LiquidifyBuilder extends EventEmitter {
 
   private notifyBuildEnd(): void {
     const stats = this.collectStats()
-    this.pluginContext.forEach((p) => p.onBuildEnd(stats))
+    for (const p of this.pluginContext) p.onBuildEnd(stats)
   }
 
   private collectStats(): PluginStats {
@@ -188,18 +198,25 @@ export class LiquidifyBuilder extends EventEmitter {
   private async processFilesInParallel(
     files: string[],
     worker: (file: string) => Promise<void>,
+    concurrency = BUILD_CONCURRENCY,
   ): Promise<Array<{ file: string; error?: unknown }>> {
-
     const results: Array<{ file: string; error?: unknown }> = new Array(files.length)
-    for (let index = 0; index < files.length; index++) {
-      const file = files[index] as string
-      try {
-        await worker(file)
-        results[index] = { file }
-      } catch (error) {
-        results[index] = { file, error }
+    let cursor = 0
+    const runNext = async (): Promise<void> => {
+      while (cursor < files.length) {
+        const index = cursor
+        cursor += 1
+        const file = files[index] as string
+        try {
+          await worker(file)
+          results[index] = { file }
+        } catch (error) {
+          results[index] = { file, error }
+        }
       }
     }
+    const workers = Array.from({ length: Math.min(concurrency, files.length) }, () => runNext())
+    await Promise.all(workers)
     return results
   }
 

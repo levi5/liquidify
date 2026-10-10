@@ -45,6 +45,35 @@ test('strict mode omits dynamic evaluation while legacy builds preserve it', asy
   assert.match(strict.script, /registerLiquidifyAction/)
 })
 
+test('inline handlers fail the build under strictCsp', async () => {
+  const compiler = createComponentCompiler()
+
+  await assert.rejects(
+    () => compiler.compile({ name: 'Counter' }, 'function Counter() { return <button onClick="alert(1)" /> }'),
+    /Inline event handler .* not allowed with react.strictCsp/,
+  )
+  await assert.rejects(
+    () => compiler.compile({ name: 'Counter' }, "function Counter() { return <button onClick={'alert(1)'} /> }"),
+    /registerLiquidifyAction/,
+  )
+})
+
+test('inline handlers are allowed once strictCsp is disabled', async () => {
+  const result = await createComponentCompiler({ strictCsp: false }).compile(
+    { name: 'Counter' },
+    'function Counter() { return <button onClick="alert(1)" /> }',
+  )
+
+  assert.match(result.script, /new Function\(/)
+})
+
+test('function handlers are never treated as inline handlers', async () => {
+  const source = 'function Counter() { return <button onClick={() => alert(1)} onMouseEnter={go} /> }'
+  const strict = await createComponentCompiler().compile({ name: 'Counter' }, source)
+
+  assert.doesNotMatch(strict.script, /new Function\(/)
+})
+
 const withStylesheet = async (source) => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'liquidify-css-'))
   fs.writeFileSync(path.join(dir, 'styles.css'), '.badge { color: red }')

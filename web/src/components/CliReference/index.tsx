@@ -1,6 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import styles from "./style.module.css";
+import { cx } from "../../constants/cx";
 
 const HELP = `liquidify [options]
 liquidify init [directory] [options]
@@ -21,5 +22,5 @@ export default function CliReference() {
   } : {
     title: "CLI: commands and behavior", commands: "Commands and flags", intro: "The CLI resolves configuration from the current directory, compiles the componentsDir tree, and writes to output. Use init in an empty directory to obtain the example foundation without assembling files by hand.", usage: "Usage", init: "Safe initialization", initText: "init refuses to overwrite existing paths. Use --force only when replacement is intentional. fashion, store, and fashion-store names normalize to the same example template.", watch: "What --watch observes", watchItems: ["The entire componentsDir folder.", "Imports and dependencies discovered by the import graph.", "Changes are grouped for 200ms before a new build.", "Templates, layout, config, and locales are not watched by themselves; build again after changing them."], failures: "Failures and output", failureItems: ["build() emits build:start and build:end on success.", "A direct failure throws; in watch, the builder also emits build:failed.", "--quiet is appropriate for CI because it removes banner and noise.", "Use --config=path or --config path instead of relying on autodiscovery."]
   };
-  return <section className={`'wrap' 'section' styles.cliReference`}><h2>{copy.title}</h2><p className="section-sub">{copy.intro}</p><h3 id="commands">{copy.commands}</h3><div className={styles.cliGrid}><div><Snippet title={copy.usage} code={HELP} language="plain" /></div><article><h3>{copy.init}</h3><p>{copy.initText}</p><h3>{copy.watch}</h3><ul>{copy.watchItems.map((item) => <li key={item}>{item}</li>)}</ul><h3>{copy.failures}</h3><ul>{copy.failureItems.map((item) => <li key={item}>{item}</li>)}</ul></article></div></section>;
+  return <section className={cx("wrap", "section", styles.cliReference)}><h2>{copy.title}</h2><p className="section-sub">{copy.intro}</p><h3 id="commands">{copy.commands}</h3><div className={styles.cliGrid}><div><Snippet title={copy.usage} code={HELP} language="plain" /></div><article><h3>{copy.init}</h3><p>{copy.initText}</p><h3>{copy.watch}</h3><ul>{copy.watchItems.map((item) => <li key={item}>{item}</li>)}</ul><h3>{copy.failures}</h3><ul>{copy.failureItems.map((item) => <li key={item}>{item}</li>)}</ul></article></div></section>;
 }
