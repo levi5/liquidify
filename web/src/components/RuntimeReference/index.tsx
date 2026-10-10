@@ -1,6 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import { cx } from "../../constants/cx";
+import styles from "./style.module.css";
 import {
   RUNTIME_TS,
   EVENT_BUS,

@@ -1,6 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import { cx } from "../../constants/cx";
+import styles from "./style.module.css";
 import {
   ERROR_CLASSES,
   ERROR_COLLECTOR,
