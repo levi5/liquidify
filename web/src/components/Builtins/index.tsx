@@ -1,6 +1,7 @@
 import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import styles from "./style.module.css";
+import { cx } from "../../constants/cx";
 import {
   IMPORT,
   IMPORT_LOGIC,
@@ -22,7 +23,7 @@ export default function Builtins({ islands = false }: { islands?: boolean } = {}
   const examples2 = BUILTINS_EXAMPLES2;
 
   return (
-    <section id="componentes" className={`'wrap' 'section' styles.builtinsPage`}>
+    <section id="componentes" className={cx("wrap", "section", styles.builtinsPage)}>
       <p className="kicker">Native Liquid, typed TSX</p>
       <h2>{copy.title}</h2>
       <p className="section-sub">

@@ -2,6 +2,7 @@ import { useLocale } from "../../i18n.tsx";
 import Snippet from "../Snippet/index.tsx";
 import { PipelineFigure } from "../Figures/index.tsx";
 import styles from "./style.module.css";
+import { cx } from "../../constants/cx";
 
 const CONFIG = `{
   "componentsDir": "src/app",
@@ -40,7 +41,7 @@ export default function DocsGuide() {
       };
 
   return (
-    <section className={`'wrap' 'section' styles.docsGuide`}>
+    <section className={cx("wrap", "section", styles.docsGuide)}>
       <h2>{copy.title}</h2>
       <p className="section-sub">{copy.intro}</p>
       <div className={styles.pipeline}>
