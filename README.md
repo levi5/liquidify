@@ -36,7 +36,7 @@ yarn add liquidify@alpha
 
 ### 1. Initialize a new theme template (Recommended)
 
-Generate a complete Shopify theme structure with the Liquidify example (fashion store):
+Generate a complete Shopify theme structure with the Liquidify starter theme:
 
 ```bash
 npx liquidify init [project-name]
@@ -46,11 +46,12 @@ npx liquidify init
 
 This creates:
 
-- The full Liquidify example fashion store theme (250+ files)
+- The full Liquidify starter theme (250+ files)
 - Shopify theme folders (`layout/`, `templates/`, `sections/`, `snippets/`, `assets/`, `config/`, `locales/`)
 - Default Shopify files (`theme.liquid`, `index.json`, `settings_schema.json`, `css-variables.liquid`)
-- Liquidify example components (sections, snippets, React islands)
+- Liquidify components (sections, snippets, React islands)
 - `liquidify.config.json` and `tsconfig.json` pre-configured
+- English and Brazilian Portuguese locales
 
 ---
 
@@ -247,7 +248,7 @@ Commands:
   init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
 
 Options:
-  --template, -t  Template to initialize (default: example, only option: example)
+  --template, -t  Template to initialize (default: theme, options: theme, starter, default)
   --watch, -w     Watch for file changes and rebuild automatically
   --force, -f     Overwrite existing output/files
   --config <path> Use an explicit config file

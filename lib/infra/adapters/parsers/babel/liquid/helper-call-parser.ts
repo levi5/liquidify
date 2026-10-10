@@ -150,11 +150,17 @@ export class HelperCallParser {
       .filter((prop) => isObjectProperty(prop as Node))
       .map((prop) => {
         const key = this.objectKey((prop as { key: unknown }).key)
-        const value = hoistLogicalOperators(
-          this.generate((prop as { value: Expression }).value as Expression, inCondition, renames, context),
-          'param',
-          context,
-        )
+        const valueNode = (prop as { value: Expression }).value as Expression
+        let value: string
+        if (isNumericLiteral(valueNode)) {
+          value = String((valueNode as { value: number }).value)
+        } else {
+          value = hoistLogicalOperators(
+            this.generate(valueNode, inCondition, renames, context),
+            'param',
+            context,
+          )
+        }
         return key === '' ? '' : `${key}: ${value}`
       })
       .filter(Boolean)

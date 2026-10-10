@@ -6,7 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { makeLiquidifyBuilder } from '../dist/index.js'
 
-const example = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../resources/templates/example')
+const example = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../resources/templates/theme')
 const componentsDir = path.join(example, 'src/app')
 const manifestName = '.liquidify-manifest.json'
 

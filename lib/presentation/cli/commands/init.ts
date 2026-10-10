@@ -14,7 +14,7 @@ const IGNORED_ENTRIES = new Set([
   '.liquidify-manifest.json',
 ])
 
-const EXAMPLE_TEMPLATES = new Set(['example', 'fashion', 'store', 'fashion-store'])
+const EXAMPLE_TEMPLATES = new Set(['theme', 'starter', 'default'])
 const FALLBACK_VERSION = '^1.1.0-alpha.4'
 
 export interface InitOptions {
@@ -29,9 +29,9 @@ interface InitArgState {
   force: boolean
 }
 
-export const normalizeTemplateName = (templateName = 'example'): string => {
+export const normalizeTemplateName = (templateName = 'theme'): string => {
   const clean = (templateName || '').trim().toLowerCase()
-  return EXAMPLE_TEMPLATES.has(clean) ? 'example' : 'example'
+  return EXAMPLE_TEMPLATES.has(clean) ? 'theme' : 'theme'
 }
 
 export function parseInitArgs(args: string[]): InitOptions {
@@ -273,7 +273,7 @@ const ensureAbsent = (destination: string): void => {
     .exec()
 }
 
-export const reportInitSuccess = (targetDirArg: string, templateName = 'example'): void => {
+export const reportInitSuccess = (targetDirArg: string, templateName = 'theme'): void => {
   console.log(kleur.bold().green(`\n✨ Shopify theme structure & Liquidify template (${templateName}) ready!\n`))
   console.log('Next steps:')
   const steps = _match(!targetDirArg || targetDirArg === '.')
@@ -287,7 +287,7 @@ export const reportInitSuccess = (targetDirArg: string, templateName = 'example'
   console.log(`  ${kleur.cyan('shopify theme dev')}\n`)
 }
 
-export async function runInit(targetDirArg = '.', templateName = 'example', force = false): Promise<void> {
+export async function runInit(targetDirArg = '.', templateName = 'theme', force = false): Promise<void> {
   const normalized = normalizeTemplateName(templateName)
   const targetDir = path.resolve(process.cwd(), targetDirArg)
   const baseName = path.basename(targetDir)
@@ -314,8 +314,8 @@ export async function runInit(targetDirArg = '.', templateName = 'example', forc
 }
 
 const defaultProjectName = (normalized: string): string =>
-  _match(normalized === 'example')
-    .with(true, () => 'liquidify-fashion-theme')
+  _match(normalized === 'theme')
+    .with(true, () => 'liquidify-theme')
     .with(false, () => 'shopify-liquidify-theme')
     .exec() as string
 

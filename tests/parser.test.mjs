@@ -390,7 +390,7 @@ export default function Hero() {
     </section>
   )
 }`,
-      path.resolve(import.meta.dirname, '../resources/templates/example/src/app/sections/Home/Hero/index.tsx'),
+      path.resolve(import.meta.dirname, '../resources/templates/theme/src/app/sections/Home/Hero/index.tsx'),
     )
     assert.ok(component.html.includes('<section class="fashion-hero container">'))
     assert.ok(component.html.includes('<h1 class="title">Title</h1>'))

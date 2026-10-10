@@ -5,7 +5,7 @@ on:
     branches: [master]
     paths:
       - "web/**"
-      - "resources/templates/example/**"
+      - "resources/templates/theme/**"
       - "lib/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
