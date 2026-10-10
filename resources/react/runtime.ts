@@ -44,7 +44,7 @@ const announceReady = (name: string) => {
 }
 const mountWaitingIslands = (name: string) => {
   const selector = `react-island[component="${CSS.escape(name)}"]:not([data-react-hydrated])`
-  for (const island of Array.from(document.querySelectorAll(selector))) {
+  for (const island of Array.from(document.querySelectorAll<HTMLElement>(selector))) {
     if (island.parentElement?.closest('react-island')) continue
     window.LiquidifyMount?.(island, name)
   }
