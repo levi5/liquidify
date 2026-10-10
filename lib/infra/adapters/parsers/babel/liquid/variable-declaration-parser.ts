@@ -106,7 +106,9 @@ export class VariableDeclarationParser {
         .with(isRestElement(el), () => {
           const arg = (el as { argument: unknown }).argument
           _match(isIdentifier(arg as Node))
-            .with(true, () => lines.push(`{% assign ${(arg as Identifier).name} = ${base} | slice: ${index}, ${base}.size | minus: ${index} %}`))
+            .with(true, () =>
+              lines.push(`{% assign ${(arg as Identifier).name} = ${base} | slice: ${index}, ${base}.size | minus: ${index} %}`),
+            )
             .with(false, () => undefined)
             .exec()
           index += 1

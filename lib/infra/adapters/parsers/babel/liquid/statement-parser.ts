@@ -63,7 +63,12 @@ export class LiquidStatementParser {
       .exec() as string
   }
 
-  private renderStatementGuarded(statement: Statement, rest: Statement[], renames?: Record<string, string>, context?: ParsingContext): string {
+  private renderStatementGuarded(
+    statement: Statement,
+    rest: Statement[],
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
     const collector = context?.errorCollector
     if (collector === undefined) return this.renderStatement(statement, rest, renames, context)
     try {
@@ -347,9 +352,7 @@ export class LiquidStatementParser {
     ]
     if (statement.handler) {
       const catchBody = this.renderBody(this.blockStatements(statement.handler.body), renames, context)
-      const binding = isIdentifier(statement.handler.param)
-        ? `\n{% assign ${(statement.handler.param as Identifier).name} = nil %}`
-        : ''
+      const binding = isIdentifier(statement.handler.param) ? `\n{% assign ${(statement.handler.param as Identifier).name} = nil %}` : ''
       parts.push(`{% if ${guard} == nil %}${binding}\n${catchBody}\n{% endif %}`)
     }
     if (statement.finalizer) {
@@ -546,13 +549,10 @@ export class LiquidStatementParser {
         if ((statement as IfStatement).alternate) branches.push((statement as IfStatement).alternate as Statement)
         return branches
       })
-      .with(
-        isForStatement(statement) || isForOfStatement(statement) || isForInStatement(statement) || isWhileStatement(statement),
-        () => {
-          const body = (statement as { body?: Statement | null }).body
-          return body ? [body] : []
-        },
-      )
+      .with(isForStatement(statement) || isForOfStatement(statement) || isForInStatement(statement) || isWhileStatement(statement), () => {
+        const body = (statement as { body?: Statement | null }).body
+        return body ? [body] : []
+      })
       .with(isTryStatement(statement), () => {
         const children: Statement[] = [(statement as TryStatement).block]
         if ((statement as TryStatement).handler) children.push((statement as TryStatement).handler?.body as Statement)

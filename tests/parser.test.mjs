@@ -209,7 +209,10 @@ export default function Label({ count }) {
       '/theme/src/components/snippets/LabelT.tsx',
     )
     assert.match(component.html, /{% assign __liquidify_t_\d+ = count %}/)
-    assert.match(component.html, /{% if __liquidify_t_\d+ == nil or __liquidify_t_\d+ == "" or __liquidify_t_\d+ == false or __liquidify_t_\d+ == 0 %}/)
+    assert.match(
+      component.html,
+      /{% if __liquidify_t_\d+ == nil or __liquidify_t_\d+ == "" or __liquidify_t_\d+ == false or __liquidify_t_\d+ == 0 %}/,
+    )
     assert.match(component.html, /{% assign __liquidify_t_\d+ = 1 %}/)
     assert.match(component.html, /\| t: __liquidify_t_\d+/)
   })
@@ -225,7 +228,10 @@ export default function Tags({ tags, sep }) {
       '/theme/src/components/snippets/Tags.tsx',
     )
     assert.match(component.html, /__liquidify_join_\d+/)
-    assert.match(component.html, /{% if __liquidify_join_\d+ == nil or __liquidify_join_\d+ == "" or __liquidify_join_\d+ == false or __liquidify_join_\d+ == 0 %}/)
+    assert.match(
+      component.html,
+      /{% if __liquidify_join_\d+ == nil or __liquidify_join_\d+ == "" or __liquidify_join_\d+ == false or __liquidify_join_\d+ == 0 %}/,
+    )
     assert.match(component.html, /{% assign __liquidify_join_\d+ = ", " %}/)
     assert.match(component.html, /\| join: __liquidify_join_\d+/)
   })
@@ -254,7 +260,10 @@ export default function Filtered({ items, fallback }) {
       '/theme/src/components/snippets/Filtered.tsx',
     )
     assert.match(component.html, /__liquidify_where_\d+/)
-    assert.match(component.html, /{% if __liquidify_where_\d+ == nil or __liquidify_where_\d+ == "" or __liquidify_where_\d+ == false or __liquidify_where_\d+ == 0 %}/)
+    assert.match(
+      component.html,
+      /{% if __liquidify_where_\d+ == nil or __liquidify_where_\d+ == "" or __liquidify_where_\d+ == false or __liquidify_where_\d+ == 0 %}/,
+    )
     assert.match(component.html, /{% assign __liquidify_where_\d+ = "x" %}/)
     assert.match(component.html, /\| where: "type", __liquidify_where_\d+/)
   })

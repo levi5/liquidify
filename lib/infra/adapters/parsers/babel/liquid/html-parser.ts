@@ -142,9 +142,7 @@ export class LiquidHtmlParser {
   private extractDangerouslyContent(attr: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
     const container = attr.value
     if (!isJSXExpressionContainer(container) || !isObjectExpression(container.expression)) {
-      throw new Error(
-        'dangerouslySetInnerHTML requires an object literal like {{ __html: code }}.',
-      )
+      throw new Error('dangerouslySetInnerHTML requires an object literal like {{ __html: code }}.')
     }
     return this.dangerouslyHtml(attr, renames, context)
   }

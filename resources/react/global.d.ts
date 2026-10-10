@@ -56,6 +56,9 @@ declare global {
     LiquidifyHydrate: Record<string, LiquidifyHydrateEntry>
     LiquidxHydrate: Record<string, LiquidifyHydrateEntry>
 
+    registerLiquidIsland: (name: string, component: unknown) => () => void
+    LiquidxRegisterIsland: (name: string, component: unknown) => () => void
+
     __LIQUIDIFY_CONTEXTS__?: Record<string, unknown>
     __LIQUIDX_CONTEXTS__?: Record<string, unknown>
   }

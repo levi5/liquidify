@@ -117,7 +117,6 @@ export class EventAttributeConverter {
       .exec() as string
   }
 
-
   private restoreJsOperators(code: string): string {
     const literals: string[] = []
     const protectedCode = code.replace(/"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|`(?:\\.|[^`\\])*`/g, (literal) => {
@@ -159,13 +158,10 @@ export class EventAttributeConverter {
   }
 
   private escapeAttributeValue(value: string): string {
-
     return value
       .split(/({{[\s\S]*?}})/g)
       .map((part) =>
-        part.startsWith('{{')
-          ? part.replace(/"/g, "'")
-          : part.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'),
+        part.startsWith('{{') ? part.replace(/"/g, "'") : part.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;'),
       )
       .join('')
   }

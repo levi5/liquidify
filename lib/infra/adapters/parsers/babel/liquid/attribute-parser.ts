@@ -253,8 +253,16 @@ export class LiquidAttributeConverter {
     const left = this.guardTestValue(rawLeft, context)
     const guard = `${left} == nil or ${left} == "" or ${left} == false or ${left} == 0`
     return _match(expression.operator === '||')
-      .with(true, () => `${this.pendingOf(context)}{% if ${guard} %}${this.renderValue(expression.right as Expression, renames, context)}{% else %}${this.renderValue(expression.left as Expression, renames, context)}{% endif %}`)
-      .with(false, () => `${this.pendingOf(context)}{% if ${guard} %}{% else %}${this.renderValue(expression.right as Expression, renames, context)}{% endif %}`)
+      .with(
+        true,
+        () =>
+          `${this.pendingOf(context)}{% if ${guard} %}${this.renderValue(expression.right as Expression, renames, context)}{% else %}${this.renderValue(expression.left as Expression, renames, context)}{% endif %}`,
+      )
+      .with(
+        false,
+        () =>
+          `${this.pendingOf(context)}{% if ${guard} %}{% else %}${this.renderValue(expression.right as Expression, renames, context)}{% endif %}`,
+      )
       .exec() as string
   }
 
@@ -339,14 +347,12 @@ export class LiquidAttributeConverter {
       .exec() as string
   }
 
-  private handleStyleConditional(
-    expression: ConditionalExpression,
-    renames?: Record<string, string>,
-    context?: ParsingContext,
-  ): string {
+  private handleStyleConditional(expression: ConditionalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
     const yes = this.renderStyleString(expression.consequent as Expression, renames, context)
     const no = this.renderStyleString(expression.alternate as Expression, renames, context)
-    const markup = renderCondition(expression.test, yes, no, (node) => this.expressionParser.generateLiquidCode(node, true, renames, context))
+    const markup = renderCondition(expression.test, yes, no, (node) =>
+      this.expressionParser.generateLiquidCode(node, true, renames, context),
+    )
     return ` style="${this.pendingOf(context)}${markup}"`
   }
 

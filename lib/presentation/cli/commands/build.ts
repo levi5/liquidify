@@ -5,7 +5,7 @@ import type { FSWatcher } from 'chokidar'
 import { glob } from 'glob'
 import chokidar from 'chokidar'
 import path from 'node:path'
-import type { PluginStats } from '../../../core/protocols/plugin'
+import type { LiquidifyPlugin, PluginStats } from '../../../core/protocols/plugin'
 
 import type { ComponentRegistry, DirectiveScanner } from '../../../application/services/component-registry'
 import type { BabelLiquidParser } from '../../../infra/adapters/parsers/babel/babel-parser'
@@ -42,7 +42,7 @@ export class LiquidifyBuilder extends EventEmitter {
     super()
   }
 
-  public registerPlugin(plugin: { name: string; setup: (ctx: { onBuildEnd: (callback: (stats: PluginStats) => void) => void }) => void }): void {
+  public registerPlugin(plugin: LiquidifyPlugin): void {
     const callbacks: Array<(stats: PluginStats) => void> = []
     const ctx = {
       onBuildEnd: (callback: (stats: PluginStats) => void) => {
@@ -51,7 +51,9 @@ export class LiquidifyBuilder extends EventEmitter {
     }
     plugin.setup(ctx)
     this.pluginContext.push({
-      onBuildEnd: (stats: PluginStats) => callbacks.forEach((cb) => cb(stats)),
+      onBuildEnd: (stats: PluginStats) => {
+        for (const cb of callbacks) cb(stats)
+      },
     })
   }
 
@@ -69,7 +71,7 @@ export class LiquidifyBuilder extends EventEmitter {
 
   private notifyBuildEnd(): void {
     const stats = this.collectStats()
-    this.pluginContext.forEach((p) => p.onBuildEnd(stats))
+    for (const p of this.pluginContext) p.onBuildEnd(stats)
   }
 
   private collectStats(): PluginStats {
@@ -189,7 +191,6 @@ export class LiquidifyBuilder extends EventEmitter {
     files: string[],
     worker: (file: string) => Promise<void>,
   ): Promise<Array<{ file: string; error?: unknown }>> {
-
     const results: Array<{ file: string; error?: unknown }> = new Array(files.length)
     for (let index = 0; index < files.length; index++) {
       const file = files[index] as string

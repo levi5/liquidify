@@ -95,7 +95,11 @@ export default function Rec() {
       '/theme/src/components/snippets/RecState.tsx',
     )
     assert.ok(!component.html.includes('&&'))
-    assert.ok(component.html.includes('{% if recommendations.performed != nil and recommendations.performed != false and recommendations.performed != 0 and recommendations.performed != "" %}'))
+    assert.ok(
+      component.html.includes(
+        '{% if recommendations.performed != nil and recommendations.performed != false and recommendations.performed != 0 and recommendations.performed != "" %}',
+      ),
+    )
     assert.ok(component.html.includes('{% if recommendations.products_count > 0 %}loaded'))
   })
 

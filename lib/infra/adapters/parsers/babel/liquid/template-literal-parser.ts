@@ -34,7 +34,8 @@ export class TemplateLiteralParser {
       .with(false, () => '')
       .exec() as string
     return expr.expressions.reduce(
-      (acc, expression, index) => this.appendExpression(acc, expression, expr.quasis[index + 1].value.raw, FILTER_PATTERN, context, renames),
+      (acc, expression, index) =>
+        this.appendExpression(acc, expression, expr.quasis[index + 1].value.raw, FILTER_PATTERN, context, renames),
       head,
     )
   }

@@ -93,13 +93,13 @@ export const RUNTIME_COPY: Record<Locale, RuntimeCopy> = {
     moduleHeaders: ["Export", "Assinatura", "Retorno"],
     moduleRows: [
       ["registerLiquidifyAction", "(name, handler) => void", "Função de unsubscribe"],
-      ["registerLiquidIsland", "(name, component) => void", "void"],
+      ["registerLiquidIsland", "(name, component) => void", "Função de unsubscribe"],
       ["useLiquidifyEvent", "<T>(event, cb: (data: T) => void) => void", "void"],
       ["emitLiquidifyEvent", "<T>(event, data?: T) => void", "void"],
       ["LiquidifyEvents", "LiquidifyEventBus", "—"],
     ],
     moduleNote:
-      "registerLiquidIsland registra um componente fora do pipeline de compilação. registerLiquidifyAction é a única função do módulo que delega para window; as outras são no-ops no servidor.",
+      "Todos os exports delegam para os globais de window e viram no-ops no servidor, importando o módulo em Node não quebra nada. registerLiquidIsland registra um componente fora do pipeline de compilação, dispara liquidify:ready:<name> e monta as ilhas que já estavam esperando; o unsubscribe restaura o componente anterior ou remove a entrada.",
     actions: "Registro de actions",
     actionsNote:
       "O handler roda com this apontando para event.currentTarget ou o nó que carrega o atributo. O unsubscribe é protegido por referência: só remove se o handler registrado ainda for o mesmo.",
@@ -145,13 +145,13 @@ export const RUNTIME_COPY: Record<Locale, RuntimeCopy> = {
     moduleHeaders: ["Export", "Signature", "Returns"],
     moduleRows: [
       ["registerLiquidifyAction", "(name, handler) => void", "Unsubscribe function"],
-      ["registerLiquidIsland", "(name, component) => void", "void"],
+      ["registerLiquidIsland", "(name, component) => void", "Unsubscribe function"],
       ["useLiquidifyEvent", "<T>(event, cb: (data: T) => void) => void", "void"],
       ["emitLiquidifyEvent", "<T>(event, data?: T) => void", "void"],
       ["LiquidifyEvents", "LiquidifyEventBus", "—"],
     ],
     moduleNote:
-      "registerLiquidIsland registers a component outside the compile pipeline. registerLiquidifyAction is the only function in the module that delegates to window; the rest are no-ops on the server.",
+      "Every export delegates to the window globals and becomes a no-op on the server, so importing the module in Node is safe. registerLiquidIsland registers a component outside the compile pipeline, fires liquidify:ready:<name> and mounts the islands that were already waiting; the unsubscribe restores the previous component or removes the entry.",
     actions: "Action registry",
     actionsNote:
       "The handler runs with this bound to event.currentTarget or the node carrying the attribute. The unsubscribe is reference-guarded: it only deletes if the currently-registered handler is still the same one.",

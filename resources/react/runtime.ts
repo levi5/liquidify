@@ -35,6 +35,40 @@ window.registerLiquidifyAction = (name, handler) => {
   }
 }
 
+window.LiquidifyComponents = window.LiquidifyComponents || window.LiquidxComponents || {}
+window.LiquidxComponents = window.LiquidifyComponents
+const announceReady = (name: string) => {
+  for (const prefix of ['liquidify', 'liquidx']) {
+    document.dispatchEvent(new CustomEvent(`${prefix}:ready:${name}`))
+  }
+}
+const mountWaitingIslands = (name: string) => {
+  const selector = `react-island[component="${CSS.escape(name)}"]:not([data-react-hydrated])`
+  for (const island of Array.from(document.querySelectorAll(selector))) {
+    if (island.parentElement?.closest('react-island')) continue
+    window.LiquidifyMount?.(island, name)
+  }
+}
+window.registerLiquidIsland = (name, component) => {
+  if (typeof name !== 'string' || !name.trim()) {
+    throw new TypeError('[Liquidify] registerLiquidIsland requires a non-empty component name.')
+  }
+  if (!component || (typeof component !== 'function' && typeof component !== 'object')) {
+    throw new TypeError(`[Liquidify] registerLiquidIsland("${name}") requires a component function or object.`)
+  }
+  const key = name.trim()
+  const previous = window.LiquidifyComponents[key]
+  window.LiquidifyComponents[key] = component
+  announceReady(key)
+  mountWaitingIslands(key)
+  return () => {
+    if (window.LiquidifyComponents[key] !== component) return
+    if (previous !== undefined) window.LiquidifyComponents[key] = previous
+    else delete window.LiquidifyComponents[key]
+  }
+}
+window.LiquidxRegisterIsland = window.registerLiquidIsland
+
 const eventSubscriptions = new WeakMap()
 const subscriberCounts = new Map()
 const pendingEmits = new Map()

@@ -253,14 +253,26 @@ export class LiquidLoopParser {
     const startArg = args[0]
     const endArg = args[1]
     if (endNum !== null && startNum !== null && endNum <= startNum) return ' limit: 0'
-    const limit = endNum !== null && startNum !== null
-      ? ` limit: ${endNum - startNum}`
-      : this.dynamicLimit(endArg, startNum, startArg, renames, context)
-    const offset = startNum !== null && startNum > 0 ? ` offset: ${startNum}` : (startArg && startNum !== 0 ? ` offset: ${this.liquidVariableParser.generateLiquidCode(startArg as Node, true, undefined, context)}` : '')
+    const limit =
+      endNum !== null && startNum !== null
+        ? ` limit: ${endNum - startNum}`
+        : this.dynamicLimit(endArg, startNum, startArg, renames, context)
+    const offset =
+      startNum !== null && startNum > 0
+        ? ` offset: ${startNum}`
+        : startArg && startNum !== 0
+          ? ` offset: ${this.liquidVariableParser.generateLiquidCode(startArg as Node, true, undefined, context)}`
+          : ''
     return `${limit}${offset}`
   }
 
-  private dynamicLimit(endArg: unknown, startNum: number | null, startArg: unknown, renames?: Record<string, string>, context?: ParsingContext): string {
+  private dynamicLimit(
+    endArg: unknown,
+    startNum: number | null,
+    startArg: unknown,
+    renames?: Record<string, string>,
+    context?: ParsingContext,
+  ): string {
     return _match(true)
       .with(endArg === null || endArg === undefined, () => (startNum !== null && startNum > 0 ? ` limit: 9999` : ''))
       .with(startNum !== null && startNum > 0, () => {
