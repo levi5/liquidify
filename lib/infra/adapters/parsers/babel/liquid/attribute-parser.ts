@@ -154,7 +154,7 @@ export class LiquidAttributeConverter {
   }
 
   private convertNamedAttribute(attribute: JSXAttribute, renames?: Record<string, string>, context?: ParsingContext): string {
-    const attributeName = this.normalizeAttributeName(attribute)
+    const attributeName = this.normalizeAttributeName(attribute, context)
     return _match(true)
       .with(!attributeName && !this.eventConverter.isDomMode(context), () => '')
       .with(!attribute.value, () => ` ${attributeName}`)
@@ -434,9 +434,9 @@ export class LiquidAttributeConverter {
     )
   }
 
-  private normalizeAttributeName(attribute: JSXAttribute): string {
+  private normalizeAttributeName(attribute: JSXAttribute, context?: ParsingContext): string {
     const name = (attribute.name as { name: string }).name
-    const converted = this.htmlAttributeConverter.toHtmlAttribute(name)
+    const converted = this.htmlAttributeConverter.toHtmlAttribute(name, context?.inSvg === true)
     return _match(converted !== '' && converted.startsWith('on'))
       .with(true, () => converted.toLowerCase())
       .with(false, () => converted)

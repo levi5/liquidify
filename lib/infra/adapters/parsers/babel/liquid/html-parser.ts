@@ -19,7 +19,7 @@ import type { LiquidAttributeConverter } from './attribute-parser'
 import type { ExpressionParser } from './expression-parser'
 import { liquidJsonOutput } from '../../../../../shared/html'
 import { ParsingContext } from '../../../../../core/entities/parsing-context'
-import { VOID_TAGS as voidTags } from '../../../../../shared/liquid-constants'
+import { VOID_TAGS as voidTags, SVG_ROOT_TAG } from '../../../../../shared/liquid-constants'
 
 export class LiquidHtmlParser {
   constructor(
@@ -34,13 +34,20 @@ export class LiquidHtmlParser {
 
   public renderHTMLElement(node: JSXElement, tagName: string, renames?: Record<string, string>, context?: ParsingContext): string {
     const state = { hasRawHtml: false, rawHtml: '', bridge: [] as JSXAttribute[] }
+    const isSvg = tagName === SVG_ROOT_TAG || context?.inSvg === true
     const filteredAttributes = node.openingElement.attributes.filter((attr) => this.keepAttribute(attr, tagName, state, renames, context))
     if (state.hasRawHtml && voidTags.has(tagName)) {
       throw new Error(`dangerouslySetInnerHTML cannot be used on void element <${tagName} />.`)
     }
-    const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, context)
-    const childContext = _match(tagName === 'style' || tagName === 'script')
-      .with(true, () => ParsingContext.derive(context, { outputContext: 'raw' }))
+    const attributeContext = isSvg && context?.inSvg !== true ? ParsingContext.derive(context, { inSvg: true }) : context
+    const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, attributeContext)
+    const childContext = _match(tagName === 'style' || tagName === 'script' || isSvg)
+      .with(true, () =>
+        ParsingContext.derive(context, {
+          outputContext: tagName === 'style' || tagName === 'script' ? 'raw' : context?.outputContext,
+          inSvg: isSvg,
+        }),
+      )
       .with(false, () => context)
       .exec() as ParsingContext | undefined
     const children = _match(state.hasRawHtml)
