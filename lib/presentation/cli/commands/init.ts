@@ -31,10 +31,7 @@ interface InitArgState {
 
 export const normalizeTemplateName = (templateName = 'example'): string => {
   const clean = (templateName || '').trim().toLowerCase()
-  return _match(EXAMPLE_TEMPLATES.has(clean))
-    .with(true, () => 'example')
-    .with(false, () => 'example')
-    .exec() as string
+  return EXAMPLE_TEMPLATES.has(clean) ? 'example' : 'example'
 }
 
 export function parseInitArgs(args: string[]): InitOptions {
@@ -194,7 +191,28 @@ export const copyTemplate = (sourceDir: string, targetDir: string, projectName: 
       filter: (src) => !IGNORED_ENTRIES.has(path.basename(src)),
     })
     syncPackageName(targetDir, projectName)
+    rewriteTsConfig(targetDir)
   })
+
+const rewriteTsConfig = (targetDir: string): void => {
+  const tsConfigPath = path.join(targetDir, 'tsconfig.json')
+  _try
+    .sync(() => fs.readFileSync(tsConfigPath, 'utf-8'))
+    .match({
+      right: (content) => {
+        const config = JSON.parse(content)
+        if (config.compilerOptions?.paths) {
+          delete config.compilerOptions.paths.liquidify
+          delete config.compilerOptions.paths.liquidex
+          if (Object.keys(config.compilerOptions.paths).length === 0) {
+            delete config.compilerOptions.paths
+          }
+        }
+        fs.writeFileSync(tsConfigPath, `${JSON.stringify(config, null, 2)}\n`, 'utf-8')
+      },
+      left: () => undefined,
+    })
+}
 
 const checkConflicts = (source: string, target: string): void => {
   const existing = statOf(target)
