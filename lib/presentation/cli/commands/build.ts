@@ -1,6 +1,7 @@
 import type { DependencyTracker } from '../../../application/services/dependency-tracker'
 import { _match, _try } from 'funcio'
 import { EventEmitter } from 'node:events'
+import os from 'node:os'
 import type { FSWatcher } from 'chokidar'
 import { glob } from 'glob'
 import chokidar from 'chokidar'
@@ -16,6 +17,13 @@ import { LiquidifyError } from '../../../core/errors/liquidify-error'
 import type { Logger } from '../../../shared/logger'
 
 const WATCH_EVENTS = ['add', 'change', 'unlink', 'addDir', 'unlinkDir'] as const
+
+const availableParallelism = (): number => {
+  const reported = typeof os.availableParallelism === 'function' ? os.availableParallelism() : os.cpus().length
+  return Number.isFinite(reported) && reported > 0 ? reported : 1
+}
+
+export const BUILD_CONCURRENCY = Math.max(1, Math.min(8, availableParallelism()))
 
 export class LiquidifyBuilder extends EventEmitter {
   private watcher: FSWatcher | null = null
@@ -190,17 +198,25 @@ export class LiquidifyBuilder extends EventEmitter {
   private async processFilesInParallel(
     files: string[],
     worker: (file: string) => Promise<void>,
+    concurrency = BUILD_CONCURRENCY,
   ): Promise<Array<{ file: string; error?: unknown }>> {
     const results: Array<{ file: string; error?: unknown }> = new Array(files.length)
-    for (let index = 0; index < files.length; index++) {
-      const file = files[index] as string
-      try {
-        await worker(file)
-        results[index] = { file }
-      } catch (error) {
-        results[index] = { file, error }
+    let cursor = 0
+    const runNext = async (): Promise<void> => {
+      while (cursor < files.length) {
+        const index = cursor
+        cursor += 1
+        const file = files[index] as string
+        try {
+          await worker(file)
+          results[index] = { file }
+        } catch (error) {
+          results[index] = { file, error }
+        }
       }
     }
+    const workers = Array.from({ length: Math.min(concurrency, files.length) }, () => runNext())
+    await Promise.all(workers)
     return results
   }
 

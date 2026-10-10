@@ -48,7 +48,7 @@ describe('error recovery', () => {
   })
 })
 
-describe('parallel file processing', () => {
+describe('multi-file builds', () => {
   it('builds every component in a multi-file project', async (t) => {
     const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'liquidify-parallel-'))
     t.after(() => fs.rmSync(directory, { recursive: true, force: true }))
