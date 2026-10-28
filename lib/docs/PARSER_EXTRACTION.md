@@ -15,6 +15,7 @@ Extraction occurs in the following order:
 ---
 
 ## 1. Directives (`DirectiveParser`)
+
 The compiler inspects strings at the top of the file (directives) or at the top of the main function body to determine execution mode:
 
 - `/^use dom(:global)?$/`: Sets client-side JavaScript execution mode (without React). If `:global` is present, the script is injected globally onto the page.
@@ -25,6 +26,7 @@ The compiler inspects strings at the top of the file (directives) or at the top 
 ---
 
 ## 2. Export Parsing (`ExportParser` and sub-parsers)
+
 Babel traverses the AST looking for `ExportNamedDeclaration` and `ExportDefaultDeclaration`.
 Depending on the exported type, a specific sub-parser handles it:
 
@@ -36,20 +38,23 @@ Depending on the exported type, a specific sub-parser handles it:
 ---
 
 ## 3. Statement Collection (`StatementCollector`)
+
 This is the core logic extraction step. It iterates over all lines in the component's main function and categorizes them:
 
 1. **Component Return**: If it is a `ReturnStatement` returning JSX, it extracts it to `metadata.jsxElement`. This JSX will not be part of the final JS code, but will be processed by `LiquidParser`.
-2. **Variables and IFs in Liquid mode**: 
+2. **Variables and IFs in Liquid mode**:
    - If the mode is `liquid` (default), it delegates `VariableDeclaration` and `IfStatement` to `LiquidVariableParser`.
    - `LiquidVariableParser` translates this code into `{% assign ... %}` strings and stores them in `metadata.liquidAssignments`.
 3. **JS Logic (DOM/React mode)**: If the statement is neither a JSX return nor a translatable Liquid assign, it is stored in `metadata.scriptStatements`. It will be compiled into the resulting `.js` file.
 
 ### "Orphaned" JS Check
+
 If the mode is `liquid` and `StatementCollector` encounters complex top-level JS declarations that cannot be converted to Liquid (e.g., complex global function calls), the `metadata.hasUncoveredJs` flag is set. This triggers a compilation error advising the developer to add the `'use dom'` directive.
 
 ---
 
 ## 4. Shopify Schemas (`SchemaExtractor`)
+
 In Liquid files for sections and blocks, Shopify requires a `{% schema %}` block. Liquidify extracts this JSON object directly from JS/TS code.
 
 It looks for:
@@ -66,10 +71,10 @@ This allows composing Shopify schemas with the full power and modularity of Type
 ---
 
 ## 5. CSS Extraction (`CSSImportExtractor`)
+
 If the component imports a `.css` file (`import './styles.css'` or `import styles from './module.css'`), the compiler:
 
 1. Removes the import statement from Babel's AST so it does not break in the browser.
 2. Reads the CSS file from disk.
 3. If imported as a module (`import styles`), it finds usages like `styles.container` and replaces them with static strings (`"container"`). The CSS content is attached to be embedded inside the generated file's `{% stylesheet %}`.
 4. If imported globally, the CSS is collected to be appended to the final `global.css` file.
-

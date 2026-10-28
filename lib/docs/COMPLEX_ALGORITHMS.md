@@ -33,4 +33,3 @@ To allow client-side JavaScript to execute without conflicts:
 When converting events such as `onClick`, the parser analyzes the callback function:
 - It detects the argument name given to the event (e.g., `e`, `evt`, `event`).
 - Normalizes all internal references to use the browser standard `event` object in the final HTML attribute.
-

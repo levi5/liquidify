@@ -159,7 +159,7 @@ const replaceLiquidTags = (source: string): string => {
         const firstSpace = trimmed.indexOf(' ')
         const tagName = firstSpace >= 0 ? trimmed.slice(0, firstSpace) : trimmed
         if (LIQUID_TAGS.has(tagName)) {
-          const fullTag = '{%' + tagBody + '%}'
+          const fullTag = `{%${tagBody}%}`
           out += `{${JSON.stringify(fullTag)}}`
           i += 2
           continue
@@ -231,7 +231,7 @@ const replaceLiquidOutputs = (source: string): string => {
         const trimmed = outputBody.trim()
         const isLiquid = trimmed.length > 0 && (/[|.[]/.test(trimmed) || /^[a-zA-Z_$][\w$]*$/.test(trimmed))
         if (isLiquid) {
-          const fullOutput = '{{' + outputBody + '}}'
+          const fullOutput = `{{${outputBody}}}`
           out += `{${JSON.stringify(fullOutput)}}`
           i += 2
           boundaryCandidate = false
@@ -348,7 +348,7 @@ const replaceLiquidOutputs = (source: string): string => {
         const trimmed = outputBody.trim()
         const isLiquid = trimmed.length > 0 && (/[|.[]/.test(trimmed) || /^[a-zA-Z_$][\w$]*$/.test(trimmed))
         if (isLiquid) {
-          const fullOutput = '{{' + outputBody + '}}'
+          const fullOutput = `{{${outputBody}}}`
           out += `{${JSON.stringify(fullOutput)}}`
           i += 2
           boundaryCandidate = false

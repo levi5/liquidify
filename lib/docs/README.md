@@ -18,12 +18,14 @@ For in-depth technical details, refer to the specific documents:
 ## Main File Mapping
 
 ### `lib/infra/adapters/parsers/babel/`
+
 - **`ASTParser.ts`**: Wrapper around the Babel parser.
 - **`babel-parser.ts`**: Main adapter coordinating the analysis flow.
 - **`liquid-parser.ts`**: Orchestrator of the JSX -> Liquid conversion.
 - **`liquid/`**: Sub-parsers for attributes, expressions, loops, etc.
 
 ### `lib/application/services/`
+
 - **`transpile-file.ts`**: Read, parse, and write pipeline.
 - **`validation-service.ts`**: Framework rules validator.
 
@@ -34,4 +36,3 @@ For in-depth technical details, refer to the specific documents:
 - **Clean Architecture**: Clear separation between domain, application, and infrastructure.
 - **Dependency Injection**: Facilitates testing and maintainability.
 - **External Documentation**: Documentation resides in `.md` files, keeping the codebase clean (without excessive inline comments).
-

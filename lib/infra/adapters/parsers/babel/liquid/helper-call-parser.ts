@@ -155,11 +155,7 @@ export class HelperCallParser {
         if (isNumericLiteral(valueNode)) {
           value = String((valueNode as { value: number }).value)
         } else {
-          value = hoistLogicalOperators(
-            this.generate(valueNode, inCondition, renames, context),
-            'param',
-            context,
-          )
+          value = hoistLogicalOperators(this.generate(valueNode, inCondition, renames, context), 'param', context)
         }
         return key === '' ? '' : `${key}: ${value}`
       })

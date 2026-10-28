@@ -1,5 +1,4 @@
 import { createHash } from 'node:crypto'
-import { _match } from 'funcio'
 
 export function liquidAssign(name: string, code: string): string {
   return `{% assign ${name} = ${code} %}`
