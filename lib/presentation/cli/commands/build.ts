@@ -126,13 +126,13 @@ export class LiquidifyBuilder extends EventEmitter {
   private async buildProject(): Promise<void> {
     const files = (await glob(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}'))).map((file) => path.resolve(file)).sort()
     const planning = _try.sync(() => this.dependencies.plan(files))
+    this.watchedDependencies = new Set(this.dependencies.watchedFiles)
     const plan = planning.match({
       right: (value) => value,
       left: (error) => {
         throw error
       },
     })
-    this.watchedDependencies = new Set(this.dependencies.watchedFiles)
     if (this.watcher) this.watcher.add(this.watchTargets())
     const registry = await this.registry.scan(files, plan.changed)
     const signature = JSON.stringify([...registry].sort((a, b) => (a[0] < b[0] ? -1 : 1)))
