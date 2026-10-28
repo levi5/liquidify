@@ -101,6 +101,7 @@ export class LiquidSnippetParser {
     const props = this.extractSnippetProps(node.openingElement.attributes, context)
     const withFor = this.extractWithFor(node.openingElement.attributes, context)
     const childrenCapture = this.captureChildren(node, context)
+    const pending = context?.getPendingAssigns() ?? ''
     const withChildren = _match(childrenCapture === '')
       .with(true, () => props)
       .with(false, () => [...props, 'children: snippet_content'])
@@ -109,7 +110,7 @@ export class LiquidSnippetParser {
       .with(true, () => `, ${withChildren.join(', ')}`)
       .with(false, () => '')
       .exec() as string
-    return `${childrenCapture}{% render '${slot.name}'${propsString}${withFor} %}`
+    return `${pending}${childrenCapture}{% render '${slot.name}'${propsString}${withFor} %}`
   }
 
   private captureChildren(node: JSXElement, context?: ParsingContext): string {

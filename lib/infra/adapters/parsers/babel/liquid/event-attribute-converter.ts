@@ -226,7 +226,7 @@ export class EventAttributeConverter {
   }
 
   private generate(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {
-    return this.expressionParser.generateLiquidCode(node, false, renames, context)
+    return this.expressionParser.generateJavaScript(node, renames, context)
   }
 
   public convertReference(name: string, attributeName: string, context?: ParsingContext): string {

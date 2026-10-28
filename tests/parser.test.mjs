@@ -208,13 +208,10 @@ export default function Label({ count }) {
 }`,
       '/theme/src/components/snippets/LabelT.tsx',
     )
-    assert.match(component.html, /{% assign __liquidify_t_\d+ = count %}/)
-    assert.match(
-      component.html,
-      /{% if __liquidify_t_\d+ == nil or __liquidify_t_\d+ == "" or __liquidify_t_\d+ == false or __liquidify_t_\d+ == 0 %}/,
-    )
-    assert.match(component.html, /{% assign __liquidify_t_\d+ = 1 %}/)
-    assert.match(component.html, /\| t: __liquidify_t_\d+/)
+    const hoisted = component.html.match(/{% assign (__liquidify_\w+_\d+) = count %}/)[1]
+    assert.match(component.html, new RegExp(`{% if ${hoisted} == nil or ${hoisted} == "" or ${hoisted} == false or ${hoisted} == 0 %}`))
+    assert.match(component.html, new RegExp(`{% assign ${hoisted} = 1 %}`))
+    assert.match(component.html, new RegExp(`\\| t: ${hoisted}`))
   })
 
   it('hoists piped join separator', async () => {
@@ -227,13 +224,10 @@ export default function Tags({ tags, sep }) {
 }`,
       '/theme/src/components/snippets/Tags.tsx',
     )
-    assert.match(component.html, /__liquidify_join_\d+/)
-    assert.match(
-      component.html,
-      /{% if __liquidify_join_\d+ == nil or __liquidify_join_\d+ == "" or __liquidify_join_\d+ == false or __liquidify_join_\d+ == 0 %}/,
-    )
-    assert.match(component.html, /{% assign __liquidify_join_\d+ = ", " %}/)
-    assert.match(component.html, /\| join: __liquidify_join_\d+/)
+    const hoisted = component.html.match(/{% assign (__liquidify_\w+_\d+) = sep %}/)[1]
+    assert.match(component.html, new RegExp(`{% if ${hoisted} == nil or ${hoisted} == "" or ${hoisted} == false or ${hoisted} == 0 %}`))
+    assert.match(component.html, new RegExp(`{% assign ${hoisted} = ", " %}`))
+    assert.match(component.html, new RegExp(`\\| join: ${hoisted}`))
   })
 
   it('hoists dynamic for-loop limit for sliced ranges', async () => {
@@ -259,13 +253,10 @@ export default function Filtered({ items, fallback }) {
 }`,
       '/theme/src/components/snippets/Filtered.tsx',
     )
-    assert.match(component.html, /__liquidify_where_\d+/)
-    assert.match(
-      component.html,
-      /{% if __liquidify_where_\d+ == nil or __liquidify_where_\d+ == "" or __liquidify_where_\d+ == false or __liquidify_where_\d+ == 0 %}/,
-    )
-    assert.match(component.html, /{% assign __liquidify_where_\d+ = "x" %}/)
-    assert.match(component.html, /\| where: "type", __liquidify_where_\d+/)
+    const hoisted = component.html.match(/{% assign (__liquidify_\w+_\d+) = fallback %}/)[1]
+    assert.match(component.html, new RegExp(`{% if ${hoisted} == nil or ${hoisted} == "" or ${hoisted} == false or ${hoisted} == 0 %}`))
+    assert.match(component.html, new RegExp(`{% assign ${hoisted} = "x" %}`))
+    assert.match(component.html, new RegExp(`\\| where: "type", ${hoisted}`))
   })
 
   it('keeps char-local filters inline in template literals', async () => {
@@ -415,5 +406,67 @@ export default function Panel({ title }) {
     assert.ok(component.html.includes('{{ children }}'), component.html)
     assert.ok(!component.html.includes('children | escape'), component.html)
     assert.ok(component.html.includes('{{ title | escape }}'), component.html)
+  })
+
+  it('hoists attribute fallbacks and browser location outside the tag', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function ActiveFilters({ collection }) {
+  return (
+    <div className="active-filters">
+      <a className="text-link" href={window.location.pathname + '?sort_by=' + (collection.sort_by || collection.default_sort_by)}>
+        Clear all
+      </a>
+    </div>
+  )
+}`,
+      '/theme/src/components/snippets/ActiveFilters.tsx',
+    )
+
+    assert.ok(component.html.includes('request.path'), component.html)
+    assert.match(component.html, /{% assign __liquidify_logic_0 = collection\.sort_by %}/)
+    assert.doesNotMatch(component.html, /__liquidify_logic_1/)
+    assert.match(
+      component.html,
+      /{% assign __liquidify_attribute_\d+ = request\.path \| append: "\?sort_by=" \| append: __liquidify_logic_0 %}/,
+    )
+
+    const tag = component.html.match(/<a\b[^>]*>/)?.[0] ?? ''
+    assert.ok(tag.includes('href="{{ __liquidify_attribute_'), tag)
+    assert.doesNotMatch(tag, /{%/)
+
+    for (const [, output] of component.html.matchAll(/{{(.*?)}}/g)) {
+      assert.doesNotMatch(output, /\bor\b/, `bare "or" leaked into output: {{${output}}}`)
+    }
+  })
+
+  it('hoists snippet prop fallbacks before the render tag', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use sections'
+import { RenderSnippet } from 'liquidex'
+const Child = () => null
+export const Section = () => <RenderSnippet slot={Child} heading={section.settings.heading || 'Fallback'} />`,
+      '/theme/src/app/sections/Section/index.tsx',
+    )
+
+    assert.match(component.html, /{% assign __liquidify_logic_0 = section\.settings\.heading %}\n/)
+    assert.match(component.html, /{% render 'child', heading: __liquidify_logic_0 %}/)
+  })
+
+  it('renders an early return as the empty branch of a condition', async () => {
+    const parser = makeParser()
+    const component = await parser.parse(
+      `'use snippets'
+export default function Empty({ items }) {
+  if (items.length === 0) return null
+  return <div>{items.length}</div>
+}`,
+      '/theme/src/components/snippets/Empty.tsx',
+    )
+
+    assert.match(component.html, /{% if items\.size == 0 %}{% else %}<div>{{ items\.size \| escape }}<\/div>{% endif %}/)
+    assert.doesNotMatch(component.html, /nil \| escape/)
   })
 })

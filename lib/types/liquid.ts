@@ -22,5 +22,6 @@ import type { ParsingContext } from '../core/entities/parsing-context'
 
 export interface ILiquidExpressionParser {
   generateLiquidCode(node: Node, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext): string
+  generateJavaScript(node: Node, renames?: Record<string, string>, context?: ParsingContext): string
   parseExpression(node: Expression, renames?: Record<string, string>, context?: ParsingContext): string
 }

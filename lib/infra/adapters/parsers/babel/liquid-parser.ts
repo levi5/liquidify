@@ -463,6 +463,10 @@ export class LiquidParser implements ILiquidExpressionParser {
     return this.expressionParser.generateLiquidCode(node, inCondition, renames, context)
   }
 
+  public generateJavaScript(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {
+    return this.expressionParser.generateJavaScript(node, renames, context)
+  }
+
   public parseExpression(expr: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
     return this.expressionParser.parseExpression(expr, renames, context)
   }

@@ -9,6 +9,9 @@ import type { LiquidLoopParser } from './loop-parser'
 import {
   cloneNode,
   traverseFast,
+  VISITOR_KEYS,
+  isFunction,
+  isNode,
   type Node,
   isBinaryExpression,
   isMemberExpression,
@@ -64,6 +67,15 @@ const SHOPIFY_GLOBAL_FILTERS = new Set([
 ])
 
 const CLASSNAMES_FNS = new Set(['classNames', 'classnames', 'clsx'])
+
+const BROWSER_LOCATION_MEMBERS: Record<string, string> = {
+  pathname: 'request.path',
+  origin: 'request.origin',
+  host: 'request.host',
+  hostname: 'request.host',
+}
+
+const BROWSER_LOCATION_ROOTS = new Set(['window', 'document', 'globalThis'])
 
 const STRING_LIKE_METHODS = new Set([
   'toString',
@@ -124,6 +136,24 @@ export class ExpressionParser {
     }
   }
 
+  public generateJavaScript(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {
+    const collector = context?.errorCollector
+    if (collector === undefined) return this.generateJs(node, renames, context)
+    try {
+      return this.generateJs(node, renames, context)
+    } catch (error) {
+      collector.add(error, context?.currentFilePath)
+      return ''
+    }
+  }
+
+  private generateJs(node: Node, renames?: Record<string, string>, context?: ParsingContext): string {
+    const cloned = cloneNode(node, true)
+    this.normalizeTree(cloned, false, renames, context, true)
+    const raw = generate(cloned).code
+    return this.postprocess(this.transpileWithCache(raw))
+  }
+
   private generate(node: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): string {
     return _match(isTemplateLiteral(node))
       .with(true, () => this.templateParser.parse(node as TemplateLiteral, context, renames))
@@ -140,10 +170,25 @@ export class ExpressionParser {
 
   private transpileNode(node: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): string {
     const cloned = cloneNode(node, true)
-    traverseFast(cloned, (child) => this.normalizeNode(child, inCondition, renames, context))
+    this.normalizeTree(cloned, inCondition, renames, context, false)
     const raw = generate(cloned).code
     const transpiled = this.transpileWithCache(raw)
     return this.postprocess(transpiled)
+  }
+
+  private normalizeTree(node: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext, inJs = false): void {
+    const nestedJs = inJs || isFunction(node)
+    this.normalizeNode(node, inCondition, renames, context, nestedJs)
+    // Rewrites replace nodes with identifiers but leave the old child keys behind;
+    // not descending into them avoids hoisting the same fallback twice.
+    if (isIdentifier(node) || isStringLiteral(node)) return
+    for (const key of VISITOR_KEYS[node.type] ?? []) {
+      const child = (node as unknown as Record<string, unknown>)[key]
+      const children = Array.isArray(child) ? child : [child]
+      for (const entry of children) {
+        if (isNode(entry)) this.normalizeTree(entry, inCondition, renames, context, nestedJs)
+      }
+    }
   }
 
   private transpileWithCache(raw: string): string {
@@ -163,15 +208,15 @@ export class ExpressionParser {
     return transpiled
   }
 
-  private normalizeNode(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+  private normalizeNode(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext, inJs = false): void {
     this.applyRename(n, renames)
     this.foldOptional(n)
     this.stripConditionParens(n, inCondition)
     this.normalizeCall(n, inCondition, renames, context)
-    this.normalizeLogical(n, inCondition, renames, context)
+    this.normalizeLogical(n, inCondition, renames, context, inJs)
     this.normalizeUnary(n, renames, context)
     this.normalizeBinary(n, renames, context)
-    this.normalizeMember(n)
+    this.normalizeMember(n, inJs)
   }
 
   private stripConditionParens(n: Node, inCondition: boolean): void {
@@ -211,11 +256,12 @@ export class ExpressionParser {
       .exec()
   }
 
-  private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext): void {
+  private normalizeLogical(n: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext, inJs = false): void {
+    if (inJs) return
     if ((n as { type?: string }).type === 'Identifier') return
     if (!isLogicalExpression(n)) return
     const op = (n as LogicalExpression).operator
-    if (!(op === '??' || (op === '&&' && !inCondition))) return
+    if (!(op === '??' || ((op === '&&' || op === '||') && !inCondition))) return
     const processed = context?.processedNodes
 
     const marker = n as Node & { __liquidifyNormalized?: string }
@@ -274,7 +320,11 @@ export class ExpressionParser {
           `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% else %}{% assign ${temp} = ${code} %}{% endif %}`,
       )
       .with(
-        true,
+        '||',
+        () => `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% assign ${temp} = ${code} %}{% endif %}`,
+      )
+      .with(
+        operator,
         () => `{% if ${temp} == nil or ${temp} == "" or ${temp} == false or ${temp} == 0 %}{% assign ${temp} = ${code} %}{% endif %}`,
       )
       .exec() as string
@@ -1008,14 +1058,14 @@ export class ExpressionParser {
     return temporary
   }
 
-  private normalizeMember(n: Node): void {
+  private normalizeMember(n: Node, inJs = false): void {
     _match(isMemberExpression(n))
-      .with(true, () => this.normalizeMemberExpression(n))
+      .with(true, () => this.normalizeMemberExpression(n, inJs))
       .with(false, () => undefined)
       .exec()
   }
 
-  private normalizeMemberExpression(n: Node): void {
+  private normalizeMemberExpression(n: Node, inJs = false): void {
     const m = n as { property?: unknown; computed?: boolean }
     const prop = m.property as Node | undefined
     const isLength =
@@ -1023,12 +1073,45 @@ export class ExpressionParser {
       (prop?.type === 'StringLiteral' && (prop as { value: string }).value === 'length')
     _match(true)
       .with(this.isCssModuleReference(n), () => Object.assign(n, stringLiteral(this.cssModuleName(n))))
+      .with(!inJs && this.isBrowserLocationReference(n), () => Object.assign(n, identifier(this.browserLocationCode(n))))
       .with(isMemberExpression(n) && isLength, () => {
         ;(n as { property: { name: string } }).property = identifier('size') as unknown as { name: string }
         ;(n as { computed: boolean }).computed = false
       })
       .with(true, () => undefined)
       .exec()
+  }
+
+  private isBrowserLocationReference(n: Node): boolean {
+    return this.browserLocationProperty(n) !== null
+  }
+
+  private browserLocationProperty(n: Node): string | null {
+    const member = n as { object?: Node; property?: Node; computed?: boolean }
+    const property = this.staticMemberName(member.property, member.computed === true)
+    if (property === null || BROWSER_LOCATION_MEMBERS[property] === undefined) return null
+    const object = member.object as Node | undefined
+    if (object === undefined) return null
+    if (isIdentifier(object, { name: 'location' })) return property
+    if (!isMemberExpression(object)) return null
+    const parent = object as { object?: Node; property?: Node; computed?: boolean }
+    const parentProperty = this.staticMemberName(parent.property, parent.computed === true)
+    return parentProperty === 'location' &&
+      isIdentifier(parent.object as Node) &&
+      BROWSER_LOCATION_ROOTS.has((parent.object as { name: string }).name)
+      ? property
+      : null
+  }
+
+  private staticMemberName(property: Node | undefined, computed: boolean): string | null {
+    if (property === undefined) return null
+    if (!computed && isIdentifier(property)) return (property as { name: string }).name
+    if (isStringLiteral(property)) return (property as { value: string }).value
+    return null
+  }
+
+  private browserLocationCode(n: Node): string {
+    return BROWSER_LOCATION_MEMBERS[this.browserLocationProperty(n) as string]
   }
 
   private isCssModuleReference(n: Node): boolean {

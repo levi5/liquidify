@@ -41,6 +41,9 @@ export class LiquidHtmlParser {
     }
     const attributeContext = isSvg && context?.inSvg !== true ? ParsingContext.derive(context, { inSvg: true }) : context
     const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, attributeContext)
+    // Attribute expressions may hoist temporary assigns/captures. Keep them outside
+    // the tag so quoted Liquid literals never break the HTML attribute delimiters.
+    const pending = this.expressionParser.getPendingAssigns(attributeContext ?? context)
     const childContext = _match(tagName === 'style' || tagName === 'script' || isSvg)
       .with(true, () =>
         ParsingContext.derive(context, {
@@ -59,13 +62,13 @@ export class LiquidHtmlParser {
       .with(tagName === 'liquid-data' && state.bridge.length > 0, () => children)
       .exec() as string
     return _match(Boolean(node.closingElement || state.hasRawHtml || tagName === 'liquid-data'))
-      .with(true, () => `<${tagName}${attributes}>${withBridge}</${tagName}>`)
+      .with(true, () => `${pending}<${tagName}${attributes}>${withBridge}</${tagName}>`)
       .with(
         false,
         () =>
           _match(voidTags.has(tagName))
-            .with(true, () => `<${tagName}${attributes} />`)
-            .with(false, () => `<${tagName}${attributes}></${tagName}>`)
+            .with(true, () => `${pending}<${tagName}${attributes} />`)
+            .with(false, () => `${pending}<${tagName}${attributes}></${tagName}>`)
             .exec() as string,
       )
       .exec() as string

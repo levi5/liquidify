@@ -5,6 +5,7 @@ import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
 import { CollectionFilter } from '../../components/Filter/Collection'
+import { ActiveFilters } from '../../components/Filter/Active'
 import { FilterDrawer } from '../../components/Filter/Drawer'
 import { Catalog } from '../../components/Catalog'
 import { Breadcrumb } from '../../components/Breadcrumb'
@@ -54,6 +55,7 @@ export const MainCollection = () => {
 						</div>
 					</div>
 
+					<RenderSnippet slot={ActiveFilters} filters={collection.filters} />
 					<RenderSnippet slot={Catalog} by={section.settings.products_per_page} />
 				</div>
 			</div>

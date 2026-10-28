@@ -1,5 +1,6 @@
 'use sections'
 
+import { t } from 'liquidify'
 import { RenderSnippet, RenderSvg } from 'liquidex'
 
 import { Carousel } from '../../../../components/Carousel'
@@ -24,19 +25,19 @@ export const BannerHero = () => {
 					<div className={styles.benefit}>
 						<RenderSvg name='premium.svg' />
 						<p>
-							<span>2 anos de garantia</span> em qualquer produto
+							<span>{t('values.warranty_title')}</span> {t('values.warranty_text')}
 						</p>
 					</div>
 					<div className={styles.benefit}>
 						<RenderSvg name='credit-card.svg' />
 						<p>
-							<span>Parcelamento</span> em até 10x sem juros
+							<span>{t('values.installments_title')}</span> {t('values.installments_text')}
 						</p>
 					</div>
 					<div className={styles.benefit}>
 						<RenderSvg name='delivery.svg' />
 						<p>
-							<span>Entrega rápida</span> para todo o Brasil
+							<span>{t('values.delivery_title')}</span> {t('values.delivery_text')}
 						</p>
 					</div>
 				</div>

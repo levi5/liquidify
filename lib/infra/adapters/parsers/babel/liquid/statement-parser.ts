@@ -22,6 +22,7 @@ import {
   isBinaryExpression,
   isNumericLiteral,
   isUnaryExpression,
+  isNullLiteral,
   variableDeclarator,
   type Statement,
   type ReturnStatement,
@@ -107,18 +108,53 @@ export class LiquidStatementParser {
   }
 
   private renderReturn(statement: ReturnStatement, renames?: Record<string, string>, context?: ParsingContext): string {
-    return _match(statement.argument === null || statement.argument === undefined)
+    const argument = statement.argument
+    return _match(
+      argument === null ||
+        argument === undefined ||
+        isNullLiteral(argument as Node) ||
+        isIdentifier(argument as Node, { name: 'undefined' }),
+    )
       .with(true, () => '')
-      .with(false, () => this.render(statement.argument as Expression, renames, context))
+      .with(false, () => this.render(argument as Expression, renames, context))
       .exec() as string
   }
 
   private renderBranch(statement: IfStatement, rest: Statement[], renames?: Record<string, string>, context?: ParsingContext): string {
     const yes = this.renderBody(this.branchBlock(statement.consequent), renames, context)
-    const no = statement.alternate ? this.renderBody(this.branchBlock(statement.alternate as Statement), renames, context) : ''
-    const tail = rest.length > 0 ? this.renderBody(rest, renames, context) : ''
+    const earlyExit = (statement.alternate === undefined || statement.alternate === null) && this.isReturnBranch(statement.consequent)
+    const no = _match(true)
+      .with(earlyExit, () => (rest.length > 0 ? this.renderBody(rest, renames, context) : ''))
+      .with(this.isReturnBranch(statement.alternate), () =>
+        this.renderBody(this.branchBlock(statement.alternate as Statement), renames, context),
+      )
+      .with(statement.alternate !== undefined && statement.alternate !== null, () =>
+        this.renderBody(this.branchBlock(statement.alternate as Statement), renames, context),
+      )
+      .with(true, () => '')
+      .exec() as string
+    const tail = _match(earlyExit || this.returnsFromBothBranches(statement))
+      .with(true, () => '')
+      .with(false, () => (rest.length > 0 ? this.renderBody(rest, renames, context) : ''))
+      .exec() as string
     const markup = renderCondition(statement.test, yes, no, (node: Node) => this.variables.generateLiquidCode(node, true, renames, context))
     return `${this.pendingAssignsOf(context)}${markup}${tail}`
+  }
+
+  private isReturnBranch(node: Statement | null | undefined): boolean {
+    return _match(true)
+      .with(node === undefined || node === null, () => false)
+      .with(isReturnStatement(node as Statement), () => true)
+      .with(isBlockStatement(node as Statement), () => {
+        const body = (node as BlockStatement).body
+        return body.length > 0 && isReturnStatement(body[body.length - 1] as Statement)
+      })
+      .with(true, () => false)
+      .exec() as boolean
+  }
+
+  private returnsFromBothBranches(statement: IfStatement): boolean {
+    return this.isReturnBranch(statement.consequent) && this.isReturnBranch(statement.alternate)
   }
 
   private branchBlock(node: Statement): Statement[] {

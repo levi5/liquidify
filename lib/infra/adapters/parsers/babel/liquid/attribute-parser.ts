@@ -231,13 +231,17 @@ export class LiquidAttributeConverter {
   }
 
   private conditionMarkup(test: Expression, yes: string, no: string, renames?: Record<string, string>, context?: ParsingContext): string {
-    const markup = renderCondition(test, yes, no, (node) => this.expressionParser.generateLiquidCode(node, true, renames, context))
-    return `${this.pendingOf(context)}${markup}`
+    return renderCondition(test, yes, no, (node) => this.expressionParser.generateLiquidCode(node, true, renames, context))
   }
 
   private renderValue(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
+    const rendered = this.renderValueRaw(expression, renames, context)
+    return this.hoistQuotedMarkup(rendered, context)
+  }
+
+  private renderValueRaw(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
     return _match(true)
-      .with(isStringLiteral(expression), () => this.renderStringValue(expression as { value: string }))
+      .with(isStringLiteral(expression), () => this.renderStringValue(expression as { value: string }, context))
       .with(isConditionalExpression(expression), () => this.renderConditionalValue(expression as ConditionalExpression, renames, context))
       .with(isLogicalExpression(expression) && (expression as LogicalExpression).operator === '??', () =>
         this.renderNilCoalescing(expression as LogicalExpression, renames, context),
@@ -256,13 +260,9 @@ export class LiquidAttributeConverter {
       .with(
         true,
         () =>
-          `${this.pendingOf(context)}{% if ${guard} %}${this.renderValue(expression.right as Expression, renames, context)}{% else %}${this.renderValue(expression.left as Expression, renames, context)}{% endif %}`,
+          `{% if ${guard} %}${this.renderValueRaw(expression.right as Expression, renames, context)}{% else %}${this.renderValueRaw(expression.left as Expression, renames, context)}{% endif %}`,
       )
-      .with(
-        false,
-        () =>
-          `${this.pendingOf(context)}{% if ${guard} %}{% else %}${this.renderValue(expression.right as Expression, renames, context)}{% endif %}`,
-      )
+      .with(false, () => `{% if ${guard} %}{% else %}${this.renderValueRaw(expression.right as Expression, renames, context)}{% endif %}`)
       .exec() as string
   }
 
@@ -294,10 +294,10 @@ export class LiquidAttributeConverter {
     return false
   }
 
-  private renderStringValue(expression: { value: string }): string {
+  private renderStringValue(expression: { value: string }, context?: ParsingContext): string {
     const isLiquidFilter =
       /[a-zA-Z0-9_.)\]"']\s*\|\s*[a-zA-Z_]/.test(expression.value) && !expression.value.includes('{{') && !expression.value.includes('{%')
-    return isLiquidFilter ? escapedOutput(expression.value.trim()) : escapeAttributeTemplate(expression.value)
+    return isLiquidFilter ? this.renderAttributeCode(expression.value.trim(), context) : escapeAttributeTemplate(expression.value)
   }
 
   private renderConditionalValue(expression: ConditionalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -308,7 +308,7 @@ export class LiquidAttributeConverter {
 
   private renderNilCoalescing(expression: LogicalExpression, renames?: Record<string, string>, context?: ParsingContext): string {
     const left = this.expressionParser.generateLiquidCode(expression.left, false, renames, context)
-    return `{% if ${left} != nil %}${this.renderValue(expression.left as Expression, renames, context)}{% else %}${this.renderValue(expression.right as Expression, renames, context)}{% endif %}`
+    return `{% if ${left} != nil %}${this.renderValueRaw(expression.left as Expression, renames, context)}{% else %}${this.renderValueRaw(expression.right as Expression, renames, context)}{% endif %}`
   }
 
   private renderCodeValue(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -319,7 +319,49 @@ export class LiquidAttributeConverter {
         context?.currentFilePath,
       )
     }
-    return `${this.pendingOf(context)}${escapedOutput(code)}`
+    return this.renderAttributeCode(code, context)
+  }
+
+  private renderAttributeCode(code: string, context?: ParsingContext): string {
+    const trimmed = code.trim()
+    const alreadyEscaped = /(?:\|)\s*(?:escape(?:_once)?|json)\b/.test(trimmed)
+    return _match(context !== undefined && this.hasDoubleQuote(trimmed))
+      .with(true, () => {
+        const temp = (context as ParsingContext).allocateName('attribute')
+        ;(context as ParsingContext).addPendingAssign(`{% assign ${temp} = ${trimmed} %}`)
+        return alreadyEscaped ? `{{ ${temp} }}` : `{{ ${temp} | escape }}`
+      })
+      .with(false, () => escapedOutput(trimmed))
+      .exec() as string
+  }
+
+  private hoistQuotedMarkup(markup: string, context?: ParsingContext): string {
+    return _match(context !== undefined && this.hasDoubleQuote(markup))
+      .with(true, () => {
+        const parsed = context as ParsingContext
+        const temp = parsed.allocateName('attribute')
+        parsed.addPendingAssign(`{% capture ${temp} %}${markup}{% endcapture %}`)
+        return `{{ ${temp} }}`
+      })
+      .with(false, () => markup)
+      .exec() as string
+  }
+
+  private hasDoubleQuote(code: string): boolean {
+    let single = false
+    let escaped = false
+    for (const c of code) {
+      if (escaped) {
+        escaped = false
+      } else if (c === '\\') {
+        escaped = true
+      } else if (c === "'") {
+        single = !single
+      } else if (c === '"' && !single) {
+        return true
+      }
+    }
+    return false
   }
 
   private isBooleanExpression(node: Expression): boolean {
@@ -342,7 +384,7 @@ export class LiquidAttributeConverter {
             context?.currentFilePath,
           )
         }
-        return ` style="${this.pendingOf(context)}${escapedOutput(code)}"`
+        return ` style="${this.renderAttributeCode(code, context)}"`
       })
       .exec() as string
   }
@@ -353,7 +395,7 @@ export class LiquidAttributeConverter {
     const markup = renderCondition(expression.test, yes, no, (node) =>
       this.expressionParser.generateLiquidCode(node, true, renames, context),
     )
-    return ` style="${this.pendingOf(context)}${markup}"`
+    return ` style="${this.hoistQuotedMarkup(markup, context)}"`
   }
 
   private renderStyleString(expression: Expression, renames?: Record<string, string>, context?: ParsingContext): string {
@@ -374,7 +416,7 @@ export class LiquidAttributeConverter {
             context?.currentFilePath,
           )
         }
-        return escapedOutput(code)
+        return this.renderAttributeCode(code, context)
       })
       .exec() as string
   }
@@ -441,10 +483,6 @@ export class LiquidAttributeConverter {
       .with(true, () => converted.toLowerCase())
       .with(false, () => converted)
       .exec() as string
-  }
-
-  private pendingOf(context?: ParsingContext): string {
-    return context === undefined ? '' : (context as ParsingContext).getPendingAssigns()
   }
 }
 

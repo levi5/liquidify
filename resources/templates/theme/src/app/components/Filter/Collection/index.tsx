@@ -33,7 +33,7 @@ export const CollectionFilter = ({ heading = '', sectionId }: { heading?: string
 							<button className='button button-dark' type='submit'>
 								{t('filters.apply')}
 							</button>
-							<a className='text-link' href={`${request.path}?sort_by=${urlEncode(defaultValue(collection.sort_by, collection.default_sort_by))}`}>
+							<a className='text-link' href={request.path + '?sort_by=' + urlEncode(defaultValue(collection.sort_by, collection.default_sort_by))}>
 								{t('filters.clear')}
 							</a>
 						</div>

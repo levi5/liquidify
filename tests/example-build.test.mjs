@@ -65,12 +65,29 @@ describe('example store build', { timeout: 120000 }, () => {
 
     assert.match(read(output, 'sections/header.liquid'), /{% schema %}/)
     assert.match(read(output, 'sections/product-info.liquid'), /<react-island/)
+    assert.match(read(output, 'sections/product-info.liquid'), /{{ product\.description }}/)
+    assert.match(read(output, 'sections/main-collection.liquid'), /{% render 'active-filters', filters: collection\.filters %}/)
     assert.match(read(output, 'snippets/card.liquid'), /{% if /)
     assert.match(read(output, 'snippets/script-global.liquid'), /asset_url/)
     assert.ok(read(output, 'assets/react-runtime.js').length > 10000)
 
     const manifest = JSON.parse(read(output, manifestName))
     assert.ok(Object.keys(manifest.entries).length > 50, 'manifest should track every example source')
+  })
+
+  it('active filters snippet keeps Liquid blocks out of HTML tags', async (t) => {
+    const { output, builder, errors } = setup(t)
+    await builder.build()
+    assert.deepEqual(errors, [])
+
+    const snippet = read(output, 'snippets/active-filters.liquid')
+    assert.match(snippet, /request\.path/)
+    for (const [tag] of snippet.matchAll(/<[a-z][^>]*>/gi)) {
+      assert.doesNotMatch(tag, /{%/, `Liquid block inside an HTML tag: ${tag}`)
+    }
+    for (const [, output] of snippet.matchAll(/{{(.*?)}}/g)) {
+      assert.doesNotMatch(output, /\bor\b/, `bare "or" leaked into output: {{${output}}}`)
+    }
   })
 
   it('every section ships a schema and no liquid output leaks undefined', async (t) => {
