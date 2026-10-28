@@ -8,9 +8,9 @@
 /locales
 /src
 node_modules
-/templates
-pnpm-lock.yaml
+# pnpm-lock.yaml is tracked so CI can install with --frozen-lockfile
 package-lock.json
+/templates
 .shopifyignore
 !resources/**/.shopifyignore
 dist
@@ -28,3 +28,13 @@ liquidx_docs*
 review.md
 # Generated file ownership metadata
 .liquidify-manifest.json
+
+# Local secrets and credentials (never commit)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.npmrc
