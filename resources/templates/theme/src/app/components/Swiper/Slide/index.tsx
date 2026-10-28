@@ -16,6 +16,8 @@ import 'swiper/css/autoplay'
 import 'swiper/css/effect-fade'
 import '../styles.css'
 
+type SlideChild = Exclude<Parameters<typeof SwiperSlide>[0]['children'], (...args: never[]) => unknown>
+
 const toCount = (value: string | number | undefined, fallback: number) => {
 	const parsed = Number(value)
 
@@ -150,7 +152,7 @@ export const SwiperCarousel: FC<
 			modules={[Autoplay, Pagination, EffectFade]}
 			direction={(params as { direction?: 'horizontal' | 'vertical' }).direction ?? 'horizontal'}
 			loop={loopMode}
-			onSwiper={(swiperInstance: typeof Swiper | null) => {
+			onSwiper={(swiperInstance: SwiperInstance) => {
 				setLocalSwiper(swiperInstance)
 				if (register && setSwiper) {
 					setSwiper(swiperInstance)
@@ -158,8 +160,8 @@ export const SwiperCarousel: FC<
 			}}
 		>
 			{slides.map((child: ReactNode, index: number) => (
-				<SwiperSlide key={index}>{child}</SwiperSlide>
-			))}
+				<SwiperSlide key={index}>{child as unknown as SlideChild}</SwiperSlide>
+			)) as unknown as SlideChild}
 		</Swiper>
 	)
 }
