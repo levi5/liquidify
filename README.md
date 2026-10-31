@@ -1,6 +1,6 @@
 # Liquidify 🚀
 
-> **Status:** Alpha — `v1.1.0-alpha.4`
+> **Status:** Alpha — `v1.1.0-alpha.5`
 
 **Liquidify** is an advanced compiler that transforms **JSX/TSX** components into **Shopify Liquid** code, powered by Babel and esbuild. Write your Shopify theme sections and snippets using React-like syntax and let Liquidify compile them into production-ready `.liquid` files.
 

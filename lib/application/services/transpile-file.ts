@@ -25,6 +25,10 @@ export class TranspileFileUseCase {
     await this.generator.abortBuild?.()
   }
 
+  async stageRuntime(content: string): Promise<void> {
+    await this.generator.stageRuntime?.(content)
+  }
+
   async execute(source: string, filePath?: string): Promise<TranspileStatus> {
     return _match(source.trim() === '')
       .with(true, () => Promise.resolve<TranspileStatus>('skipped-empty'))

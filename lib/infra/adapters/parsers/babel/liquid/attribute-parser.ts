@@ -324,7 +324,7 @@ export class LiquidAttributeConverter {
 
   private renderAttributeCode(code: string, context?: ParsingContext): string {
     const trimmed = code.trim()
-    const alreadyEscaped = /(?:\|)\s*(?:escape(?:_once)?|json)\b/.test(trimmed)
+    const alreadyEscaped = /\|\s*escape(?:_once)?\s*$/.test(trimmed)
     return _match(context !== undefined && this.hasDoubleQuote(trimmed))
       .with(true, () => {
         const temp = (context as ParsingContext).allocateName('attribute')

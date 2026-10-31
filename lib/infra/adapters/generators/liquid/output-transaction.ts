@@ -8,9 +8,11 @@ export class OutputTransaction {
   constructor(
     private readonly fs: IFileSystem,
     private readonly logger: Logger,
+    private readonly root?: string,
   ) {}
 
   private async remember(file: string): Promise<void> {
+    if (this.root) this.fs.assertSafePath?.(file, this.root)
     await _match(this.originals.has(file))
       .with(true, () => undefined)
       .with(false, () => this.capture(file))
@@ -46,12 +48,13 @@ export class OutputTransaction {
   }
 
   private async restore(file: string, content: string | undefined, failures: string[]): Promise<void> {
-    const result = await _try.async(() =>
-      _match(content === undefined)
+    const result = await _try.async(() => {
+      if (this.root) this.fs.assertSafePath?.(file, this.root)
+      return _match(content === undefined)
         .with(true, () => this.fs.unlink(file))
         .with(false, () => this.fs.writeFile(file, content as string))
-        .exec(),
-    )
+        .exec()
+    })
     result.match({
       right: () => undefined,
       left: () => failures.push(file),

@@ -211,8 +211,9 @@ function loadTypeScriptPlugin(filePath: string): unknown {
   const module = { exports: {} as Record<string, unknown> }
 
   const script = new vm.Script(`(function(module, exports, require) {\n${result.code}\n})`, { filename: filePath })
-  const fn = script.runInThisContext({ timeout: 5000 }) as (m: unknown, e: unknown, r: unknown) => void
-  fn(module, module.exports, nodeRequire)
+  // Plugins are trusted code, not a sandbox. Resolve imports relative to the plugin.
+  const fn = script.runInThisContext() as (m: unknown, e: unknown, r: unknown) => void
+  fn(module, module.exports, createRequire(filePath))
   return module.exports
 }
 

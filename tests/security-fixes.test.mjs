@@ -15,16 +15,20 @@ describe('security fixes', () => {
 
   it('does not execute object props via new Function', async () => {
     const parser = makeParser()
+    parser.setReactRegistry(new Map([['MyIsland', { rootId: '', script: 'my-island.js', mode: 'react' }]]))
     const src = `"use snippets"; export default function A(){ return <div><MyIsland data={{ a: 1, b: [true, null] }} /></div> }`
     const out = await parser.parse(src, '/tmp/A.tsx')
-    assert.ok(typeof out.html === 'string')
+    const json = out.html.match(/data-react-props>(.*?)<\/script>/s)?.[1]
+    assert.ok(json, 'must exercise island prop serialization')
+    assert.deepEqual(JSON.parse(json), { data: { a: 1, b: [true, null] } })
   })
 
-  it('falls back to liquid json for non-static props instead of eval', async () => {
+  it('serializes dynamic Liquid props as script-safe JSON instead of evaluating them', async () => {
     const parser = makeParser()
-    const src = `"use snippets"; import {x} from './x'; export default function A(){ return <div>{x}</div> }`
+    parser.setReactRegistry(new Map([['MyIsland', { rootId: '', script: 'my-island.js', mode: 'react' }]]))
+    const src = `"use snippets"; export default function A(){ return <MyIsland data={product.title} /> }`
     const out = await parser.parse(src, '/tmp/B.tsx')
-    assert.ok(out.html.includes('x') || out.html === '')
+    assert.match(out.html, /"data": {{ product.title \| json \| replace: '<', '\\u003c' }}/)
   })
 
   it('liquid helpers build assigns', () => {

@@ -24,7 +24,7 @@ import { ValidationService } from '../../application/services/validation-service
 
 export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder {
   const logger = new ConsoleLogger()
-  const fileSystem = new NodeFileSystem()
+  const fileSystem = new NodeFileSystem(options.output)
   const compiler = new EsbuildCompiler()
   const astParser = new ASTParser()
   const resolver = new ModuleResolver(fileSystem)

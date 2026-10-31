@@ -28,7 +28,23 @@ Global scripts and shared CSS use sections delimited by `liquidify:start` and `l
 
 Old files created before the manifest was adopted are not deleted automatically. Old global references without the delimiters are also preserved; remove obsolete references once when migrating.
 
-Component output writes are deferred until every selected component has compiled and passed validation. Compilation errors preserve the previous outputs. This is not a filesystem transaction: disk write failures can still interrupt the final write.
+Component and runtime output writes are deferred until every selected component has compiled and passed validation. Compilation errors preserve the previous outputs. Write failures trigger a best-effort rollback, including the runtime and manifest. Each file is replaced atomically using a temporary file in the same directory; a process crash can still interrupt the multi-file commit. This is not a crash-safe filesystem transaction.
+
+`assets/react-runtime.js` is tracked by its hash in the manifest. Unmanaged or manually modified runtimes are not overwritten unless `force` is enabled. An identical pre-existing runtime can be adopted without `force`.
+
+The Node filesystem adapter rejects symbolic links at the output root and anywhere below it, including files, aggregate outputs and the manifest. Use real directories for generated output. These checks are not a sandbox against another process concurrently replacing directory entries; build in a workspace writable only by trusted users.
+
+## Trusted plugins
+
+Local and npm plugins execute with the same filesystem, network and process privileges as the compiler. The TypeScript loader is not a sandbox and imposes no execution timeout. Never build an untrusted config or load an untrusted plugin outside an isolated environment. TypeScript plugin imports resolve relative to the plugin file. Relative JavaScript/CommonJS dependencies work through Node's `require`; dependent TypeScript files need a compatible loader or must be precompiled.
+
+## React island props and escaping
+
+Static props preserve booleans, nulls, numbers (including negative numbers), objects and arrays. `undefined` is serialized as JSON `null`. Liquid variables and supported Liquid helper calls such as `t(...)` are serialized with the JSON filter and script-safe escaping. Unsupported expressions produce a diagnostic instead of silently becoming `true`. Object and array literals must contain static values.
+
+The hydration hint accepts `eager`, `eager={true}` or `eager={false}`. Dynamic values are rejected.
+
+JSON serialization is not HTML escaping. Values rendered in HTML text or attributes still need a final `escape`/`escape_once` filter, even after `json`. Raw HTML APIs remain explicit trust boundaries and must never receive unsanitized user content.
 
 ## Data and schema imports
 

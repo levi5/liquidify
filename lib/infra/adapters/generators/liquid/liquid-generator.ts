@@ -39,6 +39,11 @@ export class LiquidFileSystemGenerator implements IGenerator {
     this.inBuild = true
   }
 
+  public async stageRuntime(content: string): Promise<void> {
+    await this.ensureDirectories()
+    await this.manifest.stageRuntime(content)
+  }
+
   public async finishBuild(): Promise<void> {
     await this.manifest.finish()
     this.inBuild = false
@@ -55,6 +60,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
   }
 
   private async writeOutput(file: string, content: string, sourcePath?: string): Promise<void> {
+    this.fileSystem.assertSafePath?.(file, this.options.outputDir)
     await _match(sourcePath === undefined)
       .with(true, () => this.fileSystem.writeFile(file, content))
       .with(false, () => this.manifest.write(sourcePath as string, file, content))
@@ -364,6 +370,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
   }
 
   private async ensureDirectory(dir: string): Promise<void> {
+    this.fileSystem.assertSafePath?.(dir, this.options.outputDir)
     await _match(await this.fileSystem.exists(dir))
       .with(true, () => undefined)
       .with(false, () => this.createDirectory(dir))

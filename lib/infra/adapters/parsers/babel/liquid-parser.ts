@@ -117,6 +117,7 @@ export class LiquidParser implements ILiquidExpressionParser {
       this.importResolver,
       () => undefined,
       (children, renames, context) => this.renderChildren(children, renames, context),
+      (node, context) => this.expressionParser.generateLiquidCode(node, false, undefined, context),
     )
 
     this.snippetParser = new LiquidSnippetParser(

@@ -13,9 +13,8 @@ export function escapeHtml(value: string): string {
 
 export function escapedOutput(code: string): string {
   const trimmed = code.trim()
-  const hasEscape = /(?:\|)\s*escape(?:_once)?\b/.test(trimmed)
-  const hasJson = /(?:\|)\s*json\b/.test(trimmed)
-  const escaped = _match(hasEscape || hasJson)
+  const hasEscape = /\|\s*escape(?:_once)?\s*$/.test(trimmed)
+  const escaped = _match(hasEscape)
     .with(true, () => trimmed)
     .with(false, () => `${trimmed} | escape`)
     .exec() as string

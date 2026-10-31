@@ -138,9 +138,11 @@ export class LiquidifyBuilder extends EventEmitter {
     const signature = JSON.stringify([...registry].sort((a, b) => (a[0] < b[0] ? -1 : 1)))
     const changed = this.registrySignature !== '' && signature !== this.registrySignature ? new Set(files) : plan.changed
     this.parser.setReactRegistry(registry)
-    await this.refreshRuntime()
     await this.useCase.beginBuild(files, changed)
-    const built = await _try.async(() => this.buildComponents(files.filter((file) => changed.has(file))))
+    const built = await _try.async(async () => {
+      await this.refreshRuntime()
+      await this.buildComponents(files.filter((file) => changed.has(file)))
+    })
     await built.match({
       right: () => this.useCase.finishBuild(),
       left: (error: unknown) =>
@@ -153,17 +155,8 @@ export class LiquidifyBuilder extends EventEmitter {
   }
 
   private async refreshRuntime(): Promise<void> {
-    const assetsDir = path.join(this.options.output, 'assets')
-    if (!this.fileSystem.existsSync(assetsDir)) this.fileSystem.mkdirSync(assetsDir, true)
     if (this.runtimeScript === undefined) this.runtimeScript = await this.runtimeBuilder.build()
-    const runtimePath = path.join(assetsDir, 'react-runtime.js')
-    const stale = _try
-      .sync(() => (this.fileSystem.existsSync(runtimePath) ? this.fileSystem.readFileSync(runtimePath) : null))
-      .match({
-        right: (current) => current !== this.runtimeScript,
-        left: () => true,
-      })
-    if (stale) this.fileSystem.writeFileSync(runtimePath, this.runtimeScript as string)
+    await this.useCase.stageRuntime(this.runtimeScript)
   }
 
   private async buildComponents(files: string[]) {
