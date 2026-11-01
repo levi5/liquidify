@@ -11,7 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "funcio": "^0.0.32",
+    "funcio": "^0.1.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
