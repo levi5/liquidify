@@ -68,7 +68,7 @@
     "@babel/parser": "^7.29.9",
     "@babel/traverse": "^7.29.8",
     "@babel/types": "^7.29.8",
-    "chokidar": "^4.0.3",
+    "chokidar": "^6.0.0",
     "classnames": "^2.5.1",
     "esbuild": "^0.28.2",
     "funcio": "^0.0.32",
