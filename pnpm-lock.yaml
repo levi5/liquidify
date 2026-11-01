@@ -30,8 +30,8 @@ importers:
         specifier: ^0.28.2
         version: 0.28.2
       funcio:
-        specifier: ^0.0.32
-        version: 0.0.32
+        specifier: ^0.1.0
+        version: 0.1.0
       glob:
         specifier: ^14.0.2
         version: 14.0.3
@@ -89,8 +89,8 @@ importers:
   web:
     dependencies:
       funcio:
-        specifier: ^0.0.32
-        version: 0.0.32
+        specifier: ^0.1.0
+        version: 0.1.0
       react:
         specifier: ^19.1.0
         version: 19.3.1
@@ -969,8 +969,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  funcio@0.0.32:
-    resolution: {integrity: sha512-x0A/BvtWHmks04XfH9rKyInZGcHSG3LX8YpXfm0YDnQEoBS5JY771OxLcKJXU5k7otRxXBXKv9DkW2tSgDN+pg==}
+  funcio@0.1.0:
+    resolution: {integrity: sha512-POUnTVigN9SR6A8ZtRwmUptUTw2abKMCDAF8VGAqTY46RXTeNJQzBddxSZMMGpAXb3eBIPu7G/nL2gXoco60cw==}
 
   gensync@1.0.0-beta.2:
     resolution: {integrity: sha512-3hN7NaskYvMDLQY55gnW3NQ+mesEAepTqlg+VEbj7zzqEMBVNhzcGYYeqFo/TlYz6eQiFcp1HcsCZO+nGgS8zg==}
@@ -1951,7 +1951,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  funcio@0.0.32: {}
+  funcio@0.1.0: {}
 
   gensync@1.0.0-beta.2: {}
 
