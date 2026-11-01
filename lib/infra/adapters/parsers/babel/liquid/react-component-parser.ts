@@ -3,9 +3,11 @@ import { _match } from 'funcio'
 import { escapeHtml, jsonForHtml, liquidJsonOutput } from '../../../../../shared/html'
 import type { ReactComponentConfig } from '../../../../../types/liquid'
 import type { ImportResolver, ImportInfo } from './import-resolver'
-import type { Expression, JSXAttribute, JSXElement, JSXEmptyExpression, JSXExpressionContainer, Node } from '@babel/types'
-import { isJSXAttribute, isJSXExpressionContainer, isJSXIdentifier, isStringLiteral } from '@babel/types'
-import { evaluateStatic, NOT_STATIC, type StaticValue } from '../css/import-extractor'
+import type { Expression, JSXAttribute, JSXElement, JSXEmptyExpression, JSXExpressionContainer } from '@babel/types'
+import { cloneNode, isCallExpression, isJSXAttribute, isJSXExpressionContainer, isJSXIdentifier, isStringLiteral } from '@babel/types'
+import { evaluateStatic, NOT_STATIC } from '../css/import-extractor'
+import { ValidationError } from '../../../../../core/errors/validation-error'
+import { HelperCallParser } from './helper-call-parser'
 
 import type { ParsingContext } from '../../../../../core/entities/parsing-context'
 
@@ -26,6 +28,7 @@ export class ReactComponentParser {
       renames?: Record<string, string>,
       context?: ParsingContext,
     ) => string,
+    private readonly generateCode?: (node: Expression, context?: ParsingContext) => string,
   ) {}
 
   public transformReactComponent(node: JSXElement, tagName: string, context?: ParsingContext): string {
@@ -77,9 +80,21 @@ export class ReactComponentParser {
     const propName = (attr.name as { name: string }).name
     return _match(propName)
       .with('elementId', () => this.collectElementId(acc, attr, context))
-      .with('eager', () => ({ ...acc, eager: true }))
+      .with('eager', () => ({ ...acc, eager: this.eagerValue(attr, context) }))
       .with(propName, () => ({ ...acc, props: [...acc.props, `"${propName}": ${this.propValueOf(attr, context)}`] }))
       .exec() as CollectedProps
+  }
+
+  private eagerValue(attr: JSXAttribute, context?: ParsingContext): boolean {
+    if (attr.value === null) return true
+    if (isJSXExpressionContainer(attr.value)) {
+      const value = evaluateStatic(attr.value.expression)
+      if (typeof value === 'boolean') return value
+    }
+    throw new ValidationError(
+      'React island eager must be a static boolean (eager, eager={true} or eager={false}).',
+      context?.currentFilePath,
+    )
   }
 
   private collectElementId(acc: CollectedProps, attr: JSXAttribute, context?: ParsingContext): CollectedProps {
@@ -96,11 +111,7 @@ export class ReactComponentParser {
     return _match(true)
       .with(isStringLiteral(attr.value), () => jsonForHtml((attr.value as { value: string }).value))
       .with(isJSXExpressionContainer(attr.value), () =>
-        this.parseExpressionContainer(
-          (attr.value as JSXExpressionContainer).expression as Expression | JSXEmptyExpression,
-          'true',
-          context,
-        ),
+        this.parseExpressionContainer((attr.value as JSXExpressionContainer).expression as Expression | JSXEmptyExpression, context),
       )
       .with(true, () => 'true')
       .exec() as string
@@ -122,23 +133,26 @@ export class ReactComponentParser {
       .exec() as Expression | undefined
   }
 
-  private parseExpressionContainer(expression: Expression | JSXEmptyExpression, fallbackValue: string, context?: ParsingContext): string {
+  private parseExpressionContainer(expression: Expression | JSXEmptyExpression, context?: ParsingContext): string {
+    const evaluated = evaluateStatic(expression)
+    if (evaluated !== NOT_STATIC) return jsonForHtml(evaluated === undefined ? null : evaluated)
+    if (isCallExpression(expression) && this.generateCode) {
+      const call = cloneNode(expression, true)
+      const helper = new HelperCallParser((node) => this.generateCode!(node as Expression, context))
+      if (helper.rewriteHelperCall(call, false, undefined, context)) return liquidJsonOutput(generate(call).code)
+    }
     return _match(true)
-      .with(expression.type === 'StringLiteral' || expression.type === 'NumericLiteral' || expression.type === 'BooleanLiteral', () =>
-        jsonForHtml((expression as { value: string | number | boolean }).value),
-      )
-      .with(expression.type === 'ObjectExpression' || expression.type === 'ArrayExpression', () => this.staticPropValue(expression as Node))
+      .with(expression.type === 'ObjectExpression' || expression.type === 'ArrayExpression', () => {
+        throw new ValidationError('React island object and array props must contain only static values.', context?.currentFilePath)
+      })
       .with(expression.type === 'Identifier', () => this.identifierPropValue(expression as Expression, context))
       .with(expression.type === 'MemberExpression', () => liquidJsonOutput(generate(expression as Expression).code))
-      .with(true, () => fallbackValue)
-      .exec() as string
-  }
-
-  private staticPropValue(expression: Node): string {
-    const evaluated = evaluateStatic(expression)
-    return _match(evaluated === NOT_STATIC)
-      .with(true, () => liquidJsonOutput(generate(expression as Expression).code))
-      .with(false, () => jsonForHtml((evaluated as StaticValue) === undefined ? null : evaluated))
+      .with(true, () => {
+        throw new ValidationError(
+          `Unsupported React island prop expression: ${expression.type}. Pass a static value or a Liquid variable.`,
+          context?.currentFilePath,
+        )
+      })
       .exec() as string
   }
 

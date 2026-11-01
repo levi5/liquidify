@@ -29,6 +29,9 @@ export class OutputManifest {
   private readonly root: string
   private readonly manifestPath: string
   private readonly force: boolean
+  private previousRuntime?: string
+  private runtimeContent?: string
+  private runtimeHash?: string
 
   constructor(
     output: string,
@@ -45,10 +48,16 @@ export class OutputManifest {
   }
 
   public async begin(files: string[], changed: Set<string>): Promise<void> {
+    this.fs.assertSafePath?.(this.manifestPath, this.root)
     await _match(await this.fs.exists(this.manifestPath))
       .with(true, () => this.loadPrevious())
-      .with(false, () => undefined)
+      .with(false, () => {
+        this.previous = {}
+        this.previousRuntime = undefined
+      })
       .exec()
+    this.runtimeContent = undefined
+    this.runtimeHash = this.previousRuntime
     this.writes.clear()
     const active = new Set(files.map((file) => path.resolve(file)))
     await _Array.forEachAsync(Object.entries(this.previous), ([source, entry]) =>
@@ -64,6 +73,8 @@ export class OutputManifest {
   public async abort(): Promise<void> {
     this.writes.clear()
     this.next = structuredClone(this.backup)
+    this.runtimeContent = undefined
+    this.runtimeHash = this.previousRuntime
   }
 
   private async loadPrevious(): Promise<void> {
@@ -77,6 +88,31 @@ export class OutputManifest {
         },
       })
     this.previous = this.validateManifest(stored)
+    const runtime = (stored as { runtime?: unknown }).runtime
+    if (runtime !== undefined && (typeof runtime !== 'string' || !HASH_PATTERN.test(runtime))) {
+      throw new ValidationError('Invalid runtime hash in output manifest.', this.manifestPath)
+    }
+    this.previousRuntime = runtime as string | undefined
+  }
+
+  public async stageRuntime(content: string): Promise<void> {
+    const file = this.safePath('assets/react-runtime.js')
+    const hash = digest(content)
+    if (await this.fs.exists(file)) {
+      const existing = digest(await this.fs.readFile(file))
+      if (!this.force && existing !== hash && existing !== this.previousRuntime) {
+        throw new ValidationError(
+          'Output conflict: assets/react-runtime.js is unmanaged or user-modified. Use force to overwrite it.',
+          file,
+        )
+      }
+      if (existing === hash) {
+        this.runtimeHash = hash
+        return
+      }
+    }
+    this.runtimeContent = content
+    this.runtimeHash = hash
   }
 
   private async markMissingOutputs(source: string, entry: Entry, changed: Set<string>): Promise<void> {
@@ -230,17 +266,23 @@ export class OutputManifest {
       })
       .with(false, () => undefined)
       .exec()
+    this.fs.assertSafePath?.(resolved, this.root)
     return resolved
   }
 
   public async finish(): Promise<void> {
-    const transaction = new OutputTransaction(this.fs, this.logger)
+    const transaction = new OutputTransaction(this.fs, this.logger, this.root)
     try {
+      if (this.runtimeContent !== undefined) await transaction.write(this.safePath('assets/react-runtime.js'), this.runtimeContent)
       await _Array.forEachAsync([...this.writes], ([file, content]) => transaction.write(file, content))
       await this.collectStale(transaction)
       await this.writeAggregates(transaction)
-      await transaction.write(this.manifestPath, JSON.stringify({ version: MANIFEST_VERSION, entries: this.next }, null, 2))
+      await transaction.write(
+        this.manifestPath,
+        JSON.stringify({ version: MANIFEST_VERSION, entries: this.next, runtime: this.runtimeHash }, null, 2),
+      )
       this.previous = structuredClone(this.next)
+      this.previousRuntime = this.runtimeHash
     } catch (error) {
       await transaction.rollback()
       throw error
@@ -300,6 +342,7 @@ export class OutputManifest {
     write: (file: string, content: string) => Promise<void>,
   ): Promise<void> {
     const file = path.join(this.root, relative)
+    this.fs.assertSafePath?.(file, this.root)
     const exists = await this.fs.exists(file)
     const previous = _match(exists)
       .with(true, () => this.fs.readFile(file))

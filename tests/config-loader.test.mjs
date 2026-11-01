@@ -65,6 +65,17 @@ describe('ConfigLoader', () => {
     assert.deepEqual(ConfigLoader.load(cwd), loadConfig(cwd))
     assert.equal(ConfigLoader.load(cwd).react.strictCsp, false)
   })
+
+  it('resolves TypeScript plugin dependencies relative to the plugin file', () => {
+    const plugins = path.join(cwd, '.plugins')
+    fs.mkdirSync(plugins)
+    fs.writeFileSync(path.join(plugins, 'name.cjs'), "module.exports = 'relative-plugin'")
+    fs.writeFileSync(path.join(plugins, 'example.ts'), "import name from './name.cjs'; export default { name, setup() {} }")
+    fs.writeFileSync(path.join(cwd, 'liquidify.config.json'), JSON.stringify({ plugins: ['example'] }))
+    const config = loadConfig(cwd)
+    assert.equal(config.plugins[0].name, 'relative-plugin')
+    assert.equal(typeof config.plugins[0].setup, 'function')
+  })
 })
 
 describe('React configuration validation', () => {

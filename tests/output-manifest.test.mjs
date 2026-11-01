@@ -14,6 +14,8 @@ const invalid = [
   ['array manifest', '[]'],
   ['unsupported version', JSON.stringify({ version: 2, entries: {} })],
   ['array entries', JSON.stringify({ version: 1, entries: [] })],
+  ['invalid runtime hash', JSON.stringify({ ...wrap(validEntry), runtime: 'invalid' })],
+  ['non-string runtime hash', JSON.stringify({ ...wrap(validEntry), runtime: null })],
   ...[
     ['null entry', null],
     ['array entry', []],

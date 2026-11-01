@@ -5,4 +5,5 @@ export interface IGenerator {
   beginBuild?(files: string[], changed: Set<string>): Promise<void>
   finishBuild?(): Promise<void>
   abortBuild?(): Promise<void>
+  stageRuntime?(content: string): Promise<void>
 }

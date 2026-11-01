@@ -11,6 +11,9 @@ on:
       - "web/**"
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: web-quality-${{ github.ref }}
   cancel-in-progress: true
@@ -33,7 +36,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: web/pnpm-lock.yaml
       - name: Install docs deps
-        run: pnpm --dir web install --ignore-workspace
+        run: pnpm --dir web install --ignore-workspace --frozen-lockfile
+      - name: Audit docs dependencies
+        run: pnpm --dir web audit --ignore-workspace --audit-level=moderate
       - name: Typecheck + build
         run: pnpm --dir web build
       - name: Check SEO artifacts

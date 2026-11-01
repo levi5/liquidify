@@ -39,9 +39,11 @@ describe('bugfix regressions', () => {
     assert.ok(parent.scriptAssets.has('x.js'))
   })
 
-  it('escapedOutput does not double-escape and respects json', () => {
-    assert.equal(escapedOutput('v | escape | upcase'), '{{ v | escape | upcase }}')
-    assert.equal(escapedOutput('v | json'), '{{ v | json }}')
+  it('escapedOutput requires a final HTML escape even after json', () => {
+    assert.equal(escapedOutput('v | escape'), '{{ v | escape }}')
+    assert.equal(escapedOutput('v | escape_once'), '{{ v | escape_once }}')
+    assert.equal(escapedOutput('v | escape | upcase'), '{{ v | escape | upcase | escape }}')
+    assert.equal(escapedOutput('v | json'), '{{ v | json | escape }}')
     assert.equal(escapedOutput('v'), '{{ v | escape }}')
   })
 
