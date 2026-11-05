@@ -121,7 +121,7 @@ export class ModuleResolver {
       .with(true, () => specifier.slice(prefix.length, specifier.length - suffix.length))
       .with(false, () => '')
       .exec() as string
-    return targets.map((target) => path.resolve(base, target.replace('*', middle)))
+    return targets.map((target) => path.resolve(base, target.replace(/\*/g, middle)))
   }
 
   public resolve(specifier: string, importer: string): string | null {
