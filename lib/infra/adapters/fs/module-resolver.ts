@@ -99,7 +99,7 @@ export class ModuleResolver {
 
   private matchAlias(specifier: string, config: ResolvedConfig): string[] {
     const base = config.baseUrl ?? config.pathsBasePath
-    const aliases = Object.entries(config.paths).sort(([a], [b]) => b.replace('*', '').length - a.replace('*', '').length)
+    const aliases = Object.entries(config.paths).sort(([a], [b]) => b.replaceAll('*', '').length - a.replaceAll('*', '').length)
     const hit = aliases.find(([pattern]) => this.patternMatches(pattern, specifier))
     return _match(hit === undefined)
       .with(true, () => [path.resolve(base, specifier)])
