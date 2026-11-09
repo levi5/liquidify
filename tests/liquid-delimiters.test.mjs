@@ -86,7 +86,13 @@ describe('preprocessLiquidExpressions', () => {
   })
 
   it('rewrites single-brace Liquid filters', () => {
-    for (const inner of ['x | default: 1', 'x\t|\tdefault_2\t: 1', 'x | first | default: 1', 'x | _filter2: 1', 'x || fallback | default: 1']) {
+    for (const inner of [
+      'x | default: 1',
+      'x\t|\tdefault_2\t: 1',
+      'x | first | default: 1',
+      'x | _filter2: 1',
+      'x || fallback | default: 1',
+    ]) {
       assert.equal(preprocessLiquidExpressions(`<p>{${inner}}</p>`), `<p>{${JSON.stringify(inner)}}</p>`)
     }
   })
