@@ -84,4 +84,35 @@ describe('preprocessLiquidExpressions', () => {
   it('keeps a valid JS expression container untouched', () => {
     assert.equal(preprocessLiquidExpressions('return <div className={a.b} />'), 'return <div className={a.b} />')
   })
+
+  it('rewrites single-brace Liquid filters', () => {
+    for (const inner of ['x | default: 1', 'x\t|\tdefault_2\t: 1', 'x | first | default: 1']) {
+      assert.equal(preprocessLiquidExpressions(`<p>{${inner}}</p>`), `<p>{${JSON.stringify(inner)}}</p>`)
+    }
+  })
+
+  it('preserves strings, comments and JavaScript expressions containing pipes', () => {
+    for (const source of [
+      'const a = "{x | default: 1}"',
+      "const a = '{x | default: 1}'",
+      'const a = `{x | default: 1}`',
+      '// {x | default: 1}',
+      '/* {x | default: 1} */',
+      '<p>{x || fallback}</p>',
+      '<p>{x | y}</p>',
+      '<p>{x ? y | z : fallback}</p>',
+      '<p>{x || default: 1}</p>',
+      '<p>{x &| default: 1}</p>',
+      '<p>{x | default}</p>',
+    ]) {
+      assert.equal(preprocessLiquidExpressions(source), source)
+    }
+  })
+
+  it('preserves large whitespace inputs without backtracking', { timeout: 5000 }, () => {
+    const whitespace = '\t'.repeat(100_000)
+    for (const source of [`{%${whitespace}`, `{x${whitespace}y}`, `{x | filter${whitespace}}`]) {
+      assert.equal(preprocessLiquidExpressions(source), source)
+    }
+  })
 })

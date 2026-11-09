@@ -3,8 +3,12 @@ import { LiquidifyError } from '../../../../core/errors/liquidify-error'
 import { parse, parseExpression } from '@babel/parser'
 import type { File } from '@babel/types'
 
-const LIQUID_PIPE_PATTERN =
-  /("(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*)|(\{([^{}]*?[^|&]\s*\|\s*[a-zA-Z_][a-zA-Z0-9_]*\s*:[^{}]*?)\})/g
+const LIQUID_STRING_OR_BRACES_PATTERN =
+  /("(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*)|(\{([^{}]*)\})/g
+
+const WHITESPACE = /\s/
+const IDENTIFIER_START = /[a-zA-Z_]/
+const IDENTIFIER_PART = /[a-zA-Z0-9_]/
 
 const LIQUID_TAGS = new Set([
   'assign',
@@ -369,13 +373,27 @@ const replaceLiquidOutputs = (source: string): string => {
 
 const replaceLiquidPipes = (source: string): string =>
   source.replace(
-    LIQUID_PIPE_PATTERN,
-    (_matched, strOrComment, fullBraces, inner) =>
-      _match(strOrComment !== undefined)
-        .with(true, () => strOrComment as string)
-        .with(false, () => preprocessBraces(fullBraces as string, inner as string))
-        .exec() as string,
+    LIQUID_STRING_OR_BRACES_PATTERN,
+    (matched: string, strOrComment: string | undefined, fullBraces: string, inner: string) => {
+      if (strOrComment !== undefined || !hasLiquidPipe(inner)) return matched
+      return preprocessBraces(fullBraces, inner)
+    },
   )
+
+function hasLiquidPipe(inner: string): boolean {
+  for (let i = 0; i < inner.length; i++) {
+    if (inner[i] !== '|') continue
+    if (i === 0 || inner[i - 1] === '|' || inner[i - 1] === '&') continue
+    let j = i + 1
+    while (j < inner.length && WHITESPACE.test(inner[j])) j++
+    if (j >= inner.length || !IDENTIFIER_START.test(inner[j])) continue
+    j++
+    while (j < inner.length && IDENTIFIER_PART.test(inner[j])) j++
+    while (j < inner.length && WHITESPACE.test(inner[j])) j++
+    if (j < inner.length && inner[j] === ':') return true
+  }
+  return false
+}
 
 function preprocessBraces(fullBraces: string, inner: string): string {
   const trimmed = inner.trim()
