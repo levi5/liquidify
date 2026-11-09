@@ -59,9 +59,13 @@ export default defineConfig({
     chunkSizeWarningLimit: 300,
     rollupOptions: {
       output: {
-        manualChunks: {
-          react: ["react", "react-dom"],
-          funcio: ["funcio"],
+        manualChunks(id) {
+          if (id.includes("/node_modules/react/") || id.includes("/node_modules/react-dom/") || id.includes("/node_modules/scheduler/")) {
+            return "react";
+          }
+          if (id.includes("/node_modules/funcio/")) {
+            return "funcio";
+          }
         },
       },
     },
