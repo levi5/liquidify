@@ -93,7 +93,7 @@
     "@babel/core": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
     "@babel/preset-typescript": "^7.29.7",
-    "@biomejs/biome": "^2.5.14",
+    "@biomejs/biome": "^2.6.5",
     "@types/babel__core": "^7.20.5",
     "@types/babel__generator": "^7.27.0",
     "@types/babel__traverse": "^7.28.0",

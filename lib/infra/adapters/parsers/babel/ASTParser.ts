@@ -3,8 +3,10 @@ import { LiquidifyError } from '../../../../core/errors/liquidify-error'
 import { parse, parseExpression } from '@babel/parser'
 import type { File } from '@babel/types'
 
-const LIQUID_PIPE_PATTERN =
-  /("(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*)|(\{([^{}]*?[^|&]\s*\|\s*[a-zA-Z_][a-zA-Z0-9_]*\s*:[^{}]*?)\})/g
+const LIQUID_STRING_OR_BRACES_PATTERN =
+  /("(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*)|(\{([^{}]*)\})/g
+
+const FILTER_NAME_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*/
 
 const LIQUID_TAGS = new Set([
   'assign',
@@ -369,13 +371,25 @@ const replaceLiquidOutputs = (source: string): string => {
 
 const replaceLiquidPipes = (source: string): string =>
   source.replace(
-    LIQUID_PIPE_PATTERN,
-    (_matched, strOrComment, fullBraces, inner) =>
-      _match(strOrComment !== undefined)
-        .with(true, () => strOrComment as string)
-        .with(false, () => preprocessBraces(fullBraces as string, inner as string))
-        .exec() as string,
+    LIQUID_STRING_OR_BRACES_PATTERN,
+    (matched: string, strOrComment: string | undefined, fullBraces: string, inner: string) => {
+      if (strOrComment !== undefined || !hasLiquidPipe(inner)) return matched
+      return preprocessBraces(fullBraces, inner)
+    },
   )
+
+function hasLiquidPipe(inner: string): boolean {
+  return inner.split('|').some((segment, index, segments) => {
+    const previous = segments[index - 1]
+    return Boolean(previous) && !previous.endsWith('&') && hasFilterArguments(segment)
+  })
+}
+
+function hasFilterArguments(segment: string): boolean {
+  const trimmed = segment.trimStart()
+  const name = FILTER_NAME_PATTERN.exec(trimmed)?.[0]
+  return name !== undefined && trimmed.slice(name.length).trimStart().startsWith(':')
+}
 
 function preprocessBraces(fullBraces: string, inner: string): string {
   const trimmed = inner.trim()
