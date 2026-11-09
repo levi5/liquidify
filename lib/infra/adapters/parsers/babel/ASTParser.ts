@@ -6,9 +6,7 @@ import type { File } from '@babel/types'
 const LIQUID_STRING_OR_BRACES_PATTERN =
   /("(?:\\[\s\S]|[^"\\])*"|'(?:\\[\s\S]|[^'\\])*'|`(?:\\[\s\S]|[^`\\])*`|\/\*[\s\S]*?\*\/|\/\/[^\r\n]*)|(\{([^{}]*)\})/g
 
-const WHITESPACE = /\s/
-const IDENTIFIER_START = /[a-zA-Z_]/
-const IDENTIFIER_PART = /[a-zA-Z0-9_]/
+const FILTER_NAME_PATTERN = /^[a-zA-Z_][a-zA-Z0-9_]*/
 
 const LIQUID_TAGS = new Set([
   'assign',
@@ -381,18 +379,16 @@ const replaceLiquidPipes = (source: string): string =>
   )
 
 function hasLiquidPipe(inner: string): boolean {
-  for (let i = 0; i < inner.length; i++) {
-    if (inner[i] !== '|') continue
-    if (i === 0 || inner[i - 1] === '|' || inner[i - 1] === '&') continue
-    let j = i + 1
-    while (j < inner.length && WHITESPACE.test(inner[j])) j++
-    if (j >= inner.length || !IDENTIFIER_START.test(inner[j])) continue
-    j++
-    while (j < inner.length && IDENTIFIER_PART.test(inner[j])) j++
-    while (j < inner.length && WHITESPACE.test(inner[j])) j++
-    if (j < inner.length && inner[j] === ':') return true
-  }
-  return false
+  return inner.split('|').some((segment, index, segments) => {
+    const previous = segments[index - 1]
+    return Boolean(previous) && !previous.endsWith('&') && hasFilterArguments(segment)
+  })
+}
+
+function hasFilterArguments(segment: string): boolean {
+  const trimmed = segment.trimStart()
+  const name = FILTER_NAME_PATTERN.exec(trimmed)?.[0]
+  return name !== undefined && trimmed.slice(name.length).trimStart().startsWith(':')
 }
 
 function preprocessBraces(fullBraces: string, inner: string): string {

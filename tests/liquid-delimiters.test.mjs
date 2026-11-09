@@ -86,7 +86,7 @@ describe('preprocessLiquidExpressions', () => {
   })
 
   it('rewrites single-brace Liquid filters', () => {
-    for (const inner of ['x | default: 1', 'x\t|\tdefault_2\t: 1', 'x | first | default: 1']) {
+    for (const inner of ['x | default: 1', 'x\t|\tdefault_2\t: 1', 'x | first | default: 1', 'x | _filter2: 1', 'x || fallback | default: 1']) {
       assert.equal(preprocessLiquidExpressions(`<p>{${inner}}</p>`), `<p>{${JSON.stringify(inner)}}</p>`)
     }
   })
@@ -104,6 +104,10 @@ describe('preprocessLiquidExpressions', () => {
       '<p>{x || default: 1}</p>',
       '<p>{x &| default: 1}</p>',
       '<p>{x | default}</p>',
+      '<p>{| default: 1}</p>',
+      '<p>{x ||| default: 1}</p>',
+      '<p>{x | 2filter: 1}</p>',
+      '<p>{x | filter-name: 1}</p>',
     ]) {
       assert.equal(preprocessLiquidExpressions(source), source)
     }
@@ -111,7 +115,16 @@ describe('preprocessLiquidExpressions', () => {
 
   it('preserves large whitespace inputs without backtracking', { timeout: 5000 }, () => {
     const whitespace = '\t'.repeat(100_000)
-    for (const source of [`{%${whitespace}`, `{x${whitespace}y}`, `{x | filter${whitespace}}`]) {
+    const identifier = 'a'.repeat(100_000)
+    const pipes = ' | filter '.repeat(10_000)
+    for (const source of [
+      `{%${whitespace}`,
+      `{x${whitespace}y}`,
+      `{x | filter${whitespace}}`,
+      `{x | ${whitespace}}`,
+      `{x | ${identifier}${whitespace}}`,
+      `{x${pipes}}`,
+    ]) {
       assert.equal(preprocessLiquidExpressions(source), source)
     }
   })
