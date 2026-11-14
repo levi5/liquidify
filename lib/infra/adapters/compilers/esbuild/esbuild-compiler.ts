@@ -1,5 +1,5 @@
 import * as esbuild from 'esbuild'
-import type { BuildResult, Compiler, BuildOptions, TranspileOptions } from '../../../../core/protocols/compiler'
+import type { BuildResult, Compiler, BuildOptions, TranspileOptions } from '@core/protocols/compiler'
 
 export class EsbuildCompiler implements Compiler {
   constructor(private readonly options: { mode?: 'development' | 'production'; sourcemap?: boolean } = {}) {}

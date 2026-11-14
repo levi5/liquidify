@@ -11,13 +11,13 @@ import {
   isEmptyStatement,
   type Statement,
 } from '@babel/types'
-import type { ComponentMetadataType } from '../../../../../types/component'
+import type { ComponentMetadataType } from '@liquidify-types/component'
 
-import { ExportParser } from './export-parser'
-import { DirectiveParser } from './directive-parser'
-import { StatementCollector } from './statement-collector'
-import { VariableParser } from './variable-parser'
-import { FunctionBodyParser } from './function-body-parser'
+import { ExportParser } from '@adapters/parsers/babel/component/export-parser'
+import { DirectiveParser } from '@adapters/parsers/babel/component/directive-parser'
+import { StatementCollector } from '@adapters/parsers/babel/component/statement-collector'
+import { VariableParser } from '@adapters/parsers/babel/component/variable-parser'
+import { FunctionBodyParser } from '@adapters/parsers/babel/component/function-body-parser'
 
 export class ComponentExtractor {
   private readonly statementCollector: StatementCollector

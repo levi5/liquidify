@@ -1,5 +1,5 @@
-import type { LiquidifyError } from '../errors/liquidify-error'
-import type { ProjectBuildResult } from './build-result'
+import type { LiquidifyError } from '@core/errors/liquidify-error'
+import type { ProjectBuildResult } from '@core/entities/build-result'
 
 export interface BuilderEvents {
   'build:start': []

@@ -1,13 +1,13 @@
 import { EventEmitter } from 'node:events'
-import type { LiquidifyPlugin } from '../../core/protocols/plugin'
-import type { BuildWatcher, BuildWatcherFactory } from '../../core/protocols/build-watcher'
-import type { ProjectBuildResult, BuildRequest } from '../../core/entities/build-result'
-import type { BuilderEvents } from '../../core/entities/builder-events'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
-import type { Logger } from '../../shared/logger'
-import type { ProjectBuildPipeline } from './project-build-pipeline'
-import { PluginRunner } from './plugin-runner'
-import { BuildDiagnostics } from './build-diagnostics'
+import type { LiquidifyPlugin } from '@core/protocols/plugin'
+import type { BuildWatcher, BuildWatcherFactory } from '@core/protocols/build-watcher'
+import type { ProjectBuildResult, BuildRequest } from '@core/entities/build-result'
+import type { BuilderEvents } from '@core/entities/builder-events'
+import { LiquidifyError } from '@core/errors/liquidify-error'
+import type { Logger } from '@shared/logger'
+import type { ProjectBuildPipeline } from '@application/services/project-build-pipeline'
+import { PluginRunner } from '@application/services/plugin-runner'
+import { BuildDiagnostics } from '@application/services/build-diagnostics'
 
 export class LiquidifyBuilder extends EventEmitter<BuilderEvents> {
   private buildQueue: Promise<unknown> = Promise.resolve()
@@ -90,7 +90,6 @@ export class LiquidifyBuilder extends EventEmitter<BuilderEvents> {
     void this.dispose().catch((error: unknown) => this.logger.error('Failed to dispose builder:', error))
   }
 
-  // Compatibility accessors for integrations that inspected the previous implementation.
   get watcher() {
     return this.projectWatcher.handle
   }

@@ -1,6 +1,6 @@
 'use snippets'
 
-import { TBadgesMetaField } from '../../../types/meta/badges'
+import { TBadgesMetaField } from '@theme/types/meta/badges'
 
 import styles from './styles.css'
 

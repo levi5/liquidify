@@ -1,14 +1,14 @@
 import { _Array, _match } from 'funcio'
 import path from 'node:path'
-import type { ASTParser } from '../../infra/adapters/parsers/babel/ASTParser'
-import { ValidationError } from '../../core/errors/validation-error'
-import type { IParser } from '../../core/protocols/parser'
-import type { IFileSystem } from '../../core/protocols/file-system'
-import type { ReactComponentConfig } from '../../types/liquid'
-import { pascalToKebab } from '../../shared/string'
-import { DOM_DIRECTIVE_PATTERN, REACT_DIRECTIVE_PATTERN } from '../../shared/liquid-constants'
-import type { ComponentDirectives } from '../../core/protocols/project-compilation'
-export type { ComponentDirectives } from '../../core/protocols/project-compilation'
+import type { ASTParser } from '@adapters/parsers/babel/ASTParser'
+import { ValidationError } from '@core/errors/validation-error'
+import type { IParser } from '@core/protocols/parser'
+import type { IFileSystem } from '@core/protocols/file-system'
+import type { ReactComponentConfig } from '@liquidify-types/liquid'
+import { pascalToKebab } from '@shared/string'
+import { DOM_DIRECTIVE_PATTERN, REACT_DIRECTIVE_PATTERN } from '@shared/liquid-constants'
+import type { ComponentDirectives } from '@core/protocols/project-compilation'
+export type { ComponentDirectives } from '@core/protocols/project-compilation'
 
 export interface ScannedComponent {
   name: string

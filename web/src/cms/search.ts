@@ -1,5 +1,5 @@
-import type { Locale } from "../i18n.tsx";
-import type { NameGroup } from "../docs/search-index.ts";
+import type { Locale } from "#web/i18n.tsx";
+import type { NameGroup } from "#web/docs/search-index.ts";
 
 export type SearchCopy = {
   open: string;

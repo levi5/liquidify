@@ -1,5 +1,5 @@
-export { DOCS_CHAPTERS } from "./docs.ts";
-export { API_CHAPTERS } from "./api.ts";
+export { DOCS_CHAPTERS } from "#web/cms/docs.ts";
+export { API_CHAPTERS } from "#web/cms/api.ts";
 export {
   SCHEMA_TSX as SCHEMA_REF_TSX,
   SCHEMA_LIQUID,
@@ -8,7 +8,7 @@ export {
   CONTENT_FOR,
   SCHEMA_COPY,
   type SchemaCopy,
-} from "./schema.ts";
+} from "#web/cms/schema.ts";
 export {
   JSX_EVENT,
   ACTION_TSX,
@@ -18,7 +18,7 @@ export {
   DATA_ATTRS,
   ISLANDS_COPY,
   type IslandsCopy,
-} from "./islands.ts";
+} from "#web/cms/islands.ts";
 export {
   SECTIONS_TSX,
   SECTIONS_LIQUID,
@@ -44,9 +44,9 @@ export {
   EQUIV_LIQUID,
   VALIDATION_ERROR_TSX,
   VALIDATION_OK_TSX,
-} from "./directives.ts";
-export { HERO_TSX, HERO_LIQUID, HERO_COPY, type HeroCopy } from "./hero.ts";
-export { CLI, API, CI, CLI_COPY, type CliCopy } from "./cli.ts";
+} from "#web/cms/directives.ts";
+export { HERO_TSX, HERO_LIQUID, HERO_COPY, type HeroCopy } from "#web/cms/hero.ts";
+export { CLI, API, CI, CLI_COPY, type CliCopy } from "#web/cms/cli.ts";
 export {
   HELLO_TSX,
   HELLO_LIQUID,
@@ -56,10 +56,10 @@ export {
   TERMINAL_OK,
   HELLO_COPY,
   type HelloCopy,
-} from "./hello.ts";
-export { PLAYGROUND_PRESETS, type PlaygroundPresetId } from "./playground.ts";
-export { STORE_SETUP, STORE_COPY, type StoreBlock, type StoreCopy } from "./store-demo.ts";
-export { SEARCH_COPY, SEARCH_DEFAULT_NAMES, type SearchCopy } from "./search.ts";
+} from "#web/cms/hello.ts";
+export { PLAYGROUND_PRESETS, type PlaygroundPresetId } from "#web/cms/playground.ts";
+export { STORE_SETUP, STORE_COPY, type StoreBlock, type StoreCopy } from "#web/cms/store-demo.ts";
+export { SEARCH_COPY, SEARCH_DEFAULT_NAMES, type SearchCopy } from "#web/cms/search.ts";
 export {
   HELPER_TABLE,
   HELPER_USAGE,
@@ -75,7 +75,7 @@ export {
   HELPER_EX_DATE,
   FILTERS_COPY,
   type FiltersCopy,
-} from "./filters.ts";
+} from "#web/cms/filters.ts";
 export {
   ERROR_CLASSES,
   NAMING,
@@ -88,7 +88,7 @@ export {
   ERROR_LOOPS_ROWS,
   ERRORS_COPY,
   type ErrorsCopy,
-} from "./errors.ts";
+} from "#web/cms/errors.ts";
 export {
   TYPES_PRODUCT,
   TYPES_COLLECTION,
@@ -99,7 +99,7 @@ export {
   TYPES_USAGE_SNIPPET,
   TYPES_COPY,
   type TypesCopy,
-} from "./types.ts";
+} from "#web/cms/types.ts";
 export {
   RUNTIME_TS,
   EVENT_BUS,
@@ -108,7 +108,7 @@ export {
   WINDOW_GLOBALS,
   RUNTIME_COPY,
   type RuntimeCopy,
-} from "./runtime.ts";
+} from "#web/cms/runtime.ts";
 export {
   PLUGIN_INTERFACE,
   PLUGIN_EXAMPLE,
@@ -117,7 +117,7 @@ export {
   PLUGIN_PROGRAMMATIC,
   PLUGIN_COPY,
   type PluginCopy,
-} from "./plugins.ts";
+} from "#web/cms/plugins.ts";
 export {
   IMPORT,
   IMPORT_LOGIC,
@@ -152,4 +152,4 @@ export {
   BUILTINS_EXAMPLES,
   BUILTINS_EXAMPLES2,
   type BuiltinsCopy,
-} from "./builtins.ts";
+} from "#web/cms/builtins.ts";

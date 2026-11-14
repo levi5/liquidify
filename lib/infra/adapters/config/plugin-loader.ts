@@ -3,9 +3,9 @@ import path from 'node:path'
 import vm from 'node:vm'
 import { createRequire } from 'node:module'
 import { transformSync } from 'esbuild'
-import type { LiquidifyPlugin } from '../../../core/protocols/plugin'
-import { ValidationError } from '../../../core/errors/validation-error'
-import { tsxStatsPlugin } from '../../../presentation/cli/plugins/tsx-stats'
+import type { LiquidifyPlugin } from '@core/protocols/plugin'
+import { ValidationError } from '@core/errors/validation-error'
+import { tsxStatsPlugin } from '@presentation/cli/plugins/tsx-stats'
 
 const nodeRequire = createRequire(__filename)
 const LOCAL_NAME = /^[a-zA-Z0-9][a-zA-Z0-9_-]*$/
@@ -33,7 +33,7 @@ function loadTypeScriptPlugin(filename: string): unknown {
   const source = fs.readFileSync(filename, 'utf8')
   const transformed = transformSync(source, { loader: filename.endsWith('.tsx') ? 'tsx' : 'ts', format: 'cjs', target: 'es2020' })
   const module = { exports: {} }
-  // Plugins are trusted executable code. vm is not a security sandbox.
+
   const script = new vm.Script(`(function(module, exports, require) {\n${transformed.code}\n})`, { filename })
   const initialize = script.runInThisContext() as (module: unknown, exports: unknown, require: unknown) => void
   initialize(module, module.exports, createRequire(filename))

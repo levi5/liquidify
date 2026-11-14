@@ -1,6 +1,6 @@
 import { _match } from 'funcio'
-import type { Logger } from '../core/protocols/logger'
-export type { Logger } from '../core/protocols/logger'
+import type { Logger } from '@core/protocols/logger'
+export type { Logger } from '@core/protocols/logger'
 
 export class ConsoleLogger implements Logger {
   info(message: string): void {

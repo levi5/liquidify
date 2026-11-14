@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { pascalToKebab, placeholder } from '../dist/shared/string.js'
+import { pascalToKebab, placeholder } from '#dist/shared/string.js'
 
 describe('shared string helpers', () => {
   it('converts PascalCase to kebab-case', () => {

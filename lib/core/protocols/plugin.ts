@@ -1,5 +1,5 @@
-import type { ParsedComponent } from '../entities/parsed-component'
-import type { Logger } from './logger'
+import type { ParsedComponent } from '@core/entities/parsed-component'
+import type { Logger } from '@core/protocols/logger'
 
 export interface PluginStats {
   total: number

@@ -1,6 +1,6 @@
-import type { Locale } from "../i18n.tsx";
-import { DOCS_CHAPTERS } from "../cms/docs.ts";
-import { API_CHAPTERS } from "../cms/api.ts";
+import type { Locale } from "#web/i18n.tsx";
+import { DOCS_CHAPTERS } from "#web/cms/docs.ts";
+import { API_CHAPTERS } from "#web/cms/api.ts";
 
 export type T = { en: string; "pt-BR": string };
 

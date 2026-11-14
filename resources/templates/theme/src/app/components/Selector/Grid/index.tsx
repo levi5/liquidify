@@ -4,7 +4,7 @@ import classNames from 'classnames'
 import type { ReactNode } from 'preact/compat'
 import { useEffect, useRef } from 'preact/hooks'
 
-import { useProduct } from '../../../context/Product'
+import { useProduct } from '@theme/app/context/Product'
 import styles from '../styles.css'
 
 export const SelectorGrid = ({ name, options }: { name: string; elementId: string; options: string[]; children?: ReactNode }) => {

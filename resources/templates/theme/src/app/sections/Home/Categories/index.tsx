@@ -4,7 +4,7 @@ import { t, escape, imageUrl, assetUrl, defaultValue } from 'liquidify'
 
 import classNames from 'classnames'
 
-import { HOME_CATEGORIES_SCHEMA } from '../../../../schemas/Home/categories.schema'
+import { HOME_CATEGORIES_SCHEMA } from '@theme/schemas/Home/categories.schema'
 
 import styles from './styles.css'
 

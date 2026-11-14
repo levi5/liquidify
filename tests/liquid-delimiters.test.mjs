@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { preprocessLiquidDelimiters, preprocessLiquidExpressions } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
-import { makeParser } from './helpers.mjs'
+import { preprocessLiquidDelimiters, preprocessLiquidExpressions } from '#dist/infra/adapters/parsers/babel/ASTParser.js'
+import { makeParser } from '#tests/helpers.mjs'
 
 const compile = async (body, directive = "'use snippets'") => {
   const parser = makeParser()

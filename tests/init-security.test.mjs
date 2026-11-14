@@ -2,8 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import { copyTemplate } from '../dist/presentation/cli/commands/init.js'
-import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
+import { copyTemplate } from '#dist/presentation/cli/commands/init.js'
+import { createTemporaryDirectory } from '#tests/helpers/temp-directory.mjs'
 
 test('force initialization still refuses source and destination symlinks', (context) => {
   const directory = createTemporaryDirectory('liquidify-init-security-')

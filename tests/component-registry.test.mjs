@@ -1,8 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import path from 'node:path'
-import { ComponentRegistry, DirectiveScanner } from '../dist/application/services/component-registry.js'
-import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
+import { ComponentRegistry, DirectiveScanner } from '#dist/application/services/component-registry.js'
+import { ASTParser } from '#dist/infra/adapters/parsers/babel/ASTParser.js'
 
 const scanner = () => new DirectiveScanner(new ASTParser())
 

@@ -1,5 +1,5 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import {
   PLUGIN_INTERFACE,
   PLUGIN_EXAMPLE,
@@ -7,7 +7,7 @@ import {
   PLUGIN_BUILTIN,
   PLUGIN_PROGRAMMATIC,
   PLUGIN_COPY,
-} from "../../cms/plugins.ts";
+} from "#web/cms/plugins.ts";
 
 export default function PluginGuide() {
   const { locale } = useLocale();

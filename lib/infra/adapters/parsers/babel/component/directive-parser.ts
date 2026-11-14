@@ -1,6 +1,6 @@
 import { _match } from 'funcio'
 import { isDirective, isExpressionStatement, isStringLiteral, type Directive, type Statement } from '@babel/types'
-import type { ComponentMetadataType } from '../../../../../types/component'
+import type { ComponentMetadataType } from '@liquidify-types/component'
 
 const DIRECTIVE_USE_DOM = /^use dom(:global)?$/
 const DIRECTIVE_USE_SCRIPT = /^use script$/

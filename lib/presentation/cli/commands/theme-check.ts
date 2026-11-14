@@ -1,6 +1,6 @@
-import { loadConfig } from '../../../infra/adapters/config/config-loader'
-import { runShopifyThemeCheck } from '../../../infra/adapters/shopify/theme-check'
-import type { ParsedCliArgs } from '../args'
+import { loadConfig } from '@adapters/config/config-loader'
+import { runShopifyThemeCheck } from '@adapters/shopify/theme-check'
+import type { ParsedCliArgs } from '@presentation/cli/args'
 
 export async function runThemeCheck(options: ParsedCliArgs): Promise<void> {
   const configuration = loadConfig(process.cwd(), options.configPath, { plugins: false })

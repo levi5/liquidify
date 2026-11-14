@@ -1,15 +1,15 @@
 import generate from '@babel/generator'
 import { _match } from 'funcio'
-import { escapeHtml, jsonForHtml, liquidJsonOutput } from '../../../../../shared/html'
-import type { ReactComponentConfig } from '../../../../../types/liquid'
-import type { ImportResolver, ImportInfo } from './import-resolver'
+import { escapeHtml, jsonForHtml, liquidJsonOutput } from '@shared/html'
+import type { ReactComponentConfig } from '@liquidify-types/liquid'
+import type { ImportResolver, ImportInfo } from '@adapters/parsers/babel/liquid/import-resolver'
 import type { Expression, JSXAttribute, JSXElement, JSXEmptyExpression, JSXExpressionContainer } from '@babel/types'
 import { cloneNode, isCallExpression, isJSXAttribute, isJSXExpressionContainer, isJSXIdentifier, isStringLiteral } from '@babel/types'
-import { evaluateStatic, NOT_STATIC } from '../css/import-extractor'
-import { ValidationError } from '../../../../../core/errors/validation-error'
-import { HelperCallParser } from './helper-call-parser'
+import { evaluateStatic, NOT_STATIC } from '@adapters/parsers/babel/css/import-extractor'
+import { ValidationError } from '@core/errors/validation-error'
+import { HelperCallParser } from '@adapters/parsers/babel/liquid/helper-call-parser'
 
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 interface CollectedProps {
   props: string[]

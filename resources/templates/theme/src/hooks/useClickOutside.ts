@@ -1,5 +1,5 @@
 import { _Maybe } from 'funcio'
-import { useEventListener } from './useCustomEvent'
+import { useEventListener } from '@theme/hooks/useCustomEvent'
 import { RefObject } from 'preact'
 
 interface TRefWithContainsMethod<T extends HTMLElement = HTMLElement> extends RefObject<T> {

@@ -1,4 +1,4 @@
-import { ValidationError } from '../../core/errors/validation-error'
+import { ValidationError } from '@core/errors/validation-error'
 
 const SETTING_TYPES = new Set([
   'article',

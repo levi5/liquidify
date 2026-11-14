@@ -1,13 +1,12 @@
 import { once } from 'node:events'
 import chokidar, { type FSWatcher } from 'chokidar'
-import { loadConfig, configWatchPaths } from '../../infra/adapters/config/config-loader'
-import { makeLiquidifyBuilder } from '../../main/factories/make-liquidify-builder'
-import type { LiquidifyBuilder } from '../../application/services/liquidify-builder'
-import { SilentLogger } from '../../shared/logger'
-import type { ParsedCliArgs } from './args'
-import type { BuildReporter } from './build-reporter'
+import { loadConfig, configWatchPaths } from '@adapters/config/config-loader'
+import { makeLiquidifyBuilder } from '@main/factories/make-liquidify-builder'
+import type { LiquidifyBuilder } from '@application/services/liquidify-builder'
+import { SilentLogger } from '@shared/logger'
+import type { ParsedCliArgs } from '@presentation/cli/args'
+import type { BuildReporter } from '@presentation/cli/build-reporter'
 
-/** Owns CLI resources; configuration reloads replace builders only after their work settles. */
 export class BuildSession {
   private builder?: LiquidifyBuilder
   private configurationWatcher?: FSWatcher

@@ -1,5 +1,5 @@
-import type { Diagnostic } from '../../core/entities/build-result'
-import type { Logger } from '../../shared/logger'
+import type { Diagnostic } from '@core/entities/build-result'
+import type { Logger } from '@shared/logger'
 
 export class BuildDiagnostics {
   private entries: Diagnostic[] = []

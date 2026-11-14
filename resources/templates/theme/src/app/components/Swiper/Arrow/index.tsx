@@ -6,11 +6,11 @@ import { memo } from 'preact/compat'
 import type { Swiper } from 'swiper/types'
 import classNames from 'classnames'
 
-import { SwiperContext } from '../Root'
+import { SwiperContext } from '@theme/app/components/Swiper/Root'
 
-import type { SwiperComponentType } from '../../../../types/swiper'
-import { type SwiperSlider, useSwiperSlider } from '../../../../hooks/useSwiperSlider'
-import { translate } from '../../../i18n/translate'
+import type { SwiperComponentType } from '@theme/types/swiper'
+import { type SwiperSlider, useSwiperSlider } from '@theme/hooks/useSwiperSlider'
+import { translate } from '@theme/app/i18n/translate'
 
 import styles from '../styles.css'
 

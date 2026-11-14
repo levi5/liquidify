@@ -1,7 +1,7 @@
 import { _match } from 'funcio'
-import { ValidationError } from '../../core/errors/validation-error'
-import { validateSchemaSetting } from './schema-setting-validation'
-import { validateSchemaLimits, validateSchemaPresets } from './schema-preset-validation'
+import { ValidationError } from '@core/errors/validation-error'
+import { validateSchemaSetting } from '@application/services/schema-setting-validation'
+import { validateSchemaLimits, validateSchemaPresets } from '@application/services/schema-preset-validation'
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   _match(typeof value === 'object' && value !== null && !Array.isArray(value))

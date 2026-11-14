@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { _match, _Maybe } from "funcio";
-import type { Chapter } from "./manifest.ts";
+import type { Chapter } from "#web/docs/manifest.ts";
 
 function key(value: string): string {
   return (

@@ -1,7 +1,7 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { createTemporaryDirectory } from './temp-directory.mjs'
+import { createTemporaryDirectory } from '#tests/helpers/temp-directory.mjs'
 
 export const cliExecutable = path.resolve('dist/presentation/cli/index.js')
 

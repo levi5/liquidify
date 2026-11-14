@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
-import { cliExecutable, createCliProject, runCli } from './helpers/cli-project.mjs'
+import { cliExecutable, createCliProject, runCli } from '#tests/helpers/cli-project.mjs'
 
 for (const initialInvalid of [false, true]) {
   test(`watch reloads configuration (${initialInvalid ? 'initially invalid' : 'valid'})`, { timeout: 15000 }, async (context) => {

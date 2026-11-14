@@ -1,9 +1,9 @@
 'use snippets'
 
 import { Raw, RenderSvg } from 'liquidex'
-import type { LinksType } from '../../../../types/components/menu'
+import type { LinksType } from '@theme/types/components/menu'
 
-import { MenuMobileModal } from './modal'
+import { MenuMobileModal } from '@theme/app/components/Menu/Mobile/modal'
 
 import styles from './styles.css'
 

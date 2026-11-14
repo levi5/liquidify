@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useLocale } from "../../i18n.tsx";
-import CodeBlock from "../CodeBlock/index.tsx";
-import type { Lang } from "../CodeBlock/highlight";
+import { useLocale } from "#web/i18n.tsx";
+import CodeBlock from "#web/components/CodeBlock/index.tsx";
+import type { Lang } from "#web/components/CodeBlock/highlight";
 import styles from "./style.module.css";
 
 export default function Snippet({

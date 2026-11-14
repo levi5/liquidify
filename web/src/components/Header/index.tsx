@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { _match, _Maybe } from "funcio";
-import { useLocale } from "../../i18n.tsx";
-import { toHref } from "../../lib/routes.ts";
-import { APP_VERSION } from "../../lib/version.ts";
-import Search from "../Search/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import { toHref } from "#web/lib/routes.ts";
+import { APP_VERSION } from "#web/lib/version.ts";
+import Search from "#web/components/Search/index.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
+import { cx } from "#web/constants/cx.ts";
 
 const STORAGE_KEY = "liquidify-docs-theme";
 

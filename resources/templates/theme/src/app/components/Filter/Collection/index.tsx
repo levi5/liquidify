@@ -4,8 +4,8 @@ import { t, escape, defaultValue, urlEncode } from 'liquidify'
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
-import { FilterListLayout } from '../Layout/List'
-import { FilterRangeLayout } from '../Layout/Range'
+import { FilterListLayout } from '@theme/app/components/Filter/Layout/List'
+import { FilterRangeLayout } from '@theme/app/components/Filter/Layout/Range'
 
 import styles from './styles.css'
 

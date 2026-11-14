@@ -1,9 +1,9 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { parse } from '@babel/parser'
-import { SchemaExtractor } from '../dist/infra/adapters/parsers/babel/schema/schema-extractor.js'
-import { ModuleResolver } from '../dist/infra/adapters/fs/module-resolver.js'
-import { SilentLogger } from '../dist/shared/logger.js'
+import { SchemaExtractor } from '#dist/infra/adapters/parsers/babel/schema/schema-extractor.js'
+import { ModuleResolver } from '#dist/infra/adapters/fs/module-resolver.js'
+import { SilentLogger } from '#dist/shared/logger.js'
 
 const makeExtractor = (fs) => new SchemaExtractor(fs, new ModuleResolver(fs), new SilentLogger())
 

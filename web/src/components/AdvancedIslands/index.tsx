@@ -1,8 +1,8 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx";
-import { JSX_EVENT, ACTION_TSX, ACTION_LIQUID, NATIVE_JS, BUS_TSX, DATA_ATTRS, ISLANDS_COPY } from "../../cms/islands.ts";
+import { cx } from "#web/constants/cx";
+import { JSX_EVENT, ACTION_TSX, ACTION_LIQUID, NATIVE_JS, BUS_TSX, DATA_ATTRS, ISLANDS_COPY } from "#web/cms/islands.ts";
 
 export default function AdvancedIslands() {
   const { locale } = useLocale();

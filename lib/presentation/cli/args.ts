@@ -1,4 +1,4 @@
-import { validateCliArgs } from './validate-args'
+import { validateCliArgs } from '@presentation/cli/validate-args'
 
 export type CliCommand = 'help' | 'init' | 'build' | 'version' | 'check' | 'doctor' | 'generate' | 'theme-check'
 
@@ -70,8 +70,11 @@ function positionalArguments(argumentsList: string[]): string[] {
   const positionals: string[] = []
   for (let index = 0; index < argumentsList.length; index++) {
     const argument = argumentsList[index]
-    if (['--config', '--concurrency', '--mode'].includes(argument)) index++
-    else if (!argument.startsWith('-')) positionals.push(argument)
+    if (['--config', '--concurrency', '--mode'].includes(argument)) {
+      index++
+      continue
+    }
+    if (!argument.startsWith('-')) positionals.push(argument)
   }
   return positionals
 }

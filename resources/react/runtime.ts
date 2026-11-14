@@ -200,20 +200,20 @@ const activeRoots = new Map()
 let rootObserver
 const updateRoots = () => {
   for (const [container, id] of activeRoots) {
-    if (!container.isConnected || container.id !== id) {
-      if (!container._unmountTimeout) {
-        container._unmountTimeout = setTimeout(() => {
-          container._unmountTimeout = null
-          if (!container.isConnected || container.id !== id) {
-            window.LiquidifyUnmount(container)
-            activeRoots.delete(container)
-          }
-        }, 100)
+    if (container.isConnected && container.id === id) {
+      if (container._unmountTimeout) {
+        clearTimeout(container._unmountTimeout)
+        container._unmountTimeout = null
       }
-    } else if (container._unmountTimeout) {
-      clearTimeout(container._unmountTimeout)
-      container._unmountTimeout = null
+      continue
     }
+    if (container._unmountTimeout) continue
+    container._unmountTimeout = setTimeout(() => {
+      container._unmountTimeout = null
+      if (container.isConnected && container.id === id) return
+      window.LiquidifyUnmount(container)
+      activeRoots.delete(container)
+    }, 100)
   }
   for (const [id, componentName] of registeredRoots) {
     const container = document.getElementById(id)

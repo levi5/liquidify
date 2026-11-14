@@ -1,8 +1,8 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { OutputManifest } from '../dist/infra/adapters/generators/liquid/output-manifest.js'
-import { ValidationError } from '../dist/core/errors/validation-error.js'
-import { SilentLogger } from '../dist/shared/logger.js'
+import { OutputManifest } from '#dist/infra/adapters/generators/liquid/output-manifest.js'
+import { ValidationError } from '#dist/core/errors/validation-error.js'
+import { SilentLogger } from '#dist/shared/logger.js'
 
 const logger = new SilentLogger()
 

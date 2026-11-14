@@ -1,17 +1,17 @@
-import type { OutputManifest } from './output-manifest'
-import { buildLiquidContent } from './liquid-content'
+import type { OutputManifest } from '@adapters/generators/liquid/output-manifest'
+import { buildLiquidContent } from '@adapters/generators/liquid/liquid-content'
 import { join, resolve, relative, isAbsolute } from 'node:path'
 import { randomUUID } from 'node:crypto'
 import { _match, _try, _Array } from 'funcio'
 
-import type { GeneratorOptions, ResolvedGeneratorOptions } from '../../../../core/entities/liquid'
-import type { IFileSystem } from '../../../../core/protocols/file-system'
-import type { IGenerator } from '../../../../core/protocols/generator'
-import type { ParsedComponent } from '../../../../core/entities/parsed-component'
-import { assertSafeFileName, toSafeFileName } from '../../../../shared/string'
-import { ValidationError } from '../../../../core/errors/validation-error'
-import { COMPONENT_TYPES } from '../../../../shared/liquid-constants'
-import type { Logger } from '../../../../shared/logger'
+import type { GeneratorOptions, ResolvedGeneratorOptions } from '@core/entities/liquid'
+import type { IFileSystem } from '@core/protocols/file-system'
+import type { IGenerator } from '@core/protocols/generator'
+import type { ParsedComponent } from '@core/entities/parsed-component'
+import { assertSafeFileName, toSafeFileName } from '@shared/string'
+import { ValidationError } from '@core/errors/validation-error'
+import { COMPONENT_TYPES } from '@shared/liquid-constants'
+import type { Logger } from '@shared/logger'
 
 export class LiquidFileSystemGenerator implements IGenerator {
   private readonly options: ResolvedGeneratorOptions

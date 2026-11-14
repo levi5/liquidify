@@ -1,1 +1,1 @@
-export { SearchDrawer } from './Drawer'
+export { SearchDrawer } from '@theme/app/components/Search/Drawer'

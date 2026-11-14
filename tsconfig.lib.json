@@ -7,6 +7,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "sourceMap": true,
+    "removeComments": true,
     "jsx": "preserve"
   },
   "include": ["lib/**/*"],

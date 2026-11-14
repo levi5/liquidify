@@ -1,11 +1,11 @@
 import { useRef, useState, type KeyboardEvent } from "react";
 import { _match, _Maybe } from "funcio";
-import { useLocale } from "../../i18n.tsx";
-import { toHref } from "../../lib/routes.ts";
-import CodeBlock from "../CodeBlock/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import { toHref } from "#web/lib/routes.ts";
+import CodeBlock from "#web/components/CodeBlock/index.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
-import { HERO_TSX, HERO_LIQUID, HERO_COPY } from "../../cms/hero.ts";
+import { cx } from "#web/constants/cx.ts";
+import { HERO_TSX, HERO_LIQUID, HERO_COPY } from "#web/cms/hero.ts";
 
 export default function Hero() {
   const { locale } = useLocale();

@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { _match, _Maybe } from "funcio";
-import { useLocale } from "../../i18n.tsx";
-import { CHAPTERS, t as tr, type Chapter } from "../../docs/manifest.ts";
-import { navigate, toHref } from "../../lib/routes.ts";
-import { highlight, search, type NameGroup, type SearchResult } from "../../docs/search-index.ts";
-import { SEARCH_COPY, SEARCH_DEFAULT_NAMES } from "../../cms/search.ts";
+import { useLocale } from "#web/i18n.tsx";
+import { CHAPTERS, t as tr, type Chapter } from "#web/docs/manifest.ts";
+import { navigate, toHref } from "#web/lib/routes.ts";
+import { highlight, search, type NameGroup, type SearchResult } from "#web/docs/search-index.ts";
+import { SEARCH_COPY, SEARCH_DEFAULT_NAMES } from "#web/cms/search.ts";
 import styles from "./style.module.css";
 
 type Copy = {
@@ -157,7 +157,7 @@ export default function Search() {
     const stops = ([inputRef.current, ...links, clearRef.current].filter(Boolean) as HTMLElement[]).filter(
       (el) => el.offsetParent !== null || el === document.activeElement,
     );
-    // Fallback to input+clear when no results rendered yet
+
     const focusables = stops.length > 0 ? stops : ([inputRef.current, clearRef.current].filter(Boolean) as HTMLElement[]);
     _match(focusables.length === 0)
       .with(true, () => undefined)

@@ -1,6 +1,6 @@
 import { _match } from 'funcio'
-import type { ParsedComponent } from '../../../../core/entities/parsed-component'
-import { VOID_TAGS as voidTags } from '../../../../shared/liquid-constants'
+import type { ParsedComponent } from '@core/entities/parsed-component'
+import { VOID_TAGS as voidTags } from '@shared/liquid-constants'
 
 interface ScanState {
   tokens: string[]

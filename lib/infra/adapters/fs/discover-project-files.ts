@@ -1,7 +1,7 @@
 import path from 'node:path'
 import { glob } from 'glob'
 import { promises as filesystem } from 'node:fs'
-import { ValidationError } from '../../../core/errors/validation-error'
+import { ValidationError } from '@core/errors/validation-error'
 
 export async function discoverProjectFiles(componentsDirectory: string, outputDirectory: string): Promise<string[]> {
   const components = path.resolve(componentsDirectory)

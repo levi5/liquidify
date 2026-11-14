@@ -1,4 +1,4 @@
-import { SchemaValidator } from './schema-validation'
+import { SchemaValidator } from '@application/services/schema-validation'
 
 const RESOURCE_TYPES: Record<string, string> = {
   product: 'Product',
@@ -35,7 +35,6 @@ function settingsType(settings: unknown, imports: Set<string>): string {
   return `{\n${entries.join('\n')}\n}`
 }
 
-/** Resource settings remain nullable because merchants can leave them unset. */
 export function generateSchemaTypes(schema: Record<string, unknown>): string {
   new SchemaValidator().validate(schema)
   const resourceImports = new Set<string>()

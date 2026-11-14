@@ -1,4 +1,4 @@
-import type { Chapter } from "../docs/manifest.ts";
+import type { Chapter } from "#web/docs/manifest.ts";
 
 export const API_CHAPTERS: Chapter[] = [
   {

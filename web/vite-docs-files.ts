@@ -2,7 +2,7 @@ import { copyFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Plugin } from "vite";
 import { _try } from "funcio";
-import { CHAPTERS } from "./src/docs/manifest.ts";
+import { CHAPTERS } from "#web/docs/manifest.ts";
 
 const ORIGIN = (process.env.SITE_ORIGIN ?? "https://levi5.github.io").replace(/\/+$/, "");
 const BASE = "/liquidify";

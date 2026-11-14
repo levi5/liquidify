@@ -30,16 +30,16 @@ class MyAccordion extends HTMLElement {
 		let foundOpen = false
 
 		items.forEach((item) => {
-			if (item.isOpen()) {
-				if (!foundOpen) {
-					foundOpen = true
-					item.update()
-				} else {
-					item.close()
-				}
-			} else {
+			if (!item.isOpen()) {
 				item.update()
+				return
 			}
+			if (foundOpen) {
+				item.close()
+				return
+			}
+			foundOpen = true
+			item.update()
 		})
 	}
 }
@@ -69,9 +69,9 @@ class MyAccordionItem extends HTMLElement {
 	toggle(): void {
 		if (this.isOpen()) {
 			this.close()
-		} else {
-			this.open()
+			return
 		}
+		this.open()
 	}
 
 	update(): void {

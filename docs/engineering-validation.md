@@ -44,7 +44,7 @@ statistics plugin, and check it without modifying the real manifest.
 Regression coverage includes public build serialization/disposal, config/syntax
 watch recovery, argument/JSON/quiet behavior, preview stale cleanup, plugin trust
 boundaries, asynchronous atomic writes, schema types/limits and schema validation.
-The local suite currently passes 308 tests; lint, library/theme/React typechecks
+The local suite currently passes 313 tests; lint, library/theme/React typechecks
 and dependency audit also pass. The audit reported no known vulnerabilities.
 Shopify CLI invocation is contract-tested with a fixture executable; running real
 Shopify Theme Check requires that CLI to be installed separately.
@@ -79,3 +79,7 @@ Generated-output discovery excludes nested output folders and dependency/git
 directories. Build refresh sentinels use unique names, preserving user-owned
 `.refresh` files. GitHub Actions are pinned to verified commit SHAs; Dependabot
 retains npm coverage for the root/web workspaces and updates action pins.
+
+The subsequent source-style migration is described in [source conventions](code-style.md).
+Library/theme/web imports use aliases, published JavaScript/declarations are
+rewritten to relative paths, and the web production build also passes.

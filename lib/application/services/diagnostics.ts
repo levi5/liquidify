@@ -1,6 +1,6 @@
-import type { Diagnostic } from '../../core/entities/build-result'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
-import { sourceCodeFrame } from '../../shared/source-code-frame'
+import type { Diagnostic } from '@core/entities/build-result'
+import { LiquidifyError } from '@core/errors/liquidify-error'
+import { sourceCodeFrame } from '@shared/source-code-frame'
 
 export function errorDiagnostic(error: unknown, source?: string): Diagnostic {
   return {

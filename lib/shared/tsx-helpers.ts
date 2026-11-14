@@ -9,8 +9,10 @@ export const raw = <T>(value: T): T => value
 
 const escapeMap: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
 
-// biome-ignore lint/suspicious/noShadowRestrictedNames: name mirrors the Liquid | escape filter
-export const escape = (value: unknown): string => String(value ?? '').replace(/[&<>"']/g, (c) => escapeMap[c] ?? c)
+const escapeHtmlValue = (value: unknown): string =>
+  String(value ?? '').replace(/[&<>"']/g, (character) => escapeMap[character] ?? character)
+
+export { escapeHtmlValue as escape }
 
 export const escapeOnce = (value: unknown): string =>
   String(value ?? '')

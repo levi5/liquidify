@@ -1,10 +1,10 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
-import CodeBlock from "../CodeBlock/index.tsx";
-import Callout from "../Callout/index.tsx";
-import { toHref } from "../../lib/routes.ts";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
+import CodeBlock from "#web/components/CodeBlock/index.tsx";
+import Callout from "#web/components/Callout/index.tsx";
+import { toHref } from "#web/lib/routes.ts";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
+import { cx } from "#web/constants/cx.ts";
 import {
   HELLO_TSX,
   HELLO_LIQUID,
@@ -13,7 +13,7 @@ import {
   RUN_CMD,
   TERMINAL_OK,
   HELLO_COPY,
-} from "../../cms/hello.ts";
+} from "#web/cms/hello.ts";
 
 export default function HelloWorld() {
   const { locale } = useLocale();

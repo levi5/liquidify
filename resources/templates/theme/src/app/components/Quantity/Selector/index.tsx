@@ -3,9 +3,9 @@
 import classNames from 'classnames'
 import { useEffect, useRef, useState } from 'preact/hooks'
 
-import { clampQuantity } from '../../../context/Product/product.helpers'
-import { showToast } from '../../../../shared/events/toast'
-import { translate } from '../../../i18n/translate'
+import { clampQuantity } from '@theme/app/context/Product/product.helpers'
+import { showToast } from '@theme/shared/events/toast'
+import { translate } from '@theme/app/i18n/translate'
 
 import './styles.css'
 

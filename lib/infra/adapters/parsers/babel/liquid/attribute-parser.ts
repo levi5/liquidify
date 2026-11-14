@@ -1,4 +1,4 @@
-import { EventAttributeConverter } from './event-attribute-converter'
+import { EventAttributeConverter } from '@adapters/parsers/babel/liquid/event-attribute-converter'
 import {
   isArrowFunctionExpression,
   isExpression,
@@ -30,15 +30,15 @@ import {
   type ObjectExpression,
 } from '@babel/types'
 
-import { HTMLAttributeConverter } from '../html/attribute-parser'
+import { HTMLAttributeConverter } from '@adapters/parsers/babel/html/attribute-parser'
 import { _match } from 'funcio'
-import type { ILiquidExpressionParser } from '../../../../../types/liquid'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
-import { ValidationError } from '../../../../../core/errors/validation-error'
-import { pascalToKebab } from '../../../../../shared/string'
-import { BOOLEAN_ATTRIBUTES as booleanAttributes } from '../../../../../shared/liquid-constants'
-import { escapeAttributeTemplate, escapedOutput } from '../../../../../shared/html'
-import { renderCondition } from './condition'
+import type { ILiquidExpressionParser } from '@liquidify-types/liquid'
+import type { ParsingContext } from '@core/entities/parsing-context'
+import { ValidationError } from '@core/errors/validation-error'
+import { pascalToKebab } from '@shared/string'
+import { BOOLEAN_ATTRIBUTES as booleanAttributes } from '@shared/liquid-constants'
+import { escapeAttributeTemplate, escapedOutput } from '@shared/html'
+import { renderCondition } from '@adapters/parsers/babel/liquid/condition'
 
 const COMPARISON_OPERATORS = new Set(['==', '===', '!=', '!==', '>', '<', '>=', '<='])
 
@@ -280,16 +280,24 @@ export class LiquidAttributeConverter {
 
   private hasTopLevelLogic(code: string): boolean {
     let single = false
-    let dbl = false
-    let tick = false
-    for (let i = 0; i < code.length - 4; i++) {
-      const c = code[i]
-      const prev = i > 0 ? code[i - 1] : ''
-      const escaped = prev === '\\'
-      if (!escaped && c === "'" && !dbl && !tick) single = !single
-      else if (!escaped && c === '"' && !single && !tick) dbl = !dbl
-      else if (!escaped && c === '`' && !single && !dbl) tick = !tick
-      else if (!single && !dbl && !tick && (code.startsWith(' and ', i) || code.startsWith(' or ', i))) return true
+    let double = false
+    let template = false
+    for (let cursor = 0; cursor < code.length - 4; cursor++) {
+      const character = code[cursor]
+      const escaped = code[cursor - 1] === '\\'
+      if (!escaped && character === "'" && !double && !template) {
+        single = !single
+        continue
+      }
+      if (!escaped && character === '"' && !single && !template) {
+        double = !double
+        continue
+      }
+      if (!escaped && character === '`' && !single && !double) {
+        template = !template
+        continue
+      }
+      if (!single && !double && !template && (code.startsWith(' and ', cursor) || code.startsWith(' or ', cursor))) return true
     }
     return false
   }
@@ -350,16 +358,20 @@ export class LiquidAttributeConverter {
   private hasDoubleQuote(code: string): boolean {
     let single = false
     let escaped = false
-    for (const c of code) {
+    for (const character of code) {
       if (escaped) {
         escaped = false
-      } else if (c === '\\') {
-        escaped = true
-      } else if (c === "'") {
-        single = !single
-      } else if (c === '"' && !single) {
-        return true
+        continue
       }
+      if (character === '\\') {
+        escaped = true
+        continue
+      }
+      if (character === "'") {
+        single = !single
+        continue
+      }
+      if (character === '"' && !single) return true
     }
     return false
   }

@@ -1,4 +1,4 @@
-import type { Locale } from "../i18n.tsx";
+import type { Locale } from "#web/i18n.tsx";
 
 export const IMPORT = `import {
   DynamicBlock,

@@ -1,7 +1,7 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx";
+import { cx } from "#web/constants/cx";
 import {
   CLASSNAME_USAGE,
   CLASSNAMES,
@@ -16,7 +16,7 @@ import {
   HELPER_TABLE,
   HELPER_USAGE,
   STRING_LIKE,
-} from "../../cms/filters.ts";
+} from "#web/cms/filters.ts";
 
 export default function FiltersReference() {
   const { locale } = useLocale();

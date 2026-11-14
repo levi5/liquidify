@@ -1,4 +1,4 @@
-import type { Locale } from "../i18n.tsx";
+import type { Locale } from "#web/i18n.tsx";
 
 export const STORE_SETUP: Record<Locale, string> = {
   "pt-BR": `npx liquidify init minha-loja --template example

@@ -1,8 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
-import { loadConfig } from '../../../infra/adapters/config/config-loader'
-import { NodeFileSystem } from '../../../infra/adapters/fs/node-file-system'
-import type { ParsedCliArgs } from '../args'
+import { loadConfig } from '@adapters/config/config-loader'
+import { NodeFileSystem } from '@adapters/fs/node-file-system'
+import type { ParsedCliArgs } from '@presentation/cli/args'
 
 const DIRECTORIES: Record<string, string> = { section: 'sections', snippet: 'snippets', island: 'islands' }
 
@@ -22,9 +22,12 @@ export async function runGenerate(options: ParsedCliArgs): Promise<void> {
   if (!options.dryRun) {
     await fs.mkdir(path.dirname(filename), { recursive: true })
     fileSystem.assertSafePath(filename, root)
-    // Exclusive creation avoids overwriting user components, including concurrent generation.
+
     await fs.writeFile(filename, source, { flag: 'wx' })
   }
-  if (options.json) console.log(JSON.stringify({ status: 'success', filename, dryRun: options.dryRun ?? false }))
-  else if (!options.quiet) console.log(`${options.dryRun ? 'Would create' : 'Created'} ${filename}`)
+  if (options.json) {
+    console.log(JSON.stringify({ status: 'success', filename, dryRun: options.dryRun ?? false }))
+    return
+  }
+  if (!options.quiet) console.log(`${options.dryRun ? 'Would create' : 'Created'} ${filename}`)
 }

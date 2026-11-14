@@ -1,7 +1,7 @@
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const vm = require('node:vm')
-const { buildRuntimeScript, mockPreactCompiler } = require('../helpers/runtime-harness.cjs')
+const { buildRuntimeScript, mockPreactCompiler } = require('#tests/helpers/runtime-harness.cjs')
 
 test('runtime provides root cleanup and compatible event aliases', async () => {
   const calls = []

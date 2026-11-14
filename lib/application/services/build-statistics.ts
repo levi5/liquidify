@@ -1,7 +1,7 @@
 import path from 'node:path'
-import type { IFileReader } from '../../core/protocols/file-system'
-import type { PluginStats } from '../../core/protocols/plugin'
-import type { DirectiveReader } from '../../core/protocols/project-compilation'
+import type { IFileReader } from '@core/protocols/file-system'
+import type { PluginStats } from '@core/protocols/plugin'
+import type { DirectiveReader } from '@core/protocols/project-compilation'
 
 export function collectBuildStatistics(files: string[], fileSystem: IFileReader, scanner: DirectiveReader): PluginStats {
   const statistics: PluginStats = { total: files.length, tsx: 0, jsx: 0, ts: 0, js: 0, byDirective: {} }

@@ -2,9 +2,9 @@
 
 import { useEffect, useRef, useState } from 'preact/hooks'
 
-import type { ToastEventDetail, ToastPosition } from '../../../shared/events/toast'
-import { TOAST_EVENT } from '../../../shared/events/toast'
-import { translate } from '../../i18n/translate'
+import type { ToastEventDetail, ToastPosition } from '@theme/shared/events/toast'
+import { TOAST_EVENT } from '@theme/shared/events/toast'
+import { translate } from '@theme/app/i18n/translate'
 
 import styles from './styles.css'
 

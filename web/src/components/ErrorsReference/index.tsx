@@ -1,6 +1,6 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
-import { cx } from "../../constants/cx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
+import { cx } from "#web/constants/cx";
 import styles from "./style.module.css";
 import {
   ERROR_CLASSES,
@@ -12,7 +12,7 @@ import {
   RESERVED,
   RUNTIME_MESSAGES,
   VALIDATION_RULES,
-} from "../../cms/errors.ts";
+} from "#web/cms/errors.ts";
 
 export default function ErrorsReference() {
   const { locale } = useLocale();

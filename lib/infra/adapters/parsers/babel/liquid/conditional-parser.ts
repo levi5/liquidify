@@ -1,8 +1,8 @@
 import type { ConditionalExpression, LogicalExpression, Node } from '@babel/types'
 import { _match } from 'funcio'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
-import { escapedOutput, liquidJsonOutput } from '../../../../../shared/html'
-import { truthyTest } from './condition'
+import type { ParsingContext } from '@core/entities/parsing-context'
+import { escapedOutput, liquidJsonOutput } from '@shared/html'
+import { truthyTest } from '@adapters/parsers/babel/liquid/condition'
 
 export class LiquidConditionalParser {
   constructor(

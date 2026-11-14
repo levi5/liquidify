@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { sourceCodeFrame } from '../dist/shared/source-code-frame.js'
+import { sourceCodeFrame } from '#dist/shared/source-code-frame.js'
 
 test('code frames include adjacent lines and a bounded caret', () => {
   const frame = sourceCodeFrame('first\nbroken\nlast', { line: 2, column: 3 })

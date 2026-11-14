@@ -1,6 +1,6 @@
 import { _match } from 'funcio'
-import { pascalToKebab } from '../../../../../shared/string'
-import type { ReactComponentConfig } from '../../../../../types/liquid'
+import { pascalToKebab } from '@shared/string'
+import type { ReactComponentConfig } from '@liquidify-types/liquid'
 import {
   isStringLiteral,
   type JSXElement,
@@ -18,8 +18,8 @@ import {
   type JSXExpressionContainer,
 } from '@babel/types'
 
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
-import { ValidationError } from '../../../../../core/errors/validation-error'
+import type { ParsingContext } from '@core/entities/parsing-context'
+import { ValidationError } from '@core/errors/validation-error'
 
 interface SlotReference {
   name: string

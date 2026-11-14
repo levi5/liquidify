@@ -3,9 +3,9 @@
 import { imageUrl, assetUrl, escape, defaultValue } from 'liquidify'
 import { RenderSvg } from 'liquidex'
 
-import { SwiperSliderArrow } from '../Swiper/Arrow'
-import { SwiperCarousel } from '../Swiper/Slide'
-import { SwiperSliderRoot } from '../Swiper/Root'
+import { SwiperSliderArrow } from '@theme/app/components/Swiper/Arrow'
+import { SwiperCarousel } from '@theme/app/components/Swiper/Slide'
+import { SwiperSliderRoot } from '@theme/app/components/Swiper/Root'
 
 import styles from './styles.css'
 

@@ -1,4 +1,4 @@
-import type { ComponentMode } from '../../types/component'
+import type { ComponentMode } from '@liquidify-types/component'
 
 export interface ParsedComponent {
   name: string

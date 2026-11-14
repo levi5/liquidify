@@ -1,8 +1,8 @@
-import { useLocale } from "../../i18n.tsx";
-import { toHref } from "../../lib/routes.ts";
-import { APP_VERSION } from "../../lib/version.ts";
+import { useLocale } from "#web/i18n.tsx";
+import { toHref } from "#web/lib/routes.ts";
+import { APP_VERSION } from "#web/lib/version.ts";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
+import { cx } from "#web/constants/cx.ts";
 
 export default function Footer() {
   const { locale } = useLocale();

@@ -13,9 +13,9 @@ import {
   type ArrowFunctionExpression,
 } from '@babel/types'
 import { _match } from 'funcio'
-import type { ComponentMetadataType } from '../../../../../types/component'
-import type { VariableParser } from './variable-parser'
-import type { FunctionBodyParser } from './function-body-parser'
+import type { ComponentMetadataType } from '@liquidify-types/component'
+import type { VariableParser } from '@adapters/parsers/babel/component/variable-parser'
+import type { FunctionBodyParser } from '@adapters/parsers/babel/component/function-body-parser'
 
 export class ExportParser {
   constructor(

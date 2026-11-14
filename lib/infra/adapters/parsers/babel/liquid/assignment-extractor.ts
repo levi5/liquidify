@@ -14,7 +14,7 @@ import {
   type Node,
 } from '@babel/types'
 import { _match } from 'funcio'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 export class AssignmentExtractor {
   public parseExpression?: (node: unknown, renames?: Record<string, string>, context?: ParsingContext) => string

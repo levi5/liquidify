@@ -5,7 +5,7 @@ import path from 'node:path'
 import { spawn } from 'node:child_process'
 import { once } from 'node:events'
 
-import { cliExecutable as executable, createCliProject as createProject, runCli as run } from './helpers/cli-project.mjs'
+import { cliExecutable as executable, createCliProject as createProject, runCli as run } from '#tests/helpers/cli-project.mjs'
 
 test('quiet builds write output without success messages', (context) => {
   const directory = createProject(context)

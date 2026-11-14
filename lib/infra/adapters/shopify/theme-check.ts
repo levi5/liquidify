@@ -8,7 +8,6 @@ export interface ThemeCheckResult {
   stderr: string
 }
 
-/** Uses an already-installed Shopify CLI. Never installs packages or accesses a store. */
 export async function runShopifyThemeCheck(directory: string, signal?: AbortSignal): Promise<ThemeCheckResult> {
   const themeRoot = path.resolve(directory)
   if (!(await fs.stat(themeRoot)).isDirectory()) throw new Error(`Theme output is not a directory: ${themeRoot}`)

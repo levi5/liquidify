@@ -7,9 +7,9 @@ import type { Swiper as SwiperInstance } from 'swiper/types'
 import { type FC, type ReactNode, Children } from 'preact/compat'
 import { useContext, useEffect, useMemo, useState } from 'preact/hooks'
 
-import { SwiperContext } from '../Root'
+import { SwiperContext } from '@theme/app/components/Swiper/Root'
 
-import type { SwiperComponentType } from '../../../../types/swiper'
+import type { SwiperComponentType } from '@theme/types/swiper'
 import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/autoplay'

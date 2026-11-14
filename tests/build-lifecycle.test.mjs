@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { makeLiquidifyBuilder, SilentLogger } from '../dist/index.js'
+import { makeLiquidifyBuilder, SilentLogger } from '#dist/index.js'
 
 function createBuilder() {
   return makeLiquidifyBuilder({ componentsDir: '/unused', output: '/unused' }, { logger: new SilentLogger() })

@@ -1,9 +1,9 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
-import { LiquidifyError } from '../dist/core/errors/liquidify-error.js'
-import { ValidationError } from '../dist/core/errors/validation-error.js'
-import { makeParser, captureConsole } from './helpers.mjs'
+import { ASTParser } from '#dist/infra/adapters/parsers/babel/ASTParser.js'
+import { LiquidifyError } from '#dist/core/errors/liquidify-error.js'
+import { ValidationError } from '#dist/core/errors/validation-error.js'
+import { makeParser, captureConsole } from '#tests/helpers.mjs'
 
 describe('BabelLiquidParser errors', () => {
   it('wraps syntax errors in LiquidifyError instead of leaking raw Babel errors', () => {

@@ -1,8 +1,8 @@
-import { useLocale } from "../../i18n.tsx";
-import { chapterNeighbours, t as tr, type Chapter } from "../../docs/manifest.ts";
-import { toHref } from "../../lib/routes.ts";
+import { useLocale } from "#web/i18n.tsx";
+import { chapterNeighbours, t as tr, type Chapter } from "#web/docs/manifest.ts";
+import { toHref } from "#web/lib/routes.ts";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
+import { cx } from "#web/constants/cx.ts";
 
 const EDIT_PATHS: Record<string, { docs: string; api: string }> = {
   hello: { docs: "HelloWorld", api: "RuntimeReference" },

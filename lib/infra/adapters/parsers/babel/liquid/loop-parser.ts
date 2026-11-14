@@ -1,5 +1,5 @@
 import generate from '@babel/generator'
-import type { LiquidVariableParser } from './variable-parser'
+import type { LiquidVariableParser } from '@adapters/parsers/babel/liquid/variable-parser'
 import {
   type Expression,
   type Node,
@@ -27,8 +27,8 @@ import {
   isLogicalExpression,
 } from '@babel/types'
 import { _match } from 'funcio'
-import { ValidationError } from '../../../../../core/errors/validation-error'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { ValidationError } from '@core/errors/validation-error'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 const cleanCode = (code: string): string => code.replace(/\?\.\s*/g, '.')
 

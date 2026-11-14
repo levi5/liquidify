@@ -5,11 +5,11 @@ import { _Maybe } from 'funcio'
 import type { FC } from 'preact/compat'
 import classNames from 'classnames'
 
-import { Portal } from '../../Portal'
-import { translate } from '../../../i18n/translate'
+import { Portal } from '@theme/app/components/Portal'
+import { translate } from '@theme/app/i18n/translate'
 
-import { useDrawerContext } from '../../../../global/context/Drawer/drawer.context'
-import { useEventListener } from '../../../../hooks/useCustomEvent'
+import { useDrawerContext } from '@theme/global/context/Drawer/drawer.context'
+import { useEventListener } from '@theme/hooks/useCustomEvent'
 
 import './styles.css'
 
@@ -76,7 +76,9 @@ export const DrawerContent: FC<{
 			if (event.shiftKey && document.activeElement === first) {
 				event.preventDefault()
 				last.focus()
-			} else if (!event.shiftKey && document.activeElement === last) {
+				return
+			}
+			if (!event.shiftKey && document.activeElement === last) {
 				event.preventDefault()
 				first.focus()
 			}

@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { formatHelp, parseCliArgs } from '../dist/presentation/cli/args.js'
+import { formatHelp, parseCliArgs } from '#dist/presentation/cli/args.js'
 
 describe('parseCliArgs', () => {
   it('defaults to a build with no flags', () => {

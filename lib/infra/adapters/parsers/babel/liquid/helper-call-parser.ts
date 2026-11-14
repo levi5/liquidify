@@ -10,10 +10,10 @@ import {
   type Expression,
   type Node,
 } from '@babel/types'
-import { HELPER_TO_FILTER, JSON_HELPERS, RAW_HELPERS, TRANSLATE_HELPERS } from '../../../../../shared/tsx-helper-filters'
-import { liquidJsonOutput } from '../../../../../shared/html'
-import { hoistLogicalOperators } from './pipe-guard'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { HELPER_TO_FILTER, JSON_HELPERS, RAW_HELPERS, TRANSLATE_HELPERS } from '@shared/tsx-helper-filters'
+import { liquidJsonOutput } from '@shared/html'
+import { hoistLogicalOperators } from '@adapters/parsers/babel/liquid/pipe-guard'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 type GenerateFn = (node: unknown, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string
 
@@ -151,12 +151,9 @@ export class HelperCallParser {
       .map((prop) => {
         const key = this.objectKey((prop as { key: unknown }).key)
         const valueNode = (prop as { value: Expression }).value as Expression
-        let value: string
-        if (isNumericLiteral(valueNode)) {
-          value = String((valueNode as { value: number }).value)
-        } else {
-          value = hoistLogicalOperators(this.generate(valueNode, inCondition, renames, context), 'param', context)
-        }
+        const value = isNumericLiteral(valueNode)
+          ? String((valueNode as { value: number }).value)
+          : hoistLogicalOperators(this.generate(valueNode, inCondition, renames, context), 'param', context)
         return key === '' ? '' : `${key}: ${value}`
       })
       .filter(Boolean)

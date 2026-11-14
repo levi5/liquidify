@@ -1,6 +1,6 @@
 import { _match, _try, _Array } from 'funcio'
-import type { IFileSystem } from '../../../../core/protocols/file-system'
-import type { Logger } from '../../../../shared/logger'
+import type { IFileSystem } from '@core/protocols/file-system'
+import type { Logger } from '@shared/logger'
 
 export class OutputTransaction {
   private readonly originals = new Map<string, string | undefined>()

@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { once } from 'node:events'
-import { makeLiquidifyBuilder } from '../dist/index.js'
+import { makeLiquidifyBuilder } from '#dist/index.js'
 
 function setup(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'liquidify-incremental-'))

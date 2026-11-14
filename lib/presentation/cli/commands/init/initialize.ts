@@ -1,7 +1,7 @@
 import path from 'node:path'
-import { normalizeTemplateName } from './arguments'
-import { resolveTemplate } from './template-source'
-import { copyTemplate } from './template-copy'
+import { normalizeTemplateName } from '@presentation/cli/commands/init/arguments'
+import { resolveTemplate } from '@presentation/cli/commands/init/template-source'
+import { copyTemplate } from '@presentation/cli/commands/init/template-copy'
 
 export function reportInitSuccess(targetDirectory: string, templateName = 'theme'): void {
   console.log(`Shopify theme & Liquidify template (${templateName}) ready!`)
@@ -21,8 +21,11 @@ export async function runInit(
   const result = copyTemplate(resolveTemplate(template), directory, projectName, force)
   result.match({
     right: () => {
-      if (options.json) console.log(JSON.stringify({ status: 'success', directory, template }))
-      else if (!options.quiet) reportInitSuccess(targetDirectory, template)
+      if (options.json) {
+        console.log(JSON.stringify({ status: 'success', directory, template }))
+        return
+      }
+      if (!options.quiet) reportInitSuccess(targetDirectory, template)
     },
     left: (error) => {
       throw error

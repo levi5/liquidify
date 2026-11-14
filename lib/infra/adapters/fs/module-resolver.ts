@@ -1,9 +1,9 @@
 import path from 'node:path'
 import { parseExpression } from '@babel/parser'
 import { _match, _try } from 'funcio'
-import type { IFileSystem } from '../../../core/protocols/file-system'
-import { ValidationError } from '../../../core/errors/validation-error'
-import { SOURCE_EXTENSIONS as extensions } from '../../../shared/liquid-constants'
+import type { IFileSystem } from '@core/protocols/file-system'
+import { ValidationError } from '@core/errors/validation-error'
+import { SOURCE_EXTENSIONS as extensions } from '@shared/liquid-constants'
 
 interface ResolvedConfig {
   baseUrl?: string

@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
-import { useLocale } from "../../i18n.tsx";
-import CodeBlock from "../CodeBlock/index.tsx";
-import Callout from "../Callout/index.tsx";
-import { toHref } from "../../lib/routes.ts";
+import { useLocale } from "#web/i18n.tsx";
+import CodeBlock from "#web/components/CodeBlock/index.tsx";
+import Callout from "#web/components/Callout/index.tsx";
+import { toHref } from "#web/lib/routes.ts";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
-import { PLAYGROUND_PRESETS as PRESETS, type PlaygroundPresetId as PresetId } from "../../cms/playground.ts";
+import { cx } from "#web/constants/cx.ts";
+import { PLAYGROUND_PRESETS as PRESETS, type PlaygroundPresetId as PresetId } from "#web/cms/playground.ts";
 
 function naiveTsxToLiquid(tsx: string): string {
   let out = tsx;

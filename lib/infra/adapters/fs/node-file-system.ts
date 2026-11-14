@@ -1,10 +1,10 @@
 import { existsSync, lstatSync, mkdirSync, readFileSync, type Stats } from 'node:fs'
 import { promises as filesystem } from 'node:fs'
 import path from 'node:path'
-import { ValidationError } from '../../../core/errors/validation-error'
+import { ValidationError } from '@core/errors/validation-error'
 import { _match } from 'funcio'
-import type { IFileSystem } from '../../../core/protocols/file-system'
-import { writeAtomicFile, writeAtomicFileSync } from './atomic-write'
+import type { IFileSystem } from '@core/protocols/file-system'
+import { writeAtomicFile, writeAtomicFileSync } from '@adapters/fs/atomic-write'
 
 export class NodeFileSystem implements IFileSystem {
   constructor(private readonly outputRoot?: string) {}

@@ -1,7 +1,7 @@
 import { _match } from 'funcio'
-import { LiquidifyError } from '../../../../../core/errors/liquidify-error'
-import { readReactTemplate, reactTemplatesDirectory } from './template-loader'
-import type { Compiler } from '../../../../../core/protocols/compiler'
+import { LiquidifyError } from '@core/errors/liquidify-error'
+import { readReactTemplate, reactTemplatesDirectory } from '@adapters/compilers/react/runtime/template-loader'
+import type { Compiler } from '@core/protocols/compiler'
 
 export class ReactRuntimeBuilder {
   constructor(private readonly compiler: Compiler) {}

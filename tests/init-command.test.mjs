@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { parseInitArgs, resolveTemplate, copyTemplate, normalizeTemplateName } from '../dist/presentation/cli/commands/init.js'
+import { parseInitArgs, resolveTemplate, copyTemplate, normalizeTemplateName } from '#dist/presentation/cli/commands/init.js'
 
 test('normalizeTemplateName normalizes aliases', () => {
   assert.equal(normalizeTemplateName('theme'), 'theme')

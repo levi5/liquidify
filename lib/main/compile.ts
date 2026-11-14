@@ -1,17 +1,16 @@
 import path from 'node:path'
-import type { CompileOptions, CompileResult } from '../core/entities/compile-result'
-import { SilentLogger } from '../shared/logger'
-import { NodeFileSystem } from '../infra/adapters/fs/node-file-system'
-import { EsbuildCompiler } from '../infra/adapters/compilers/esbuild/esbuild-compiler'
-import { makeComponentParser } from './factories/make-component-parser'
-import { ValidationService } from '../application/services/validation-service'
-import { SchemaValidator } from '../application/services/schema-validation'
-import { buildLiquidContent } from '../infra/adapters/generators/liquid/liquid-content'
-import { toSafeFileName } from '../shared/string'
-import { errorDiagnostic } from '../application/services/diagnostics'
-import { DEFAULT_BUILD_LIMITS } from '../core/entities/build-limits'
+import type { CompileOptions, CompileResult } from '@core/entities/compile-result'
+import { SilentLogger } from '@shared/logger'
+import { NodeFileSystem } from '@adapters/fs/node-file-system'
+import { EsbuildCompiler } from '@adapters/compilers/esbuild/esbuild-compiler'
+import { makeComponentParser } from '@main/factories/make-component-parser'
+import { ValidationService } from '@application/services/validation-service'
+import { SchemaValidator } from '@application/services/schema-validation'
+import { buildLiquidContent } from '@adapters/generators/liquid/liquid-content'
+import { toSafeFileName } from '@shared/string'
+import { errorDiagnostic } from '@application/services/diagnostics'
+import { DEFAULT_BUILD_LIMITS } from '@core/entities/build-limits'
 
-/** Compile one component without writing files. Project builds resolve island registries separately. */
 export async function compile(source: string, options: CompileOptions = {}): Promise<CompileResult> {
   const projectRoot = path.resolve(options.cwd ?? process.cwd())
   const filename = options.filename ? path.resolve(projectRoot, options.filename) : undefined

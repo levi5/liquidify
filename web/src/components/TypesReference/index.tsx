@@ -1,5 +1,5 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import {
   TYPES_PRODUCT,
   TYPES_COLLECTION,
@@ -9,7 +9,7 @@ import {
   TYPES_PAGINATE,
   TYPES_USAGE_SNIPPET,
   TYPES_COPY,
-} from "../../cms/types.ts";
+} from "#web/cms/types.ts";
 
 export default function TypesReference() {
   const { locale } = useLocale();

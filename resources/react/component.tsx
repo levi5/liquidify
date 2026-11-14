@@ -1,17 +1,20 @@
 window.LiquidifyComponents = window.LiquidifyComponents || window.LiquidxComponents || {}
 
+function parseAttributeValue(value: string): unknown {
+  if (value === 'true') return true
+  if (value === 'false') return false
+  if (value.trim() !== '' && !Number.isNaN(Number(value))) return Number(value)
+  return value
+}
+
+const reactAttributeNames = new Map([['class', 'className'], ['for', 'htmlFor']])
+
 window.LiquidifyParseProps = (node: Element) => {
   const props: Record<string, unknown> = {}
   Array.from(node.attributes || []).forEach((attr) => {
     const val = attr.value
-    let finalVal: unknown = val
-    if (val === 'true') finalVal = true
-    else if (val === 'false') finalVal = false
-    else if (!Number.isNaN(Number(val)) && val.trim() !== '') finalVal = Number(val)
-
-    let key = attr.name
-    if (key === 'class') key = 'className'
-    else if (key === 'for') key = 'htmlFor'
+    const finalVal = parseAttributeValue(val)
+    const key = reactAttributeNames.get(attr.name) ?? attr.name
 
     if (key.startsWith('data-liquidify-on-')) {
       const eventName = key.slice('data-liquidify-on-'.length)
@@ -34,14 +37,19 @@ window.LiquidifyParseProps = (node: Element) => {
       }
       props[eventProp] = (event) => {
         const action = window.LiquidifyActions?.get(val)
-        if (action) action.call(event.currentTarget || node, event)
-        else console.warn('[Liquidify] Action is not registered. Call registerLiquidifyAction before interaction:', val, node)
+        if (!action) {
+          console.warn('[Liquidify] Action is not registered. Call registerLiquidifyAction before interaction:', val, node)
+          return
+        }
+        action.call(event.currentTarget || node, event)
       }
-    } else if (key.startsWith('on') && typeof finalVal === 'string') {
-      __LIQUIDIFY_INLINE_HANDLER__
-    } else {
-      props[key] = finalVal
+      return
     }
+    if (key.startsWith('on') && typeof finalVal === 'string') {
+      __LIQUIDIFY_INLINE_HANDLER__
+      return
+    }
+    props[key] = finalVal
   })
   const propsScript = Array.from(node.children).find((c) => (c as any).tagName === 'SCRIPT' && (c as any).hasAttribute('data-react-props'))
   if (propsScript) {
@@ -162,11 +170,7 @@ window.LiquidifyGetProps = (node: Element, propName = 'store') => {
       props[key] = mergeLiquidValue(props[key], val)
       continue
     }
-    const raw = attr.value
-    if (raw === 'true') val = true
-    else if (raw === 'false') val = false
-    else if (!Number.isNaN(Number(raw)) && raw.trim() !== '') val = Number(raw)
-    props[attr.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase())] = val
+    props[attr.name.replace(/-([a-z])/g, (g) => g[1].toUpperCase())] = parseAttributeValue(attr.value)
   }
   const propsScript = Array.from(node.children).find((c) => (c as any).tagName === 'SCRIPT' && (c as any).hasAttribute('data-react-props'))
   if (propsScript) {
@@ -229,20 +233,20 @@ window.LiquidifyHydrate['__LIQUIDIFY_COMPONENT__'] = (container) => {
     container._reactRoot = root
     root.render(window.React.createElement(__LIQUIDIFY_COMPONENT__, props))
   }
-  if (container.getAttribute('data-hydrate') === 'eager') hydrate()
-  else if ('IntersectionObserver' in window && hasLayoutBox(container)) {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          hydrate()
-          observer.unobserve(container)
-        }
-      },
-      { rootMargin: '200px' },
-    )
-    container._liquidifyObserver = observer
-    observer.observe(container)
-  } else hydrate()
+  if (container.getAttribute('data-hydrate') === 'eager' || !('IntersectionObserver' in window) || !hasLayoutBox(container)) {
+    hydrate()
+    return
+  }
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (!entries[0].isIntersecting) return
+      hydrate()
+      observer.unobserve(container)
+    },
+    { rootMargin: '200px' },
+  )
+  container._liquidifyObserver = observer
+  observer.observe(container)
 }
 
 document.dispatchEvent(new CustomEvent('liquidify:ready:__LIQUIDIFY_COMPONENT__'))

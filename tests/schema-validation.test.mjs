@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { SchemaValidator } from '../dist/application/services/schema-validation.js'
+import { SchemaValidator } from '#dist/application/services/schema-validation.js'
 
 const validator = new SchemaValidator()
 

@@ -1,6 +1,6 @@
 import generate from '@babel/generator'
 import { callExpression, expressionStatement, identifier, memberExpression, stringLiteral } from '@babel/types'
-import { readReactTemplate } from './template-loader'
+import { readReactTemplate } from '@adapters/compilers/react/runtime/template-loader'
 
 export class CssInjector {
   build(): string {

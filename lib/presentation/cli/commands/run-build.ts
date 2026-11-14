@@ -1,9 +1,9 @@
-import type { ParsedCliArgs } from '../args'
-import { BuildReporter } from '../build-reporter'
-import { loadConfig } from '../../../infra/adapters/config/config-loader'
-import { previewProject } from '../../../main/preview'
-import { SilentLogger } from '../../../shared/logger'
-import { BuildSession } from '../build-session'
+import type { ParsedCliArgs } from '@presentation/cli/args'
+import { BuildReporter } from '@presentation/cli/build-reporter'
+import { loadConfig } from '@adapters/config/config-loader'
+import { previewProject } from '@main/preview'
+import { SilentLogger } from '@shared/logger'
+import { BuildSession } from '@presentation/cli/build-session'
 
 export async function runBuild(options: ParsedCliArgs): Promise<void> {
   const reporter = new BuildReporter(options)

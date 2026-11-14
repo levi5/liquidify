@@ -1,9 +1,8 @@
 import path from 'node:path'
 import chokidar, { type FSWatcher } from 'chokidar'
-import type { IFileReader } from '../../../core/protocols/file-system'
-import type { BuildWatcher, BuildWatchCallbacks } from '../../../core/protocols/build-watcher'
+import type { IFileReader } from '@core/protocols/file-system'
+import type { BuildWatcher, BuildWatchCallbacks } from '@core/protocols/build-watcher'
 
-/** Coalesces file events and keeps at most one watch-triggered build active. */
 export class ProjectWatcher implements BuildWatcher {
   watcher: FSWatcher | null = null
   private dependencies = new Set<string>()

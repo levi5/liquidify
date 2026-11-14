@@ -1,4 +1,4 @@
-import type { ParsedComponent } from '../entities/parsed-component'
+import type { ParsedComponent } from '@core/entities/parsed-component'
 
 export interface IGenerator {
   readonly outputFiles?: string[]

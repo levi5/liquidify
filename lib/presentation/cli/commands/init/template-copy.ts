@@ -1,8 +1,8 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { _try } from 'funcio'
-import { NodeFileSystem } from '../../../../infra/adapters/fs/node-file-system'
-import { configureTemplate } from './template-source'
+import { NodeFileSystem } from '@adapters/fs/node-file-system'
+import { configureTemplate } from '@presentation/cli/commands/init/template-source'
 
 const IGNORED_ENTRIES = new Set([
   'node_modules',
@@ -26,8 +26,11 @@ function inspectTemplate(source: string, destination: string, root: string, forc
     const destinationPath = path.join(destination, entry.name)
     if (entry.isSymbolicLink()) throw new Error(`Refusing to copy symlink: ${sourcePath}. Templates must not contain symlinks.`)
     new NodeFileSystem(root).assertSafePath(destinationPath, root)
-    if (entry.isDirectory()) inspectTemplate(sourcePath, destinationPath, root, force)
-    else if (!force && fs.existsSync(destinationPath)) {
+    if (entry.isDirectory()) {
+      inspectTemplate(sourcePath, destinationPath, root, force)
+      continue
+    }
+    if (!force && fs.existsSync(destinationPath)) {
       throw new Error(`Refusing to overwrite existing file: ${destinationPath}. Initialize in an empty directory or use --force.`)
     }
   }

@@ -2,8 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import { loadConfig } from '../dist/index.js'
-import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
+import { loadConfig } from '#dist/index.js'
+import { createTemporaryDirectory } from '#tests/helpers/temp-directory.mjs'
 
 function createProject(context, plugins) {
   const directory = createTemporaryDirectory('liquidify-plugins-')

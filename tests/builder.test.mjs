@@ -3,10 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { makeLiquidifyBuilder } from '../dist/index.js'
-import { LiquidifyError } from '../dist/core/errors/liquidify-error.js'
-import { BUILD_CONCURRENCY } from '../dist/presentation/cli/commands/build.js'
-import { processFilesInParallel } from '../dist/application/services/parallel-files.js'
+import { makeLiquidifyBuilder } from '#dist/index.js'
+import { LiquidifyError } from '#dist/core/errors/liquidify-error.js'
+import { BUILD_CONCURRENCY } from '#dist/presentation/cli/commands/build.js'
+import { processFilesInParallel } from '#dist/application/services/parallel-files.js'
 
 for (const source of ["'use react'; export default function Broken( {", 'export default function Broken( {']) {
   test(`build rejects invalid syntax and emits one error (${source.startsWith("'use react'") ? 'scan' : 'compile'})`, async (t) => {

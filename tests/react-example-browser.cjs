@@ -5,10 +5,10 @@ const { spawnSync } = require('node:child_process')
 const { pathToFileURL } = require('node:url')
 const assert = require('node:assert/strict')
 const esbuild = require('esbuild')
-const { makeLiquidifyBuilder } = require('../dist/main/factories/make-liquidify-builder')
-const { ReactComponentCompiler } = require('../dist/infra/adapters/compilers/react/component-compiler')
-const { CssInjector } = require('../dist/infra/adapters/compilers/react/runtime/css-injector')
-const { SilentLogger } = require('../dist/shared/logger')
+const { makeLiquidifyBuilder } = require('#dist/main/factories/make-liquidify-builder.js')
+const { ReactComponentCompiler } = require('#dist/infra/adapters/compilers/react/component-compiler.js')
+const { CssInjector } = require('#dist/infra/adapters/compilers/react/runtime/css-injector.js')
+const { SilentLogger } = require('#dist/shared/logger.js')
 
 const REQUIRED_FOLDERS = ['assets', 'snippets', 'sections', 'blocks']
 const STRICT_BUNDLES = [

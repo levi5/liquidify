@@ -1,13 +1,12 @@
 import path from 'node:path'
-import type { IFileSystem } from '../../../core/protocols/file-system'
-import { NodeFileSystem } from './node-file-system'
+import type { IFileSystem } from '@core/protocols/file-system'
+import { NodeFileSystem } from '@adapters/fs/node-file-system'
 
 export interface OutputChange {
   filename: string
   operation: 'create' | 'update' | 'delete'
 }
 
-/** Copy-on-write overlay: reads real files, but never writes, touches or removes them. */
 export class PreviewFileSystem implements IFileSystem {
   private readonly overlay = new Map<string, string | null>()
   private readonly directories = new Set<string>()

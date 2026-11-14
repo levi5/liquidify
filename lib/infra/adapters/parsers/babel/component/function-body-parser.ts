@@ -1,7 +1,7 @@
 import { _match } from 'funcio'
 import { type FunctionDeclaration, isBlockStatement } from '@babel/types'
-import type { ComponentMetadataType } from '../../../../../types/component'
-import type { StatementCollector } from './statement-collector'
+import type { ComponentMetadataType } from '@liquidify-types/component'
+import type { StatementCollector } from '@adapters/parsers/babel/component/statement-collector'
 
 export class FunctionBodyParser {
   constructor(private readonly statementCollector: StatementCollector) {}

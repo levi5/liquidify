@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { _match, _Maybe } from "funcio";
-import { useLocale } from "../../i18n.tsx";
-import { t as tr, type Chapter } from "../../docs/manifest.ts";
-import { toHref } from "../../lib/routes.ts";
+import { useLocale } from "#web/i18n.tsx";
+import { t as tr, type Chapter } from "#web/docs/manifest.ts";
+import { toHref } from "#web/lib/routes.ts";
 import styles from "./style.module.css";
 
 export default function PageToc({ chapter }: { chapter: Chapter }) {

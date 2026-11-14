@@ -4,7 +4,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { makeLiquidifyBuilder } from '../dist/index.js'
+import { makeLiquidifyBuilder } from '#dist/index.js'
 
 const example = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../resources/templates/theme')
 const componentsDir = path.join(example, 'src/app')

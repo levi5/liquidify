@@ -1,6 +1,6 @@
-import type { BuildRequest } from '../../core/entities/build-result'
-import { DEFAULT_BUILD_LIMITS, type BuildLimits } from '../../core/entities/build-limits'
-import type { IFileReader } from '../../core/protocols/file-system'
+import type { BuildRequest } from '@core/entities/build-result'
+import { DEFAULT_BUILD_LIMITS, type BuildLimits } from '@core/entities/build-limits'
+import type { IFileReader } from '@core/protocols/file-system'
 import type {
   ProjectParser,
   RuntimeBundler,
@@ -8,12 +8,12 @@ import type {
   DirectiveReader,
   DependencyPlanner,
   ProjectFileDiscovery,
-} from '../../core/protocols/project-compilation'
-import type { TranspileFileUseCase } from './transpile-file'
-import type { BuildPlan } from '../../core/entities/build-plan'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
-import { collectBuildStatistics } from './build-statistics'
-import { compileProjectFiles } from './compile-project-files'
+} from '@core/protocols/project-compilation'
+import type { TranspileFileUseCase } from '@application/services/transpile-file'
+import type { BuildPlan } from '@core/entities/build-plan'
+import { LiquidifyError } from '@core/errors/liquidify-error'
+import { collectBuildStatistics } from '@application/services/build-statistics'
+import { compileProjectFiles } from '@application/services/compile-project-files'
 
 export interface ProjectPipelineOptions {
   componentsDir: string
@@ -22,7 +22,6 @@ export interface ProjectPipelineOptions {
   limits?: BuildLimits
 }
 
-/** Coordinates planning, validation and a transactional publish; owns no terminal or watcher. */
 export class ProjectBuildPipeline {
   files: string[] = []
   rebuilt: string[] = []
@@ -49,7 +48,6 @@ export class ProjectBuildPipeline {
     try {
       plan = this.dependencies.plan(this.files)
     } finally {
-      // Keep unresolved paths watched even when planning fails.
       updateWatch(this.dependencies.watchedFiles)
     }
     const registry = await this.registry.scan(this.files, plan.changed)

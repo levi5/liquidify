@@ -1,11 +1,11 @@
 import { _match, _try } from 'funcio'
 import fs from 'node:fs'
 import path from 'node:path'
-import { DEFAULT_CONFIG, type LiquidifyConfig } from '../../../core/entities/config'
-import { ValidationError } from '../../../core/errors/validation-error'
-import { resolvePlugins } from './plugin-loader'
-import { resolveBuildLimits } from '../../../core/entities/build-limits'
-import { configurationKeySuggestion } from './key-suggestion'
+import { DEFAULT_CONFIG, type LiquidifyConfig } from '@core/entities/config'
+import { ValidationError } from '@core/errors/validation-error'
+import { resolvePlugins } from '@adapters/config/plugin-loader'
+import { resolveBuildLimits } from '@core/entities/build-limits'
+import { configurationKeySuggestion } from '@adapters/config/key-suggestion'
 
 const configFiles = ['liquidify.config.json', '.liquidifyrc.json', '.liquidifyrc', 'liquidx.config.json', '.liquidxrc.json', '.liquidxrc']
 

@@ -4,8 +4,8 @@ import { t, money, escape, imageUrl, defaultValue } from 'liquidify'
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
-import { ThemeIcon } from '../Icon'
-import { Badges } from '../Badges'
+import { ThemeIcon } from '@theme/app/components/Icon'
+import { Badges } from '@theme/app/components/Badges'
 
 import styles from './styles.css'
 

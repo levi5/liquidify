@@ -1,7 +1,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { ImportGraphBuilder } from '../dist/application/services/dependency-tracker.js'
-import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
+import { ImportGraphBuilder } from '#dist/application/services/dependency-tracker.js'
+import { ASTParser } from '#dist/infra/adapters/parsers/babel/ASTParser.js'
 
 test('unchanged syntax is cached while import resolution is refreshed', () => {
   const source = 'import value from "./dependency"; export default value'

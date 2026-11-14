@@ -1,9 +1,9 @@
 import path from 'node:path'
-import type { LiquidifyConfig } from '../core/entities/config'
-import type { BuildRequest, ProjectBuildResult } from '../core/entities/build-result'
-import { PreviewFileSystem, type OutputChange } from '../infra/adapters/fs/preview-file-system'
-import { makeLiquidifyBuilder, type BuilderDependencies } from './factories/make-liquidify-builder'
-import { SilentLogger } from '../shared/logger'
+import type { LiquidifyConfig } from '@core/entities/config'
+import type { BuildRequest, ProjectBuildResult } from '@core/entities/build-result'
+import { PreviewFileSystem, type OutputChange } from '@adapters/fs/preview-file-system'
+import { makeLiquidifyBuilder, type BuilderDependencies } from '@main/factories/make-liquidify-builder'
+import { SilentLogger } from '@shared/logger'
 
 export interface ProjectPreview extends ProjectBuildResult {
   changes: OutputChange[]

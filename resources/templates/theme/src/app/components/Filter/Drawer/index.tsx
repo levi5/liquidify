@@ -2,7 +2,7 @@
 
 import { useLayoutEffect, useRef, useState } from 'preact/hooks'
 
-import { translate } from '../../../i18n/translate'
+import { translate } from '@theme/app/i18n/translate'
 
 import './styles.css'
 
@@ -37,10 +37,10 @@ export const FilterDrawer = ({ sectionId }: { sectionId: string }) => {
 			if (mobile.matches) {
 				sections.open = true
 				body.appendChild(sections)
-			} else {
-				modal.close()
-				source.appendChild(sections)
+				return
 			}
+			modal.close()
+			source.appendChild(sections)
 		}
 
 		const sort = form.elements.namedItem('sort_by') as HTMLSelectElement | null

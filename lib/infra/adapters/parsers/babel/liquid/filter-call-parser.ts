@@ -1,8 +1,8 @@
 import { isCallExpression, isMemberExpression, isIdentifier, isArrowFunctionExpression, type Node } from '@babel/types'
 import { _match } from 'funcio'
-import { ValidationError } from '../../../../../core/errors/validation-error'
-import { hoistLogicalOperators } from './pipe-guard'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { ValidationError } from '@core/errors/validation-error'
+import { hoistLogicalOperators } from '@adapters/parsers/babel/liquid/pipe-guard'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 export class FilterCallParser {
   constructor(
@@ -107,7 +107,7 @@ export class FilterCallParser {
     const arg = (body as { argument: { property?: { name?: string; value?: string | number }; computed?: boolean } }).argument
     const prop = arg.property?.name ?? (arg.property?.value !== undefined ? String(arg.property.value) : '')
     if (prop === '') return '["unknown"]'
-    // Computed access like item["foo-bar"] needs bracket syntax, not `item.`.
+
     if (arg.computed) return `["${prop.replace(/"/g, "'")}"]`
     return /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(prop) ? prop : `["${prop.replace(/"/g, "'")}"]`
   }
@@ -134,7 +134,6 @@ export class FilterCallParser {
   }
 
   private rewriteStrict(body: unknown): unknown {
-    // Clone instead of mutating the caller's AST in place.
     const clone = JSON.parse(JSON.stringify(body)) as { operator?: string }
     _match(clone.operator === '===')
       .with(true, () => {
@@ -168,9 +167,6 @@ export class FilterCallParser {
   }
 
   private escapeWhereCondition(condition: string): string {
-    // where_exp condition lives inside double quotes: escape backslashes,
-    // turn inner double quotes into single quotes unless the condition
-    // already contains single quotes (then escape doubles instead).
     if (!condition.includes('"')) return condition
     if (!condition.includes("'")) return condition.replace(/"/g, "'")
     return condition.replace(/\\/g, '\\\\').replace(/"/g, '\\"')

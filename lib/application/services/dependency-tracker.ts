@@ -1,12 +1,11 @@
-import type { ImportGraphBuilder } from './import-graph-builder'
-import { sha256Hex } from '../../shared/liquid-helpers'
-import type { BuildPlan } from '../../core/entities/build-plan'
-export type { BuildPlan } from '../../core/entities/build-plan'
+import type { ImportGraphBuilder } from '@application/services/import-graph-builder'
+import { sha256Hex } from '@shared/liquid-helpers'
+import type { BuildPlan } from '@core/entities/build-plan'
+export type { BuildPlan } from '@core/entities/build-plan'
 
-export { ImportGraphBuilder } from './import-graph-builder'
-export type { ImportGraph } from './import-graph-builder'
+export { ImportGraphBuilder } from '@application/services/import-graph-builder'
+export type { ImportGraph } from '@application/services/import-graph-builder'
 
-/** Propagates changed nodes through reverse edges instead of hashing every transitive closure. */
 export class DependencyTracker {
   private previousSources = new Map<string, string>()
   private previousEdges = new Map<string, Set<string>>()

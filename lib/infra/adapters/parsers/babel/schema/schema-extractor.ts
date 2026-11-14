@@ -33,11 +33,11 @@ import {
 } from '@babel/types'
 
 import { parse } from '@babel/parser'
-import type { ModuleResolver } from '../../../fs/module-resolver'
-import type { IFileSystem } from '../../../../../core/protocols/file-system'
-import type { Logger } from '../../../../../shared/logger'
+import type { ModuleResolver } from '@adapters/fs/module-resolver'
+import type { IFileSystem } from '@core/protocols/file-system'
+import type { Logger } from '@shared/logger'
 
-import { ValidationError } from '../../../../../core/errors/validation-error'
+import { ValidationError } from '@core/errors/validation-error'
 
 type Schema = Record<string, unknown>
 

@@ -10,7 +10,7 @@ type ChangeCartItemPayload = {
 	quantity: number
 }
 
-import { rootUrl } from '../../../lib/shopify'
+import { rootUrl } from '@theme/lib/shopify'
 
 type ShopifyCartError = {
 	description?: string

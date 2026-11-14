@@ -1,6 +1,6 @@
-import { useLocale } from "../../i18n.tsx";
+import { useLocale } from "#web/i18n.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
+import { cx } from "#web/constants/cx.ts";
 
 export default function Loading() {
   const { locale } = useLocale();

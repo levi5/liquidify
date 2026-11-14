@@ -1,4 +1,4 @@
-import { BOX_FRAGMENT_SCHEMA } from '../Box/box.schema'
+import { BOX_FRAGMENT_SCHEMA } from '@theme/schemas/Box/box.schema'
 
 export const PRODUCT_INFO_SCHEMA = {
 	name: 't:sections.product_info.name',

@@ -4,7 +4,7 @@ import { t } from 'liquidify'
 import { FormBlock } from 'liquidex'
 import classNames from 'classnames'
 
-import { NEWSLETTER_SCHEMA } from '../../../schemas/Newsletter/newsletter.schema'
+import { NEWSLETTER_SCHEMA } from '@theme/schemas/Newsletter/newsletter.schema'
 
 import styles from './styles.css'
 

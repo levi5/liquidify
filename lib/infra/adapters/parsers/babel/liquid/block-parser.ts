@@ -15,9 +15,9 @@ import {
   isExpression,
 } from '@babel/types'
 import { _match } from 'funcio'
-import { pascalToKebab } from '../../../../../shared/string'
-import { ValidationError } from '../../../../../core/errors/validation-error'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { pascalToKebab } from '@shared/string'
+import { ValidationError } from '@core/errors/validation-error'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 export class LiquidBlockParser {
   constructor(

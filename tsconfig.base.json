@@ -6,6 +6,17 @@
     "types": ["node"],
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@core/*": ["lib/core/*"],
+      "@application/*": ["lib/application/*"],
+      "@adapters/*": ["lib/infra/adapters/*"],
+      "@presentation/*": ["lib/presentation/*"],
+      "@main/*": ["lib/main/*"],
+      "@shared/*": ["lib/shared/*"],
+      "@liquidify-types/*": ["lib/types/*"],
+      "@react-runtime/*": ["resources/react/*"]
+    }
   }
 }

@@ -1,10 +1,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { loadConfig } from '../../../infra/adapters/config/config-loader'
-import type { ParsedCliArgs } from '../args'
+import { loadConfig } from '@adapters/config/config-loader'
+import type { ParsedCliArgs } from '@presentation/cli/args'
 
 export async function runDoctor(options: ParsedCliArgs): Promise<void> {
-  // Diagnostics never execute plugins, even when the configuration contains them.
   const configuration = loadConfig(process.cwd(), options.configPath, { plugins: false })
   const checks = [
     { name: 'Node.js >= 22', success: Number(process.versions.node.split('.')[0]) >= 22, detail: process.version },

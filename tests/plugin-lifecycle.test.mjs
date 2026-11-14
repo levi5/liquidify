@@ -2,8 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import { makeLiquidifyBuilder, SilentLogger } from '../dist/index.js'
-import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
+import { makeLiquidifyBuilder, SilentLogger } from '#dist/index.js'
+import { createTemporaryDirectory } from '#tests/helpers/temp-directory.mjs'
 
 test('plugin generation hooks are awaited and validation runs after mutation', async (context) => {
   const directory = createTemporaryDirectory('liquidify-plugin-hooks-')

@@ -1,7 +1,7 @@
-import { DrawerAction } from './Action'
-import { DrawerContent } from './Content'
-import { DrawerTrigger } from './Trigger'
-import { Drawer as Root } from './Root'
+import { DrawerAction } from '@theme/app/components/Drawer/Action'
+import { DrawerContent } from '@theme/app/components/Drawer/Content'
+import { DrawerTrigger } from '@theme/app/components/Drawer/Trigger'
+import { Drawer as Root } from '@theme/app/components/Drawer/Root'
 
 export const Drawer = {
 	Action: DrawerAction,

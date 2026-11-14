@@ -4,14 +4,14 @@ import { imageUrl, escape, defaultValue } from 'liquidify'
 import { RenderSvg } from 'liquidex'
 import classNames from 'classnames'
 
-import type { ProductPreviewType } from '../../../../types/components/product'
+import type { ProductPreviewType } from '@theme/types/components/product'
 
-import { SwiperSliderRoot } from '../../Swiper/Root'
-import { SwiperCarousel } from '../../Swiper/Slide'
-import { SwiperSliderArrow } from '../../Swiper/Arrow'
-import { Thumbnails } from '../Thumbnails'
+import { SwiperSliderRoot } from '@theme/app/components/Swiper/Root'
+import { SwiperCarousel } from '@theme/app/components/Swiper/Slide'
+import { SwiperSliderArrow } from '@theme/app/components/Swiper/Arrow'
+import { Thumbnails } from '@theme/app/components/Product/Thumbnails'
 
-import { PRODUCT_PREVIEW_SLIDER_SETTINGS } from '../../../../settings/slider/product.settings'
+import { PRODUCT_PREVIEW_SLIDER_SETTINGS } from '@theme/settings/slider/product.settings'
 
 import styles from './styles.css'
 

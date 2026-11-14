@@ -1,19 +1,25 @@
 import { _match } from 'funcio'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 function scanState() {
   return { single: false, dbl: false, tick: false, escaped: false }
 }
 
-function stepQuote(c: string, prev: string, s: { single: boolean; dbl: boolean; tick: boolean }): void {
-  const escaped = prev === '\\'
-  if (!escaped && c === "'" && !s.dbl && !s.tick) s.single = !s.single
-  else if (!escaped && c === '"' && !s.single && !s.tick) s.dbl = !s.dbl
-  else if (!escaped && c === '`' && !s.single && !s.dbl) s.tick = !s.tick
+function stepQuote(character: string, previous: string, state: { single: boolean; dbl: boolean; tick: boolean }): void {
+  if (previous === '\\') return
+  if (character === "'" && !state.dbl && !state.tick) {
+    state.single = !state.single
+    return
+  }
+  if (character === '"' && !state.single && !state.tick) {
+    state.dbl = !state.dbl
+    return
+  }
+  if (character === '`' && !state.single && !state.dbl) state.tick = !state.tick
 }
 
-function inString(s: { single: boolean; dbl: boolean; tick: boolean }): boolean {
-  return s.single || s.dbl || s.tick
+function inString(state: { single: boolean; dbl: boolean; tick: boolean }): boolean {
+  return state.single || state.dbl || state.tick
 }
 
 export function hasTopLevelPipe(code: string): boolean {

@@ -1,5 +1,5 @@
-import type { LiquidifyPlugin } from '../protocols/plugin'
-import type { BuildLimits } from './build-limits'
+import type { LiquidifyPlugin } from '@core/protocols/plugin'
+import type { BuildLimits } from '@core/entities/build-limits'
 
 export interface LiquidifyConfig {
   componentsDir: string

@@ -9,11 +9,11 @@ import {
   type Node,
   type CallExpression,
 } from '@babel/types'
-import type { ASTParser } from '../../infra/adapters/parsers/babel/ASTParser'
-import type { ModuleResolver } from '../../infra/adapters/fs/module-resolver'
-import type { IFileSystem } from '../../core/protocols/file-system'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
-import { DEFAULT_BUILD_LIMITS, type BuildLimits } from '../../core/entities/build-limits'
+import type { ASTParser } from '@adapters/parsers/babel/ASTParser'
+import type { ModuleResolver } from '@adapters/fs/module-resolver'
+import type { IFileSystem } from '@core/protocols/file-system'
+import { LiquidifyError } from '@core/errors/liquidify-error'
+import { DEFAULT_BUILD_LIMITS, type BuildLimits } from '@core/entities/build-limits'
 
 export interface ImportGraph {
   sources: Map<string, string>

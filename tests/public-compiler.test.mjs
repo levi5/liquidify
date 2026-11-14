@@ -2,8 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import { compile, previewProject, makeLiquidifyBuilder, SilentLogger } from '../dist/index.js'
-import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
+import { compile, previewProject, makeLiquidifyBuilder, SilentLogger } from '#dist/index.js'
+import { createTemporaryDirectory } from '#tests/helpers/temp-directory.mjs'
 
 function createProject(context) {
   const directory = createTemporaryDirectory('liquidify-public-')

@@ -1,10 +1,10 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { generateSchemaTypes, makeLiquidifyBuilder, SilentLogger } from '../dist/index.js'
-import { resolveBuildLimits } from '../dist/core/entities/build-limits.js'
-import { ImportGraphBuilder } from '../dist/application/services/dependency-tracker.js'
-import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
-import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
+import { generateSchemaTypes, makeLiquidifyBuilder, SilentLogger } from '#dist/index.js'
+import { resolveBuildLimits } from '#dist/core/entities/build-limits.js'
+import { ImportGraphBuilder } from '#dist/application/services/dependency-tracker.js'
+import { ASTParser } from '#dist/infra/adapters/parsers/babel/ASTParser.js'
+import { EsbuildCompiler } from '#dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
 
 test('schema type generation preserves literal choices and quoted setting IDs', () => {
   const output = generateSchemaTypes({

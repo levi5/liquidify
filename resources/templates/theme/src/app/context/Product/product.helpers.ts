@@ -1,4 +1,4 @@
-import type { Product, ProductOption, ProductProviderProps, ProductStore, ProductVariant } from '../../../types/components/product'
+import type { Product, ProductOption, ProductProviderProps, ProductStore, ProductVariant } from '@theme/types/components/product'
 
 export const normalizeProduct = (store: ProductStore): Product | null => {
 	if (!store) return null

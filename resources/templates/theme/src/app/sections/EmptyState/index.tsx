@@ -3,10 +3,10 @@
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
-import { BaseSection } from '../../components/Base/Section'
-import { BaseEmptyState } from '../../components/Base/EmptyState'
+import { BaseSection } from '@theme/app/components/Base/Section'
+import { BaseEmptyState } from '@theme/app/components/Base/EmptyState'
 
-import { EMPTY_STATE_SCHEMA } from '../../../schemas/EmptyState/empty-state.schema'
+import { EMPTY_STATE_SCHEMA } from '@theme/schemas/EmptyState/empty-state.schema'
 
 export const EmptyState = () => {
 	return (

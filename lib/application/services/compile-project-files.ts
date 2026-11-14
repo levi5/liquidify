@@ -1,8 +1,8 @@
-import type { IFileReader } from '../../core/protocols/file-system'
-import type { DirectiveReader } from '../../core/protocols/project-compilation'
-import type { TranspileFileUseCase } from './transpile-file'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
-import { processFilesInParallel } from './parallel-files'
+import type { IFileReader } from '@core/protocols/file-system'
+import type { DirectiveReader } from '@core/protocols/project-compilation'
+import type { TranspileFileUseCase } from '@application/services/transpile-file'
+import { LiquidifyError } from '@core/errors/liquidify-error'
+import { processFilesInParallel } from '@application/services/parallel-files'
 
 export async function compileProjectFiles(
   files: string[],

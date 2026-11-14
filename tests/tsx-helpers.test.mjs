@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { makeParser } from './helpers.mjs'
+import { makeParser } from '#tests/helpers.mjs'
 
 describe('TSX-first helpers (no Liquid-in-strings)', () => {
   it('raw() outputs without escape', async () => {

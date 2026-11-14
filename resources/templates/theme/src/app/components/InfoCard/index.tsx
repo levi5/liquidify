@@ -2,7 +2,7 @@
 
 import { t, imageUrl, assetUrl, escape } from 'liquidify'
 
-import { INFO_CARD_SCHEMA } from '../../../schemas/InfoCard/info-card.schema'
+import { INFO_CARD_SCHEMA } from '@theme/schemas/InfoCard/info-card.schema'
 
 import styles from './styles.css'
 

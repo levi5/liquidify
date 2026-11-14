@@ -3,10 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { makeParser } from './helpers.mjs'
-import { makeLiquidifyBuilder } from '../dist/index.js'
-import { AggregateValidationError } from '../dist/core/errors/error-collector.js'
-import { ValidationError } from '../dist/core/errors/validation-error.js'
+import { makeParser } from '#tests/helpers.mjs'
+import { makeLiquidifyBuilder } from '#dist/index.js'
+import { AggregateValidationError } from '#dist/core/errors/error-collector.js'
+import { ValidationError } from '#dist/core/errors/validation-error.js'
 
 describe('error recovery', () => {
   it('collects multiple errors from one file and reports them together', async () => {

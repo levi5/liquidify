@@ -1,8 +1,8 @@
 const esbuild = require('esbuild')
-const { ReactRuntimeBuilder } = require('../../dist/infra/adapters/compilers/react/runtime/runtime-builder')
-const { ReactComponentCompiler } = require('../../dist/infra/adapters/compilers/react/component-compiler')
-const { CssInjector } = require('../../dist/infra/adapters/compilers/react/runtime/css-injector')
-const { SilentLogger } = require('../../dist/shared/logger')
+const { ReactRuntimeBuilder } = require('#dist/infra/adapters/compilers/react/runtime/runtime-builder.js')
+const { ReactComponentCompiler } = require('#dist/infra/adapters/compilers/react/component-compiler.js')
+const { CssInjector } = require('#dist/infra/adapters/compilers/react/runtime/css-injector.js')
+const { SilentLogger } = require('#dist/shared/logger.js')
 
 const buildRuntimeScript = (compiler = esbuild) => new ReactRuntimeBuilder(compiler).build()
 

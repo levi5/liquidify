@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { TranspileFileUseCase } from '../dist/application/services/transpile-file.js'
-import { ValidationService } from '../dist/application/services/validation-service.js'
-import { SchemaValidator } from '../dist/application/services/schema-validation.js'
+import { TranspileFileUseCase } from '#dist/application/services/transpile-file.js'
+import { ValidationService } from '#dist/application/services/validation-service.js'
+import { SchemaValidator } from '#dist/application/services/schema-validation.js'
 
 function makeUseCase({ component = { name: 'Hero' } } = {}) {
   const generated = []

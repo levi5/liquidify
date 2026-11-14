@@ -1,12 +1,12 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { parseExpression } from '@babel/parser'
-import { ExpressionParser } from '../dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
-import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
-import { ReactComponentCompiler } from '../dist/infra/adapters/compilers/react/component-compiler.js'
-import { ParsingContext } from '../dist/core/entities/parsing-context.js'
-import { ComponentRegistry, DirectiveScanner } from '../dist/application/services/component-registry.js'
-import { ASTParser } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
+import { ExpressionParser } from '#dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
+import { EsbuildCompiler } from '#dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
+import { ReactComponentCompiler } from '#dist/infra/adapters/compilers/react/component-compiler.js'
+import { ParsingContext } from '#dist/core/entities/parsing-context.js'
+import { ComponentRegistry, DirectiveScanner } from '#dist/application/services/component-registry.js'
+import { ASTParser } from '#dist/infra/adapters/parsers/babel/ASTParser.js'
 
 const scanner = () => new DirectiveScanner(new ASTParser())
 const detectDirectives = (source) => scanner().scan(source)

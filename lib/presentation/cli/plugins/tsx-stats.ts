@@ -1,4 +1,4 @@
-import type { LiquidifyPlugin, PluginStats } from '../../../core/protocols/plugin'
+import type { LiquidifyPlugin, PluginStats } from '@core/protocols/plugin'
 
 export const tsxStatsPlugin: LiquidifyPlugin = {
   name: 'tsx-stats',

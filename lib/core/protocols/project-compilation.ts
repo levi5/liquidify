@@ -1,6 +1,6 @@
-import type { ReactComponentConfig } from '../../types/liquid'
-import type { BuildPlan } from '../entities/build-plan'
-import type { IParser } from './parser'
+import type { ReactComponentConfig } from '@liquidify-types/liquid'
+import type { BuildPlan } from '@core/entities/build-plan'
+import type { IParser } from '@core/protocols/parser'
 
 export interface ProjectParser extends IParser {
   setReactRegistry(registry: Map<string, ReactComponentConfig>): void

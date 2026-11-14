@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import { normalizeTemplateName } from './arguments'
+import { normalizeTemplateName } from '@presentation/cli/commands/init/arguments'
 
 export function resolveTemplate(templateName = 'theme'): string {
   const normalized = normalizeTemplateName(templateName)

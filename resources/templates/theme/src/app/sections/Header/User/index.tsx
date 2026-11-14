@@ -2,8 +2,8 @@
 
 import { RenderSvg } from 'liquidex'
 
-import { MiniCart } from '../../../components/MiniCart'
-import { SearchDrawer } from '../../../components/Search/Drawer'
+import { MiniCart } from '@theme/app/components/MiniCart'
+import { SearchDrawer } from '@theme/app/components/Search/Drawer'
 
 export const HeaderUserOptions = () => {
 	return (

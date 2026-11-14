@@ -1,4 +1,4 @@
-import { ValidationError } from '../../core/errors/validation-error'
+import { ValidationError } from '@core/errors/validation-error'
 
 function fail(message: string, filename?: string): never {
   throw new ValidationError(`Invalid schema: ${message}`, filename)

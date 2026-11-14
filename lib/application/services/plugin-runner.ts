@@ -1,9 +1,8 @@
-import type { LiquidifyPlugin, PluginContext, PluginStats } from '../../core/protocols/plugin'
-import type { ParsedComponent } from '../../core/entities/parsed-component'
-import type { Logger } from '../../core/protocols/logger'
-import { SilentLogger } from '../../shared/logger'
+import type { LiquidifyPlugin, PluginContext, PluginStats } from '@core/protocols/plugin'
+import type { ParsedComponent } from '@core/entities/parsed-component'
+import type { Logger } from '@core/protocols/logger'
+import { SilentLogger } from '@shared/logger'
 
-/** Hooks are ordered and awaited; plugins run with the host process privileges. */
 export class PluginRunner {
   private readonly starts: Array<() => void | Promise<void>> = []
   private readonly ends: Array<(statistics: PluginStats) => void | Promise<void>> = []

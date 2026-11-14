@@ -17,9 +17,9 @@ import traverse from '@babel/traverse'
 import classNames from 'classnames'
 import { _match, _try } from 'funcio'
 
-import type { IFileSystem } from '../../../../../core/protocols/file-system'
-import { MAX_CSS_BYTES } from '../../../../../shared/liquid-constants'
-import type { Logger } from '../../../../../shared/logger'
+import type { IFileSystem } from '@core/protocols/file-system'
+import { MAX_CSS_BYTES } from '@shared/liquid-constants'
+import type { Logger } from '@shared/logger'
 
 export interface CSSImportResult {
   componentCss: string

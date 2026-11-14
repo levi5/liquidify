@@ -1,6 +1,6 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
-import { cx } from "../../constants/cx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
+import { cx } from "#web/constants/cx";
 import styles from "./style.module.css";
 import {
   RUNTIME_TS,
@@ -9,7 +9,7 @@ import {
   ACTION,
   WINDOW_GLOBALS,
   RUNTIME_COPY,
-} from "../../cms/runtime.ts";
+} from "#web/cms/runtime.ts";
 
 export default function RuntimeReference() {
   const { locale } = useLocale();

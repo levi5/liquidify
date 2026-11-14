@@ -2,8 +2,8 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import { NodeFileSystem } from '../dist/infra/adapters/fs/node-file-system.js'
-import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
+import { NodeFileSystem } from '#dist/infra/adapters/fs/node-file-system.js'
+import { createTemporaryDirectory } from '#tests/helpers/temp-directory.mjs'
 
 test('asynchronous atomic writes preserve permissions and clean temporary files', async (context) => {
   const directory = createTemporaryDirectory('liquidify-async-')

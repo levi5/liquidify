@@ -1,9 +1,9 @@
 import { _match } from 'funcio'
-import type { IParser } from '../../core/protocols/parser'
-import type { IGenerator } from '../../core/protocols/generator'
-import type { ParsedComponent } from '../../core/entities/parsed-component'
-import type { ValidationService } from './validation-service'
-import type { PluginRunner } from './plugin-runner'
+import type { IParser } from '@core/protocols/parser'
+import type { IGenerator } from '@core/protocols/generator'
+import type { ParsedComponent } from '@core/entities/parsed-component'
+import type { ValidationService } from '@application/services/validation-service'
+import type { PluginRunner } from '@application/services/plugin-runner'
 
 export type TranspileStatus = 'ok' | 'skipped-empty' | 'skipped-unnamed'
 

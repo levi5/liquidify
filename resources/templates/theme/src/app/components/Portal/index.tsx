@@ -2,7 +2,7 @@
 
 import classNames from 'classnames'
 import { createPortal, ReactNode } from 'preact/compat'
-import { $DomFind } from '../../../shared/dom/get-element'
+import { $DomFind } from '@theme/shared/dom/get-element'
 
 const Root = ({ children, onClick, className = 'modalPortalDefault' }: { children: ReactNode; onClick?: () => void; className?: string }) => {
 	return (

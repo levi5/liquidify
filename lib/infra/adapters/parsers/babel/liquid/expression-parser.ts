@@ -1,11 +1,11 @@
-import { renderCondition } from './condition'
-import { hoistPipedArg, hoistLogicalOperators } from './pipe-guard'
-import { ValidationError } from '../../../../../core/errors/validation-error'
-import { TemplateLiteralParser } from './template-literal-parser'
+import { renderCondition } from '@adapters/parsers/babel/liquid/condition'
+import { hoistPipedArg, hoistLogicalOperators } from '@adapters/parsers/babel/liquid/pipe-guard'
+import { ValidationError } from '@core/errors/validation-error'
+import { TemplateLiteralParser } from '@adapters/parsers/babel/liquid/template-literal-parser'
 import generate from '@babel/generator'
-import type { Compiler } from '../../../../../core/protocols/compiler'
-import type { ImportResolver } from './import-resolver'
-import type { LiquidLoopParser } from './loop-parser'
+import type { Compiler } from '@core/protocols/compiler'
+import type { ImportResolver } from '@adapters/parsers/babel/liquid/import-resolver'
+import type { LiquidLoopParser } from '@adapters/parsers/babel/liquid/loop-parser'
 import {
   cloneNode,
   traverseFast,
@@ -37,9 +37,9 @@ import {
   isBlockStatement,
 } from '@babel/types'
 import { _match, _try } from 'funcio'
-import { escapeHtml, escapedOutput, liquidJsonOutput } from '../../../../../shared/html'
-import { HelperCallParser } from './helper-call-parser'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { escapeHtml, escapedOutput, liquidJsonOutput } from '@shared/html'
+import { HelperCallParser } from '@adapters/parsers/babel/liquid/helper-call-parser'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 const LIQUID_FILTERS = new Set(['markdownify', 'handleize', 'downcase', 'upcase', 'strip', 'strip_html', 'money', 'money_without_currency'])
 
@@ -179,8 +179,7 @@ export class ExpressionParser {
   private normalizeTree(node: Node, inCondition: boolean, renames?: Record<string, string>, context?: ParsingContext, inJs = false): void {
     const nestedJs = inJs || isFunction(node)
     this.normalizeNode(node, inCondition, renames, context, nestedJs)
-    // Rewrites replace nodes with identifiers but leave the old child keys behind;
-    // not descending into them avoids hoisting the same fallback twice.
+
     if (isIdentifier(node) || isStringLiteral(node)) return
     for (const key of VISITOR_KEYS[node.type] ?? []) {
       const child = (node as unknown as Record<string, unknown>)[key]
@@ -996,12 +995,18 @@ export class ExpressionParser {
 
   private hasTopLevelAppend(code: string): boolean {
     let single = false
-    let dbl = false
-    for (let i = 0; i < code.length - 12; i++) {
-      const c = code[i]
-      if (c === "'" && !dbl) single = !single
-      else if (c === '"' && !single) dbl = !dbl
-      else if (!single && !dbl && code.startsWith(' | append: ', i)) return true
+    let double = false
+    for (let cursor = 0; cursor < code.length - 12; cursor++) {
+      const character = code[cursor]
+      if (character === "'" && !double) {
+        single = !single
+        continue
+      }
+      if (character === '"' && !single) {
+        double = !double
+        continue
+      }
+      if (!single && !double && code.startsWith(' | append: ', cursor)) return true
     }
     return false
   }
@@ -1033,12 +1038,18 @@ export class ExpressionParser {
 
   private hasTopLevelPipe(code: string): boolean {
     let single = false
-    let dbl = false
-    for (let i = 0; i < code.length - 2; i++) {
-      const c = code[i]
-      if (c === "'" && !dbl) single = !single
-      else if (c === '"' && !single) dbl = !dbl
-      else if (!single && !dbl && c === ' ' && code[i + 1] === '|' && code[i + 2] === ' ') return true
+    let double = false
+    for (let cursor = 0; cursor < code.length - 2; cursor++) {
+      const character = code[cursor]
+      if (character === "'" && !double) {
+        single = !single
+        continue
+      }
+      if (character === '"' && !single) {
+        double = !double
+        continue
+      }
+      if (!single && !double && character === ' ' && code[cursor + 1] === '|' && code[cursor + 2] === ' ') return true
     }
     return false
   }
@@ -1229,10 +1240,6 @@ export class ExpressionParser {
   }
 
   private parseStringLiteral(expr: { value: string }, context?: ParsingContext): string {
-    // String literals containing Liquid syntax are an intentional DSL:
-    // developers write `{'settings.title | default: shop.name'}` to emit
-    // live Liquid (see parser tests). Static source is trusted at compile
-    // time, so preserve that feature and only escape plain text.
     return _match(true)
       .with(expr.value.includes('{{') || expr.value.includes('{%'), () => expr.value)
       .with(expr.value.includes('|'), () => `{{ ${expr.value.trim()} }}`)

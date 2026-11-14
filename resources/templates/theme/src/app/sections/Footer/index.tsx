@@ -2,7 +2,7 @@
 
 import { t, escape, defaultValue } from 'liquidify'
 
-import { FOOTER_LAYOUT_SCHEMA } from '../../../schemas/Footer/footer.schema'
+import { FOOTER_LAYOUT_SCHEMA } from '@theme/schemas/Footer/footer.schema'
 import classNames from 'classnames'
 
 import styles from './styles.css'

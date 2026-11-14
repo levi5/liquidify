@@ -1,9 +1,9 @@
-import type { ParsedCliArgs } from './args'
-import type { ProjectBuildResult } from '../../core/entities/build-result'
-import type { OutputChange } from '../../infra/adapters/fs/preview-file-system'
-import { errorDiagnostic } from '../../application/services/diagnostics'
+import type { ParsedCliArgs } from '@presentation/cli/args'
+import type { ProjectBuildResult } from '@core/entities/build-result'
+import type { OutputChange } from '@adapters/fs/preview-file-system'
+import { errorDiagnostic } from '@application/services/diagnostics'
 import fs from 'node:fs'
-import { sourceCodeFrame } from '../../shared/source-code-frame'
+import { sourceCodeFrame } from '@shared/source-code-frame'
 
 export class BuildReporter {
   constructor(private readonly options: Partial<Pick<ParsedCliArgs, 'json' | 'quiet' | 'command' | 'dryRun' | 'profile' | 'verbose'>>) {}
@@ -43,9 +43,7 @@ export class BuildReporter {
             const frame = sourceCodeFrame(fs.readFileSync(diagnostic.filePath, 'utf8'), diagnostic.location)
             if (frame) console.error(frame)
           }
-        } catch {
-          // A missing source must never hide the original compilation diagnostic.
-        }
+        } catch {}
       }
     }
   }

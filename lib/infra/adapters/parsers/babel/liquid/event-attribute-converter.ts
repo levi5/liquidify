@@ -9,9 +9,9 @@ import {
   type CallExpression,
   type Node,
 } from '@babel/types'
-import type { ILiquidExpressionParser } from '../../../../../types/liquid'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
-import { pascalToKebab } from '../../../../../shared/string'
+import type { ILiquidExpressionParser } from '@liquidify-types/liquid'
+import type { ParsingContext } from '@core/entities/parsing-context'
+import { pascalToKebab } from '@shared/string'
 
 const jsReserved = new Set([
   'new',
