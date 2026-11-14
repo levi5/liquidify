@@ -22,13 +22,17 @@ export interface ScannedComponent {
 }
 
 export class DirectiveScanner {
+  private readonly cache = new Map<string, { source: string; directives: ComponentDirectives }>()
+
   constructor(private readonly astParser: ASTParser) {}
 
   public scan(src: string, filePath?: string): ComponentDirectives {
+    const cached = filePath ? this.cache.get(filePath) : undefined
+    if (cached?.source === src) return { ...cached.directives }
     const values = this.astParser.parse(src, filePath).program.directives.map((directive) => directive.value.value)
     const react = values.map((value) => value.match(REACT_DIRECTIVE_PATTERN)).find(Boolean)
     const rawId = react?.[1] as string | undefined
-    return {
+    const directives = {
       isReact: react !== undefined,
       isDom: values.some((value) => DOM_DIRECTIVE_PATTERN.test(value)),
       isSnippet: values.includes('use snippets'),
@@ -38,6 +42,11 @@ export class DirectiveScanner {
         .with(false, () => (rawId as string).replace(/^#/, ''))
         .exec() as string,
     }
+    if (filePath) {
+      if (this.cache.size >= 2048) this.cache.clear()
+      this.cache.set(filePath, { source: src, directives })
+    }
+    return directives
   }
 }
 

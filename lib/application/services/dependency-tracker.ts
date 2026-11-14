@@ -30,6 +30,8 @@ export interface BuildPlan {
 const MISSING_SOURCE = '<missing>'
 
 export class ImportGraphBuilder {
+  private readonly importCache = new Map<string, { source: string; specifiers: string[] }>()
+
   constructor(
     private readonly fs: IFileSystem,
     private readonly resolver: ModuleResolver,
@@ -41,6 +43,9 @@ export class ImportGraphBuilder {
     files.forEach((file) => {
       this.visit(file, graph, dependencies)
     })
+    for (const filename of this.importCache.keys()) {
+      if (!graph.sources.has(filename)) this.importCache.delete(filename)
+    }
     return graph
   }
 
@@ -85,6 +90,11 @@ export class ImportGraphBuilder {
   }
 
   private collectAstImports(file: string, source: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
+    const cached = this.importCache.get(file)
+    if (cached?.source === source) {
+      for (const specifier of cached.specifiers) this.addImport(specifier, file, graph, dependencies, imports)
+      return
+    }
     const parsed = _try.sync(() => this.astParser.parse(source, file))
     const ast = parsed.match({
       right: (value) => value,
@@ -98,10 +108,13 @@ export class ImportGraphBuilder {
           })
           .exec(),
     })
+    const specifiers: string[] = []
     traverseFast(ast, (node: Node) => {
       const specifier = this.staticSourceOf(node)
-      if (specifier !== undefined) this.addImport(specifier, file, graph, dependencies, imports)
+      if (specifier !== undefined) specifiers.push(specifier)
     })
+    this.importCache.set(file, { source, specifiers })
+    for (const specifier of specifiers) this.addImport(specifier, file, graph, dependencies, imports)
   }
 
   private staticSourceOf(node: Node): string | undefined {
@@ -195,7 +208,10 @@ export class DependencyTracker {
   }
 
   private snapshot(files: string[], graph: ImportGraph): Map<string, string> {
-    return new Map(files.map((file) => [path.resolve(file), sha256Hex(this.fingerprint(file, graph))]))
+    // Hash shared source content once instead of concatenating it for every entry.
+    const digests = new Map(Array.from(graph.sources, ([filename, source]) => [filename, sha256Hex(source)]))
+    const hashedGraph = { ...graph, sources: digests }
+    return new Map(files.map((file) => [path.resolve(file), sha256Hex(this.fingerprint(file, hashedGraph))]))
   }
 
   private fingerprint(file: string, graph: ImportGraph): string {

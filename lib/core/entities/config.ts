@@ -6,6 +6,8 @@ export interface LiquidifyConfig {
   react?: { strictCsp?: boolean }
   force?: boolean
   plugins?: LiquidifyPlugin[]
+  cwd?: string
+  concurrency?: number
 }
 
 export const DEFAULT_CONFIG: LiquidifyConfig = {

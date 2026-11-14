@@ -52,18 +52,19 @@ const readPackageVersion = (): string => {
   }
 }
 
-const runBuild = async (watch: boolean, force = false, configPath?: string): Promise<void> => {
-  const spinner = ora({ text: 'Loading configuration...', spinner: 'dots' }).start()
+const runBuild = async (watch: boolean, force = false, configPath?: string, quiet = false): Promise<void> => {
+  const spinner = ora({ text: 'Loading configuration...', spinner: 'dots', isSilent: quiet }).start()
   const { loadConfig } = await import('../../infra/adapters/config/config-loader')
   const { makeLiquidifyBuilder } = await import('../../main/factories/make-liquidify-builder')
   const config = loadConfig(process.cwd(), configPath)
+  const { SilentLogger } = await import('../../shared/logger')
   _match(force)
     .with(true, () => {
       config.force = true
     })
     .with(false, () => undefined)
     .exec()
-  const builder = makeLiquidifyBuilder(config)
+  const builder = makeLiquidifyBuilder(config, quiet ? { logger: new SilentLogger() } : {})
 
   spinner.succeed(`Configuration loaded (src: ${config.componentsDir}, out: ${config.output})`)
 
@@ -74,13 +75,15 @@ const runBuild = async (watch: boolean, force = false, configPath?: string): Pro
   builder.on('build:end', () => {
     spinner.succeed(kleur.green('Build completed successfully!'))
     _match(watch)
-      .with(true, () => console.log(kleur.dim('\n👀 Watching for changes...')))
+      .with(true, () => {
+        if (!quiet) console.log(kleur.dim('\n👀 Watching for changes...'))
+      })
       .with(false, () => undefined)
       .exec()
   })
 
   builder.on('file:change', (file) => {
-    console.log(kleur.dim(`\n📄 File changed: ${file}`))
+    if (!quiet) console.log(kleur.dim(`\n📄 File changed: ${file}`))
   })
 
   builder.on('error', (error: LiquidifyError) => {
@@ -96,7 +99,7 @@ const runBuild = async (watch: boolean, force = false, configPath?: string): Pro
     await builder.dispose().catch((error) => {
       console.error(kleur.red(`Failed to dispose builder: ${error instanceof Error ? error.message : String(error)}`))
     })
-    console.log(kleur.yellow('\n👋 Shutting down...'))
+    if (!quiet) console.log(kleur.yellow('\n👋 Shutting down...'))
     process.exit(code)
   }
 
@@ -121,7 +124,10 @@ const runBuild = async (watch: boolean, force = false, configPath?: string): Pro
   const outcome = await _try.async(() => builder.build())
   await outcome.match({
     right: () => finishRun(builder, watch, shutdown),
-    left: (error) => failRun(builder, spinner, error, watch),
+    left: async (error) => {
+      await failRun(builder, spinner, error, watch)
+      if (watch) builder.watch()
+    },
   })
 }
 
@@ -171,7 +177,7 @@ const resolveAction = (args: string[]) => {
     .with('help', () => showHelp)
     .with('version', () => showVersion)
     .with('init', () => initAction(parsed.initArgs, parsed.force))
-    .with('build', () => () => runBuild(parsed.watch, parsed.force, parsed.configPath))
+    .with('build', () => () => runBuild(parsed.watch, parsed.force, parsed.configPath, parsed.quiet))
     .exec()
 }
 

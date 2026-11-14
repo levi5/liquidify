@@ -8,7 +8,7 @@ export interface PluginStats {
 }
 
 export interface PluginContext {
-  onBuildEnd(callback: (stats: PluginStats) => void): void
+  onBuildEnd(callback: (stats: PluginStats) => void | Promise<void>): void
 }
 
 export interface LiquidifyPlugin {

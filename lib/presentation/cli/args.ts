@@ -18,6 +18,7 @@ const QUIET_FLAGS = new Set(['--quiet', '-q'])
 
 export function parseCliArgs(args: string[]): ParsedCliArgs {
   const normalized = args ?? []
+  validateCliArgs(normalized)
   const watch = normalized.some((arg) => WATCH_FLAGS.has(arg))
   const force = normalized.some((arg) => FORCE_FLAGS.has(arg))
   const quiet = normalized.some((arg) => QUIET_FLAGS.has(arg))
@@ -57,7 +58,7 @@ export function formatHelp(): string {
     init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
 
   Options:
-    --template, -t  Template to initialize (default: example, options: example)
+    --template, -t  Template to initialize (default: theme, options: theme, starter, default)
     --watch, -w     Watch for file changes and rebuild automatically
     --force, -f     Force overwrite existing files during build or init
     --config <path> Use an explicit config file instead of auto-discovery
@@ -67,3 +68,4 @@ export function formatHelp(): string {
     --help, -h      Show help
 `
 }
+import { validateCliArgs } from './validate-args'
