@@ -49,11 +49,11 @@ and dependency audit also pass. The audit reported no known vulnerabilities.
 Shopify CLI invocation is contract-tested with a fixture executable; running real
 Shopify Theme Check requires that CLI to be installed separately.
 
-The separate `pnpm test:example:browser` scenario currently fails at
-`tests/fixtures/browser/03-purchase.js:8`: its `ProductPurchase` fixture and purchase
-selectors no longer match the shipped theme. The same failure was reproduced on
-unmodified baseline `e42c4a0` in a separate worktree. The test was not deleted,
-skipped, weakened or reported as passing.
+The separate `pnpm test:example:browser` scenario exercises the shipped theme's
+current components (`ProductProvider`, `QuantitySelector`, `MiniCart` and the
+composable Swiper islands) in both legacy and strict CSP modes. It checks
+quantity updates, cart submission, success feedback, section replacement and
+slider reinitialization.
 
 ## Not completed by this iteration
 
@@ -69,7 +69,7 @@ as shipped:
 - Complete Shopify schema conformance. Local checks now validate known setting
   types, range/select/radio defaults, duplicate IDs, preset references and limits;
   official Theme Check remains an additional validator.
-- Updating the obsolete browser fixtures and verifying a real Shopify store.
+- Verifying a real Shopify store.
 
 Build limits and safe-path checks are safeguards, not a sandbox. Trusted plugins
 retain host privileges. A separate process can race filesystem checks in a shared

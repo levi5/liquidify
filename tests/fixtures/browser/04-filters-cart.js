@@ -9,6 +9,6 @@ window.scenarios.push({
     await wait()
     check(!document.querySelector('#FilterDrawer-test').open, 'Example filters must close')
 
-    check(document.querySelector('.cart-contents .empty-state'), 'Example cart must render')
+    check(document.querySelector('.miniCartProduct'), 'Example cart must retain the purchased item')
   },
 })

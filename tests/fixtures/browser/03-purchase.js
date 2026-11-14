@@ -5,20 +5,45 @@ window.scenarios.push({
     await wait()
     check(document.getElementById('probe-counter').textContent === '1', 'JSX runtime hooks must update')
 
-    document.querySelector('.purchase-actions .quantity-control button:last-child').click()
+    const root = document.getElementById('product-provider')
+    const increase = root.querySelector('[data-product-quantity] button:last-child')
+    const add = root.querySelector('[data-product-add-to-cart]')
+    check(increase && add, 'Current product purchase controls must render')
+    check(!add.disabled, 'Available variant must enable purchase')
+    document.querySelector('.miniCartIcon').click()
     await wait()
-    check(document.getElementById('ProductQuantity').value === '2', 'Example quantity click must update')
+    check(document.querySelector('.miniCartEmpty'), 'MiniCart must initially render an empty cart')
+    document.querySelector('.drawerOverlay').click()
+    await wait()
+    increase.click()
+    await wait()
+    check(root.querySelector('#Quantity').value === '2', 'Example quantity click must update')
 
-    const quantity = document.getElementById('ProductQuantity')
+    const quantity = root.querySelector('#Quantity')
     quantity.value = '3'
     quantity.dispatchEvent(new Event('input', { bubbles: true }))
     await wait()
-    document.querySelector('.purchase-form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-    await wait()
-    check(
-      JSON.parse(window.requests.find((request) => request.url.endsWith('cart/add.js')).body).items[0].quantity === 3,
-      'Example form must submit selected quantity',
+    let success
+    window.addEventListener(
+      'product:add-to-cart:success',
+      (event) => {
+        success = event.detail
+      },
+      { once: true },
     )
-    check(Boolean(document.querySelector('.form-success')?.textContent?.trim()), 'Example purchase success must render')
+    add.click()
+    await wait()
+    const requests = window.requests.filter((request) => request.url.endsWith('cart/add.js'))
+    check(requests.length === 1, 'Purchase click must submit exactly once')
+    const payload = JSON.parse(requests[0].body)
+    check(payload.id === 1 && payload.quantity === 3, 'Purchase must submit the selected variant and quantity')
+    check(success?.variant.id === 1, 'Purchase must emit success for the selected variant')
+    check(document.querySelector('dialog.drawerContent')?.open, 'Successful purchase must open MiniCart')
+    check(document.querySelector('.miniCartProductName')?.textContent === 'Test product', 'MiniCart must render the purchased item')
+    check(document.querySelector('.miniCartCount')?.textContent === '3', 'MiniCart must display the purchased quantity')
+    check(
+      Boolean(document.querySelector('.toastAlert.success .toastMessage')?.textContent?.trim()),
+      'Purchase success feedback must render',
+    )
   },
 })

@@ -12,7 +12,6 @@ const { SilentLogger } = require('#dist/shared/logger.js')
 
 const REQUIRED_FOLDERS = ['assets', 'snippets', 'sections', 'blocks']
 const STRICT_BUNDLES = [
-  'product-info',
   'product-provider',
   'filter-provider',
   'mini-cart',
