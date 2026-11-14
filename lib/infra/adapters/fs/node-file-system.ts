@@ -46,6 +46,10 @@ export class NodeFileSystem implements IFileSystem {
     return filesystem.readFile(path, 'utf-8')
   }
 
+  public async readdir(path: string): Promise<string[]> {
+    return filesystem.readdir(path)
+  }
+
   public async writeFile(path: string, content: string): Promise<void> {
     await writeAtomicFile(path, content, () => this.checkWrite(path))
   }

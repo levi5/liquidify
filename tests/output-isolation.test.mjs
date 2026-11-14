@@ -27,6 +27,33 @@ test('build refreshes never overwrite existing user .refresh files', async (cont
   }
 })
 
+test('build removes stale temporary files from generated directories', async (context) => {
+  const directory = createTemporaryDirectory('liquidify-stale-tmp-')
+  context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
+  const componentsDir = path.join(directory, 'components')
+  const output = path.join(directory, 'out')
+  const sections = path.join(output, 'sections')
+  fs.mkdirSync(componentsDir)
+  fs.mkdirSync(sections, { recursive: true })
+  fs.writeFileSync(path.join(componentsDir, 'Card.tsx'), '"use snippets"; export default function Card() { return <p>Card</p> }')
+  const uuid = '0665b607-6ccc-45cf-9719-81d7f6fc8104'
+  const stale = `.liquidify-${uuid}.tmp`
+  const refresh = `.liquidify-refresh-${uuid}.tmp`
+  const userFile = '.liquidify-notes.tmp'
+  fs.writeFileSync(path.join(sections, stale), '')
+  fs.writeFileSync(path.join(sections, refresh), '')
+  fs.writeFileSync(path.join(sections, userFile), 'user-owned')
+  const builder = makeLiquidifyBuilder({ componentsDir, output }, { logger: new SilentLogger() })
+  try {
+    await builder.build()
+    assert.equal(fs.existsSync(path.join(sections, stale)), false)
+    assert.equal(fs.existsSync(path.join(sections, refresh)), false)
+    assert.equal(fs.readFileSync(path.join(sections, userFile), 'utf8'), 'user-owned')
+  } finally {
+    await builder.dispose()
+  }
+})
+
 test('discovery handles literal glob characters and excludes nested output and dependencies', async (context) => {
   const directory = createTemporaryDirectory('liquidify-discovery-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))

@@ -20,6 +20,8 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
     .exec() as boolean
 const digest = (content: string) => sha256Hex(content)
 const HASH_PATTERN = /^[a-f0-9]{64}$/
+const TEMPORARY_FILE = /^\.liquidify-(?:refresh-)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.tmp$/
+const SWEPT_DIRECTORIES = ['', 'sections', 'blocks', 'snippets', 'assets']
 
 export class OutputManifest {
   private previous: Entries = {}
@@ -49,6 +51,7 @@ export class OutputManifest {
 
   public async begin(files: string[], changed: Set<string>): Promise<void> {
     this.fs.assertSafePath?.(this.manifestPath, this.root)
+    await this.sweepTemporaryFiles()
     await _match(await this.fs.exists(this.manifestPath))
       .with(true, () => this.loadPrevious())
       .with(false, () => {
@@ -75,6 +78,31 @@ export class OutputManifest {
     this.next = structuredClone(this.backup)
     this.runtimeContent = undefined
     this.runtimeHash = this.previousRuntime
+  }
+
+  private async sweepTemporaryFiles(): Promise<void> {
+    await _Array.forEachAsync(SWEPT_DIRECTORIES, (relative) => this.sweepTemporaryDirectory(relative))
+  }
+
+  private async sweepTemporaryDirectory(relative: string): Promise<void> {
+    const directory = relative === '' ? this.root : path.join(this.root, relative)
+    const listing = await _try.async(async () => (await this.fs.readdir?.(directory)) ?? [])
+    const entries = listing.match({ right: (names) => names, left: () => [] as string[] })
+    await _Array.forEachAsync(entries, (filename) =>
+      _match(TEMPORARY_FILE.test(filename))
+        .with(true, () => this.removeTemporaryFile(directory, filename))
+        .with(false, () => Promise.resolve())
+        .exec(),
+    )
+  }
+
+  private async removeTemporaryFile(directory: string, filename: string): Promise<void> {
+    const file = path.join(directory, filename)
+    const result = await _try.async(() => this.fs.unlink(file))
+    result.match({
+      right: () => undefined,
+      left: (error) => this.logger.warn(`Failed to remove stale build temporary file ${file}: ${error.message}`),
+    })
   }
 
   get outputFiles(): string[] {
