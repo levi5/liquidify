@@ -44,3 +44,10 @@ test('development bundles support inline sourcemaps without writing files', asyn
   assert.match(result.outputFiles[0].text, /sourceMappingURL=data:application\/json/)
   assert.match(result.outputFiles[0].text, /console.log/)
 })
+
+test('transpiled scripts omit generated pure annotations', () => {
+  const compiler = new EsbuildCompiler()
+  const result = compiler.transpileSync('const cache = new WeakMap()', { loader: 'ts', format: 'esm', minify: false })
+  assert.doesNotMatch(result.code, /@__PURE__/)
+  assert.match(result.code, /new WeakMap\(\)/)
+})

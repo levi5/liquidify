@@ -31,7 +31,7 @@ const addItem = async (id, quantity) => {
   }
   return response.json();
 };
-const announcementCleanup =                 new WeakMap();
+const announcementCleanup = new WeakMap();
 function prepareAnnouncements(root) {
   root.querySelectorAll("[data-announcement]").forEach((bar) => {
     if (announcementCleanup.has(bar)) return;
@@ -85,7 +85,7 @@ function prepareAnnouncements(root) {
     });
   });
 }
-const benefitsCleanup =                 new WeakMap();
+const benefitsCleanup = new WeakMap();
 function prepareBenefits(root) {
   root.querySelectorAll("[data-benefits-carousel]").forEach((wrapper) => {
     if (benefitsCleanup.has(wrapper)) return;

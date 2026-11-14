@@ -19,7 +19,7 @@ export async function projectSources() {
       'scripts/*.mjs',
       'benchmarks/*.mjs',
     ],
-    { ignore: ['**/node_modules/**', '**/dist/**'] },
+    { ignore: ['**/node_modules/**', '**/dist/**', 'resources/templates/theme/assets/**/*.js'] },
   )
 }
 
