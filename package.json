@@ -106,7 +106,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/babel__generator": "^7.27.0",
     "@types/babel__traverse": "^7.28.0",
-    "@types/node": "^22.13.1",
+    "@types/node": "^26.6.6",
     "tsc-alias": "^1.9.10",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3"
