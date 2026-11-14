@@ -45,8 +45,14 @@
       "@main/*": [
         "lib/main/*"
       ],
-      "@types/*": [
+      "@liquidify-types/*": [
         "lib/types/*"
+      ],
+      "@shared/*": [
+        "lib/shared/*"
+      ],
+      "@react-runtime/*": [
+        "resources/react/*"
       ]
     }
   },

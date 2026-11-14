@@ -10,8 +10,10 @@ window.scenarios.push({
     check(window.actionCount === 1 && window.actionTarget === 'registered-action', 'Registered action must receive the element')
 
     const legacy = document.createElement('button')
-    legacy.setAttribute('onclick', 'window.legacyCount = (window.legacyCount || 0) + 1')
-    const props = window.LiquidifyParseProps(legacy)
+    const props = window.LiquidifyParseProps({
+      attributes: [{ name: 'onclick', value: 'window.legacyCount = (window.legacyCount || 0) + 1' }],
+      children: [],
+    })
     if (document.querySelector('meta[http-equiv]').content.includes('unsafe-eval')) {
       props.onclick({ currentTarget: legacy })
       check(window.legacyCount === 1, 'Legacy inline handlers must remain compatible')

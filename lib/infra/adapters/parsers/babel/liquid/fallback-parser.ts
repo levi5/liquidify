@@ -1,6 +1,6 @@
 import { isLogicalExpression, type LogicalExpression, type Node } from '@babel/types'
 import { _match } from 'funcio'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 export class FallbackParser {
   constructor(

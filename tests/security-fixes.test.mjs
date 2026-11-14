@@ -1,9 +1,9 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { toSafeFileName, assertSafeFileName, pascalToKebab } from '../dist/shared/string.js'
-import { liquidAssign, sha256Hex } from '../dist/shared/liquid-helpers.js'
-import { VOID_TAGS, COMPONENT_TYPES, OUTPUT_RESERVED } from '../dist/shared/liquid-constants.js'
-import { makeParser } from './helpers.mjs'
+import { toSafeFileName, assertSafeFileName, pascalToKebab } from '#dist/shared/string.js'
+import { liquidAssign, sha256Hex } from '#dist/shared/liquid-helpers.js'
+import { VOID_TAGS, COMPONENT_TYPES, OUTPUT_RESERVED } from '#dist/shared/liquid-constants.js'
+import { makeParser } from '#tests/helpers.mjs'
 
 describe('security fixes', () => {
   it('sanitizes traversal component names', () => {

@@ -1,6 +1,6 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { formatHtml, buildLiquidContent } from '../dist/infra/adapters/generators/liquid/liquid-content.js'
+import { formatHtml, buildLiquidContent } from '#dist/infra/adapters/generators/liquid/liquid-content.js'
 
 test('formatHtml keeps greater-than signs inside quoted attributes', () => {
   assert.equal(formatHtml('<div data-rule="a > b"><span>ok</span></div>'), '<div data-rule="a > b">\n  <span>\n    ok\n  </span>\n</div>')

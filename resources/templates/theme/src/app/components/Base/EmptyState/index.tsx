@@ -2,7 +2,7 @@
 
 import { RenderSnippet } from 'liquidex'
 
-import { PrimaryButton } from '../../Button/Primary'
+import { PrimaryButton } from '@theme/app/components/Button/Primary'
 
 export const BaseEmptyState = ({ heading, text = '', actionLabel = '', actionLink = '' }: { heading: string; text?: string; actionLabel?: string; actionLink?: string }) => {
 	return (

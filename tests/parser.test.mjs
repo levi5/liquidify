@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import path from 'node:path'
-import { makeParser } from './helpers.mjs'
+import { makeParser } from '#tests/helpers.mjs'
 
 describe('BabelLiquidParser golden outputs', () => {
   it('compiles a snippet: className -> class, props -> liquid output', async () => {

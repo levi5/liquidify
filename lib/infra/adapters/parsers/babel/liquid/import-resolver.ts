@@ -14,7 +14,7 @@ import {
   isImportSpecifier,
   traverseFast,
 } from '@babel/types'
-import type { SchemaExtractor } from '../schema/schema-extractor'
+import type { SchemaExtractor } from '@adapters/parsers/babel/schema/schema-extractor'
 
 export interface ImportInfo {
   source: string

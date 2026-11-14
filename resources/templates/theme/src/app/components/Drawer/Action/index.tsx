@@ -3,7 +3,7 @@
 import { ButtonHTMLAttributes } from 'preact'
 import { FC } from 'preact/compat'
 
-import { useDrawerContext } from '../../../../global/context/Drawer/drawer.context'
+import { useDrawerContext } from '@theme/global/context/Drawer/drawer.context'
 
 export const DrawerAction: FC<ButtonHTMLAttributes & { action: 'close' | 'open' }> = ({
 	action,

@@ -1,10 +1,10 @@
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
-import { VariableDeclarationParser } from './variable-declaration-parser'
-import { FilterCallParser } from './filter-call-parser'
-import { FallbackParser } from './fallback-parser'
-import { ConditionalDeclarationParser } from './conditional-declaration-parser'
-import { ObjectPatternParser } from './object-pattern-parser'
-import { AssignmentExtractor } from './assignment-extractor'
+import type { ParsingContext } from '@core/entities/parsing-context'
+import { VariableDeclarationParser } from '@adapters/parsers/babel/liquid/variable-declaration-parser'
+import { FilterCallParser } from '@adapters/parsers/babel/liquid/filter-call-parser'
+import { FallbackParser } from '@adapters/parsers/babel/liquid/fallback-parser'
+import { ConditionalDeclarationParser } from '@adapters/parsers/babel/liquid/conditional-declaration-parser'
+import { ObjectPatternParser } from '@adapters/parsers/babel/liquid/object-pattern-parser'
+import { AssignmentExtractor } from '@adapters/parsers/babel/liquid/assignment-extractor'
 
 export class LiquidVariableParser {
   private readonly filterCallParser: FilterCallParser

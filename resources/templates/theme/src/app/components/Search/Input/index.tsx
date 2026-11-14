@@ -1,7 +1,7 @@
 'use snippets'
 
 import { t } from 'liquidify'
-import { SearchResult } from '../Result'
+import { SearchResult } from '@theme/app/components/Search/Result'
 
 import styles from './styles.css'
 

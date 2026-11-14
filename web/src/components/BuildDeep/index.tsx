@@ -1,6 +1,6 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
-import { cx } from "../../constants/cx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
+import { cx } from "#web/constants/cx";
 
 const DISPOSE_TS = `// Para o watcher e espera os observers fecharem:
 await builder.dispose()

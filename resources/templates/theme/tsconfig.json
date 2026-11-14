@@ -11,6 +11,7 @@
     "jsxFactory": "React.createElement",
     "jsxFragmentFactory": "React.Fragment",
     "paths": {
+      "@theme/*": ["./src/*"],
       "liquidify": ["../../../dist/index.d.ts"],
       "liquidex": ["../../../dist/index.d.ts"]
     }

@@ -1,7 +1,7 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx";
+import { cx } from "#web/constants/cx";
 
 const BUILDER = `import { makeLiquidifyBuilder } from 'liquidify'
 

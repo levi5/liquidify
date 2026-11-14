@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { ParsingContext } from '../dist/core/entities/parsing-context.js'
-import { escapedOutput } from '../dist/shared/html.js'
-import { makeParser } from './helpers.mjs'
+import { ParsingContext } from '#dist/core/entities/parsing-context.js'
+import { escapedOutput } from '#dist/shared/html.js'
+import { makeParser } from '#tests/helpers.mjs'
 
 describe('bugfix regressions', () => {
   it('for i<n emits inclusive-safe range with minus:1, <= keeps limit', async () => {

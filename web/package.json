@@ -4,6 +4,10 @@
   "private": true,
   "description": "Site estático de documentação do Liquidify (Vite + React), publicado no GitHub Pages",
   "type": "module",
+  "imports": {
+    "#web/*": "./src/*",
+    "#web-tools/*": "./*"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json && vite build",

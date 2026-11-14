@@ -1,7 +1,7 @@
 import { _Maybe, _match } from 'funcio'
-import type { ParsedComponent } from '../../core/entities/parsed-component'
-import { ValidationError } from '../../core/errors/validation-error'
-import type { SchemaValidator } from './schema-validation'
+import type { ParsedComponent } from '@core/entities/parsed-component'
+import { ValidationError } from '@core/errors/validation-error'
+import type { SchemaValidator } from '@application/services/schema-validation'
 
 const JS_EXTENSIONS = ['.tsx', '.jsx', '.js', '.ts']
 

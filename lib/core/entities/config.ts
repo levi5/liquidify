@@ -1,4 +1,5 @@
-import type { LiquidifyPlugin } from '../protocols/plugin'
+import type { LiquidifyPlugin } from '@core/protocols/plugin'
+import type { BuildLimits } from '@core/entities/build-limits'
 
 export interface LiquidifyConfig {
   componentsDir: string
@@ -6,6 +7,11 @@ export interface LiquidifyConfig {
   react?: { strictCsp?: boolean }
   force?: boolean
   plugins?: LiquidifyPlugin[]
+  cwd?: string
+  concurrency?: number
+  limits?: Partial<BuildLimits>
+  mode?: 'development' | 'production'
+  sourcemap?: boolean
 }
 
 export const DEFAULT_CONFIG: LiquidifyConfig = {

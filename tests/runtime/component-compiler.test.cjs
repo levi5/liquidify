@@ -4,7 +4,7 @@ const vm = require('node:vm')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
-const { createComponentCompiler } = require('../helpers/runtime-harness.cjs')
+const { createComponentCompiler } = require('#tests/helpers/runtime-harness.cjs')
 
 test('component templates bundle and preserve source tokens', async () => {
   const compiler = createComponentCompiler()

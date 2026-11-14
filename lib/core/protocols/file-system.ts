@@ -1,6 +1,7 @@
 export interface IFileReader {
   assertSafePath?(path: string, root: string): void
   exists(path: string): Promise<boolean>
+  readdir?(path: string): Promise<string[]>
   readFile(path: string): Promise<string>
   existsSync(path: string): boolean
   readFileSync(path: string): string

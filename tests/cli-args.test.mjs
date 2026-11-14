@@ -1,6 +1,6 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { formatHelp, parseCliArgs } from '../dist/presentation/cli/args.js'
+import { formatHelp, parseCliArgs } from '#dist/presentation/cli/args.js'
 
 describe('parseCliArgs', () => {
   it('defaults to a build with no flags', () => {
@@ -49,6 +49,12 @@ describe('parseCliArgs', () => {
     assert.equal(parseCliArgs(['--quiet']).quiet, true)
     assert.equal(parseCliArgs(['-q']).quiet, true)
     assert.equal(parseCliArgs(['-q']).noBanner, true)
+  })
+
+  it('rejects unknown arguments and missing option values', () => {
+    for (const argumentsList of [['--watc'], ['unknown'], ['--config'], ['--config='], ['--config', '--watch']]) {
+      assert.throws(() => parseCliArgs(argumentsList), /Unknown argument|requires a value/)
+    }
   })
 })
 

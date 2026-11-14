@@ -8,9 +8,9 @@ import {
   type VariableDeclaration,
   type VariableDeclarator,
 } from '@babel/types'
-import { pascalToKebab } from '../../../../../shared/string'
+import { pascalToKebab } from '@shared/string'
 
-import type { Compiler } from '../../../../../core/protocols/compiler'
+import type { Compiler } from '@core/protocols/compiler'
 
 export class ScriptGenerator {
   constructor(private readonly compiler: Compiler) {}

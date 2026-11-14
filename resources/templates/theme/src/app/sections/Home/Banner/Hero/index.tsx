@@ -3,9 +3,9 @@
 import { t } from 'liquidify'
 import { RenderSnippet, RenderSvg } from 'liquidex'
 
-import { Carousel } from '../../../../components/Carousel'
+import { Carousel } from '@theme/app/components/Carousel'
 
-import { BANNER_HERO_SCHEMA } from '../../../../../schemas/Banner/hero.schema'
+import { BANNER_HERO_SCHEMA } from '@theme/schemas/Banner/hero.schema'
 
 import styles from '../../styles.css'
 

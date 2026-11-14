@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { preprocessLiquidDelimiters, preprocessLiquidExpressions } from '../dist/infra/adapters/parsers/babel/ASTParser.js'
-import { makeParser } from './helpers.mjs'
+import { preprocessLiquidDelimiters, preprocessLiquidExpressions } from '#dist/infra/adapters/parsers/babel/ASTParser.js'
+import { makeParser } from '#tests/helpers.mjs'
 
 const compile = async (body, directive = "'use snippets'") => {
   const parser = makeParser()
@@ -115,6 +115,12 @@ describe('preprocessLiquidExpressions', () => {
       '<p>{x | 2filter: 1}</p>',
       '<p>{x | filter-name: 1}</p>',
     ]) {
+      assert.equal(preprocessLiquidExpressions(source), source)
+    }
+  })
+
+  it('handles unterminated strings and comments without polynomial scanning', { timeout: 5000 }, () => {
+    for (const source of ['a/*'.repeat(100_000), `"${'\\"'.repeat(100_000)}`, `'${"\\'".repeat(100_000)}`, `\`${'\\`'.repeat(100_000)}`]) {
       assert.equal(preprocessLiquidExpressions(source), source)
     }
   })

@@ -4,7 +4,7 @@ import { t, escape, imageUrl, assetUrl, defaultValue } from 'liquidify'
 
 import classNames from 'classnames'
 
-import { HOME_INFO_BANNER_SCHEMA } from '../../../../schemas/Home/info-banner.schema'
+import { HOME_INFO_BANNER_SCHEMA } from '@theme/schemas/Home/info-banner.schema'
 
 import styles from './styles.css'
 

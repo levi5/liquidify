@@ -36,9 +36,7 @@ function renderBranch(node: Node, yes: string, no: string, generate: (node: Node
 
 export function truthyTest(_node: Node, code: string): string {
   const trimmed = code.trim()
-  // Literals and explicit comparisons are already boolean; anything else
-  // (identifiers, member access, calls like `list.size`, filters like
-  // `x | size`) needs the full nil/false/0/empty guard so `0` isn't truthy.
+
   const isBooleanLiteral = trimmed === 'true' || trimmed === 'false'
   const isComparison = /==|!=|>=|<=|>|<| and | or |contains\b/.test(trimmed)
   return _match(isBooleanLiteral || isComparison)

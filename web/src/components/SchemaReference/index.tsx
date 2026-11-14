@@ -1,8 +1,8 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx";
-import { SCHEMA_TSX, SCHEMA_LIQUID, VALIDATION, TRANSLATION, CONTENT_FOR, SCHEMA_COPY } from "../../cms/schema.ts";
+import { cx } from "#web/constants/cx";
+import { SCHEMA_TSX, SCHEMA_LIQUID, VALIDATION, TRANSLATION, CONTENT_FOR, SCHEMA_COPY } from "#web/cms/schema.ts";
 
 export default function SchemaReference() {
   const { locale } = useLocale();

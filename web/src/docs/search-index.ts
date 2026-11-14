@@ -1,4 +1,4 @@
-import { CHAPTERS, type Chapter, type Section, type T } from "./manifest.ts";
+import { CHAPTERS, type Chapter, type Section, type T } from "#web/docs/manifest.ts";
 
 export type NameEntry = {
   name: string;

@@ -1,6 +1,6 @@
 'use snippets'
 
-import { SelectorGrid } from './Grid'
+import { SelectorGrid } from '@theme/app/components/Selector/Grid'
 
 import styles from './styles.css'
 

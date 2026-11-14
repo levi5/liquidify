@@ -1,7 +1,7 @@
 import { _match } from 'funcio'
 import type { ConditionalExpression, Expression } from '@babel/types'
 import { isConditionalExpression } from '@babel/types'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 type GenerateCode = (node: unknown, inCondition?: boolean, renames?: Record<string, string>, context?: ParsingContext) => string
 

@@ -9,5 +9,7 @@ yarn.lock
 tsconfig.json
 liquidify.config.json
 .liquidify-manifest.json
+.liquidify-*.tmp
+**/.liquidify-*.tmp
 README.md
 

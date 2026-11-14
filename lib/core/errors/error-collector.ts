@@ -1,4 +1,4 @@
-import { ValidationError } from './validation-error'
+import { ValidationError } from '@core/errors/validation-error'
 
 export interface CollectedError {
   message: string

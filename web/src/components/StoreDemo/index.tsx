@@ -1,20 +1,20 @@
 import { useState, type KeyboardEvent } from "react";
 import { _match, _Maybe } from "funcio";
-import { useLocale } from "../../i18n.tsx";
-import CodeBlock from "../CodeBlock/index.tsx";
-import Snippet from "../Snippet/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import CodeBlock from "#web/components/CodeBlock/index.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import {
   HERO_TSX, HERO_LIQUID, HERO_CSS,
   CARD_TSX, CARD_LIQUID, CARD_CSS,
   MINICART_TSX, MINICART_LIQUID, MINICART_CSS,
-} from "../../constants/store-demo.ts";
+} from "#web/constants/store-demo.ts";
 import {
   CATALOG_TSX, CATALOG_LIQUID, CATALOG_CSS,
   NEWS_TSX, NEWS_LIQUID, NEWS_CSS,
   PROD_TSX, PROD_LIQUID, PROD_CSS,
-} from "../../constants/store-demo-extra.ts";
-import { CatalogPreview, ProductPreview, NewsletterPreview, CartPreview } from "./previews.tsx";
-import { STORE_SETUP, STORE_COPY } from "../../cms/store-demo.ts";
+} from "#web/constants/store-demo-extra.ts";
+import { CatalogPreview, ProductPreview, NewsletterPreview, CartPreview } from "#web/components/StoreDemo/previews.tsx";
+import { STORE_SETUP, STORE_COPY } from "#web/cms/store-demo.ts";
 import "./style.css";
 
 type Tab = "tsx" | "liquid" | "css";

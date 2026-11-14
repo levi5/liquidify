@@ -1,4 +1,4 @@
-import { LiquidifyError } from './liquidify-error'
+import { LiquidifyError } from '@core/errors/liquidify-error'
 
 export class ValidationError extends LiquidifyError {
   constructor(message: string, filePath?: string, location?: { line: number; column: number }) {

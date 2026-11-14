@@ -4,16 +4,16 @@ import { t, escape, money, json } from 'liquidify'
 import { RenderSnippet, Raw } from 'liquidex'
 import classNames from 'classnames'
 
-import { ProductPreview } from '../../components/Product/Preview'
-import { BaseBox } from '../../components/Base/Box'
-import { QuantitySelector } from '../../components/Quantity/Selector'
-import { Selector } from '../../components/Selector'
-import { Breadcrumb } from '../../components/Breadcrumb'
+import { ProductPreview } from '@theme/app/components/Product/Preview'
+import { BaseBox } from '@theme/app/components/Base/Box'
+import { QuantitySelector } from '@theme/app/components/Quantity/Selector'
+import { Selector } from '@theme/app/components/Selector'
+import { Breadcrumb } from '@theme/app/components/Breadcrumb'
 
-import { PRODUCT_INFO_SCHEMA } from '../../../schemas/ProductInfo/product-info.schema'
+import { PRODUCT_INFO_SCHEMA } from '@theme/schemas/ProductInfo/product-info.schema'
 
-import { ProductProvider } from '../../context/Product'
-import { ToastHost } from '../../components/Toast'
+import { ProductProvider } from '@theme/app/context/Product'
+import { ToastHost } from '@theme/app/components/Toast'
 
 import styles from './styles.css'
 

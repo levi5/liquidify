@@ -1,6 +1,6 @@
-import { useLocale } from "../../i18n.tsx";
-import { toHref } from "../../lib/routes.ts";
-import { cx } from "../../constants/cx.ts";
+import { useLocale } from "#web/i18n.tsx";
+import { toHref } from "#web/lib/routes.ts";
+import { cx } from "#web/constants/cx.ts";
 import styles from "./style.module.css";
 
 export default function NotFound({ path }: { path: string }) {

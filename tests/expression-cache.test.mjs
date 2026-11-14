@@ -1,8 +1,8 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { parseExpression } from '@babel/parser'
-import { ExpressionParser } from '../dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
-import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
+import { ExpressionParser } from '#dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
+import { EsbuildCompiler } from '#dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
 
 function countingParser(counter) {
   const real = new EsbuildCompiler()

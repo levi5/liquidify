@@ -8,7 +8,6 @@
 /locales
 /src
 node_modules
-# pnpm-lock.yaml is tracked so CI can install with --frozen-lockfile
 package-lock.json
 /templates
 .shopifyignore
@@ -23,13 +22,10 @@ error.txt
 liquidify_docs*
 liquidx_docs*
 
-# Build artifact: default compiler output when run at repo root
 /liquidify/
 review.md
-# Generated file ownership metadata
 .liquidify-manifest.json
 
-# Local secrets and credentials (never commit)
 .env
 .env.*
 !.env.example

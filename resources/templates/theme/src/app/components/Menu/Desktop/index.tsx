@@ -1,7 +1,7 @@
 'use snippets'
 
 
-import type { LinksType } from '../../../../types/components/menu'
+import type { LinksType } from '@theme/types/components/menu'
 
 
 export const MenuDesktop = ({ options }: { options: LinksType }) => {

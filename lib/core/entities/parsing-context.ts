@@ -1,6 +1,6 @@
 import { _Maybe, _match } from 'funcio'
-import type { InlineComponentNode } from '../../types/component'
-import type { ErrorCollector } from '../errors/error-collector'
+import type { InlineComponentNode } from '@liquidify-types/component'
+import type { ErrorCollector } from '@core/errors/error-collector'
 
 const orDefault = <T>(value: T | undefined, fallback: T): T => _Maybe.of(value).getOrElse(fallback) as T
 
@@ -17,7 +17,7 @@ export interface ParsingContextData {
   outputContext?: 'text' | 'raw' | 'json'
   inSvg?: boolean
   errorCollector?: ErrorCollector
-  /** @internal shared sequence holder so derived contexts don't collide */
+
   sequenceRef?: { value: number }
 }
 

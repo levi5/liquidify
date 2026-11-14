@@ -1,16 +1,22 @@
 import { _match } from 'funcio'
-import type { IParser } from '../../core/protocols/parser'
-import type { IGenerator } from '../../core/protocols/generator'
-import type { ParsedComponent } from '../../core/entities/parsed-component'
-import type { ValidationService } from './validation-service'
+import type { IParser } from '@core/protocols/parser'
+import type { IGenerator } from '@core/protocols/generator'
+import type { ParsedComponent } from '@core/entities/parsed-component'
+import type { ValidationService } from '@application/services/validation-service'
+import type { PluginRunner } from '@application/services/plugin-runner'
 
 export type TranspileStatus = 'ok' | 'skipped-empty' | 'skipped-unnamed'
 
 export class TranspileFileUseCase {
+  get outputFiles(): string[] {
+    return this.generator.outputFiles ?? []
+  }
+
   constructor(
     private readonly parser: IParser,
     private readonly generator: IGenerator,
     private readonly validator: ValidationService,
+    private readonly plugins?: PluginRunner,
   ) {}
 
   async beginBuild(files: string[], changed: Set<string>): Promise<void> {
@@ -45,6 +51,7 @@ export class TranspileFileUseCase {
   }
 
   private async validateAndGenerate(component: ParsedComponent, filePath?: string): Promise<TranspileStatus> {
+    await this.plugins?.generate(component, filePath)
     this.validator.validate(component, filePath)
     await this.generator.generate(component, filePath)
     return 'ok'

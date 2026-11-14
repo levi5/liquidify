@@ -1,8 +1,8 @@
-import { useLocale } from "../../i18n.tsx";
+import { useLocale } from "#web/i18n.tsx";
 import type { ReactNode } from "react";
-import Snippet from "../Snippet/index.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
+import { cx } from "#web/constants/cx.ts";
 import {
   SECTIONS_TSX,
   SECTIONS_LIQUID,
@@ -28,7 +28,7 @@ import {
   EQUIV_LIQUID,
   VALIDATION_ERROR_TSX,
   VALIDATION_OK_TSX,
-} from "../../cms/directives.ts";
+} from "#web/cms/directives.ts";
 
 type DirectiveDoc = {
   id: string;

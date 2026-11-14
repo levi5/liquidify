@@ -1,7 +1,7 @@
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const vm = require('node:vm')
-const { CssInjector } = require('../../dist/infra/adapters/compilers/react/runtime/css-injector')
+const { CssInjector } = require('#dist/infra/adapters/compilers/react/runtime/css-injector.js')
 
 test('CSS values survive JavaScript serialization without executing embedded text', () => {
   const injector = new CssInjector()

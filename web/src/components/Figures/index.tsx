@@ -1,4 +1,4 @@
-import { useLocale } from "../../i18n.tsx";
+import { useLocale } from "#web/i18n.tsx";
 import styles from "./style.module.css";
 
 function FlowCaption({ text }: { text: string }) {

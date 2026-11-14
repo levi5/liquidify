@@ -1,7 +1,7 @@
-import { useLocale } from "../../i18n.tsx";
-import { toHref } from "../../lib/routes.ts";
+import { useLocale } from "#web/i18n.tsx";
+import { toHref } from "#web/lib/routes.ts";
 import styles from "./style.module.css";
-import { cx } from "../../constants/cx.ts";
+import { cx } from "#web/constants/cx.ts";
 
 type QA = { q: string; a: string; link: [string, string] };
 

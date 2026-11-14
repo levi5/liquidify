@@ -3,12 +3,12 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { NodeFileSystem } from '../dist/infra/adapters/fs/node-file-system.js'
-import { OutputManifest } from '../dist/infra/adapters/generators/liquid/output-manifest.js'
-import { SilentLogger } from '../dist/shared/logger.js'
-import { escapeAttributeTemplate, escapedOutput, jsonForHtml } from '../dist/shared/html.js'
-import { makeLiquidifyBuilder } from '../dist/index.js'
-import { makeParser } from './helpers.mjs'
+import { NodeFileSystem } from '#dist/infra/adapters/fs/node-file-system.js'
+import { OutputManifest } from '#dist/infra/adapters/generators/liquid/output-manifest.js'
+import { SilentLogger } from '#dist/shared/logger.js'
+import { escapeAttributeTemplate, escapedOutput, jsonForHtml } from '#dist/shared/html.js'
+import { makeLiquidifyBuilder } from '#dist/index.js'
+import { makeParser } from '#tests/helpers.mjs'
 
 function fixture(t) {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'liquidify-hardening-'))

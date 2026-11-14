@@ -3,11 +3,11 @@
 import { useContext, useEffect, useState } from 'preact/hooks'
 import classNames from 'classnames'
 
-import { SwiperCarousel } from '../../../components/Swiper/Slide'
-import { SwiperContext } from '../../../components/Swiper/Root'
+import { SwiperCarousel } from '@theme/app/components/Swiper/Slide'
+import { SwiperContext } from '@theme/app/components/Swiper/Root'
 
 import { SwiperOptions } from 'swiper/types'
-import { PRODUCT_THUMBNAILS_SLIDER_SETTINGS } from '../../../../settings/slider/product.settings'
+import { PRODUCT_THUMBNAILS_SLIDER_SETTINGS } from '@theme/settings/slider/product.settings'
 
 import styles from './styles.css'
 

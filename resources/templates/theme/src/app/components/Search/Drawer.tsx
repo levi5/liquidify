@@ -2,10 +2,10 @@
 
 import { useCallback, useRef } from 'preact/hooks'
 
-import { Drawer } from '../Drawer'
-import { DrawerHeader } from '../Drawer/Header'
-import { translate } from '../../i18n/translate'
-import { rootUrl } from '../../../lib/shopify'
+import { Drawer } from '@theme/app/components/Drawer'
+import { DrawerHeader } from '@theme/app/components/Drawer/Header'
+import { translate } from '@theme/app/i18n/translate'
+import { rootUrl } from '@theme/lib/shopify'
 
 import './Drawer.css'
 

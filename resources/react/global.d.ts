@@ -1,4 +1,4 @@
-import '../../lib/types/runtime'
+import 'liquidify/runtime'
 
 interface LiquidifyHydrateEntry {
   (container: any): void
@@ -34,7 +34,7 @@ declare global {
     LiquidifyJSXRuntime: typeof import('preact/jsx-runtime')
     LiquidifyJSXDevRuntime: typeof import('preact/jsx-dev-runtime')
 
-    LiquidxEvents: import('../../lib/types/runtime').LiquidifyEventBus
+    LiquidxEvents: import('liquidify/runtime').LiquidifyEventBus
     LiquidxEmitEvent: <T = any>(event: string, data?: T) => void
     LiquidxUseEvent: <T = any>(event: string, callback: (data: T) => void) => void
 

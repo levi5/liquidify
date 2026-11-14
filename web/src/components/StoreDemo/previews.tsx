@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { _match, _Maybe } from "funcio";
-import { useLocale } from "../../i18n.tsx";
-import { brl, isValidEmail, getCatalogItems, paginate, getTotalPages, getSubtotal } from "./helpers.ts";
+import { useLocale } from "#web/i18n.tsx";
+import { brl, isValidEmail, getCatalogItems, paginate, getTotalPages, getSubtotal } from "#web/components/StoreDemo/helpers.ts";
 
 export function CatalogPreview({ womenImg, menImg }: { womenImg: string; menImg: string }) {
   const { locale } = useLocale();

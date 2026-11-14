@@ -1,10 +1,10 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { ValidationService } from '../dist/application/services/validation-service.js'
-import { SchemaValidator } from '../dist/application/services/schema-validation.js'
+import { ValidationService } from '#dist/application/services/validation-service.js'
+import { SchemaValidator } from '#dist/application/services/schema-validation.js'
 
 const serviceFor = () => new ValidationService(new SchemaValidator())
-import { ValidationError } from '../dist/core/errors/validation-error.js'
+import { ValidationError } from '#dist/core/errors/validation-error.js'
 
 describe('ValidationService', () => {
   it('rejects react mode inside sections', () => {

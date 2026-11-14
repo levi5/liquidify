@@ -1,7 +1,7 @@
 import { _match } from 'funcio'
-import { hoistPipedArg, needsHoist } from './pipe-guard'
+import { hoistPipedArg, needsHoist } from '@adapters/parsers/babel/liquid/pipe-guard'
 import type { Node, TemplateLiteral } from '@babel/types'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 type GenerateCode = (node: Node, renames?: Record<string, string>, context?: ParsingContext) => string
 
@@ -78,7 +78,6 @@ export class TemplateLiteralParser {
   }
 
   private consumeFilter(quasi: string, matched: string[], pattern: RegExp, collected: string[]): { text: string; remaining: string } {
-    // Guard against zero-length matches looping forever.
     if (!matched[0] || matched[0].length === 0) return { text: collected.join(' | '), remaining: quasi }
     return this.extractFilters(quasi.substring(matched[0].length), pattern, [...collected, this.normalizeFilter(matched[1].trim())])
   }

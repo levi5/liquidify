@@ -13,12 +13,12 @@ import {
   type Node,
 } from '@babel/types'
 import { _Object, _match } from 'funcio'
-import { hoistPipedArg } from './pipe-guard'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
-import type { FilterCallParser } from './filter-call-parser'
-import type { FallbackParser } from './fallback-parser'
-import type { ConditionalDeclarationParser } from './conditional-declaration-parser'
-import type { ObjectPatternParser } from './object-pattern-parser'
+import { hoistPipedArg } from '@adapters/parsers/babel/liquid/pipe-guard'
+import type { ParsingContext } from '@core/entities/parsing-context'
+import type { FilterCallParser } from '@adapters/parsers/babel/liquid/filter-call-parser'
+import type { FallbackParser } from '@adapters/parsers/babel/liquid/fallback-parser'
+import type { ConditionalDeclarationParser } from '@adapters/parsers/babel/liquid/conditional-declaration-parser'
+import type { ObjectPatternParser } from '@adapters/parsers/babel/liquid/object-pattern-parser'
 
 export class VariableDeclarationParser {
   constructor(

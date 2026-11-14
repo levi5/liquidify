@@ -1,5 +1,5 @@
 import { _match } from 'funcio'
-import { SVG_CASE_SENSITIVE_ATTRIBUTES, SVG_HYPHENATED_ATTRIBUTES } from '../../../../../shared/liquid-constants'
+import { SVG_CASE_SENSITIVE_ATTRIBUTES, SVG_HYPHENATED_ATTRIBUTES } from '@shared/liquid-constants'
 
 const toKebabCase = (name: string): string => name.replace(/([A-Z])/g, (match) => `-${match.toLowerCase()}`)
 

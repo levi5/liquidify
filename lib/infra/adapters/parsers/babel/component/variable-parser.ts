@@ -18,8 +18,8 @@ import {
 } from '@babel/types'
 import generate from '@babel/generator'
 import { _match } from 'funcio'
-import type { ComponentMetadataType } from '../../../../../types/component'
-import type { StatementCollector } from './statement-collector'
+import type { ComponentMetadataType } from '@liquidify-types/component'
+import type { StatementCollector } from '@adapters/parsers/babel/component/statement-collector'
 
 export class VariableParser {
   constructor(private readonly statementCollector: StatementCollector) {}

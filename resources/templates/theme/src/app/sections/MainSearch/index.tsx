@@ -4,7 +4,7 @@ import { t, escape } from 'liquidify'
 import { PaginateByLiquid, RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
-import { Card } from '../../components/Card'
+import { Card } from '@theme/app/components/Card'
 
 import styles from './styles.css'
 

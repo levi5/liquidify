@@ -4,14 +4,14 @@ import { t, escape } from 'liquidify'
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
-import { CollectionFilter } from '../../components/Filter/Collection'
-import { ActiveFilters } from '../../components/Filter/Active'
-import { FilterDrawer } from '../../components/Filter/Drawer'
-import { Catalog } from '../../components/Catalog'
-import { Breadcrumb } from '../../components/Breadcrumb'
-import { ThemeIcon } from '../../components/Icon'
+import { CollectionFilter } from '@theme/app/components/Filter/Collection'
+import { ActiveFilters } from '@theme/app/components/Filter/Active'
+import { FilterDrawer } from '@theme/app/components/Filter/Drawer'
+import { Catalog } from '@theme/app/components/Catalog'
+import { Breadcrumb } from '@theme/app/components/Breadcrumb'
+import { ThemeIcon } from '@theme/app/components/Icon'
 
-import { COLLECTION_SCHEMA } from '../../../schemas/Collection/collection.schema'
+import { COLLECTION_SCHEMA } from '@theme/schemas/Collection/collection.schema'
 
 import styles from './styles.css'
 

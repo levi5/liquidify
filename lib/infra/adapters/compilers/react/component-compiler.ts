@@ -1,20 +1,20 @@
 import { _match, _try } from 'funcio'
 import path from 'node:path'
 import { promises as fsPromises } from 'node:fs'
-import { readReactTemplate } from './runtime/template-loader'
-import type { Compiler, BuildResult } from '../../../../core/protocols/compiler'
-import type { ComponentMetadataType } from '../../../../types/component'
-import type { CssInjector } from './runtime/css-injector'
-import type { Logger } from '../../../../shared/logger'
-import { escapeHtml } from '../../../../shared/html'
-import { ValidationError } from '../../../../core/errors/validation-error'
+import { readReactTemplate } from '@adapters/compilers/react/runtime/template-loader'
+import type { Compiler, BuildResult } from '@core/protocols/compiler'
+import type { ComponentMetadataType } from '@liquidify-types/component'
+import type { CssInjector } from '@adapters/compilers/react/runtime/css-injector'
+import type { Logger } from '@shared/logger'
+import { escapeHtml } from '@shared/html'
+import { ValidationError } from '@core/errors/validation-error'
 import {
   COMPONENT_NAME_PATTERN,
   INLINE_HANDLER_PATTERN,
   RAW_LIQUID_GLOBALS_PATTERN,
   RUNTIME_GLOBAL_STUB,
   STYLESHEET_IMPORT_PATTERN,
-} from './constants'
+} from '@adapters/compilers/react/constants'
 import { parse } from '@babel/parser'
 import traverse, { type NodePath } from '@babel/traverse'
 import generate from '@babel/generator'

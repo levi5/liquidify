@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'preact/hooks'
 import { _Maybe } from 'funcio'
 import classNames from 'classnames'
 
-import { useClickOutside } from '../../../../hooks/useClickOutside'
-import { translate } from '../../../i18n/translate'
-import { rootUrl } from '../../../../lib/shopify'
-import { ResultSkeleton } from './Skeleton'
+import { useClickOutside } from '@theme/hooks/useClickOutside'
+import { translate } from '@theme/app/i18n/translate'
+import { rootUrl } from '@theme/lib/shopify'
+import { ResultSkeleton } from '@theme/app/components/Search/Result/Skeleton'
 
 import styles from './styles.css'
 

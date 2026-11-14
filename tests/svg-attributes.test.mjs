@@ -1,11 +1,11 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
 import { parse, parseExpression } from '@babel/parser'
-import { LiquidAttributeConverter } from '../dist/infra/adapters/parsers/babel/liquid/attribute-parser.js'
-import { ExpressionParser } from '../dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
-import { EsbuildCompiler } from '../dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
-import { ParsingContext } from '../dist/core/entities/parsing-context.js'
-import { makeParser } from './helpers.mjs'
+import { LiquidAttributeConverter } from '#dist/infra/adapters/parsers/babel/liquid/attribute-parser.js'
+import { ExpressionParser } from '#dist/infra/adapters/parsers/babel/liquid/expression-parser.js'
+import { EsbuildCompiler } from '#dist/infra/adapters/compilers/esbuild/esbuild-compiler.js'
+import { ParsingContext } from '#dist/core/entities/parsing-context.js'
+import { makeParser } from '#tests/helpers.mjs'
 
 function converter() {
   const compiler = new EsbuildCompiler()

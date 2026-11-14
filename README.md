@@ -92,6 +92,15 @@ npx liquidx --watch
 npx liquidify --config ./liquidify.config.json
 npx liquidify --no-banner
 npx liquidify --version
+
+# Validate or preview without changing theme output
+npx liquidify check --json --no-plugins
+npx liquidify --dry-run
+npx liquidify doctor
+
+# Generate a component or validate compiled Liquid with installed Shopify CLI
+npx liquidify generate section ProductHero
+npx liquidify theme-check
 ```
 
 ---
@@ -198,6 +207,13 @@ See [incremental compilation, output cleanup and import resolution](docs/compile
 
 ## ⚙️ Programmatic API
 
+See [compiler API and plugins](docs/compiler-api.md), [CLI workflows](docs/cli-workflows.md)
+and [validation results and remaining work](docs/engineering-validation.md).
+
+The `liquidify/compiler` entry point also exports `compile()` for in-memory
+compilation, `previewProject()` for safe output previews, and
+`generateSchemaTypes()` for settings/block declarations.
+
 You can use Liquidify programmatically in your own scripts:
 
 ```ts
@@ -246,6 +262,11 @@ Usage:
 
 Commands:
   init [dir]      Initialize a new Shopify + Liquidify project template (default: .)
+  build           Compile the project (default)
+  check           Validate without writing output
+  doctor          Diagnose environment and configuration
+  generate <kind> <name>  Create a section, snippet or island
+  theme-check     Validate compiled output with installed Shopify CLI
 
 Options:
   --template, -t  Template to initialize (default: theme, options: theme, starter, default)
@@ -254,6 +275,14 @@ Options:
   --config <path> Use an explicit config file
   --no-banner     Skip startup banner
   --quiet, -q     Minimal output; implies --no-banner
+  --json          Structured output (NDJSON in watch mode)
+  --dry-run       Preview output changes without writing files
+  --no-plugins    Disable project plugin loading
+  --concurrency <number>  Concurrent files (1-64)
+  --mode <name>   development or production
+  --sourcemap     Inline JavaScript sourcemaps
+  --verbose       List compiled and unchanged sources
+  --profile       Report total build duration
   --version, -V   Show version
   --help, -h      Show help
 

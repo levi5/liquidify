@@ -4,7 +4,7 @@ import { ReactNode } from 'preact/compat'
 import { useCallback, useRef } from 'preact/hooks'
 import type { SwiperRef } from 'swiper/react'
 import type { Swiper } from 'swiper/types'
-import type { SwiperContextType } from '../app/components/Swiper/Root'
+import type { SwiperContextType } from '@theme/app/components/Swiper/Root'
 
 export namespace SwiperSlider {
 	export type Datais = {

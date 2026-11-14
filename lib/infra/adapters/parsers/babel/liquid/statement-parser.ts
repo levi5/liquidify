@@ -45,10 +45,10 @@ import {
   type UpdateExpression,
 } from '@babel/types'
 import { _match } from 'funcio'
-import { ValidationError } from '../../../../../core/errors/validation-error'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
-import type { LiquidVariableParser } from './variable-parser'
-import { renderCondition } from './condition'
+import { ValidationError } from '@core/errors/validation-error'
+import type { ParsingContext } from '@core/entities/parsing-context'
+import type { LiquidVariableParser } from '@adapters/parsers/babel/liquid/variable-parser'
+import { renderCondition } from '@adapters/parsers/babel/liquid/condition'
 
 export class LiquidStatementParser {
   constructor(

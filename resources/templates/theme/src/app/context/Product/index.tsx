@@ -5,9 +5,9 @@ import { createContext } from 'preact'
 import type { ReactNode } from 'preact/compat'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks'
 
-import { CartService } from '../../services/Cart/cart.service'
-import type { ProductContextType, ProductProviderProps } from '../../../types/components/product'
-import { buildSelectedOptions, clampQuantity, getProductOptions, getRequiredOptions, getVariantQuantityInCart, getVariantStockLimit, normalizeProduct, selectionIsComplete, variantMatches } from './product.helpers'
+import { CartService } from '@theme/app/services/Cart/cart.service'
+import type { ProductContextType, ProductProviderProps } from '@theme/types/components/product'
+import { buildSelectedOptions, clampQuantity, getProductOptions, getRequiredOptions, getVariantQuantityInCart, getVariantStockLimit, normalizeProduct, selectionIsComplete, variantMatches } from '@theme/app/context/Product/product.helpers'
 
 const ProductContext = createContext<ProductContextType | null>(null)
 

@@ -11,9 +11,9 @@ import {
   type Node,
 } from '@babel/types'
 import { _match } from 'funcio'
-import { ValidationError } from '../../../../../core/errors/validation-error'
+import { ValidationError } from '@core/errors/validation-error'
 
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 export class LiquidFormParser {
   constructor(

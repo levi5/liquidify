@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test'
 import assert from 'node:assert/strict'
-import { ReactRuntimeBuilder } from '../dist/infra/adapters/compilers/react/runtime/runtime-builder.js'
-import { LiquidifyError } from '../dist/core/errors/liquidify-error.js'
+import { ReactRuntimeBuilder } from '#dist/infra/adapters/compilers/react/runtime/runtime-builder.js'
+import { LiquidifyError } from '#dist/core/errors/liquidify-error.js'
 
 describe('ReactRuntimeBuilder', () => {
   it('returns the bundled runtime text', async () => {

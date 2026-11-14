@@ -1,7 +1,7 @@
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const vm = require('node:vm')
-const { buildRuntimeScript, createComponentCompiler } = require('../helpers/runtime-harness.cjs')
+const { buildRuntimeScript, createComponentCompiler } = require('#tests/helpers/runtime-harness.cjs')
 
 test('context bridge reports initialization failures before executing components', async () => {
   const window = {}

@@ -15,11 +15,11 @@ import {
   type StringLiteral,
 } from '@babel/types'
 import { _Maybe, _match } from 'funcio'
-import type { LiquidAttributeConverter } from './attribute-parser'
-import type { ExpressionParser } from './expression-parser'
-import { liquidJsonOutput } from '../../../../../shared/html'
-import { ParsingContext } from '../../../../../core/entities/parsing-context'
-import { VOID_TAGS as voidTags, SVG_ROOT_TAG } from '../../../../../shared/liquid-constants'
+import type { LiquidAttributeConverter } from '@adapters/parsers/babel/liquid/attribute-parser'
+import type { ExpressionParser } from '@adapters/parsers/babel/liquid/expression-parser'
+import { liquidJsonOutput } from '@shared/html'
+import { ParsingContext } from '@core/entities/parsing-context'
+import { VOID_TAGS as voidTags, SVG_ROOT_TAG } from '@shared/liquid-constants'
 
 export class LiquidHtmlParser {
   constructor(
@@ -41,8 +41,7 @@ export class LiquidHtmlParser {
     }
     const attributeContext = isSvg && context?.inSvg !== true ? ParsingContext.derive(context, { inSvg: true }) : context
     const attributes = this.attributeConverter.getAttributes(filteredAttributes, renames, attributeContext)
-    // Attribute expressions may hoist temporary assigns/captures. Keep them outside
-    // the tag so quoted Liquid literals never break the HTML attribute delimiters.
+
     const pending = this.expressionParser.getPendingAssigns(attributeContext ?? context)
     const childContext = _match(tagName === 'style' || tagName === 'script' || isSvg)
       .with(true, () =>

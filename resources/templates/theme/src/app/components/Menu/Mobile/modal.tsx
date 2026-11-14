@@ -2,11 +2,11 @@
 
 import { _match, _try } from 'funcio'
 
-import { Drawer } from '../../Drawer'
-import { DrawerHeader } from '../../Drawer/Header'
-import { translate } from '../../../i18n/translate'
+import { Drawer } from '@theme/app/components/Drawer'
+import { DrawerHeader } from '@theme/app/components/Drawer/Header'
+import { translate } from '@theme/app/i18n/translate'
 
-import type { LinksType } from '../../../../types/components/menu'
+import type { LinksType } from '@theme/types/components/menu'
 
 import './styles.css'
 

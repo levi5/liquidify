@@ -4,15 +4,15 @@ import { t, escape, defaultValue } from 'liquidify'
 import { RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
-import { TopBar } from '../../components/Bar/Top'
-import { MenuDesktop } from '../../components/Menu/Desktop'
-import { HeaderUserOptions } from './User'
-import { MenuMobile } from '../../components/Menu/Mobile'
+import { TopBar } from '@theme/app/components/Bar/Top'
+import { MenuDesktop } from '@theme/app/components/Menu/Desktop'
+import { HeaderUserOptions } from '@theme/app/sections/Header/User'
+import { MenuMobile } from '@theme/app/components/Menu/Mobile'
 
 import styles from './styles.css'
 
 export const Header = () => {
-	
+
 	return (
 		<div className={classNames(styles['header-shell'])}>
 			<RenderSnippet slot={TopBar} blocks={section.blocks} />

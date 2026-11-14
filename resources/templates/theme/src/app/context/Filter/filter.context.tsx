@@ -4,7 +4,7 @@ import { createContext } from 'preact'
 import type { ReactNode } from 'preact/compat'
 import { useCallback, useContext, useEffect, useMemo, useState } from 'preact/hooks'
 
-import { FilterService } from './filter.service'
+import { FilterService } from '@theme/app/context/Filter/filter.service'
 
 interface FilterContextType {
 	activeFilters: URLSearchParams

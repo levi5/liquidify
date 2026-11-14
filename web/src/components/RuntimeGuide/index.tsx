@@ -1,6 +1,6 @@
-import { useLocale } from "../../i18n.tsx";
-import Snippet from "../Snippet/index.tsx";
-import { IslandFigure } from "../Figures/index.tsx";
+import { useLocale } from "#web/i18n.tsx";
+import Snippet from "#web/components/Snippet/index.tsx";
+import { IslandFigure } from "#web/components/Figures/index.tsx";
 import styles from "./style.module.css";
 
 const BRIDGE = `<liquid-data data-liquid-store="{{ product | json }}">

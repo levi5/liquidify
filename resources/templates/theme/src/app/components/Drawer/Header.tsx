@@ -1,8 +1,8 @@
 'use react'
 
-import { DrawerAction } from './Action'
+import { DrawerAction } from '@theme/app/components/Drawer/Action'
 
-import { translate } from '../../i18n/translate'
+import { translate } from '@theme/app/i18n/translate'
 
 import './styles.css'
 import styles from './styles.css'

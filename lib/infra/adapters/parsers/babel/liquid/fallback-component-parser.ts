@@ -12,8 +12,8 @@ import {
   type Node,
 } from '@babel/types'
 import { _match } from 'funcio'
-import { escapedOutput } from '../../../../../shared/html'
-import type { ParsingContext } from '../../../../../core/entities/parsing-context'
+import { escapedOutput } from '@shared/html'
+import type { ParsingContext } from '@core/entities/parsing-context'
 
 export class LiquidFallbackParser {
   constructor(

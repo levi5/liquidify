@@ -1,7 +1,7 @@
 const { test } = require('node:test')
 const assert = require('node:assert/strict')
 const vm = require('node:vm')
-const { buildRuntimeScript } = require('../helpers/runtime-harness.cjs')
+const { buildRuntimeScript } = require('#tests/helpers/runtime-harness.cjs')
 
 test('registered actions can be replaced and unregistered', async () => {
   const window = {}

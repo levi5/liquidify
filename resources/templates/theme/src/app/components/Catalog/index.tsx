@@ -4,8 +4,8 @@ import { t, escape } from 'liquidify'
 import { PaginateByLiquid, RenderSnippet } from 'liquidex'
 import classNames from 'classnames'
 
-import { Card } from '../Card'
-import { BaseEmptyState } from '../Base/EmptyState'
+import { Card } from '@theme/app/components/Card'
+import { BaseEmptyState } from '@theme/app/components/Base/EmptyState'
 
 import styles from './styles.css'
 

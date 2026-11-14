@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { _match, _Maybe, _try } from "funcio";
-import { docsFiles } from "./vite-docs-files.ts";
+import { docsFiles } from "#web-tools/vite-docs-files.ts";
 
 function appVersion(): string {
   return _try
@@ -44,6 +44,7 @@ export default defineConfig({
   plugins: [baseRedirect(), react(), docsFiles()],
   resolve: {
     alias: {
+      "#web": fileURLToPath(new URL("./src", import.meta.url)),
       funcio: fileURLToPath(new URL("./node_modules/funcio/lib/main.js", import.meta.url)),
     },
   },

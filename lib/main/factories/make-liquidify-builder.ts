@@ -1,59 +1,73 @@
-import type { LiquidifyConfig } from '../../core/entities/config'
-import { ASTParser } from '../../infra/adapters/parsers/babel/ASTParser'
-import { BabelLiquidParser } from '../../infra/adapters/parsers/babel/babel-parser'
-import { ComponentExtractor } from '../../infra/adapters/parsers/babel/component'
-import { CSSImportExtractor } from '../../infra/adapters/parsers/babel/css/import-extractor'
-import { CssInjector } from '../../infra/adapters/compilers/react/runtime/css-injector'
-import { EsbuildCompiler } from '../../infra/adapters/compilers/esbuild/esbuild-compiler'
-import { LiquidFileSystemGenerator } from '../../infra/adapters/generators/liquid/liquid-generator'
-import { OutputManifest } from '../../infra/adapters/generators/liquid/output-manifest'
-import { LiquidParser } from '../../infra/adapters/parsers/babel/liquid-parser'
-import { LiquidifyBuilder } from '../../presentation/cli/commands/build'
-import { ModuleResolver } from '../../infra/adapters/fs/module-resolver'
-import { NodeFileSystem } from '../../infra/adapters/fs/node-file-system'
-import { ReactComponentCompiler } from '../../infra/adapters/compilers/react/component-compiler'
-import { ReactRuntimeBuilder } from '../../infra/adapters/compilers/react/runtime/runtime-builder'
-import { SchemaExtractor } from '../../infra/adapters/parsers/babel/schema/schema-extractor'
-import { ScriptGenerator } from '../../infra/adapters/parsers/babel/script/script-generator'
-import { ConsoleLogger } from '../../shared/logger'
-import { ComponentRegistry, DirectiveScanner } from '../../application/services/component-registry'
-import { DependencyTracker, ImportGraphBuilder } from '../../application/services/dependency-tracker'
-import { SchemaValidator } from '../../application/services/schema-validation'
-import { TranspileFileUseCase } from '../../application/services/transpile-file'
-import { ValidationService } from '../../application/services/validation-service'
+import type { LiquidifyConfig } from '@core/entities/config'
+import { EsbuildCompiler } from '@adapters/compilers/esbuild/esbuild-compiler'
+import { LiquidFileSystemGenerator } from '@adapters/generators/liquid/liquid-generator'
+import { OutputManifest } from '@adapters/generators/liquid/output-manifest'
+import { LiquidifyBuilder } from '@application/services/liquidify-builder'
+import { NodeFileSystem } from '@adapters/fs/node-file-system'
+import { ReactRuntimeBuilder } from '@adapters/compilers/react/runtime/runtime-builder'
+import { ConsoleLogger, type Logger } from '@shared/logger'
+import path from 'node:path'
+import type { IFileSystem } from '@core/protocols/file-system'
+import { ComponentRegistry, DirectiveScanner } from '@application/services/component-registry'
+import { DependencyTracker, ImportGraphBuilder } from '@application/services/dependency-tracker'
+import { SchemaValidator } from '@application/services/schema-validation'
+import { TranspileFileUseCase } from '@application/services/transpile-file'
+import { ValidationService } from '@application/services/validation-service'
+import { makeComponentParser } from '@main/factories/make-component-parser'
+import { PluginRunner } from '@application/services/plugin-runner'
+import { BuildDiagnostics, DiagnosticLogger } from '@application/services/build-diagnostics'
+import { resolveBuildLimits } from '@core/entities/build-limits'
+import { ProjectBuildPipeline } from '@application/services/project-build-pipeline'
+import { ProjectWatcher } from '@adapters/fs/project-watcher'
+import { discoverProjectFiles } from '@adapters/fs/discover-project-files'
 
-export function makeLiquidifyBuilder(options: LiquidifyConfig): LiquidifyBuilder {
-  const logger = new ConsoleLogger()
-  const fileSystem = new NodeFileSystem(options.output)
-  const compiler = new EsbuildCompiler()
-  const astParser = new ASTParser()
-  const resolver = new ModuleResolver(fileSystem)
-  const projectRoot = process.cwd()
+export interface BuilderDependencies {
+  logger?: Logger
+  fileSystem?: IFileSystem
+}
 
-  const parser = new BabelLiquidParser({
-    astParser,
-    componentExtractor: new ComponentExtractor(),
-    cssExtractor: new CSSImportExtractor(fileSystem, logger),
-    jsxConverter: new LiquidParser(compiler, fileSystem, logger),
-    reactCompiler: new ReactComponentCompiler(compiler, new CssInjector(), options.react ?? {}, projectRoot, logger),
-    schemaExtractor: new SchemaExtractor(fileSystem, resolver, logger),
-    scriptGenerator: new ScriptGenerator(compiler),
-  })
+export function makeLiquidifyBuilder(configuration: LiquidifyConfig, dependencies: BuilderDependencies = {}): LiquidifyBuilder {
+  const projectRoot = path.resolve(configuration.cwd ?? process.cwd())
+  const options = {
+    ...configuration,
+    componentsDir: path.resolve(projectRoot, configuration.componentsDir),
+    output: path.resolve(projectRoot, configuration.output),
+    limits: resolveBuildLimits(configuration.limits),
+  }
+  if (
+    options.concurrency !== undefined &&
+    (!Number.isInteger(options.concurrency) || options.concurrency < 1 || options.concurrency > 64)
+  ) {
+    throw new Error('Build concurrency must be an integer between 1 and 64.')
+  }
+  const diagnostics = new BuildDiagnostics()
+  const logger = new DiagnosticLogger(dependencies.logger ?? new ConsoleLogger(), diagnostics)
+  const fileSystem = dependencies.fileSystem ?? new NodeFileSystem(options.output)
+  const compiler = new EsbuildCompiler({ mode: options.mode, sourcemap: options.sourcemap })
+  const { parser, astParser, resolver } = makeComponentParser({ fileSystem, compiler, logger, projectRoot, react: options.react })
 
   const manifest = new OutputManifest(options.output, fileSystem, logger, { force: options.force })
   const generator = new LiquidFileSystemGenerator({ outputDir: options.output, force: options.force }, fileSystem, logger, manifest)
-  const useCase = new TranspileFileUseCase(parser, generator, new ValidationService(new SchemaValidator()))
+  const plugins = new PluginRunner(logger)
+  const useCase = new TranspileFileUseCase(parser, generator, new ValidationService(new SchemaValidator()), plugins)
 
-  const builder = new LiquidifyBuilder(
+  const pipeline = new ProjectBuildPipeline(
     options,
     parser,
     useCase,
     fileSystem,
-    new DependencyTracker(new ImportGraphBuilder(fileSystem, resolver, astParser)),
+    new DependencyTracker(new ImportGraphBuilder(fileSystem, resolver, astParser, options.limits)),
     new ComponentRegistry(parser, fileSystem, new DirectiveScanner(astParser)),
     new ReactRuntimeBuilder(compiler),
     new DirectiveScanner(astParser),
+    discoverProjectFiles,
+  )
+  const builder = new LiquidifyBuilder(
+    pipeline,
+    (callbacks) => new ProjectWatcher(options.componentsDir, fileSystem, callbacks, options.output),
     logger,
+    plugins,
+    diagnostics,
   )
 
   for (const plugin of options.plugins ?? []) {

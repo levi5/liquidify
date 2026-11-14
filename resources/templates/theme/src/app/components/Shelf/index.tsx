@@ -4,13 +4,13 @@ import { t, defaultValue } from 'liquidify'
 import { RenderSnippet, RenderSvg } from 'liquidex'
 import classNames from 'classnames'
 
-import { Card } from '../Card'
-import { SwiperSliderArrow } from '../Swiper/Arrow'
-import { SwiperCarousel } from '../Swiper/Slide'
-import { SwiperSliderRoot } from '../Swiper/Root'
+import { Card } from '@theme/app/components/Card'
+import { SwiperSliderArrow } from '@theme/app/components/Swiper/Arrow'
+import { SwiperCarousel } from '@theme/app/components/Swiper/Slide'
+import { SwiperSliderRoot } from '@theme/app/components/Swiper/Root'
 
-import { COLLECTION_SHELF_SCHEMA } from '../../../schemas/Shelf/collection-shelf.schema'
-import { SHELF_SLIDER_SETTINGS } from '../../../settings/slider/shelf.settings'
+import { COLLECTION_SHELF_SCHEMA } from '@theme/schemas/Shelf/collection-shelf.schema'
+import { SHELF_SLIDER_SETTINGS } from '@theme/settings/slider/shelf.settings'
 
 import styles from './styles.css'
 

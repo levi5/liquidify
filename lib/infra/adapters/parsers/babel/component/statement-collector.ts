@@ -23,8 +23,8 @@ import {
 } from '@babel/types'
 import generate from '@babel/generator'
 import { _match, _pipe } from 'funcio'
-import type { ComponentMetadataType, InlineComponentNode } from '../../../../../types/component'
-import { LiquidVariableParser } from '../liquid/variable-parser'
+import type { ComponentMetadataType, InlineComponentNode } from '@liquidify-types/component'
+import { LiquidVariableParser } from '@adapters/parsers/babel/liquid/variable-parser'
 
 export class StatementCollector {
   private generateLiquidCodeFromNode(node: unknown): string {
