@@ -2,6 +2,20 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { normalizeTemplateName } from '@presentation/cli/commands/init/arguments'
 
+function readOptionalFile(filename: string): string | undefined {
+  try {
+    return fs.readFileSync(filename, 'utf8')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined
+    throw error
+  }
+}
+
+function readOptionalJson<T>(filename: string): T | undefined {
+  const content = readOptionalFile(filename)
+  return content === undefined ? undefined : (JSON.parse(content) as T)
+}
+
 export function resolveTemplate(templateName = 'theme'): string {
   const normalized = normalizeTemplateName(templateName)
   const candidates = [
@@ -11,8 +25,9 @@ export function resolveTemplate(templateName = 'theme'): string {
     path.resolve(process.cwd(), 'templates', normalized),
   ]
   for (const directory of candidates) {
-    if (fs.existsSync(directory) && !fs.lstatSync(directory).isSymbolicLink() && fs.existsSync(path.join(directory, 'package.json')))
-      return directory
+    const stats = fs.lstatSync(directory, { throwIfNoEntry: false })
+    if (!stats || stats.isSymbolicLink() || !stats.isDirectory()) continue
+    if (readOptionalFile(path.join(directory, 'package.json')) !== undefined) return directory
   }
   throw new Error(`Template "${normalized}" not found. Searched: ${candidates.join(', ')}`)
 }
@@ -24,29 +39,29 @@ function packageVersion(): string {
     path.resolve(process.cwd(), 'package.json'),
   ]
   for (const filename of candidates) {
-    if (!fs.existsSync(filename)) continue
-    const metadata = JSON.parse(fs.readFileSync(filename, 'utf8')) as { name?: string; version?: string }
-    if (metadata.name === 'liquidify' && metadata.version) return `^${metadata.version}`
+    const metadata = readOptionalJson<{ name?: string; version?: string }>(filename)
+    if (metadata?.name === 'liquidify' && metadata.version) return `^${metadata.version}`
   }
   return '^1.1.0-alpha.4'
 }
 
 export function configureTemplate(directory: string, projectName: string): void {
   const packagePath = path.join(directory, 'package.json')
-  if (fs.existsSync(packagePath)) {
-    const metadata = JSON.parse(fs.readFileSync(packagePath, 'utf8')) as { name?: string; dependencies?: Record<string, string> }
+  const metadata = readOptionalJson<{ name?: string; dependencies?: Record<string, string> }>(packagePath)
+  if (metadata) {
     metadata.name = projectName
     if (metadata.dependencies?.liquidify?.startsWith('file:')) metadata.dependencies.liquidify = packageVersion()
     fs.writeFileSync(packagePath, `${JSON.stringify(metadata, null, 2)}\n`)
   }
   const typescriptPath = path.join(directory, 'tsconfig.json')
-  if (fs.existsSync(typescriptPath)) {
-    const configuration = JSON.parse(fs.readFileSync(typescriptPath, 'utf8'))
-    const paths = configuration.compilerOptions?.paths
-    if (paths) {
+  const configuration = readOptionalJson<{ compilerOptions?: { paths?: Record<string, string> } }>(typescriptPath)
+  if (configuration) {
+    const compilerOptions = configuration.compilerOptions
+    const paths = compilerOptions?.paths
+    if (compilerOptions && paths) {
       delete paths.liquidify
       delete paths.liquidex
-      if (Object.keys(paths).length === 0) delete configuration.compilerOptions.paths
+      if (Object.keys(paths).length === 0) delete compilerOptions.paths
     }
     fs.writeFileSync(typescriptPath, `${JSON.stringify(configuration, null, 2)}\n`)
   }

@@ -119,6 +119,12 @@ describe('preprocessLiquidExpressions', () => {
     }
   })
 
+  it('handles unterminated strings and comments without polynomial scanning', { timeout: 5000 }, () => {
+    for (const source of ['a/*'.repeat(100_000), `"${'\\"'.repeat(100_000)}`, `'${"\\'".repeat(100_000)}`, `\`${'\\`'.repeat(100_000)}`]) {
+      assert.equal(preprocessLiquidExpressions(source), source)
+    }
+  })
+
   it('preserves large whitespace inputs without backtracking', { timeout: 5000 }, () => {
     const whitespace = '\t'.repeat(100_000)
     const identifier = 'a'.repeat(100_000)

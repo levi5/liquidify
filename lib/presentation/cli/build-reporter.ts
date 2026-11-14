@@ -39,9 +39,14 @@ export class BuildReporter {
       console.error(`  ${diagnostic.filePath}${location}`)
       if (diagnostic.location) {
         try {
-          if (fs.statSync(diagnostic.filePath).size <= 1024 * 1024) {
-            const frame = sourceCodeFrame(fs.readFileSync(diagnostic.filePath, 'utf8'), diagnostic.location)
-            if (frame) console.error(frame)
+          const descriptor = fs.openSync(diagnostic.filePath, 'r')
+          try {
+            if (fs.fstatSync(descriptor).size <= 1024 * 1024) {
+              const frame = sourceCodeFrame(fs.readFileSync(descriptor, 'utf8'), diagnostic.location)
+              if (frame) console.error(frame)
+            }
+          } finally {
+            fs.closeSync(descriptor)
           }
         } catch {}
       }
