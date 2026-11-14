@@ -1,11 +1,12 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
+import { createTemporaryDirectory } from './temp-directory.mjs'
 
 export const cliExecutable = path.resolve('dist/presentation/cli/index.js')
 
 export function createCliProject(context) {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-cli-')
+  const directory = createTemporaryDirectory('liquidify-cli-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   fs.mkdirSync(path.join(directory, 'components'))
   fs.writeFileSync(path.join(directory, 'components/Card.tsx'), '"use snippets"; export default function Card() { return <div>Card</div> }')

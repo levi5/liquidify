@@ -52,7 +52,9 @@ export class ImportGraphBuilder {
   }
 
   private collect(file: string, graph: ImportGraph, dependencies: Set<string>): void {
-    if (dependencies.size >= this.limits.maxDependencies || this.dependencyDepth >= this.limits.maxDependencyDepth) {
+    const exceedsCount =
+      dependencies.size > this.limits.maxDependencies || (!dependencies.has(file) && dependencies.size >= this.limits.maxDependencies)
+    if (exceedsCount || this.dependencyDepth >= this.limits.maxDependencyDepth) {
       throw new LiquidifyError('Dependency graph exceeds configured build limits.', file)
     }
     const imports = new Set<string>()

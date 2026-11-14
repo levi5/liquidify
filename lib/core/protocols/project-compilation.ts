@@ -30,3 +30,5 @@ export interface DependencyPlanner {
 export interface RuntimeBundler {
   build(): Promise<string>
 }
+
+export type ProjectFileDiscovery = (componentsDirectory: string, outputDirectory: string) => Promise<string[]>

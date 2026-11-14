@@ -54,7 +54,7 @@ function localPluginPath(name: string, configPath: string): string | undefined {
 
 function resolvePlugin(name: string, configPath: string): LiquidifyPlugin {
   if (name === 'tsx-stats') return tsxStatsPlugin
-  if (!PACKAGE_NAME.test(name) || name === '__proto__' || name === 'constructor') {
+  if ((!LOCAL_NAME.test(name) && !PACKAGE_NAME.test(name)) || name === '__proto__' || name === 'constructor') {
     throw new ValidationError(`Invalid plugin reference "${name}". Use a local plugin name or an npm package name, not a path.`, configPath)
   }
   try {

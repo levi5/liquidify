@@ -3,9 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { NodeFileSystem } from '../dist/infra/adapters/fs/node-file-system.js'
+import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
 
 test('asynchronous atomic writes preserve permissions and clean temporary files', async (context) => {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-async-')
+  const directory = createTemporaryDirectory('liquidify-async-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   const filename = path.join(directory, 'output.liquid')
   fs.writeFileSync(filename, 'before', { mode: 0o640 })
@@ -17,7 +18,7 @@ test('asynchronous atomic writes preserve permissions and clean temporary files'
 })
 
 test('failed asynchronous atomic renames preserve the target and remove temporary files', async (context) => {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-async-failure-')
+  const directory = createTemporaryDirectory('liquidify-async-failure-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   const destination = path.join(directory, 'existing-directory')
   fs.mkdirSync(destination)

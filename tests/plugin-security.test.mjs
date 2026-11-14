@@ -3,9 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { loadConfig } from '../dist/index.js'
+import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
 
 function createProject(context, plugins) {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-plugins-')
+  const directory = createTemporaryDirectory('liquidify-plugins-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   fs.mkdirSync(path.join(directory, '.plugins'))
   fs.writeFileSync(path.join(directory, 'liquidify.config.json'), JSON.stringify({ plugins }))

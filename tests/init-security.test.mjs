@@ -3,9 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { copyTemplate } from '../dist/presentation/cli/commands/init.js'
+import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
 
 test('force initialization still refuses source and destination symlinks', (context) => {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-init-security-')
+  const directory = createTemporaryDirectory('liquidify-init-security-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   const source = path.join(directory, 'source')
   const target = path.join(directory, 'target')

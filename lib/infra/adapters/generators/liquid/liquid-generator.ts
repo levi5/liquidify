@@ -1,6 +1,7 @@
 import type { OutputManifest } from './output-manifest'
 import { buildLiquidContent } from './liquid-content'
 import { join, resolve, relative, isAbsolute } from 'node:path'
+import { randomUUID } from 'node:crypto'
 import { _match, _try, _Array } from 'funcio'
 
 import type { GeneratorOptions, ResolvedGeneratorOptions } from '../../../../core/entities/liquid'
@@ -237,7 +238,7 @@ export class LiquidFileSystemGenerator implements IGenerator {
 
   private async refreshTarget(targetDir: string, now: Date): Promise<void> {
     await this.fileSystem.utimes(targetDir, now, now)
-    const tempFile = join(targetDir, '.refresh')
+    const tempFile = join(targetDir, `.liquidify-refresh-${randomUUID()}.tmp`)
     await this.fileSystem.writeFile(tempFile, '')
     await this.fileSystem.unlink(tempFile)
   }

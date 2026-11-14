@@ -5,6 +5,7 @@ import { DEFAULT_CONFIG, type LiquidifyConfig } from '../../../core/entities/con
 import { ValidationError } from '../../../core/errors/validation-error'
 import { resolvePlugins } from './plugin-loader'
 import { resolveBuildLimits } from '../../../core/entities/build-limits'
+import { configurationKeySuggestion } from './key-suggestion'
 
 const configFiles = ['liquidify.config.json', '.liquidifyrc.json', '.liquidifyrc', 'liquidx.config.json', '.liquidxrc.json', '.liquidxrc']
 
@@ -43,35 +44,6 @@ export function loadConfigFromFile(filePath: string, options: ConfigLoadOptions 
   return readConfig(resolved, options)
 }
 
-function levenshtein(a: string, b: string): number {
-  const rows = a.length + 1
-  const cols = b.length + 1
-  const grid: number[][] = Array.from({ length: rows }, (_, i) => [i, ...Array(cols - 1).fill(0)])
-  for (let j = 1; j < cols; j += 1) grid[0][j] = j
-  for (let i = 1; i < rows; i += 1) {
-    for (let j = 1; j < cols; j += 1) {
-      grid[i][j] = Math.min(grid[i - 1][j] + 1, grid[i][j - 1] + 1, grid[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1))
-    }
-  }
-  return grid[a.length][b.length]
-}
-
-function suggestKey(unknownKey: string, allowed: Set<string> | string[]): string {
-  if (unknownKey.length > 128) return ''
-  const candidates = [...allowed]
-  let best: string | undefined
-  let bestScore = Number.POSITIVE_INFINITY
-  for (const candidate of candidates) {
-    const score = levenshtein(unknownKey, candidate)
-    if (score < bestScore) {
-      bestScore = score
-      best = candidate
-    }
-  }
-  if (best !== undefined && bestScore <= Math.max(2, Math.floor(unknownKey.length / 2))) return ` Did you mean "${best}"?`
-  return ''
-}
-
 function readConfig(fullPath: string, options: ConfigLoadOptions): LiquidifyConfig {
   const content = attempt(() => fs.readFileSync(fullPath, 'utf-8'), `Unable to read ${path.basename(fullPath)}`, fullPath)
   const value: unknown = attempt(() => JSON.parse(content) as unknown, `Invalid JSON in ${path.basename(fullPath)}`, fullPath)
@@ -98,7 +70,10 @@ function validateConfig(fullPath: string, value: unknown, options: ConfigLoadOpt
   _match(unknownKey === undefined)
     .with(true, () => undefined)
     .with(false, () => {
-      throw new ValidationError(`Unknown configuration key "${unknownKey}".${suggestKey(unknownKey as string, ALLOWED_KEYS)}`, fullPath)
+      throw new ValidationError(
+        `Unknown configuration key "${unknownKey}".${configurationKeySuggestion(unknownKey as string, ALLOWED_KEYS)}`,
+        fullPath,
+      )
     })
     .exec()
   const merged = { ...DEFAULT_CONFIG, ...raw }

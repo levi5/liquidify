@@ -20,10 +20,10 @@ export class DirectiveScanner {
 
   constructor(private readonly astParser: ASTParser) {}
 
-  public scan(src: string, filePath?: string): ComponentDirectives {
+  public scan(source: string, filePath?: string): ComponentDirectives {
     const cached = filePath ? this.cache.get(filePath) : undefined
-    if (cached?.source === src) return { ...cached.directives }
-    const values = this.astParser.parse(src, filePath).program.directives.map((directive) => directive.value.value)
+    if (cached?.source === source) return { ...cached.directives }
+    const values = this.astParser.parse(source, filePath).program.directives.map((directive) => directive.value.value)
     const react = values.map((value) => value.match(REACT_DIRECTIVE_PATTERN)).find(Boolean)
     const rawId = react?.[1] as string | undefined
     const directives = {
@@ -38,7 +38,7 @@ export class DirectiveScanner {
     }
     if (filePath) {
       if (this.cache.size >= 2048) this.cache.clear()
-      this.cache.set(filePath, { source: src, directives })
+      this.cache.set(filePath, { source, directives })
     }
     return directives
   }

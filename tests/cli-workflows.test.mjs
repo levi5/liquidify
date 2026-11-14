@@ -2,23 +2,10 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import { spawn, spawnSync } from 'node:child_process'
+import { spawn } from 'node:child_process'
 import { once } from 'node:events'
 
-const executable = path.resolve('dist/presentation/cli/index.js')
-
-function createProject(context) {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-cli-')
-  context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
-  fs.mkdirSync(path.join(directory, 'components'))
-  fs.writeFileSync(path.join(directory, 'components/Card.tsx'), '"use snippets"; export default function Card() { return <div>Card</div> }')
-  fs.writeFileSync(path.join(directory, 'liquidify.config.json'), JSON.stringify({ componentsDir: 'components', output: 'out' }))
-  return directory
-}
-
-function run(directory, argumentsList) {
-  return spawnSync(process.execPath, [executable, ...argumentsList], { cwd: directory, encoding: 'utf8', timeout: 15000 })
-}
+import { cliExecutable as executable, createCliProject as createProject, runCli as run } from './helpers/cli-project.mjs'
 
 test('quiet builds write output without success messages', (context) => {
   const directory = createProject(context)

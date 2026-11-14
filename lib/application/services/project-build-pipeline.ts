@@ -1,5 +1,3 @@
-import path from 'node:path'
-import { glob } from 'glob'
 import type { BuildRequest } from '../../core/entities/build-result'
 import { DEFAULT_BUILD_LIMITS, type BuildLimits } from '../../core/entities/build-limits'
 import type { IFileReader } from '../../core/protocols/file-system'
@@ -9,6 +7,7 @@ import type {
   ComponentRegistryReader,
   DirectiveReader,
   DependencyPlanner,
+  ProjectFileDiscovery,
 } from '../../core/protocols/project-compilation'
 import type { TranspileFileUseCase } from './transpile-file'
 import type { BuildPlan } from '../../core/entities/build-plan'
@@ -39,12 +38,11 @@ export class ProjectBuildPipeline {
     private readonly registry: ComponentRegistryReader,
     private readonly runtimeBuilder: RuntimeBundler,
     private readonly scanner: DirectiveReader,
+    private readonly discoverFiles: ProjectFileDiscovery,
   ) {}
 
   async run(request: BuildRequest, updateWatch: (dependencies: Set<string>) => void): Promise<void> {
-    this.files = (await glob(path.join(this.options.componentsDir, '**/*.{tsx,jsx,ts,js}')))
-      .map((filename) => path.resolve(filename))
-      .sort()
+    this.files = await this.discoverFiles(this.options.componentsDir, this.options.output)
     if (this.files.length > (this.options.limits ?? DEFAULT_BUILD_LIMITS).maxFiles)
       throw new LiquidifyError('Project exceeds the configured maxFiles limit.')
     let plan: BuildPlan

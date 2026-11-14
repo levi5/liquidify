@@ -3,9 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { makeLiquidifyBuilder, SilentLogger } from '../dist/index.js'
+import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
 
 test('plugin generation hooks are awaited and validation runs after mutation', async (context) => {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-plugin-hooks-')
+  const directory = createTemporaryDirectory('liquidify-plugin-hooks-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   const componentsDir = path.join(directory, 'components')
   fs.mkdirSync(componentsDir)

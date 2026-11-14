@@ -19,6 +19,7 @@ import { BuildDiagnostics, DiagnosticLogger } from '../../application/services/b
 import { resolveBuildLimits } from '../../core/entities/build-limits'
 import { ProjectBuildPipeline } from '../../application/services/project-build-pipeline'
 import { ProjectWatcher } from '../../infra/adapters/fs/project-watcher'
+import { discoverProjectFiles } from '../../infra/adapters/fs/discover-project-files'
 
 export interface BuilderDependencies {
   logger?: Logger
@@ -59,10 +60,11 @@ export function makeLiquidifyBuilder(configuration: LiquidifyConfig, dependencie
     new ComponentRegistry(parser, fileSystem, new DirectiveScanner(astParser)),
     new ReactRuntimeBuilder(compiler),
     new DirectiveScanner(astParser),
+    discoverProjectFiles,
   )
   const builder = new LiquidifyBuilder(
     pipeline,
-    (callbacks) => new ProjectWatcher(options.componentsDir, fileSystem, callbacks),
+    (callbacks) => new ProjectWatcher(options.componentsDir, fileSystem, callbacks, options.output),
     logger,
     plugins,
     diagnostics,

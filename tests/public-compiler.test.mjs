@@ -3,9 +3,10 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import { compile, previewProject, makeLiquidifyBuilder, SilentLogger } from '../dist/index.js'
+import { createTemporaryDirectory } from './helpers/temp-directory.mjs'
 
 function createProject(context) {
-  const directory = fs.mkdtempSync('/tmp/opencode/liquidify-public-')
+  const directory = createTemporaryDirectory('liquidify-public-')
   context.after(() => fs.rmSync(directory, { recursive: true, force: true }))
   fs.mkdirSync(path.join(directory, 'components'))
   fs.writeFileSync(path.join(directory, 'components/Card.tsx'), '"use snippets"; export default function Card() { return <div>Card</div> }')
@@ -55,7 +56,7 @@ test('preview reports stale removals without deleting owned files', async (conte
 })
 
 test('compiler subpath exports the standalone APIs', async () => {
-  const compiler = await import('../dist/compiler.js')
+  const compiler = await import('liquidify/compiler')
   assert.equal(compiler.compile, compile)
   assert.equal(compiler.previewProject, previewProject)
 })

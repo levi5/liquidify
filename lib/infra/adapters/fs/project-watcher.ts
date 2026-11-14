@@ -16,6 +16,7 @@ export class ProjectWatcher implements BuildWatcher {
     private readonly componentsDir: string,
     private readonly reader: IFileReader,
     private readonly callbacks: BuildWatchCallbacks,
+    private readonly outputDirectory?: string,
   ) {}
 
   get handle(): FSWatcher | null {
@@ -94,6 +95,9 @@ export class ProjectWatcher implements BuildWatcher {
   private isWatched(filename: string): boolean {
     const absolute = path.resolve(filename)
     const components = path.resolve(this.componentsDir)
+    const output = this.outputDirectory ? path.resolve(this.outputDirectory) : undefined
+    if (absolute.split(path.sep).some((segment) => segment === 'node_modules' || segment === '.git')) return false
+    if (output?.startsWith(`${components}${path.sep}`) && (absolute === output || absolute.startsWith(`${output}${path.sep}`))) return false
     if (absolute === components || absolute.startsWith(`${components}${path.sep}`) || components.startsWith(`${absolute}${path.sep}`))
       return true
     for (const dependency of this.dependencies) {
