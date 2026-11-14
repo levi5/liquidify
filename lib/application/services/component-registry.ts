@@ -7,14 +7,8 @@ import type { IFileSystem } from '../../core/protocols/file-system'
 import type { ReactComponentConfig } from '../../types/liquid'
 import { pascalToKebab } from '../../shared/string'
 import { DOM_DIRECTIVE_PATTERN, REACT_DIRECTIVE_PATTERN } from '../../shared/liquid-constants'
-
-export interface ComponentDirectives {
-  isReact: boolean
-  isDom: boolean
-  isSnippet: boolean
-  isSections: boolean
-  rootId: string
-}
+import type { ComponentDirectives } from '../../core/protocols/project-compilation'
+export type { ComponentDirectives } from '../../core/protocols/project-compilation'
 
 export interface ScannedComponent {
   name: string

@@ -1,5 +1,7 @@
 import { _match } from 'funcio'
 import { ValidationError } from '../../core/errors/validation-error'
+import { validateSchemaSetting } from './schema-setting-validation'
+import { validateSchemaLimits, validateSchemaPresets } from './schema-preset-validation'
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   _match(typeof value === 'object' && value !== null && !Array.isArray(value))
@@ -14,6 +16,8 @@ export class SchemaValidator {
     this.validateSettingsBlock(value, filePath)
     this.validateBlocksBlock(value, filePath)
     this.validatePresetsBlock(value, filePath)
+    validateSchemaLimits(value, filePath)
+    validateSchemaPresets(value, filePath)
   }
 
   private fail(message: string, filePath?: string): never {
@@ -74,6 +78,7 @@ export class SchemaValidator {
       .with(true, () => this.fail(`${location} entries require a type`, filePath))
       .with(false, () => this.validateSettingId(setting, location, ids, filePath))
       .exec()
+    validateSchemaSetting(setting, location, filePath)
   }
 
   private validateSettingId(setting: Record<string, unknown>, location: string, ids: Set<string>, filePath?: string): void {

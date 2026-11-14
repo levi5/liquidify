@@ -18,6 +18,10 @@ export class LiquidFileSystemGenerator implements IGenerator {
   private pendingTouch = false
   private writeChain: Promise<unknown> = Promise.resolve()
 
+  get outputFiles(): string[] {
+    return this.manifest.outputFiles
+  }
+
   constructor(
     options: GeneratorOptions,
     private readonly fileSystem: IFileSystem,

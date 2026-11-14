@@ -1,9 +1,9 @@
 import path from 'node:path'
-import type { IFileSystem } from '../../core/protocols/file-system'
+import type { IFileReader } from '../../core/protocols/file-system'
 import type { PluginStats } from '../../core/protocols/plugin'
-import type { DirectiveScanner } from './component-registry'
+import type { DirectiveReader } from '../../core/protocols/project-compilation'
 
-export function collectBuildStatistics(files: string[], fileSystem: IFileSystem, scanner: DirectiveScanner): PluginStats {
+export function collectBuildStatistics(files: string[], fileSystem: IFileReader, scanner: DirectiveReader): PluginStats {
   const statistics: PluginStats = { total: files.length, tsx: 0, jsx: 0, ts: 0, js: 0, byDirective: {} }
   for (const file of files) {
     const extension = path.extname(file).slice(1) as 'tsx' | 'jsx' | 'ts' | 'js'

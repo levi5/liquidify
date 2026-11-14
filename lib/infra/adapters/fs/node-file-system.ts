@@ -1,22 +1,10 @@
-import {
-  closeSync,
-  existsSync,
-  fsyncSync,
-  lstatSync,
-  mkdirSync,
-  openSync,
-  readFileSync,
-  renameSync,
-  unlinkSync,
-  utimesSync,
-  writeFileSync,
-  type Stats,
-} from 'node:fs'
+import { existsSync, lstatSync, mkdirSync, readFileSync, type Stats } from 'node:fs'
+import { promises as filesystem } from 'node:fs'
 import path from 'node:path'
-import { randomUUID } from 'node:crypto'
 import { ValidationError } from '../../../core/errors/validation-error'
 import { _match } from 'funcio'
 import type { IFileSystem } from '../../../core/protocols/file-system'
+import { writeAtomicFile, writeAtomicFileSync } from './atomic-write'
 
 export class NodeFileSystem implements IFileSystem {
   constructor(private readonly outputRoot?: string) {}
@@ -47,7 +35,7 @@ export class NodeFileSystem implements IFileSystem {
 
   public async appendFile(path: string, content: string): Promise<void> {
     this.checkWrite(path)
-    this.writeFileSync(path, (existsSync(path) ? readFileSync(path, 'utf-8') : '') + content)
+    await this.writeFile(path, (existsSync(path) ? await this.readFile(path) : '') + content)
   }
 
   public async exists(path: string): Promise<boolean> {
@@ -55,35 +43,30 @@ export class NodeFileSystem implements IFileSystem {
   }
 
   public async readFile(path: string): Promise<string> {
-    return readFileSync(path, 'utf-8')
+    return filesystem.readFile(path, 'utf-8')
   }
 
   public async writeFile(path: string, content: string): Promise<void> {
-    this.writeFileSync(path, content)
+    await writeAtomicFile(path, content, () => this.checkWrite(path))
   }
 
   public async mkdir(path: string, recursive = true): Promise<void> {
     this.checkWrite(path)
-    _match(existsSync(path))
-      .with(true, () => undefined)
-      .with(false, () => mkdirSync(path, { recursive }))
-      .exec()
+    await filesystem.mkdir(path, { recursive })
   }
 
   public async unlink(path: string): Promise<void> {
     this.checkWrite(path)
-    _match(existsSync(path))
-      .with(true, () => unlinkSync(path))
-      .with(false, () => undefined)
-      .exec()
+    await filesystem.unlink(path).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== 'ENOENT') throw error
+    })
   }
 
   public async utimes(path: string, atime: Date, mtime: Date): Promise<void> {
     this.checkWrite(path)
-    _match(existsSync(path))
-      .with(true, () => utimesSync(path, atime, mtime))
-      .with(false, () => undefined)
-      .exec()
+    await filesystem.utimes(path, atime, mtime).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== 'ENOENT') throw error
+    })
   }
 
   public existsSync(path: string): boolean {
@@ -95,24 +78,7 @@ export class NodeFileSystem implements IFileSystem {
   }
 
   public writeFileSync(file: string, content: string): void {
-    this.checkWrite(file)
-    const temporary = path.join(path.dirname(file), `.liquidify-${randomUUID()}.tmp`)
-    const mode = existsSync(file) ? lstatSync(file).mode & 0o777 : 0o666
-    let fd: number | undefined
-    let created = false
-    try {
-      fd = openSync(temporary, 'wx', mode)
-      created = true
-      writeFileSync(fd, content, 'utf-8')
-      fsyncSync(fd)
-      closeSync(fd)
-      fd = undefined
-      this.checkWrite(file)
-      renameSync(temporary, file)
-    } finally {
-      if (fd !== undefined) closeSync(fd)
-      if (created && existsSync(temporary)) unlinkSync(temporary)
-    }
+    writeAtomicFileSync(file, content, () => this.checkWrite(file))
   }
 
   public mkdirSync(path: string, recursive = true): void {

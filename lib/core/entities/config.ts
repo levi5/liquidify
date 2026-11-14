@@ -1,4 +1,5 @@
 import type { LiquidifyPlugin } from '../protocols/plugin'
+import type { BuildLimits } from './build-limits'
 
 export interface LiquidifyConfig {
   componentsDir: string
@@ -8,6 +9,9 @@ export interface LiquidifyConfig {
   plugins?: LiquidifyPlugin[]
   cwd?: string
   concurrency?: number
+  limits?: Partial<BuildLimits>
+  mode?: 'development' | 'production'
+  sourcemap?: boolean
 }
 
 export const DEFAULT_CONFIG: LiquidifyConfig = {

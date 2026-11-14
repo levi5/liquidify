@@ -19,7 +19,12 @@ afterEach(() => {
 
 describe('ConfigLoader', () => {
   it('returns defaults when no config file exists', () => {
-    assert.deepEqual(ConfigLoader.load(cwd), DEFAULT_CONFIG)
+    assert.deepEqual(ConfigLoader.load(cwd), {
+      ...DEFAULT_CONFIG,
+      cwd,
+      componentsDir: path.resolve(cwd, DEFAULT_CONFIG.componentsDir),
+      output: path.resolve(cwd, DEFAULT_CONFIG.output),
+    })
   })
 
   it('loads liquidify.config.json with first-hit precedence', () => {
@@ -31,6 +36,7 @@ describe('ConfigLoader', () => {
       componentsDir: path.resolve(cwd, 'src/components'),
       output: path.resolve(cwd, '.'),
       plugins: [],
+      cwd,
     })
   })
 

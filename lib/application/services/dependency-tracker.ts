@@ -1,238 +1,71 @@
-import path from 'node:path'
-import { _match, _try } from 'funcio'
-import {
-  traverseFast,
-  isStringLiteral,
-  isImportDeclaration,
-  isExportNamedDeclaration,
-  isExportAllDeclaration,
-  isCallExpression,
-  type Node,
-  type CallExpression,
-} from '@babel/types'
-import type { ASTParser } from '../../infra/adapters/parsers/babel/ASTParser'
-import type { ModuleResolver } from '../../infra/adapters/fs/module-resolver'
-import type { IFileSystem } from '../../core/protocols/file-system'
-import { LiquidifyError } from '../../core/errors/liquidify-error'
+import type { ImportGraphBuilder } from './import-graph-builder'
 import { sha256Hex } from '../../shared/liquid-helpers'
+import type { BuildPlan } from '../../core/entities/build-plan'
+export type { BuildPlan } from '../../core/entities/build-plan'
 
-export interface ImportGraph {
-  sources: Map<string, string>
-  edges: Map<string, Set<string>>
-}
+export { ImportGraphBuilder } from './import-graph-builder'
+export type { ImportGraph } from './import-graph-builder'
 
-export interface BuildPlan {
-  changed: Set<string>
-  dependencies: Set<string>
-  commit: () => void
-}
-
-const MISSING_SOURCE = '<missing>'
-
-export class ImportGraphBuilder {
-  private readonly importCache = new Map<string, { source: string; specifiers: string[] }>()
-
-  constructor(
-    private readonly fs: IFileSystem,
-    private readonly resolver: ModuleResolver,
-    private readonly astParser: ASTParser,
-  ) {}
-
-  public build(files: string[], dependencies: Set<string>): ImportGraph {
-    const graph: ImportGraph = { sources: new Map(), edges: new Map() }
-    files.forEach((file) => {
-      this.visit(file, graph, dependencies)
-    })
-    for (const filename of this.importCache.keys()) {
-      if (!graph.sources.has(filename)) this.importCache.delete(filename)
-    }
-    return graph
-  }
-
-  private visit(file: string, graph: ImportGraph, dependencies: Set<string>): void {
-    _match(graph.edges.has(file))
-      .with(true, () => undefined)
-      .with(false, () => this.collect(file, graph, dependencies))
-      .exec()
-  }
-
-  private collect(file: string, graph: ImportGraph, dependencies: Set<string>): void {
-    const imports = new Set<string>()
-    graph.edges.set(file, imports)
-    dependencies.add(file)
-    _match(this.fs.existsSync(file))
-      .with(true, () => this.collectExisting(file, graph, dependencies, imports))
-      .with(false, () => graph.sources.set(file, MISSING_SOURCE))
-      .exec()
-  }
-
-  private collectExisting(file: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    const source = this.fs.readFileSync(file)
-    graph.sources.set(file, source)
-    this.resolver
-      .configFiles(file, (config) => dependencies.add(config))
-      .filter((config) => config !== file)
-      .forEach((config) => {
-        imports.add(config)
-        this.visit(config, graph, dependencies)
-      })
-    _match(/\.s?css$/.test(file))
-      .with(true, () => this.collectCssImports(file, source, graph, dependencies, imports))
-      .with(false, () => this.collectJsImports(file, source, graph, dependencies, imports))
-      .exec()
-  }
-
-  private collectJsImports(file: string, source: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    _match(/\.[jt]sx?$/.test(file))
-      .with(true, () => this.collectAstImports(file, source, graph, dependencies, imports))
-      .with(false, () => undefined)
-      .exec()
-  }
-
-  private collectAstImports(file: string, source: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    const cached = this.importCache.get(file)
-    if (cached?.source === source) {
-      for (const specifier of cached.specifiers) this.addImport(specifier, file, graph, dependencies, imports)
-      return
-    }
-    const parsed = _try.sync(() => this.astParser.parse(source, file))
-    const ast = parsed.match({
-      right: (value) => value,
-      left: (error) =>
-        _match(error instanceof LiquidifyError)
-          .with(true, () => {
-            throw error
-          })
-          .with(false, () => {
-            throw new LiquidifyError(`Failed to parse imports in ${file}: ${error instanceof Error ? error.message : String(error)}`, file)
-          })
-          .exec(),
-    })
-    const specifiers: string[] = []
-    traverseFast(ast, (node: Node) => {
-      const specifier = this.staticSourceOf(node)
-      if (specifier !== undefined) specifiers.push(specifier)
-    })
-    this.importCache.set(file, { source, specifiers })
-    for (const specifier of specifiers) this.addImport(specifier, file, graph, dependencies, imports)
-  }
-
-  private staticSourceOf(node: Node): string | undefined {
-    return _match(true)
-      .with(isImportDeclaration(node) || isExportNamedDeclaration(node) || isExportAllDeclaration(node), () => this.declarationSource(node))
-      .with(isCallExpression(node), () => this.callSource(node))
-      .with(true, () => undefined)
-      .exec() as string | undefined
-  }
-
-  private declarationSource(node: Node): string | undefined {
-    const value = (node as { source?: { value?: unknown } }).source?.value
-    return _match(typeof value === 'string')
-      .with(true, () => value as string)
-      .with(false, () => undefined)
-      .exec() as string | undefined
-  }
-
-  private callSource(node: Node): string | undefined {
-    const call = node as CallExpression
-    const firstArg = _match(Array.isArray(call.arguments) && isStringLiteral(call.arguments[0]))
-      .with(true, () => (call.arguments[0] as { value: string }).value)
-      .with(false, () => undefined)
-      .exec() as string | undefined
-    return _match(firstArg !== undefined && this.isImportOrRequire(call))
-      .with(true, () => firstArg)
-      .with(false, () => undefined)
-      .exec() as string | undefined
-  }
-
-  private isImportOrRequire(call: CallExpression): boolean {
-    if (call.callee.type === 'Import') return true
-    if (call.callee.type === 'Identifier') return (call.callee as { name?: string }).name === 'require'
-    return false
-  }
-
-  private collectCssImports(file: string, source: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    this.cssSpecifiers(source).forEach((specifier) => {
-      this.addImport(specifier, file, graph, dependencies, imports)
-    })
-  }
-
-  private cssSpecifiers(source: string): string[] {
-    const quoted = Array.from(source.matchAll(/@(?:import|use|forward)\s+(?:url\()?['"]([^'"]+)['"]/g), (match) => match[1])
-    const bare = Array.from(source.matchAll(/@import\s+(?:url\()?([^'"\s;]+)/g), (match) => match[1].replace(/['"];?$/, ''))
-    return [...quoted, ...bare]
-  }
-
-  private addImport(specifier: string, file: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    const resolved = this.resolver.resolve(specifier, file)
-    _match(resolved === null)
-      .with(true, () => this.trackUnresolved(specifier, file, graph, dependencies, imports))
-      .with(false, () => this.trackResolved(resolved as string, file, graph, dependencies, imports))
-      .exec()
-  }
-
-  private trackResolved(resolved: string, _file: string, graph: ImportGraph, _dependencies: Set<string>, imports: Set<string>): void {
-    imports.add(resolved)
-    this.visit(resolved, graph, _dependencies)
-  }
-
-  private trackUnresolved(specifier: string, file: string, graph: ImportGraph, dependencies: Set<string>, imports: Set<string>): void {
-    const candidates = this.resolver.candidates(specifier, file)
-    if (!specifier.startsWith('.') && candidates.length === 0) return
-    for (const candidate of candidates) {
-      imports.add(candidate)
-      dependencies.add(candidate)
-      graph.sources.set(candidate, MISSING_SOURCE)
-    }
-  }
-}
-
+/** Propagates changed nodes through reverse edges instead of hashing every transitive closure. */
 export class DependencyTracker {
-  private previous = new Map<string, string>()
-  public readonly watchedFiles = new Set<string>()
+  private previousSources = new Map<string, string>()
+  private previousEdges = new Map<string, Set<string>>()
+  private previousEntries = new Set<string>()
+  readonly watchedFiles = new Set<string>()
 
   constructor(private readonly graphBuilder: ImportGraphBuilder) {}
 
-  public plan(files: string[]): BuildPlan {
+  plan(files: string[]): BuildPlan {
     this.watchedFiles.clear()
     const graph = this.graphBuilder.build(files, this.watchedFiles)
-    const snapshot = this.snapshot(files, graph)
-    const changed = new Set(files.filter((file) => snapshot.get(file) !== this.previous.get(file)))
+    const digests = new Map(Array.from(graph.sources, ([filename, source]) => [filename, sha256Hex(source)]))
+    const dirty = new Set<string>()
+    for (const [filename, digest] of digests) {
+      if (digest !== this.previousSources.get(filename)) dirty.add(filename)
+    }
+    for (const filename of this.previousSources.keys()) {
+      if (!digests.has(filename)) dirty.add(filename)
+    }
+    for (const [filename, imports] of graph.edges) {
+      const previousImports = this.previousEdges.get(filename)
+      if (
+        !previousImports ||
+        imports.size !== previousImports.size ||
+        [...imports].some((dependency) => !previousImports.has(dependency))
+      ) {
+        dirty.add(filename)
+      }
+    }
+    this.propagate(dirty, graph.edges)
     return {
-      changed,
+      changed: new Set(files.filter((filename) => dirty.has(filename) || !this.previousEntries.has(filename))),
       dependencies: this.watchedFiles,
       commit: () => {
-        this.previous = snapshot
+        this.previousSources = digests
+        this.previousEdges = graph.edges
+        this.previousEntries = new Set(files)
       },
     }
   }
 
-  private snapshot(files: string[], graph: ImportGraph): Map<string, string> {
-    // Hash shared source content once instead of concatenating it for every entry.
-    const digests = new Map(Array.from(graph.sources, ([filename, source]) => [filename, sha256Hex(source)]))
-    const hashedGraph = { ...graph, sources: digests }
-    return new Map(files.map((file) => [path.resolve(file), sha256Hex(this.fingerprint(file, hashedGraph))]))
-  }
-
-  private fingerprint(file: string, graph: ImportGraph): string {
-    return Array.from(this.reachable(file, graph))
-      .sort()
-      .map((dependency) => `${dependency}\0${graph.sources.get(dependency) ?? MISSING_SOURCE}\0`)
-      .join('')
-  }
-
-  private reachable(file: string, graph: ImportGraph, seen: Set<string> = new Set()): Set<string> {
-    return _match(seen.has(file))
-      .with(true, () => seen)
-      .with(false, () => this.expand(file, graph, seen))
-      .exec() as Set<string>
-  }
-
-  private expand(file: string, graph: ImportGraph, seen: Set<string>): Set<string> {
-    seen.add(file)
-    ;(graph.edges.get(file) ?? new Set<string>()).forEach((edge) => {
-      this.reachable(edge, graph, seen)
-    })
-    return seen
+  private propagate(dirty: Set<string>, currentEdges: Map<string, Set<string>>): void {
+    const dependents = new Map<string, Set<string>>()
+    for (const edges of [currentEdges, this.previousEdges]) {
+      for (const [importer, imports] of edges) {
+        for (const dependency of imports) {
+          if (!dependents.has(dependency)) dependents.set(dependency, new Set())
+          dependents.get(dependency)?.add(importer)
+        }
+      }
+    }
+    const pending = [...dirty]
+    for (let index = 0; index < pending.length; index++) {
+      for (const importer of dependents.get(pending[index]) ?? []) {
+        if (!dirty.has(importer)) {
+          dirty.add(importer)
+          pending.push(importer)
+        }
+      }
+    }
   }
 }

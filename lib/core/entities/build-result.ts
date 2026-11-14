@@ -3,6 +3,7 @@ export interface Diagnostic {
   message: string
   filePath?: string
   location?: { line: number; column: number }
+  codeFrame?: string
 }
 
 export interface BuildRequest {
@@ -14,5 +15,6 @@ export interface ProjectBuildResult {
   files: string[]
   rebuilt: string[]
   skipped: string[]
+  outputFiles: string[]
   diagnostics: Diagnostic[]
 }

@@ -77,6 +77,15 @@ export class OutputManifest {
     this.runtimeHash = this.previousRuntime
   }
 
+  get outputFiles(): string[] {
+    const entries = Object.values(this.next)
+    const paths = entries.flatMap((entry) => Object.keys(entry.files))
+    if (this.runtimeHash) paths.push('assets/react-runtime.js')
+    if (entries.some((entry) => entry.scripts.length > 0)) paths.push('snippets/script-global.liquid')
+    if (entries.some((entry) => entry.css.trim())) paths.push('assets/global.css')
+    return [...new Set(paths)].sort().map((filename) => this.safePath(filename))
+  }
+
   private async loadPrevious(): Promise<void> {
     const content = await this.fs.readFile(this.manifestPath)
     const stored: unknown = _try

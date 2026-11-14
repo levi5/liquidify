@@ -4,10 +4,15 @@ import path from 'node:path'
 import { DEFAULT_CONFIG, type LiquidifyConfig } from '../../../core/entities/config'
 import { ValidationError } from '../../../core/errors/validation-error'
 import { resolvePlugins } from './plugin-loader'
+import { resolveBuildLimits } from '../../../core/entities/build-limits'
 
 const configFiles = ['liquidify.config.json', '.liquidifyrc.json', '.liquidifyrc', 'liquidx.config.json', '.liquidxrc.json', '.liquidxrc']
 
-const ALLOWED_KEYS = new Set(['componentsDir', 'output', 'react', 'force', 'plugins', 'concurrency'])
+export function configWatchPaths(cwd: string, explicitPath?: string): string[] {
+  return explicitPath ? [path.resolve(cwd, explicitPath)] : configFiles.map((filename) => path.resolve(cwd, filename))
+}
+
+const ALLOWED_KEYS = new Set(['componentsDir', 'output', 'react', 'force', 'plugins', 'concurrency', 'limits', 'mode', 'sourcemap'])
 
 export interface ConfigLoadOptions {
   plugins?: boolean
@@ -19,7 +24,13 @@ export function loadConfig(cwd: string = process.cwd(), explicitPath?: string, o
   }
   const fullPath = configFiles.map((file) => path.resolve(cwd, file)).find((file) => fs.existsSync(file))
   return _match(fullPath === undefined)
-    .with(true, () => ({ ...DEFAULT_CONFIG, react: { ...DEFAULT_CONFIG.react } }))
+    .with(true, () => ({
+      ...DEFAULT_CONFIG,
+      componentsDir: path.resolve(cwd, DEFAULT_CONFIG.componentsDir),
+      output: path.resolve(cwd, DEFAULT_CONFIG.output),
+      cwd: path.resolve(cwd),
+      react: { ...DEFAULT_CONFIG.react },
+    }))
     .with(false, () => readConfig(fullPath as string, options))
     .exec() as LiquidifyConfig
 }
@@ -46,6 +57,7 @@ function levenshtein(a: string, b: string): number {
 }
 
 function suggestKey(unknownKey: string, allowed: Set<string> | string[]): string {
+  if (unknownKey.length > 128) return ''
   const candidates = [...allowed]
   let best: string | undefined
   let bestScore = Number.POSITIVE_INFINITY
@@ -103,6 +115,15 @@ function validateConfig(fullPath: string, value: unknown, options: ConfigLoadOpt
     })
     .exec()
   const react = validateReact(fullPath, raw.react)
+  if (raw.limits !== undefined) {
+    if (typeof raw.limits !== 'object' || raw.limits === null || Array.isArray(raw.limits))
+      throw new ValidationError('Configuration limits must be an object.', fullPath)
+    attempt(() => resolveBuildLimits(raw.limits as Parameters<typeof resolveBuildLimits>[0]), 'Invalid build limits', fullPath)
+  }
+  if (raw.mode !== undefined && raw.mode !== 'development' && raw.mode !== 'production')
+    throw new ValidationError('Configuration mode must be development or production.', fullPath)
+  if (raw.sourcemap !== undefined && typeof raw.sourcemap !== 'boolean')
+    throw new ValidationError('Configuration sourcemap must be boolean.', fullPath)
   const cwd = path.dirname(fullPath)
   const plugins = options.plugins === false ? [] : resolvePlugins(raw.plugins, fullPath)
   if (
@@ -113,6 +134,7 @@ function validateConfig(fullPath: string, value: unknown, options: ConfigLoadOpt
   }
   return {
     ...merged,
+    cwd,
     componentsDir: path.resolve(cwd, merged.componentsDir as string),
     output: path.resolve(cwd, merged.output as string),
     react: { ...DEFAULT_CONFIG.react, ...react },

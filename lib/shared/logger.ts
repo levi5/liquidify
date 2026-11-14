@@ -1,10 +1,6 @@
 import { _match } from 'funcio'
-
-export interface Logger {
-  info(message: string): void
-  warn(message: string): void
-  error(message: string, cause?: unknown): void
-}
+import type { Logger } from '../core/protocols/logger'
+export type { Logger } from '../core/protocols/logger'
 
 export class ConsoleLogger implements Logger {
   info(message: string): void {
