@@ -14,7 +14,11 @@ To stop the watcher and wait for the observers to close:
 await builder.dispose()
 ```
 
-`disposeSync()` remains available for compatibility with the CLI.
+`disposeSync()` starts best-effort asynchronous cleanup for compatibility. Prefer
+`await builder.dispose()` to wait for accepted builds and plugin cleanup.
+
+See [the compiler API](compiler-api.md), [CLI workflows](cli-workflows.md) and
+[engineering validation and remaining work](engineering-validation.md).
 
 ## Generated outputs and cleanup
 
@@ -37,6 +41,10 @@ The Node filesystem adapter rejects symbolic links at the output root and anywhe
 ## Trusted plugins
 
 Local and npm plugins execute with the same filesystem, network and process privileges as the compiler. The TypeScript loader is not a sandbox and imposes no execution timeout. Never build an untrusted config or load an untrusted plugin outside an isolated environment. TypeScript plugin imports resolve relative to the plugin file. Relative JavaScript/CommonJS dependencies work through Node's `require`; dependent TypeScript files need a compatible loader or must be precompiled.
+
+`--no-plugins` disables loading before code execution. Local plugin references
+must be simple names within `.plugins`; symlink escapes and filesystem path
+references are rejected. npm references must be package names, optionally scoped.
 
 ## React island props and escaping
 
